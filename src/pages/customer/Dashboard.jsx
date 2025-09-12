@@ -135,7 +135,7 @@ const CustomerDashboard = () => {
     }
   }
 
-  if (loading || !profile) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blush-500"></div>
@@ -151,7 +151,7 @@ const CustomerDashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-display font-bold text-dusty-900">
-                Welcome back, {profile?.full_name?.split(' ')[0]}!
+                Welcome back{profile?.full_name ? `, ${profile.full_name.split(' ')[0]}` : ''}!
               </h1>
               <p className="text-dusty-600 mt-1">
                 Manage your bookings and discover new photographers
