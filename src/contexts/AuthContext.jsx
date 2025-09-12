@@ -195,11 +195,6 @@ export const AuthProvider = ({ children }) => {
   // Sign in function
   const signIn = async (email, password) => {
     try {
-      console.log('Attempting sign in for:', email)
-      console.log('Supabase client:', supabase)
-      console.log('Auth methods:', Object.keys(supabase.auth))
-      
-      // Direct call without timeout to see actual error
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
@@ -210,31 +205,33 @@ export const AuthProvider = ({ children }) => {
         throw error
       }
 
-      console.log('Sign in successful, user:', data.user?.id)
-      toast.success('Welcome back!')
-      
-      // Redirect based on role
       if (data.user) {
+        setUser(data.user)
+        toast.success('Welcome back!')
+        
+        // Fetch user profile data
         try {
           const userProfile = await fetchUserData(data.user)
-          console.log('User profile fetched:', userProfile)
           
+          // Navigate based on role after successful login
           if (userProfile?.role === 'photographer') {
             navigate('/dashboard/photographer')
           } else {
             navigate('/dashboard')
           }
         } catch (profileError) {
-          console.error('Error fetching profile, navigating to dashboard anyway:', profileError)
+          console.error('Error fetching profile:', profileError)
+          // Still navigate to dashboard even if profile fetch fails
           navigate('/dashboard')
         }
       }
 
       return { success: true, user: data.user }
     } catch (error) {
-      console.error('Signin error:', error)
-      toast.error(error.message || 'Invalid credentials')
-      return { success: false, error: error.message }
+      console.error('Sign in error:', error)
+      const errorMessage = error.message || 'Invalid credentials'
+      toast.error(errorMessage)
+      return { success: false, error: errorMessage }
     }
   }
 
