@@ -6,7 +6,9 @@ import {
   CameraIcon, 
   MailIcon, 
   LockIcon,
-  ArrowRightIcon
+  ArrowRightIcon,
+  EyeIcon,
+  EyeOffIcon
 } from 'lucide-react'
 import Button from '@components/ui/Button'
 import Input from '@components/ui/Input'
@@ -18,6 +20,7 @@ const Login = () => {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
   
   const redirectTo = searchParams.get('redirect') || '/dashboard'
   
@@ -105,20 +108,33 @@ const Login = () => {
                 placeholder="you@example.com"
               />
 
-              <Input
-                label="Password"
-                type="password"
-                icon={<LockIcon className="w-5 h-5 text-dusty-400" />}
-                {...register('password', {
-                  required: 'Password is required',
-                  minLength: {
-                    value: 6,
-                    message: 'Password must be at least 6 characters'
-                  }
-                })}
-                error={errors.password?.message}
-                placeholder="••••••••"
-              />
+              <div className="relative">
+                <Input
+                  label="Password"
+                  type={showPassword ? "text" : "password"}
+                  icon={<LockIcon className="w-5 h-5 text-dusty-400" />}
+                  {...register('password', {
+                    required: 'Password is required',
+                    minLength: {
+                      value: 6,
+                      message: 'Password must be at least 6 characters'
+                    }
+                  })}
+                  error={errors.password?.message}
+                  placeholder="••••••••"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-[38px] text-dusty-400 hover:text-dusty-600"
+                >
+                  {showPassword ? (
+                    <EyeOffIcon className="w-5 h-5" />
+                  ) : (
+                    <EyeIcon className="w-5 h-5" />
+                  )}
+                </button>
+              </div>
             </Card>
 
             <div className="flex items-center justify-between">
@@ -175,7 +191,7 @@ const Login = () => {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-dusty-900/50 to-transparent" />
         </div>
-        <div className="relative flex items-center p-12">
+        <div className="relative flex items-start pt-24 p-12">
           <div className="text-white">
             <h3 className="text-3xl font-display font-bold mb-2">
               Capture life's precious moments

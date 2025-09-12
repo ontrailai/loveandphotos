@@ -80,9 +80,9 @@ const Browse = () => {
         .from('photographer_preview_profiles')
         .select('*')
         .eq('is_available', true)
-        .limit(50)
+        .limit(100)
       
-      if (!previewError && previewProfiles) {
+      if (!previewError && previewProfiles && previewProfiles.length > 0) {
         // Transform preview profiles to match expected format
         const transformedProfiles = previewProfiles.map(profile => ({
           id: profile.id,
@@ -191,6 +191,9 @@ const Browse = () => {
 
       if (!error && data) {
         setPhotographers(data)
+      } else {
+        // If no data from either table, set empty array
+        setPhotographers([])
       }
     } catch (error) {
       console.error('Error loading photographers:', error)

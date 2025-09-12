@@ -16,7 +16,9 @@ import {
   CheckIcon,
   ArrowRightIcon,
   SparklesIcon,
-  BriefcaseIcon
+  BriefcaseIcon,
+  EyeIcon,
+  EyeOffIcon
 } from 'lucide-react'
 import Button from '@components/ui/Button'
 import Input from '@components/ui/Input'
@@ -31,6 +33,7 @@ const SignUp = () => {
   const [selectedRole, setSelectedRole] = useState(searchParams.get('role') || 'customer')
   const [loading, setLoading] = useState(false)
   const [step, setStep] = useState(1)
+  const [showPassword, setShowPassword] = useState(false)
   
   // Redirect if already logged in
   useEffect(() => {
@@ -237,34 +240,60 @@ const SignUp = () => {
                   error={errors.phone?.message}
                 />
 
-                <Input
-                  label="Password"
-                  type="password"
-                  icon={<LockIcon className="w-5 h-5 text-dusty-400" />}
-                  {...register('password', {
-                    required: 'Password is required',
-                    minLength: {
-                      value: 8,
-                      message: 'Password must be at least 8 characters'
-                    },
-                    pattern: {
-                      value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-                      message: 'Password must include uppercase, lowercase, and number'
-                    }
-                  })}
-                  error={errors.password?.message}
-                />
+                <div className="relative">
+                  <Input
+                    label="Password"
+                    type={showPassword ? "text" : "password"}
+                    icon={<LockIcon className="w-5 h-5 text-dusty-400" />}
+                    {...register('password', {
+                      required: 'Password is required',
+                      minLength: {
+                        value: 8,
+                        message: 'Password must be at least 8 characters'
+                      },
+                      pattern: {
+                        value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+                        message: 'Password must include uppercase, lowercase, and number'
+                      }
+                    })}
+                    error={errors.password?.message}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-[38px] text-dusty-400 hover:text-dusty-600"
+                  >
+                    {showPassword ? (
+                      <EyeOffIcon className="w-5 h-5" />
+                    ) : (
+                      <EyeIcon className="w-5 h-5" />
+                    )}
+                  </button>
+                </div>
 
-                <Input
-                  label="Confirm Password"
-                  type="password"
-                  icon={<LockIcon className="w-5 h-5 text-dusty-400" />}
-                  {...register('confirmPassword', {
-                    required: 'Please confirm your password',
-                    validate: value => value === password || 'Passwords do not match'
-                  })}
-                  error={errors.confirmPassword?.message}
-                />
+                <div className="relative">
+                  <Input
+                    label="Confirm Password"
+                    type={showPassword ? "text" : "password"}
+                    icon={<LockIcon className="w-5 h-5 text-dusty-400" />}
+                    {...register('confirmPassword', {
+                      required: 'Please confirm your password',
+                      validate: value => value === password || 'Passwords do not match'
+                    })}
+                    error={errors.confirmPassword?.message}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-[38px] text-dusty-400 hover:text-dusty-600"
+                  >
+                    {showPassword ? (
+                      <EyeOffIcon className="w-5 h-5" />
+                    ) : (
+                      <EyeIcon className="w-5 h-5" />
+                    )}
+                  </button>
+                </div>
               </div>
 
               {/* Selected Role Display */}
