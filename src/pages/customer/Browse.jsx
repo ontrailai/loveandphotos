@@ -31,6 +31,44 @@ import RatingStars from '@components/shared/RatingStars'
 import { supabase } from '@lib/supabase'
 import { clsx } from 'clsx'
 
+// Array of diverse photographer profile images
+const profileImages = [
+  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d',
+  'https://images.unsplash.com/photo-1494790108377-be9c29b29330',
+  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e',
+  'https://images.unsplash.com/photo-1438761681033-6461ffad8d80',
+  'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e',
+  'https://images.unsplash.com/photo-1517841905240-472988babdf9',
+  'https://images.unsplash.com/photo-1534528741775-53994a69daeb',
+  'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6',
+  'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d',
+  'https://images.unsplash.com/photo-1519345182560-3f2917c472ef',
+  'https://images.unsplash.com/photo-1463453091185-61582044d556',
+  'https://images.unsplash.com/photo-1480429370139-e0132c086e2a',
+  'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df',
+  'https://images.unsplash.com/photo-1464863979621-258859e62245',
+  'https://images.unsplash.com/photo-1507081323647-4d250478b919'
+]
+
+// Array of portfolio images for photographers
+const portfolioImages = [
+  'https://images.unsplash.com/photo-1511285560929-80b456fea0bc',
+  'https://images.unsplash.com/photo-1519741497674-611481863552',
+  'https://images.unsplash.com/photo-1606216794074-735e91aa2c92',
+  'https://images.unsplash.com/photo-1537633552985-df8429e8048b',
+  'https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6',
+  'https://images.unsplash.com/photo-1591604466107-ec97de577aff',
+  'https://images.unsplash.com/photo-1583939003579-730e3918a45a',
+  'https://images.unsplash.com/photo-1525673812761-4e0d45adc0cc',
+  'https://images.unsplash.com/photo-1460978812857-470ed1c77af0',
+  'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4',
+  'https://images.unsplash.com/photo-1520854221256-17451cc331bf',
+  'https://images.unsplash.com/photo-1529636798458-92182e662485',
+  'https://images.unsplash.com/photo-1545232979-8bf68ee9b1af',
+  'https://images.unsplash.com/photo-1513279922550-250c2129b13a',
+  'https://images.unsplash.com/photo-1552750085-1cbc45a53c52'
+]
+
 const Browse = () => {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -80,11 +118,11 @@ const Browse = () => {
         .from('photographer_preview_profiles')
         .select('*')
         .eq('is_available', true)
-        .limit(100)
+        .limit(1100)
       
       if (!previewError && previewProfiles && previewProfiles.length > 0) {
         // Transform preview profiles to match expected format
-        const transformedProfiles = previewProfiles.map(profile => ({
+        const transformedProfiles = previewProfiles.map((profile, index) => ({
           id: profile.id,
           user_id: profile.user_id || profile.id,
           bio: profile.bio,
@@ -101,14 +139,18 @@ const Browse = () => {
           total_bookings: profile.total_bookings || 0,
           users: {
             full_name: profile.display_name,
-            avatar_url: profile.portfolio_images?.[0] || 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d'
+            avatar_url: profileImages[index % profileImages.length]
           },
           pay_tiers: {
             name: profile.is_verified ? 'Professional' : 'Standard',
             hourly_rate: profile.hourly_rate,
             badge_color: profile.is_verified ? 'gold' : 'silver'
           },
-          portfolio_items: profile.portfolio_images?.map(url => ({ image_url: url })) || []
+          portfolio_items: [
+            { image_url: portfolioImages[index % portfolioImages.length] },
+            { image_url: portfolioImages[(index + 5) % portfolioImages.length] },
+            { image_url: portfolioImages[(index + 10) % portfolioImages.length] }
+          ]
         }))
         
         // Apply filters
@@ -552,15 +594,17 @@ const Browse = () => {
                       </div>
 
                       {/* Stats */}
-                      <div className="flex items-center justify-between mb-3">
-                        <RatingStars 
-                          rating={photographer.average_rating || 0} 
-                          size="sm" 
-                          showNumber 
-                        />
-                        <span className="text-sm text-dusty-600">
-                          {photographer.total_reviews || 0} reviews
-                        </span>
+                      <div className="mb-3">
+                        <div className="flex items-center gap-2">
+                          <RatingStars 
+                            rating={photographer.average_rating || 0} 
+                            size="sm" 
+                            showNumber 
+                          />
+                          <span className="text-sm text-dusty-600">
+                            ({photographer.total_reviews || 0} reviews)
+                          </span>
+                        </div>
                       </div>
 
                       {/* Price & Features */}
