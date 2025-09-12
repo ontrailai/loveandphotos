@@ -185,6 +185,11 @@ function App() {
             <Route path="/photographer-resources" element={<Resources />} />
             <Route path="/photographer-faq" element={<FAQ />} />
             <Route path="/join" element={<SignUp />} />
+            <Route path="/photographers" element={
+              <Suspense fallback={<PageLoader />}>
+                <BrowsePhotographers />
+              </Suspense>
+            } />
           </Route>
 
           {/* Customer Routes - Lazy loaded */}

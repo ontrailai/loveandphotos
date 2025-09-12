@@ -66,7 +66,7 @@ const Navbar = () => {
             ) : (
               <>
                 <Link 
-                  to="/browse" 
+                  to="/photographers" 
                   className="text-dusty-600 hover:text-dusty-900 transition"
                 >
                   Find Photographers
@@ -133,7 +133,7 @@ const Navbar = () => {
             ) : (
               <div className="space-y-2">
                 <Link 
-                  to="/browse" 
+                  to="/photographers" 
                   className="block px-4 py-2 text-dusty-600 hover:bg-gray-50"
                   onClick={() => setMobileMenuOpen(false)}
                 >

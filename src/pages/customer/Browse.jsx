@@ -75,6 +75,87 @@ const Browse = () => {
     try {
       setLoading(true)
       
+      // First try to load from photographer_preview_profiles (imported photographers)
+      let { data: previewProfiles, error: previewError } = await supabase
+        .from('photographer_preview_profiles')
+        .select('*')
+        .eq('is_available', true)
+        .limit(50)
+      
+      if (!previewError && previewProfiles) {
+        // Transform preview profiles to match expected format
+        const transformedProfiles = previewProfiles.map(profile => ({
+          id: profile.id,
+          user_id: profile.user_id || profile.id,
+          bio: profile.bio,
+          specialties: profile.specialties || [],
+          languages: profile.languages || ['English'],
+          years_experience: profile.years_experience,
+          hourly_rate: profile.hourly_rate,
+          location_city: profile.location_city,
+          location_state: profile.location_state,
+          is_available: profile.is_available,
+          is_public: true,
+          average_rating: profile.average_rating || 4.5,
+          total_reviews: profile.total_reviews || 0,
+          total_bookings: profile.total_bookings || 0,
+          users: {
+            full_name: profile.display_name,
+            avatar_url: profile.portfolio_images?.[0] || 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d'
+          },
+          pay_tiers: {
+            name: profile.is_verified ? 'Professional' : 'Standard',
+            hourly_rate: profile.hourly_rate,
+            badge_color: profile.is_verified ? 'gold' : 'silver'
+          },
+          portfolio_items: profile.portfolio_images?.map(url => ({ image_url: url })) || []
+        }))
+        
+        // Apply filters
+        let filtered = transformedProfiles
+        
+        if (filters.rating > 0) {
+          filtered = filtered.filter(p => p.average_rating >= filters.rating)
+        }
+        
+        if (filters.priceRange !== 'all') {
+          const [min, max] = filters.priceRange.split('-').map(v => v === '500+' ? 9999 : parseInt(v))
+          filtered = filtered.filter(p => {
+            const rate = p.hourly_rate
+            if (max === 9999) return rate >= 500
+            return rate >= min && rate <= (max || 9999)
+          })
+        }
+        
+        if (filters.specialties.length > 0) {
+          filtered = filtered.filter(p => 
+            filters.specialties.some(s => 
+              p.specialties.some(ps => ps.toLowerCase().includes(s.toLowerCase()))
+            )
+          )
+        }
+        
+        if (filters.languages.length > 0) {
+          filtered = filtered.filter(p =>
+            filters.languages.some(l => p.languages.includes(l))
+          )
+        }
+        
+        if (filters.zip) {
+          // Filter by location (city or state)
+          const searchTerm = filters.zip.toLowerCase()
+          filtered = filtered.filter(p => 
+            p.location_city?.toLowerCase().includes(searchTerm) ||
+            p.location_state?.toLowerCase().includes(searchTerm)
+          )
+        }
+        
+        setPhotographers(filtered)
+        setLoading(false)
+        return
+      }
+      
+      // Fallback to original photographers table if preview profiles don't exist
       let query = supabase
         .from('photographers')
         .select(`
@@ -86,7 +167,7 @@ const Browse = () => {
         .eq('is_public', true)
         .limit(20)
 
-      // Apply filters
+      // Apply filters for original table
       if (filters.rating > 0) {
         query = query.gte('average_rating', filters.rating)
       }

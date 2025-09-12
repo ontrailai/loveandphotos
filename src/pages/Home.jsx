@@ -66,7 +66,7 @@ const Home = () => {
   const handleSearch = (e) => {
     e.preventDefault()
     if (searchZip) {
-      navigate(`/browse?zip=${searchZip}`)
+      navigate(`/photographers?zip=${searchZip}`)
     }
   }
 
@@ -496,7 +496,7 @@ const Home = () => {
             <div>
               <h4 className="font-semibold text-dusty-900 mb-4">For Clients</h4>
               <ul className="space-y-2">
-                <li><Link to="/browse" className="text-dusty-600 hover:text-dusty-900 text-sm">Find Photographers</Link></li>
+                <li><Link to="/photographers" className="text-dusty-600 hover:text-dusty-900 text-sm">Find Photographers</Link></li>
                 <li><Link to="/how-it-works" className="text-dusty-600 hover:text-dusty-900 text-sm">How It Works</Link></li>
                 <li><Link to="/pricing" className="text-dusty-600 hover:text-dusty-900 text-sm">Pricing</Link></li>
               </ul>
