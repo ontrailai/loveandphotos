@@ -8,6 +8,7 @@ import DevBanner from '@components/DevBanner'
 // Layout Components
 import Layout from '@components/Layout'
 import PublicLayout from '@components/PublicLayout'
+import ScrollToTop from '@components/ScrollToTop'
 
 // Page Loading Component
 const PageLoader = () => (
@@ -133,6 +134,9 @@ function App() {
   return (
     <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <AuthProvider>
+        {/* Scroll to top on navigation */}
+        <ScrollToTop />
+        
         {/* Development environment banner */}
         {import.meta.env.DEV && <DevBanner />}
         
