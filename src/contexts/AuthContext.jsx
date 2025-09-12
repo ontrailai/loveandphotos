@@ -419,14 +419,15 @@ export const ProtectedRoute = ({ children, requireRole = null, requireOnboarding
 
   useEffect(() => {
     if (!loading) {
-      // Check authentication
-      if (!user || !profile) {
+      // Check authentication - only check for user, not profile
+      // Profile might still be loading
+      if (!user) {
         navigate('/login')
         return
       }
 
-      // Check role requirement
-      if (requireRole && !hasRole(requireRole)) {
+      // Check role requirement (only if profile is loaded)
+      if (requireRole && profile && !hasRole(requireRole)) {
         toast.error('You do not have permission to access this page')
         navigate('/dashboard')
         return
