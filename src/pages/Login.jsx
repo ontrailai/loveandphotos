@@ -149,7 +149,7 @@ const Login = () => {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-dusty-900/50 to-transparent" />
         </div>
-        <div className="relative flex items-end p-12">
+        <div className="relative flex items-center p-12">
           <div className="text-white">
             <h3 className="text-3xl font-display font-bold mb-2">
               Capture life's precious moments
