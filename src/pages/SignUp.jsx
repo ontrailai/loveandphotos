@@ -34,7 +34,8 @@ const SignUp = () => {
   
   // Redirect if already logged in
   useEffect(() => {
-    if (!authLoading && user && profile) {
+    // Only redirect if we have a user AND profile loaded
+    if (user && profile) {
       console.log('User is already logged in, redirecting from signup...')
       if (profile.role === 'photographer') {
         navigate('/dashboard/photographer')
@@ -42,10 +43,11 @@ const SignUp = () => {
         navigate('/dashboard')
       }
     }
-  }, [user, profile, authLoading, navigate])
+  }, [user, profile, navigate])
   
-  // Don't show signup form if auth is still loading
-  if (authLoading) {
+  // Show spinner only while checking auth AND user exists
+  // This prevents infinite spinner for non-logged-in users
+  if (authLoading && user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blush-500"></div>
