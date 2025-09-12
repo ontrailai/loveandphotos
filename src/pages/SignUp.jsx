@@ -3,7 +3,7 @@
  * Registration page with role selection
  */
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@contexts/AuthContext'
 import { useForm } from 'react-hook-form'
@@ -25,12 +25,23 @@ import { clsx } from 'clsx'
 import toast from 'react-hot-toast'
 
 const SignUp = () => {
-  const { signUp } = useAuth()
+  const { signUp, user, profile } = useAuth()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [selectedRole, setSelectedRole] = useState(searchParams.get('role') || 'customer')
   const [loading, setLoading] = useState(false)
   const [step, setStep] = useState(1)
+  
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user && profile) {
+      if (profile.role === 'photographer') {
+        navigate('/dashboard/photographer')
+      } else {
+        navigate('/dashboard')
+      }
+    }
+  }, [user, profile, navigate])
 
   const {
     register,

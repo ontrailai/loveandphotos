@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@contexts/AuthContext'
 import { useForm } from 'react-hook-form'
@@ -14,12 +14,23 @@ import Card from '@components/ui/Card'
 import toast from 'react-hot-toast'
 
 const Login = () => {
-  const { signIn } = useAuth()
+  const { signIn, user, profile } = useAuth()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [loading, setLoading] = useState(false)
   
   const redirectTo = searchParams.get('redirect') || '/dashboard'
+  
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user && profile) {
+      if (profile.role === 'photographer') {
+        navigate('/dashboard/photographer')
+      } else {
+        navigate('/dashboard')
+      }
+    }
+  }, [user, profile, navigate])
   
   const {
     register,
