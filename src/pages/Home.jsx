@@ -186,10 +186,13 @@ const Home = () => {
                     autoComplete="off"
                   />
                 </div>
-                <Button type="submit" className="rounded-full px-8">
-                  <SearchIcon className="w-5 h-5 mr-2" />
-                  Search
-                </Button>
+                <button 
+                  type="submit" 
+                  className="bg-blush-600 hover:bg-blush-700 text-white rounded-full p-3 transition-colors"
+                  aria-label="Search"
+                >
+                  <SearchIcon className="w-5 h-5" />
+                </button>
               </div>
               
               {/* Autocomplete Dropdown */}
