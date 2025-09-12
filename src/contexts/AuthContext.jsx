@@ -241,20 +241,49 @@ export const AuthProvider = ({ children }) => {
   // Sign out function
   const signOut = async () => {
     try {
-      const { error } = await supabase.auth.signOut()
-      if (error) throw error
-
+      // Clear local state first
       setUser(null)
       setProfile(null)
       setPhotographerProfile(null)
       
+      // Clear localStorage session data
+      localStorage.removeItem('lovep-auth')
+      localStorage.removeItem('sb-ldxscjxoakqrmkgqwwhr-auth-token')
+      
+      // Then sign out from Supabase
+      const { error } = await supabase.auth.signOut()
+      
+      // Even if there's an error, we've cleared local state
+      if (error) {
+        console.warn('Supabase signout warning:', error)
+        // Don't throw - we still want to clear local state and redirect
+      }
+      
       toast.success('Signed out successfully')
-      navigate('/login')
+      
+      // Use setTimeout to ensure state updates are processed before navigation
+      setTimeout(() => {
+        navigate('/')
+      }, 100)
       
       return { success: true }
     } catch (error) {
       console.error('Signout error:', error)
-      toast.error('Failed to sign out')
+      // Even on error, clear local state
+      setUser(null)
+      setProfile(null)
+      setPhotographerProfile(null)
+      
+      // Clear localStorage session data
+      localStorage.removeItem('lovep-auth')
+      localStorage.removeItem('sb-ldxscjxoakqrmkgqwwhr-auth-token')
+      
+      // Still navigate away
+      setTimeout(() => {
+        navigate('/')
+      }, 100)
+      
+      toast.error('Sign out completed with errors')
       return { success: false, error: error.message }
     }
   }

@@ -11,8 +11,10 @@ const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const handleSignOut = async () => {
-    await signOut()
-    navigate('/')
+    const result = await signOut()
+    if (!result.success) {
+      console.error('Sign out failed:', result.error)
+    }
   }
 
   return (
