@@ -25,7 +25,7 @@ import { clsx } from 'clsx'
 import toast from 'react-hot-toast'
 
 const SignUp = () => {
-  const { signUp, user, profile } = useAuth()
+  const { signUp, user, profile, loading: authLoading } = useAuth()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [selectedRole, setSelectedRole] = useState(searchParams.get('role') || 'customer')
@@ -34,14 +34,24 @@ const SignUp = () => {
   
   // Redirect if already logged in
   useEffect(() => {
-    if (user && profile) {
+    if (!authLoading && user && profile) {
+      console.log('User is already logged in, redirecting from signup...')
       if (profile.role === 'photographer') {
         navigate('/dashboard/photographer')
       } else {
         navigate('/dashboard')
       }
     }
-  }, [user, profile, navigate])
+  }, [user, profile, authLoading, navigate])
+  
+  // Don't show signup form if auth is still loading
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blush-500"></div>
+      </div>
+    )
+  }
 
   const {
     register,

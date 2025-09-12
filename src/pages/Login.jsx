@@ -14,7 +14,7 @@ import Card from '@components/ui/Card'
 import toast from 'react-hot-toast'
 
 const Login = () => {
-  const { signIn, user, profile } = useAuth()
+  const { signIn, user, profile, loading: authLoading } = useAuth()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [loading, setLoading] = useState(false)
@@ -23,14 +23,24 @@ const Login = () => {
   
   // Redirect if already logged in
   useEffect(() => {
-    if (user && profile) {
+    if (!authLoading && user && profile) {
+      console.log('User is already logged in, redirecting...')
       if (profile.role === 'photographer') {
         navigate('/dashboard/photographer')
       } else {
         navigate('/dashboard')
       }
     }
-  }, [user, profile, navigate])
+  }, [user, profile, authLoading, navigate])
+  
+  // Don't show login form if auth is still loading
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blush-500"></div>
+      </div>
+    )
+  }
   
   const {
     register,
