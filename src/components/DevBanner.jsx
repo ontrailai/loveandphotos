@@ -26,28 +26,9 @@ const DevBanner = () => {
     return null
   }
 
-  // Don't show if everything is configured
+  // Don't show banner if everything is configured properly
   if (env.isValid) {
-    return (
-      <div className="bg-green-50 border-b border-green-200">
-        <div className="max-w-7xl mx-auto px-4 py-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <CheckCircleIcon className="w-5 h-5 text-green-600" />
-              <span className="text-sm text-green-800">
-                Environment properly configured
-              </span>
-            </div>
-            <button 
-              onClick={() => setShow(false)}
-              className="text-green-600 hover:text-green-800"
-            >
-              <XIcon className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      </div>
-    )
+    return null
   }
 
   const severity = env.missing.length > 0 ? 'error' : 'warning'
