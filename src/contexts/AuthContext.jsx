@@ -206,23 +206,42 @@ export const AuthProvider = ({ children }) => {
       }
 
       if (data.user) {
+        // Set user immediately
         setUser(data.user)
-        toast.success('Welcome back!')
         
-        // Fetch user profile data
+        // Fetch and set user profile data before navigation
         try {
           const userProfile = await fetchUserData(data.user)
           
-          // Navigate based on role after successful login
-          if (userProfile?.role === 'photographer') {
-            navigate('/dashboard/photographer')
-          } else {
-            navigate('/dashboard')
+          // Make sure profile is set
+          if (userProfile) {
+            setProfile(userProfile)
+            
+            // If photographer, set photographer profile too
+            if (userProfile.role === 'photographer') {
+              const photographerData = await db.photographers.getProfile(data.user.id)
+              setPhotographerProfile(photographerData)
+            }
           }
+          
+          // Show success message
+          toast.success('Welcome back!')
+          
+          // Navigate based on role after everything is loaded
+          setTimeout(() => {
+            if (userProfile?.role === 'photographer') {
+              navigate('/dashboard/photographer')
+            } else {
+              navigate('/dashboard')
+            }
+          }, 100) // Small delay to ensure state updates
         } catch (profileError) {
           console.error('Error fetching profile:', profileError)
+          toast.success('Welcome back!')
           // Still navigate to dashboard even if profile fetch fails
-          navigate('/dashboard')
+          setTimeout(() => {
+            navigate('/dashboard')
+          }, 100)
         }
       }
 

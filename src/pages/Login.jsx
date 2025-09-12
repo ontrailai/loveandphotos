@@ -36,10 +36,13 @@ const Login = () => {
       // The signIn function handles navigation and returns result
       if (!result.success) {
         console.error('Login failed:', result.error)
+        // Only set loading to false if login failed
+        setLoading(false)
       }
+      // If successful, don't set loading to false since we're navigating away
     } catch (error) {
       console.error('Login error:', error)
-    } finally {
+      // Only set loading to false on error
       setLoading(false)
     }
   }
