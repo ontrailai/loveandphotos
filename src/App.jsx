@@ -29,6 +29,11 @@ import PrivacyPolicy from '@pages/PrivacyPolicy'
 import TermsAndConditions from '@pages/TermsAndConditions'
 import Contact from '@pages/Contact'
 import TestSupabase from '@pages/TestSupabase'
+import About from '@pages/About'
+import HowItWorks from '@pages/HowItWorks'
+import Pricing from '@pages/Pricing'
+import FAQ from '@pages/FAQ'
+import Resources from '@pages/Resources'
 
 // Customer Pages (lazy loaded)
 const CustomerDashboard = lazy(() => import('@pages/customer/Dashboard'))
@@ -168,6 +173,14 @@ function App() {
             <Route path="/terms" element={<TermsAndConditions />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/test-supabase" element={<TestSupabase />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/how-it-works" element={<HowItWorks />} />
+            <Route path="/pricing" element={<Pricing />} />
+            <Route path="/faq" element={<FAQ />} />
+            <Route path="/resources" element={<Resources />} />
+            <Route path="/photographer-resources" element={<Resources />} />
+            <Route path="/photographer-faq" element={<FAQ />} />
+            <Route path="/join" element={<SignUp />} />
           </Route>
 
           {/* Customer Routes - Lazy loaded */}

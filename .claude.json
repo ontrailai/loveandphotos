@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "render": {
+      "transport": "http",
+      "url": "https://mcp.render.com/mcp",
+      "headers": {
+        "Authorization": "rnd_Q9L2a19bDptTIy0JokgYGJ8ZAAO2"
+      }
+    }
+  }
+}

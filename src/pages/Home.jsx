@@ -502,7 +502,7 @@ const Home = () => {
             <div>
               <h4 className="font-semibold text-dusty-900 mb-4">For Photographers</h4>
               <ul className="space-y-2">
-                <li><Link to="/signup?role=photographer" className="text-dusty-600 hover:text-dusty-900 text-sm">Join as Pro</Link></li>
+                <li><Link to="/signup?role=photographer" className="text-dusty-600 hover:text-dusty-900 text-sm">Join as Photographer</Link></li>
                 <li><Link to="/resources" className="text-dusty-600 hover:text-dusty-900 text-sm">Resources</Link></li>
                 <li><Link to="/faq" className="text-dusty-600 hover:text-dusty-900 text-sm">FAQ</Link></li>
               </ul>
