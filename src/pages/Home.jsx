@@ -41,6 +41,7 @@ const Home = () => {
 
   const loadFeaturedPhotographers = async () => {
     try {
+      console.log('Loading featured photographers...')
       // Load from photographer_preview_profiles (imported photographers)
       const { data: previewData, error: previewError } = await supabase
         .from('photographer_preview_profiles')
@@ -48,6 +49,8 @@ const Home = () => {
         .eq('is_available', true)
         .order('average_rating', { ascending: false })
         .limit(3)
+
+      console.log('Featured photographers data:', { previewData, previewError })
 
       if (!previewError && previewData && previewData.length > 0) {
         // Transform to match expected format

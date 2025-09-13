@@ -136,7 +136,8 @@ const Browse = () => {
       
       console.log('Preview profiles loaded:', { previewProfiles, previewError })
       
-      if (!previewError && previewProfiles && previewProfiles.length > 0) {
+      if (!previewError && previewProfiles) {
+        console.log('Processing', previewProfiles.length, 'profiles')
         // Transform preview profiles to match expected format
         const transformedProfiles = previewProfiles.map((profile, index) => ({
           id: profile.id,
@@ -253,7 +254,9 @@ const Browse = () => {
         setPhotographers(data)
       } else {
         // If no data from either table, set empty array
+        console.log('No photographers found in fallback query')
         setPhotographers([])
+        setAllPhotographers([])
       }
     } catch (error) {
       console.error('Error loading photographers:', error)
