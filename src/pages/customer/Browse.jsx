@@ -74,6 +74,8 @@ const Browse = () => {
   const [searchParams, setSearchParams] = useSearchParams()
   
   const [photographers, setPhotographers] = useState([])
+  const [allPhotographers, setAllPhotographers] = useState([])
+  const [displayCount, setDisplayCount] = useState(50)
   const [loading, setLoading] = useState(true)
   const [filters, setFilters] = useState({
     zip: searchParams.get('zip') || '',
@@ -109,6 +111,13 @@ const Browse = () => {
     loadPhotographers()
   }, [filters])
 
+  useEffect(() => {
+    // When display count changes, update displayed photographers
+    if (allPhotographers.length > 0) {
+      setPhotographers(allPhotographers.slice(0, displayCount))
+    }
+  }, [displayCount, allPhotographers])
+
   const loadPhotographers = async () => {
     try {
       setLoading(true)
@@ -118,7 +127,7 @@ const Browse = () => {
         .from('photographer_preview_profiles')
         .select('*')
         .eq('is_available', true)
-        .limit(1100)
+        .limit(200)
       
       if (!previewError && previewProfiles && previewProfiles.length > 0) {
         // Transform preview profiles to match expected format
@@ -192,7 +201,8 @@ const Browse = () => {
           )
         }
         
-        setPhotographers(filtered)
+        setAllPhotographers(filtered)
+        setPhotographers(filtered.slice(0, displayCount))
         setLoading(false)
         return
       }
@@ -279,6 +289,7 @@ const Browse = () => {
       specialties: [],
       languages: []
     })
+    setDisplayCount(50) // Reset display count
   }
 
   const activeFilterCount = 
@@ -595,14 +606,14 @@ const Browse = () => {
 
                       {/* Stats */}
                       <div className="mb-3">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1">
                           <RatingStars 
                             rating={photographer.average_rating || 0} 
                             size="sm" 
                             showNumber 
                           />
-                          <span className="text-sm text-dusty-600">
-                            ({photographer.total_reviews || 0} reviews)
+                          <span className="text-xs text-dusty-600 whitespace-nowrap">
+                            ({photographer.total_reviews || 0})
                           </span>
                         </div>
                       </div>
@@ -727,10 +738,18 @@ const Browse = () => {
             )}
 
             {/* Load More */}
-            {photographers.length > 0 && (
+            {photographers.length > 0 && photographers.length < allPhotographers.length && (
               <div className="mt-8 text-center">
-                <Button variant="outline" size="lg">
-                  Load More Photographers
+                <Button 
+                  variant="outline" 
+                  size="lg"
+                  onClick={() => {
+                    const newCount = displayCount + 50
+                    setDisplayCount(newCount)
+                    setPhotographers(allPhotographers.slice(0, newCount))
+                  }}
+                >
+                  Load More Photographers ({photographers.length} of {allPhotographers.length})
                 </Button>
               </div>
             )}
