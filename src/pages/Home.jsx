@@ -49,9 +49,9 @@ const Home = () => {
       
       const { data: photographers, error } = await supabase
         .from('photographer_preview_profiles')
-        .select('id, display_name, image_url, average_rating, hourly_rate, is_verified, specialties')
+        .select('id, display_name, portfolio_images, average_rating, hourly_rate, is_verified, specialties')
         .eq('is_available', true)
-        .order('average_rating', false)
+        .order('average_rating', { ascending: false })
         .limit(3)
       
       console.log('Featured photographers query result:', { photographers, error })
