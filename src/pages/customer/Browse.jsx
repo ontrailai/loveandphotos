@@ -130,7 +130,7 @@ const Browse = () => {
       // First try to load from photographer_preview_profiles (imported photographers)
       let { data: previewProfiles, error: previewError } = await supabase
         .from('photographer_preview_profiles')
-        .select('*')
+        .select('id, display_name, image_url, bio, specialties, languages, years_experience, hourly_rate, location_city, location_state, is_available, average_rating, total_reviews, total_bookings, is_verified, user_id')
         .eq('is_available', true)
         .limit(500)
       

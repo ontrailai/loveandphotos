@@ -48,7 +48,7 @@ const Home = () => {
       console.log('Fetching from photographer_preview_profiles...')
       const { data: previewData, error: previewError } = await supabase
         .from('photographer_preview_profiles')
-        .select('*')
+        .select('id, display_name, image_url, average_rating, hourly_rate, is_verified, specialties')
         .eq('is_available', true)
         .order('average_rating', { ascending: false })
         .limit(3)
