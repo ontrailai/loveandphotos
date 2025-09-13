@@ -7,11 +7,11 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@contexts/AuthContext'
 import { useForm } from 'react-hook-form'
-import { 
-  CameraIcon, 
-  UserIcon, 
-  MailIcon, 
-  LockIcon, 
+import {
+  CameraIcon,
+  UserIcon,
+  MailIcon,
+  LockIcon,
   PhoneIcon,
   CheckIcon,
   ArrowRightIcon,
@@ -34,7 +34,7 @@ const SignUp = () => {
   const [loading, setLoading] = useState(false)
   const [step, setStep] = useState(1)
   const [showPassword, setShowPassword] = useState(false)
-  
+
   // Redirect if already logged in
   useEffect(() => {
     // Only redirect if we have a user AND profile loaded
@@ -47,7 +47,7 @@ const SignUp = () => {
       }
     }
   }, [user, profile, navigate])
-  
+
   // Show spinner only while checking auth AND user exists
   // This prevents infinite spinner for non-logged-in users
   if (authLoading && user) {
@@ -378,8 +378,8 @@ const SignUp = () => {
         <div className="relative flex items-end p-12">
           <div className="text-white">
             <h3 className="text-3xl font-display font-bold mb-2">
-              {selectedRole === 'photographer' 
-                ? 'Turn your passion into profit' 
+              {selectedRole === 'photographer'
+                ? 'Turn your passion into profit'
                 : 'Find your perfect match'}
             </h3>
             <p className="text-lg text-white/80">

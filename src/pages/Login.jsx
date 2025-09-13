@@ -21,9 +21,10 @@ const Login = () => {
   const [searchParams] = useSearchParams()
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
-  
+  const [rememberMe, setRememberMe] = useState(false)
+
   const redirectTo = searchParams.get('redirect') || '/dashboard'
-  
+
   // Redirect if already logged in
   useEffect(() => {
     // Only redirect if we have a user AND profile loaded
@@ -36,7 +37,7 @@ const Login = () => {
       }
     }
   }, [user, profile, navigate])
-  
+
   // Show spinner only while checking auth AND user exists
   // This prevents infinite spinner for non-logged-in users
   if (authLoading && user) {
@@ -46,7 +47,7 @@ const Login = () => {
       </div>
     )
   }
-  
+
   const {
     register,
     handleSubmit,
@@ -55,10 +56,10 @@ const Login = () => {
 
   const onSubmit = async (data) => {
     setLoading(true)
-    
+
     try {
       const result = await signIn(data.email, data.password)
-      
+
       // The signIn function handles navigation and returns result
       if (!result.success) {
         console.error('Login failed:', result.error)
@@ -81,7 +82,7 @@ const Login = () => {
           <div className="text-center mb-8">
             <Link to="/" className="inline-flex items-center space-x-2 mb-6">
               <CameraIcon className="w-10 h-10 text-blush-500" />
-              <span className="text-3xl font-display font-bold text-dusty-900">Love & Photos</span>
+              <span className="text-3xl font-display font-bold text-dusty-900">LoveP</span>
             </Link>
             <h2 className="text-3xl font-display font-bold text-dusty-900">
               Welcome back
@@ -92,7 +93,7 @@ const Login = () => {
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <Card className="p-6 space-y-4">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-4">
               <Input
                 label="Email Address"
                 type="email"
@@ -126,7 +127,7 @@ const Login = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-[38px] text-dusty-400 hover:text-dusty-600"
+                  className="absolute right-3 top-[38px] text-dusty-400 hover:text-dusty-600 transition-colors"
                 >
                   {showPassword ? (
                     <EyeOffIcon className="w-5 h-5" />
@@ -135,7 +136,7 @@ const Login = () => {
                   )}
                 </button>
               </div>
-            </Card>
+            </div>
 
             <div className="flex items-center justify-between">
               <div className="flex items-center">
@@ -143,6 +144,8 @@ const Login = () => {
                   id="remember-me"
                   name="remember-me"
                   type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
                   className="h-4 w-4 text-blush-600 focus:ring-blush-500 border-gray-300 rounded"
                 />
                 <label htmlFor="remember-me" className="ml-2 block text-sm text-dusty-600">
@@ -152,7 +155,7 @@ const Login = () => {
 
               <Link
                 to="/forgot-password"
-                className="text-sm font-medium text-blush-600 hover:text-blush-700"
+                className="text-sm font-medium text-blush-600 hover:text-blush-700 transition-colors"
               >
                 Forgot password?
               </Link>
@@ -169,14 +172,28 @@ const Login = () => {
                 <ArrowRightIcon className="w-5 h-5 ml-2" />
               </Button>
 
-              <p className="text-center text-sm text-dusty-600">
-                Don't have an account?{' '}
-                <Link to="/signup" className="text-blush-600 hover:text-blush-700 font-medium">
-                  Sign up
-                </Link>
-              </p>
-            </div>
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-200"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-gradient-to-br from-blush-50/50 via-white/50 to-sage-50/50 text-dusty-600">
+                    New to LoveP?
+                  </span>
+                </div>
+              </div>
 
+              <Link to="/signup" className="block">
+                <Button
+                  variant="outline"
+                  className="w-full border-dusty-300 text-dusty-700 hover:bg-dusty-50"
+                  size="lg"
+                  type="button"
+                >
+                  Create an account
+                </Button>
+              </Link>
+            </div>
           </form>
         </div>
       </div>
@@ -191,8 +208,8 @@ const Login = () => {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-dusty-900/50 to-transparent" />
         </div>
-        <div className="relative flex items-center justify-center h-full p-12">
-          <div className="text-white text-center mb-64">
+        <div className="relative flex items-end p-12">
+          <div className="text-white">
             <h3 className="text-3xl font-display font-bold mb-2">
               Capture life's precious moments
             </h3>
