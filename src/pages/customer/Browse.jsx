@@ -31,26 +31,26 @@ import RatingStars from '@components/shared/RatingStars'
 import { supabase } from '@lib/supabase'
 import { clsx } from 'clsx'
 
-// Array of diverse photographer profile images - add w=200 for faster loading
+// Array of diverse photographer profile images - high quality with proper cropping
 const profileImages = [
-  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200',
-  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200',
-  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200',
-  'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200',
-  'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200',
-  'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200',
-  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200',
-  'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200',
-  'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200',
-  'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=200',
-  'https://images.unsplash.com/photo-1463453091185-61582044d556?w=200',
-  'https://images.unsplash.com/photo-1480429370139-e0132c086e2a?w=200',
-  'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=200',
-  'https://images.unsplash.com/photo-1464863979621-258859e62245?w=200',
-  'https://images.unsplash.com/photo-1507081323647-4d250478b919?w=200',
-  'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=200',
-  'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=200',
-  'https://images.unsplash.com/photo-1507591064344-4c6ce005b128?w=200'
+  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&h=400&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=400&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=400&h=400&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&h=400&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=400&h=400&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1463453091185-61582044d556?w=400&h=400&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1480429370139-e0132c086e2a?w=400&h=400&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=400&h=400&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1464863979621-258859e62245?w=400&h=400&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1507081323647-4d250478b919?w=400&h=400&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&h=400&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1507591064344-4c6ce005b128?w=400&h=400&fit=crop&crop=face'
 ]
 
 // Array of portfolio images for photographers - add w=600 for faster loading
@@ -139,36 +139,41 @@ const Browse = () => {
       if (!previewError && previewProfiles) {
         console.log('Processing', previewProfiles.length, 'profiles')
         // Transform preview profiles to match expected format
-        const transformedProfiles = previewProfiles.map((profile, index) => ({
-          id: profile.id,
-          user_id: profile.user_id || profile.id,
-          bio: profile.bio,
-          specialties: profile.specialties || [],
-          languages: profile.languages || ['English'],
-          years_experience: profile.years_experience,
-          hourly_rate: profile.hourly_rate,
-          location_city: profile.location_city,
-          location_state: profile.location_state,
-          is_available: profile.is_available,
-          is_public: true,
-          average_rating: profile.average_rating || 4.5,
-          total_reviews: profile.total_reviews || 0,
-          total_bookings: profile.total_bookings || 0,
-          users: {
-            full_name: profile.display_name,
-            avatar_url: profileImages[index % profileImages.length]
-          },
-          pay_tiers: {
-            name: profile.is_verified ? 'Professional' : 'Standard',
+        const transformedProfiles = previewProfiles.map((profile, index) => {
+          // Use fallback image based on index to ensure variety, but check for valid image_url first
+          const fallbackUrl = profileImages[index % profileImages.length]
+          
+          return {
+            id: profile.id,
+            user_id: profile.user_id || profile.id,
+            bio: profile.bio,
+            specialties: profile.specialties || [],
+            languages: profile.languages || ['English'],
+            years_experience: profile.years_experience,
             hourly_rate: profile.hourly_rate,
-            badge_color: profile.is_verified ? 'gold' : 'silver'
-          },
-          portfolio_items: [
-            { image_url: portfolioImages[index % portfolioImages.length] },
-            { image_url: portfolioImages[(index + 5) % portfolioImages.length] },
-            { image_url: portfolioImages[(index + 10) % portfolioImages.length] }
-          ]
-        }))
+            location_city: profile.location_city,
+            location_state: profile.location_state,
+            is_available: profile.is_available,
+            is_public: true,
+            average_rating: profile.average_rating || 4.5,
+            total_reviews: profile.total_reviews || 0,
+            total_bookings: profile.total_bookings || 0,
+            users: {
+              full_name: profile.display_name,
+              avatar_url: profile.image_url && profile.image_url.startsWith('http') ? profile.image_url : fallbackUrl
+            },
+            pay_tiers: {
+              name: profile.is_verified ? 'Professional' : 'Standard',
+              hourly_rate: profile.hourly_rate,
+              badge_color: profile.is_verified ? 'gold' : 'silver'
+            },
+            portfolio_items: [
+              { image_url: portfolioImages[index % portfolioImages.length] },
+              { image_url: portfolioImages[(index + 5) % portfolioImages.length] },
+              { image_url: portfolioImages[(index + 10) % portfolioImages.length] }
+            ]
+          }
+        })
         
         // Apply filters
         let filtered = transformedProfiles
