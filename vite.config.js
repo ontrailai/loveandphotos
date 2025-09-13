@@ -12,6 +12,7 @@ export default defineConfig({
       '@pages': path.resolve(__dirname, './src/pages'),
       '@lib': path.resolve(__dirname, './src/lib'),
       '@contexts': path.resolve(__dirname, './src/contexts'),
+      '@providers': path.resolve(__dirname, './src/providers'),
       '@hooks': path.resolve(__dirname, './src/hooks'),
       '@utils': path.resolve(__dirname, './src/utils'),
       '@assets': path.resolve(__dirname, './src/assets'),
@@ -68,7 +69,8 @@ export default defineConfig({
       '@supabase/supabase-js',
       'lucide-react',
       'clsx',
-      'tailwind-merge'
+      'tailwind-merge',
+      'swr'
     ]
   },
 

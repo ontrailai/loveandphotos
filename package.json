@@ -8,6 +8,7 @@
     "dev:client": "vite",
     "dev:api": "node api/server.js",
     "dev:frontend-only": "vite",
+    "prebuild": "node scripts/validate-imports.js",
     "build": "vite build",
     "build:analyze": "vite build --mode analyze",
     "build:production": "NODE_ENV=production vite build",

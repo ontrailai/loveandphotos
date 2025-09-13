@@ -770,7 +770,6 @@ const Browse = () => {
                     </div>
                   </Card>
                 ))}
-              ) : null}
               </div>
             )}
 
