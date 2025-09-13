@@ -52,8 +52,9 @@ const Home = () => {
 
       console.log('Featured photographers data:', { previewData, previewError })
 
-      if (!previewError && previewData && previewData.length > 0) {
-        // Transform to match expected format
+      if (!previewError && previewData) {
+        // Even if empty, process the data
+        console.log('Processing featured photographers:', previewData.length)
         const transformed = previewData.map((profile, index) => ({
           id: profile.id,
           average_rating: profile.average_rating || 4.5,
@@ -68,23 +69,27 @@ const Home = () => {
           specialties: profile.specialties || ['Wedding', 'Portrait']
         }))
         setFeaturedPhotographers(transformed)
-      } else {
-        // Fallback to original table if no preview profiles
-        const { data, error } = await supabase
-          .from('photographers')
-          .select(`
-            *,
-            users!inner(full_name, avatar_url),
-            pay_tiers(name, hourly_rate, badge_color)
-          `)
-          .eq('is_public', true)
-          .eq('is_verified', true)
-          .order('average_rating', { ascending: false })
-          .limit(3)
+        setLoading(false)
+        return  // Exit early if we got preview data
+      }
+      
+      // Only fallback if preview profiles failed
+      console.log('Falling back to original photographers table')
+      // Fallback to original table if no preview profiles
+      const { data, error } = await supabase
+        .from('photographers')
+        .select(`
+          *,
+          users!inner(full_name, avatar_url),
+          pay_tiers(name, hourly_rate, badge_color)
+        `)
+        .eq('is_public', true)
+        .eq('is_verified', true)
+        .order('average_rating', { ascending: false })
+        .limit(3)
 
-        if (!error && data) {
-          setFeaturedPhotographers(data)
-        }
+      if (!error && data) {
+        setFeaturedPhotographers(data)
       }
     } catch (error) {
       console.error('Error loading photographers:', error)
