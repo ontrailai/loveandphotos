@@ -60,20 +60,34 @@ const Home = () => {
         // Fall through to fallback
       } else if (previewData && previewData.length > 0) {
         console.log(`Found ${previewData.length} featured photographers`)
-        const transformed = previewData.map((profile, index) => ({
-          id: profile.id,
-          average_rating: profile.average_rating || 4.5,
-          users: {
-            full_name: profile.display_name,
-            avatar_url: profile.image_url || `https://images.unsplash.com/photo-${1500648767791 + index * 1000}-00dcc994a43e?w=400`
-          },
-          pay_tiers: {
-            name: profile.is_verified ? 'Professional' : 'Standard',
-            hourly_rate: profile.hourly_rate || 150,
-            badge_color: profile.is_verified ? 'bg-yellow-500' : 'bg-gray-500'
-          },
-          specialties: profile.specialties ? profile.specialties.split(',').map(s => s.trim()) : ['Wedding', 'Portrait']
-        }))
+        const transformed = previewData.map((profile, index) => {
+          // Create reliable fallback images for photographers
+          const fallbackImages = [
+            'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=400&h=400&fit=crop&crop=face'
+          ]
+          
+          // Use fallback image based on index to ensure variety
+          const fallbackUrl = fallbackImages[index % fallbackImages.length]
+          
+          return {
+            id: profile.id,
+            average_rating: profile.average_rating || 4.5,
+            users: {
+              full_name: profile.display_name,
+              avatar_url: profile.image_url && profile.image_url.startsWith('http') ? profile.image_url : fallbackUrl
+            },
+            pay_tiers: {
+              name: profile.is_verified ? 'Professional' : 'Standard',
+              hourly_rate: profile.hourly_rate || 150,
+              badge_color: profile.is_verified ? 'bg-yellow-500' : 'bg-gray-500'
+            },
+            specialties: profile.specialties ? profile.specialties.split(',').map(s => s.trim()) : ['Wedding', 'Portrait']
+          }
+        })
         console.log('Transformed data:', transformed)
         setFeaturedPhotographers(transformed)
         setLoading(false)
