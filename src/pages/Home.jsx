@@ -44,35 +44,80 @@ const Home = () => {
       console.log('Loading featured photographers...')
       setLoading(true)
       
-      // Use mock data temporarily to fix the page
-      console.log('Using mock data for featured photographers')
+      // Try to load real data from photographer_preview_profiles
+      console.log('Attempting to fetch featured photographers from database...')
+      
+      const { data: photographers, error } = await supabase
+        .from('photographer_preview_profiles')
+        .select('id, display_name, image_url, average_rating, hourly_rate, is_verified, specialties')
+        .eq('is_available', true)
+        .order('average_rating', { ascending: false })
+        .limit(3)
+      
+      console.log('Featured photographers query result:', { photographers, error })
+      
+      if (!error && photographers && photographers.length > 0) {
+        console.log(`Found ${photographers.length} real featured photographers`)
+        
+        // Fallback images for featured photographers
+        const fallbackImages = [
+          'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop&crop=face&auto=format&q=80',
+          'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face&auto=format&q=80',
+          'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop&crop=face&auto=format&q=80'
+        ]
+        
+        const transformed = photographers.map((profile, index) => ({
+          id: profile.id,
+          average_rating: profile.average_rating || 4.5,
+          users: {
+            full_name: profile.display_name || `Featured Photographer ${index + 1}`,
+            avatar_url: profile.image_url && profile.image_url.startsWith('http') ? profile.image_url : fallbackImages[index]
+          },
+          pay_tiers: {
+            name: profile.is_verified ? 'Professional' : 'Standard',
+            hourly_rate: profile.hourly_rate || 150,
+            badge_color: profile.is_verified ? 'bg-yellow-500' : 'bg-gray-500'
+          },
+          specialties: profile.specialties ? profile.specialties.split(',').map(s => s.trim()) : ['Wedding', 'Portrait']
+        }))
+        
+        console.log('Featured photographers transformed:', transformed)
+        setFeaturedPhotographers(transformed)
+        return
+      }
+      
+      console.log('Database query failed or no data, using fallback...')
+      throw new Error('No featured photographers found')
+      
+    } catch (error) {
+      console.error('Error loading real featured photographers:', error)
+      console.log('Using fallback mock featured photographers')
+      
+      // Fallback mock data
       const mockData = [
         {
           id: 1,
           average_rating: 4.9,
-          users: { full_name: 'Sarah Johnson', avatar_url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop&crop=face' },
+          users: { full_name: 'Sarah Johnson', avatar_url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop&crop=face&auto=format&q=80' },
           pay_tiers: { name: 'Professional', hourly_rate: 200, badge_color: 'bg-yellow-500' },
           specialties: ['Wedding', 'Portrait']
         },
         {
           id: 2,
           average_rating: 4.8,
-          users: { full_name: 'Michael Chen', avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face' },
+          users: { full_name: 'Michael Chen', avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face&auto=format&q=80' },
           pay_tiers: { name: 'Expert', hourly_rate: 250, badge_color: 'bg-purple-500' },
           specialties: ['Event', 'Corporate']
         },
         {
           id: 3,
           average_rating: 4.7,
-          users: { full_name: 'Emily Rodriguez', avatar_url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop&crop=face' },
+          users: { full_name: 'Emily Rodriguez', avatar_url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop&crop=face&auto=format&q=80' },
           pay_tiers: { name: 'Professional', hourly_rate: 175, badge_color: 'bg-yellow-500' },
           specialties: ['Family', 'Newborn']
         }
       ]
-      console.log('Mock data set:', mockData)
       setFeaturedPhotographers(mockData)
-    } catch (error) {
-      console.error('Error loading featured photographers:', error)
     } finally {
       setLoading(false)
     }
