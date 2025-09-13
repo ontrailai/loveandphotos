@@ -43,6 +43,9 @@ const CustomerDashboard = () => {
     reviewsGiven: 0
   })
 
+  // Debug logging
+  console.log('CustomerDashboard rendering:', { user, profile, loading })
+
   useEffect(() => {
     if (user) {
       loadDashboardData()
@@ -145,6 +148,11 @@ const CustomerDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* DEBUG - Remove this later */}
+      <div className="bg-red-500 text-white p-4 text-center">
+        Dashboard is rendering! User: {user?.email || 'No user'}
+      </div>
+      
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
