@@ -43,8 +43,6 @@ const CustomerDashboard = () => {
     reviewsGiven: 0
   })
 
-  // Debug logging
-  console.log('CustomerDashboard rendering:', { user, profile, loading })
 
   useEffect(() => {
     if (user) {
@@ -138,21 +136,14 @@ const CustomerDashboard = () => {
     }
   }
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blush-500"></div>
-      </div>
-    )
-  }
-
-  return (
+  // Don't render early - this breaks hooks
+  // Instead, show loading or content conditionally
+  return loading ? (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blush-500"></div>
+    </div>
+  ) : (
     <div className="min-h-screen bg-gray-50">
-      {/* DEBUG - Remove this later */}
-      <div className="bg-red-500 text-white p-4 text-center">
-        Dashboard is rendering! User: {user?.email || 'No user'}
-      </div>
-      
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
