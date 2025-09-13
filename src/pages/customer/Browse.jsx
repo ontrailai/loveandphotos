@@ -26,7 +26,9 @@ import Button from '@components/ui/Button'
 import Input from '@components/ui/Input'
 import Card from '@components/ui/Card'
 import Badge from '@components/ui/Badge'
-import Avatar from '@components/shared/Avatar'
+import SafeAvatar from '@components/shared/SafeAvatar'
+import SafeImage from '@components/shared/SafeImage'
+import ImageErrorBoundary from '@components/shared/ImageErrorBoundary'
 import RatingStars from '@components/shared/RatingStars'
 import { supabase } from '@lib/supabase'
 import { clsx } from 'clsx'
@@ -602,25 +604,27 @@ const Browse = () => {
                     onClick={() => navigate(`/photographer/${photographer.id}`)}
                   >
                     {/* Portfolio Preview */}
-                    <div className="aspect-w-16 aspect-h-12 -m-6 mb-4">
-                      <img
-                        src={
-                          photographer.portfolio_items?.[0]?.image_url ||
-                          'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=600'
-                        }
-                        alt={photographer.users?.full_name}
-                        className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </div>
+                    <ImageErrorBoundary>
+                      <div className="aspect-w-16 aspect-h-12 -m-6 mb-4">
+                        <SafeImage
+                          src={photographer.portfolio_items?.[0]?.image_url}
+                          alt={photographer.users?.full_name || 'Photographer portfolio'}
+                          fallbackType="portfolio"
+                          className="w-full h-48"
+                          imgClassName="group-hover:scale-105 transition-transform duration-300"
+                          objectFit="cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                      </div>
+                    </ImageErrorBoundary>
 
                     <div className="px-6 pb-6">
                       {/* Photographer Info */}
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center space-x-3">
-                          <Avatar
+                          <SafeAvatar
                             src={photographer.users?.avatar_url}
-                            name={photographer.users?.full_name}
+                            name={photographer.users?.full_name || `Photographer ${photographer.id}`}
                             size="sm"
                           />
                           <div>
@@ -699,24 +703,25 @@ const Browse = () => {
                   >
                     <div className="flex">
                       {/* Image */}
-                      <div className="w-48 h-36 flex-shrink-0">
-                        <img
-                          src={
-                            photographer.portfolio_items?.[0]?.image_url ||
-                            'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=400'
-                          }
-                          alt={photographer.users?.full_name}
-                          className="w-full h-full object-cover rounded-l-xl"
-                        />
-                      </div>
+                      <ImageErrorBoundary>
+                        <div className="w-48 h-36 flex-shrink-0">
+                          <SafeImage
+                            src={photographer.portfolio_items?.[0]?.image_url}
+                            alt={photographer.users?.full_name || 'Photographer portfolio'}
+                            fallbackType="portfolio"
+                            className="w-full h-full rounded-l-xl overflow-hidden"
+                            objectFit="cover"
+                          />
+                        </div>
+                      </ImageErrorBoundary>
 
                       {/* Content */}
                       <div className="flex-1 p-6">
                         <div className="flex items-start justify-between mb-3">
                           <div className="flex items-center space-x-4">
-                            <Avatar
+                            <SafeAvatar
                               src={photographer.users?.avatar_url}
-                              name={photographer.users?.full_name}
+                              name={photographer.users?.full_name || `Photographer ${photographer.id}`}
                               size="md"
                             />
                             <div>
