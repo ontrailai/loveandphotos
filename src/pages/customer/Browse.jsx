@@ -93,6 +93,7 @@ const Browse = () => {
   const [allPhotographers, setAllPhotographers] = useState([])
   const [displayCount, setDisplayCount] = useState(50)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const [filters, setFilters] = useState({
     zip: searchParams.get('zip') || '',
     date: '',
@@ -135,36 +136,30 @@ const Browse = () => {
   }, [displayCount, allPhotographers])
 
   const loadPhotographers = async () => {
+    setLoading(true)
+    setError(null)
+
     try {
-      setLoading(true)
-      console.log('Loading photographers...')
-      
-      // First try to load real data from photographer_preview_profiles
-      console.log('Attempting to fetch from photographer_preview_profiles...')
-      
-      // Try a very simple query first
-      const { data: testData, error: testError } = await supabase
-        .from('photographer_preview_profiles')
-        .select('id')
-        .limit(1)
-      
-      console.log('Test query result:', { testData, testError })
-      
-      if (testError) {
-        console.error('Test query failed:', testError)
-        throw new Error('Database connection failed')
+      console.log('Loading photographers from Supabase...')
+
+      // Check if Supabase is configured
+      if (!supabase || !import.meta.env.VITE_SUPABASE_URL) {
+        console.error('Supabase not configured properly')
+        throw new Error('Database configuration error. Please check environment variables.')
       }
-      
-      console.log('Test query succeeded, fetching full data...')
-      
-      // Now try the full query
+
+      // Fetch photographers with proper error handling
       const { data: photographers, error } = await supabase
         .from('photographer_preview_profiles')
         .select('id, display_name, portfolio_images, bio, specialties, hourly_rate, location_city, location_state, average_rating, is_verified, is_available')
         .eq('is_available', true)
         .limit(1000)
-      
-      console.log('Full query result:', { photographers, error, count: photographers?.length })
+
+      console.log('Query result:', {
+        success: !error,
+        count: photographers?.length || 0,
+        error: error?.message
+      })
       
       if (error) {
         console.error('Full query failed:', error)
@@ -260,8 +255,9 @@ const Browse = () => {
       console.log('No data found, falling back to mock data')
       throw new Error('No photographers found in database')
       
-    } catch (error) {
-      console.error('Error loading real data:', error)
+    } catch (err) {
+      console.error('Error loading photographers:', err)
+      setError(err.message || 'Failed to load photographers. Please try again.')
       console.log('Generating fallback mock data...')
       
       // Fallback to mock data if real data fails
@@ -342,6 +338,9 @@ const Browse = () => {
       console.log('Fallback: Setting photographers:', filtered.length, 'photographers')
       setAllPhotographers(filtered)
       setPhotographers(filtered.slice(0, displayCount))
+    } finally {
+      // CRITICAL: Always set loading to false
+      setLoading(false)
     }
   }
 
@@ -615,6 +614,29 @@ const Browse = () => {
                 {loading ? 'Loading...' : `${allPhotographers.length} Photographers Available`}
               </h2>
             </div>
+
+            {/* Error State */}
+            {error && !loading && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-6">
+                <div className="flex items-start">
+                  <XIcon className="w-5 h-5 text-red-500 mt-0.5 mr-3 flex-shrink-0" />
+                  <div className="flex-1">
+                    <h3 className="text-sm font-medium text-red-800 mb-1">
+                      Could not load photographers
+                    </h3>
+                    <p className="text-sm text-red-700">{error}</p>
+                    <Button
+                      onClick={() => loadPhotographers()}
+                      size="sm"
+                      variant="secondary"
+                      className="mt-3"
+                    >
+                      Try Again
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Photographer Grid/List */}
             {loading ? (
