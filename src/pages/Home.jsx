@@ -497,7 +497,7 @@ const Home = () => {
                 Get Started Free
               </Button>
             </Link>
-            <Link to="/browse">
+            <Link to="/photographers">
               <Button size="lg" variant="outline" className="text-white border-white hover:bg-white/10">
                 Browse Photographers
               </Button>

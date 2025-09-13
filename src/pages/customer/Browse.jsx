@@ -125,6 +125,7 @@ const Browse = () => {
   const loadPhotographers = async () => {
     try {
       setLoading(true)
+      console.log('Loading photographers...')
       
       // First try to load from photographer_preview_profiles (imported photographers)
       let { data: previewProfiles, error: previewError } = await supabase
@@ -132,6 +133,8 @@ const Browse = () => {
         .select('*')
         .eq('is_available', true)
         .limit(500)
+      
+      console.log('Preview profiles loaded:', { previewProfiles, previewError })
       
       if (!previewError && previewProfiles && previewProfiles.length > 0) {
         // Transform preview profiles to match expected format
@@ -205,6 +208,7 @@ const Browse = () => {
           )
         }
         
+        console.log('Setting photographers:', filtered.length, 'photographers')
         setAllPhotographers(filtered)
         setPhotographers(filtered.slice(0, displayCount))
         setLoading(false)
@@ -253,6 +257,8 @@ const Browse = () => {
       }
     } catch (error) {
       console.error('Error loading photographers:', error)
+      setPhotographers([])
+      setAllPhotographers([])
     } finally {
       setLoading(false)
     }
