@@ -44,9 +44,7 @@ const Quiz = lazy(() => import('@pages/customer/Quiz'))
 
 // Lazy load placeholder pages
 const LazyPlaceholders = lazy(() => import('@pages/customer/placeholders'))
-const PhotographerProfile = lazy(() => 
-  import('@pages/customer/placeholders').then(module => ({ default: module.PhotographerProfile }))
-)
+const PhotographerProfile = lazy(() => import('@pages/customer/PhotographerProfile'))
 const BookingPage = lazy(() => 
   import('@pages/customer/placeholders').then(module => ({ default: module.BookingPage }))
 )

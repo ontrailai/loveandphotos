@@ -31,42 +31,46 @@ import RatingStars from '@components/shared/RatingStars'
 import { supabase } from '@lib/supabase'
 import { clsx } from 'clsx'
 
-// Array of diverse photographer profile images
+// Array of diverse photographer profile images - add w=200 for faster loading
 const profileImages = [
-  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d',
-  'https://images.unsplash.com/photo-1494790108377-be9c29b29330',
-  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e',
-  'https://images.unsplash.com/photo-1438761681033-6461ffad8d80',
-  'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e',
-  'https://images.unsplash.com/photo-1517841905240-472988babdf9',
-  'https://images.unsplash.com/photo-1534528741775-53994a69daeb',
-  'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6',
-  'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d',
-  'https://images.unsplash.com/photo-1519345182560-3f2917c472ef',
-  'https://images.unsplash.com/photo-1463453091185-61582044d556',
-  'https://images.unsplash.com/photo-1480429370139-e0132c086e2a',
-  'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df',
-  'https://images.unsplash.com/photo-1464863979621-258859e62245',
-  'https://images.unsplash.com/photo-1507081323647-4d250478b919'
+  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200',
+  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200',
+  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200',
+  'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200',
+  'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200',
+  'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200',
+  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200',
+  'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200',
+  'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200',
+  'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=200',
+  'https://images.unsplash.com/photo-1463453091185-61582044d556?w=200',
+  'https://images.unsplash.com/photo-1480429370139-e0132c086e2a?w=200',
+  'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=200',
+  'https://images.unsplash.com/photo-1464863979621-258859e62245?w=200',
+  'https://images.unsplash.com/photo-1507081323647-4d250478b919?w=200',
+  'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=200',
+  'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=200',
+  'https://images.unsplash.com/photo-1507591064344-4c6ce005b128?w=200'
 ]
 
-// Array of portfolio images for photographers
+// Array of portfolio images for photographers - add w=600 for faster loading
 const portfolioImages = [
-  'https://images.unsplash.com/photo-1511285560929-80b456fea0bc',
-  'https://images.unsplash.com/photo-1519741497674-611481863552',
-  'https://images.unsplash.com/photo-1606216794074-735e91aa2c92',
-  'https://images.unsplash.com/photo-1537633552985-df8429e8048b',
-  'https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6',
-  'https://images.unsplash.com/photo-1591604466107-ec97de577aff',
-  'https://images.unsplash.com/photo-1583939003579-730e3918a45a',
-  'https://images.unsplash.com/photo-1525673812761-4e0d45adc0cc',
-  'https://images.unsplash.com/photo-1460978812857-470ed1c77af0',
-  'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4',
-  'https://images.unsplash.com/photo-1520854221256-17451cc331bf',
-  'https://images.unsplash.com/photo-1529636798458-92182e662485',
-  'https://images.unsplash.com/photo-1545232979-8bf68ee9b1af',
-  'https://images.unsplash.com/photo-1513279922550-250c2129b13a',
-  'https://images.unsplash.com/photo-1552750085-1cbc45a53c52'
+  'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=600',
+  'https://images.unsplash.com/photo-1519741497674-611481863552?w=600',
+  'https://images.unsplash.com/photo-1606216794074-735e91aa2c92?w=600',
+  'https://images.unsplash.com/photo-1537633552985-df8429e8048b?w=600',
+  'https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=600',
+  'https://images.unsplash.com/photo-1591604466107-ec97de577aff?w=600',
+  'https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=600',
+  'https://images.unsplash.com/photo-1525673812761-4e0d45adc0cc?w=600',
+  'https://images.unsplash.com/photo-1460978812857-470ed1c77af0?w=600',
+  'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=600',
+  'https://images.unsplash.com/photo-1520854221256-17451cc331bf?w=600',
+  'https://images.unsplash.com/photo-1529636798458-92182e662485?w=600',
+  'https://images.unsplash.com/photo-1545232979-8bf68ee9b1af?w=600',
+  'https://images.unsplash.com/photo-1513279922550-250c2129b13a?w=600',
+  'https://images.unsplash.com/photo-1552750085-1cbc45a53c52?w=600',
+  'https://images.unsplash.com/photo-1469371670807-013ccf25f16a?w=600'
 ]
 
 const Browse = () => {
@@ -127,7 +131,7 @@ const Browse = () => {
         .from('photographer_preview_profiles')
         .select('*')
         .eq('is_available', true)
-        .limit(200)
+        .limit(50)
       
       if (!previewError && previewProfiles && previewProfiles.length > 0) {
         // Transform preview profiles to match expected format
@@ -521,7 +525,7 @@ const Browse = () => {
             {/* Results Header */}
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-display font-semibold text-dusty-900">
-                {loading ? 'Loading...' : `${photographers.length} Photographers Found`}
+                {loading ? 'Loading...' : `${allPhotographers.length} Photographers Available`}
               </h2>
             </div>
 
@@ -589,7 +593,7 @@ const Browse = () => {
                           />
                           <div>
                             <h3 className="font-semibold text-dusty-900">
-                              {photographer.users?.full_name || 'Photographer'}
+                              {photographer.users?.full_name?.split(' ')[0] || 'Photographer'}
                             </h3>
                             <p className="text-sm text-dusty-600">
                               {photographer.specialties?.[0] || 'All Events'}
@@ -686,7 +690,7 @@ const Browse = () => {
                             <div>
                               <div className="flex items-center space-x-2">
                                 <h3 className="text-lg font-semibold text-dusty-900">
-                                  {photographer.users?.full_name || 'Photographer'}
+                                  {photographer.users?.full_name?.split(' ')[0] || 'Photographer'}
                                 </h3>
                                 <Badge 
                                   variant={photographer.pay_tiers?.name?.toLowerCase() || 'default'} 
