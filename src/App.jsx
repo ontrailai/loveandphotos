@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider, ProtectedRoute } from '@contexts/AuthContext'
+import { SWRProvider } from '@providers/SWRProvider'
 import { validateEnvironment } from '@utils/validateEnv'
 import DevBanner from '@components/DevBanner'
 import { TwentyFirstToolbar } from '@21st-extension/toolbar-react'
@@ -135,13 +136,14 @@ function App() {
 
   return (
     <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      <AuthProvider>
-        {/* 21st.dev Toolbar - Development only */}
-        <TwentyFirstToolbar 
-          config={{
-            plugins: [ReactPlugin]
-          }}
-        />
+      <SWRProvider>
+        <AuthProvider>
+          {/* 21st.dev Toolbar - Development only */}
+          <TwentyFirstToolbar
+            config={{
+              plugins: [ReactPlugin]
+            }}
+          />
         
         {/* Scroll to top on navigation */}
         <ScrollToTop />
@@ -377,6 +379,7 @@ function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </AuthProvider>
+      </SWRProvider>
     </Router>
   )
 }

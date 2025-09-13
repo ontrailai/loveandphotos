@@ -1,0 +1,6 @@
+id,email,role,full_name,phone,avatar_url
+550e8400-e29b-41d4-a716-446655440001,john.doe@example.com,customer,John Doe,555-0101,https://example.com/avatars/john.jpg
+550e8400-e29b-41d4-a716-446655440002,jane.smith@example.com,photographer,Jane Smith,555-0102,https://example.com/avatars/jane.jpg
+550e8400-e29b-41d4-a716-446655440003,bob.wilson@example.com,customer,Bob Wilson,555-0103,
+,alice.johnson@example.com,photographer,Alice Johnson,,https://example.com/avatars/alice.jpg
+,charlie.brown@example.com,customer,Charlie Brown,555-0105,
