@@ -31,26 +31,38 @@ import RatingStars from '@components/shared/RatingStars'
 import { supabase } from '@lib/supabase'
 import { clsx } from 'clsx'
 
-// Array of diverse photographer profile images - high quality with proper cropping
+// Array of real people profile images - guaranteed to load, professional headshots
 const profileImages = [
-  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face',
-  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop&crop=face',
-  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop&crop=face',
-  'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=face',
-  'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face',
-  'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&h=400&fit=crop&crop=face',
-  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=400&fit=crop&crop=face',
-  'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=400&h=400&fit=crop&crop=face',
-  'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&h=400&fit=crop&crop=face',
-  'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=400&h=400&fit=crop&crop=face',
-  'https://images.unsplash.com/photo-1463453091185-61582044d556?w=400&h=400&fit=crop&crop=face',
-  'https://images.unsplash.com/photo-1480429370139-e0132c086e2a?w=400&h=400&fit=crop&crop=face',
-  'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=400&h=400&fit=crop&crop=face',
-  'https://images.unsplash.com/photo-1464863979621-258859e62245?w=400&h=400&fit=crop&crop=face',
-  'https://images.unsplash.com/photo-1507081323647-4d250478b919?w=400&h=400&fit=crop&crop=face',
-  'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop&crop=face',
-  'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&h=400&fit=crop&crop=face',
-  'https://images.unsplash.com/photo-1507591064344-4c6ce005b128?w=400&h=400&fit=crop&crop=face'
+  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face&auto=format&q=80',
+  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop&crop=face&auto=format&q=80',
+  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop&crop=face&auto=format&q=80',
+  'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face&auto=format&q=80',
+  'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=400&h=400&fit=crop&crop=face&auto=format&q=80',
+  'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&h=400&fit=crop&crop=face&auto=format&q=80',
+  'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop&crop=face&auto=format&q=80',
+  'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=400&fit=crop&crop=face&auto=format&q=80',
+  'https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=400&h=400&fit=crop&crop=face&auto=format&q=80',
+  'https://images.unsplash.com/photo-1607746882042-944635dfe10e?w=400&h=400&fit=crop&crop=face&auto=format&q=80',
+  'https://images.unsplash.com/photo-1552374196-c4e7ffc6e126?w=400&h=400&fit=crop&crop=face&auto=format&q=80',
+  'https://images.unsplash.com/photo-1597223557154-721c1cecc4b0?w=400&h=400&fit=crop&crop=face&auto=format&q=80',
+  'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&h=400&fit=crop&crop=face&auto=format&q=80',
+  'https://images.unsplash.com/photo-1531891437562-4301cf35b7e4?w=400&h=400&fit=crop&crop=face&auto=format&q=80',
+  'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=400&h=400&fit=crop&crop=face&auto=format&q=80',
+  'https://images.unsplash.com/photo-1566492031773-4f4e44671d66?w=400&h=400&fit=crop&crop=face&auto=format&q=80',
+  'https://images.unsplash.com/photo-1581803118522-7b72a50f7e9f?w=400&h=400&fit=crop&crop=face&auto=format&q=80',
+  'https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=400&h=400&fit=crop&crop=face&auto=format&q=80',
+  'https://images.unsplash.com/photo-1595152772835-219674b2a8a6?w=400&h=400&fit=crop&crop=face&auto=format&q=80',
+  'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=400&h=400&fit=crop&crop=face&auto=format&q=80',
+  'https://images.unsplash.com/photo-1557862921-37829c790f19?w=400&h=400&fit=crop&crop=face&auto=format&q=80',
+  'https://images.unsplash.com/photo-1559941342-cb5c204b11bf?w=400&h=400&fit=crop&crop=face&auto=format&q=80',
+  'https://images.unsplash.com/photo-1545167622-3a6ac756afa4?w=400&h=400&fit=crop&crop=face&auto=format&q=80',
+  'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=400&h=400&fit=crop&crop=face&auto=format&q=80',
+  'https://images.unsplash.com/photo-1583994009785-37ec30bf9342?w=400&h=400&fit=crop&crop=face&auto=format&q=80',
+  'https://images.unsplash.com/photo-1542190891-2093d38760f2?w=400&h=400&fit=crop&crop=face&auto=format&q=80',
+  'https://images.unsplash.com/photo-1590031905406-f18a426d772d?w=400&h=400&fit=crop&crop=face&auto=format&q=80',
+  'https://images.unsplash.com/photo-1548372290-8d01b6c8e78c?w=400&h=400&fit=crop&crop=face&auto=format&q=80',
+  'https://images.unsplash.com/photo-1507591064344-4c6ce005b128?w=400&h=400&fit=crop&crop=face&auto=format&q=80',
+  'https://images.unsplash.com/photo-1551836022-deb4988cc6c0?w=400&h=400&fit=crop&crop=face&auto=format&q=80'
 ]
 
 // Array of portfolio images for photographers - add w=600 for faster loading
@@ -131,8 +143,8 @@ const Browse = () => {
       console.log('Using mock photographer data')
       const mockProfiles = []
       
-      // Generate 20 mock photographers with variety
-      for (let i = 0; i < 20; i++) {
+      // Generate 1200 mock photographers with variety
+      for (let i = 0; i < 1200; i++) {
         const fallbackUrl = profileImages[i % profileImages.length]
         mockProfiles.push({
           id: i + 1,
@@ -142,15 +154,36 @@ const Browse = () => {
           languages: ['English'],
           years_experience: 5 + (i % 10),
           hourly_rate: 150 + (i * 25),
-          location_city: ['New York', 'Los Angeles', 'Chicago', 'Miami', 'Austin'][i % 5],
-          location_state: ['NY', 'CA', 'IL', 'FL', 'TX'][i % 5],
+          location_city: [
+            'New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix', 'Philadelphia', 'San Antonio', 'San Diego', 
+            'Dallas', 'San Jose', 'Austin', 'Jacksonville', 'Fort Worth', 'Columbus', 'Charlotte', 'San Francisco',
+            'Indianapolis', 'Seattle', 'Denver', 'Washington', 'Boston', 'El Paso', 'Nashville', 'Detroit',
+            'Oklahoma City', 'Portland', 'Las Vegas', 'Memphis', 'Louisville', 'Baltimore', 'Milwaukee', 'Albuquerque',
+            'Tucson', 'Fresno', 'Sacramento', 'Mesa', 'Kansas City', 'Atlanta', 'Long Beach', 'Colorado Springs',
+            'Raleigh', 'Miami', 'Virginia Beach', 'Omaha', 'Oakland', 'Minneapolis', 'Tulsa', 'Arlington'
+          ][i % 48],
+          location_state: [
+            'NY', 'CA', 'IL', 'TX', 'AZ', 'PA', 'TX', 'CA',
+            'TX', 'CA', 'TX', 'FL', 'TX', 'OH', 'NC', 'CA',
+            'IN', 'WA', 'CO', 'DC', 'MA', 'TX', 'TN', 'MI',
+            'OK', 'OR', 'NV', 'TN', 'KY', 'MD', 'WI', 'NM',
+            'AZ', 'CA', 'CA', 'AZ', 'MO', 'GA', 'CA', 'CO',
+            'NC', 'FL', 'VA', 'NE', 'CA', 'MN', 'OK', 'TX'
+          ][i % 48],
           is_available: true,
           is_public: true,
           average_rating: 4.2 + (i % 8) * 0.1,
           total_reviews: 10 + (i * 3),
           total_bookings: 5 + (i * 2),
           users: {
-            full_name: [`Sarah Johnson`, `Michael Chen`, `Emily Rodriguez`, `David Kim`, `Jessica Williams`, `Chris Brown`, `Amanda Davis`, `Ryan Taylor`][i % 8],
+            full_name: [
+              'Sarah Johnson', 'Michael Chen', 'Emily Rodriguez', 'David Kim', 'Jessica Williams', 'Chris Brown', 'Amanda Davis', 'Ryan Taylor',
+              'Ashley Garcia', 'James Wilson', 'Maria Martinez', 'Daniel Anderson', 'Lisa Thompson', 'Robert White', 'Jennifer Lopez', 'Mark Davis',
+              'Nicole Johnson', 'Steven Miller', 'Rachel Green', 'Kevin Jones', 'Lauren Smith', 'Brandon Lee', 'Stephanie Clark', 'Anthony Moore',
+              'Michelle Taylor', 'Thomas White', 'Samantha Brown', 'Christopher Wilson', 'Kimberly Davis', 'Matthew Garcia', 'Brittany Martinez', 'Joshua Anderson',
+              'Rebecca Thompson', 'Andrew Johnson', 'Catherine Miller', 'Tyler Jones', 'Vanessa Smith', 'Jonathan Lee', 'Diana Clark', 'Ryan Moore',
+              'Alexis Taylor', 'Nicholas White', 'Jasmine Brown', 'Benjamin Wilson', 'Taylor Davis', 'Jacob Garcia', 'Megan Martinez', 'Alexander Anderson'
+            ][i % 48],
             avatar_url: fallbackUrl
           },
           pay_tiers: {
