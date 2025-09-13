@@ -160,7 +160,7 @@ const Browse = () => {
       // Now try the full query
       const { data: photographers, error } = await supabase
         .from('photographer_preview_profiles')
-        .select('id, display_name, image_url, bio, specialties, hourly_rate, location_city, location_state, average_rating, is_verified, is_available')
+        .select('id, display_name, portfolio_images, bio, specialties, hourly_rate, location_city, location_state, average_rating, is_verified, is_available')
         .eq('is_available', true)
         .limit(1000)
       
@@ -195,7 +195,7 @@ const Browse = () => {
             total_bookings: 5 + (index * 2),
             users: {
               full_name: profile.display_name || `Photographer ${index + 1}`,
-              avatar_url: profile.image_url && profile.image_url.startsWith('http') ? profile.image_url : fallbackUrl
+              avatar_url: profile.portfolio_images && profile.portfolio_images.length > 0 ? profile.portfolio_images[0] : fallbackUrl
             },
             pay_tiers: {
               name: profile.is_verified ? 'Professional' : 'Standard',

@@ -51,7 +51,7 @@ const Home = () => {
         .from('photographer_preview_profiles')
         .select('id, display_name, image_url, average_rating, hourly_rate, is_verified, specialties')
         .eq('is_available', true)
-        .order('average_rating', { ascending: false })
+        .order('average_rating', false)
         .limit(3)
       
       console.log('Featured photographers query result:', { photographers, error })
@@ -71,7 +71,7 @@ const Home = () => {
           average_rating: profile.average_rating || 4.5,
           users: {
             full_name: profile.display_name || `Featured Photographer ${index + 1}`,
-            avatar_url: profile.image_url && profile.image_url.startsWith('http') ? profile.image_url : fallbackImages[index]
+            avatar_url: profile.portfolio_images && profile.portfolio_images.length > 0 ? profile.portfolio_images[0] : fallbackImages[index]
           },
           pay_tiers: {
             name: profile.is_verified ? 'Professional' : 'Standard',
