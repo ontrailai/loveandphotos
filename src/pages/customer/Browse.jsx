@@ -131,7 +131,7 @@ const Browse = () => {
         .from('photographer_preview_profiles')
         .select('*')
         .eq('is_available', true)
-        .limit(50)
+        .limit(500)
       
       if (!previewError && previewProfiles && previewProfiles.length > 0) {
         // Transform preview profiles to match expected format

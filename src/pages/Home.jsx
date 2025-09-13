@@ -41,20 +41,47 @@ const Home = () => {
 
   const loadFeaturedPhotographers = async () => {
     try {
-      const { data, error } = await supabase
-        .from('photographers')
-        .select(`
-          *,
-          users!inner(full_name, avatar_url),
-          pay_tiers(name, hourly_rate, badge_color)
-        `)
-        .eq('is_public', true)
-        .eq('is_verified', true)
+      // Load from photographer_preview_profiles (imported photographers)
+      const { data: previewData, error: previewError } = await supabase
+        .from('photographer_preview_profiles')
+        .select('*')
+        .eq('is_available', true)
         .order('average_rating', { ascending: false })
         .limit(3)
 
-      if (!error && data) {
-        setFeaturedPhotographers(data)
+      if (!previewError && previewData && previewData.length > 0) {
+        // Transform to match expected format
+        const transformed = previewData.map((profile, index) => ({
+          id: profile.id,
+          average_rating: profile.average_rating || 4.5,
+          users: {
+            full_name: profile.display_name,
+            avatar_url: `https://images.unsplash.com/photo-${1500648767791 + index * 1000}-00dcc994a43e?w=400`
+          },
+          pay_tiers: {
+            name: profile.is_verified ? 'Professional' : 'Standard',
+            hourly_rate: profile.hourly_rate || 150
+          },
+          specialties: profile.specialties || ['Wedding', 'Portrait']
+        }))
+        setFeaturedPhotographers(transformed)
+      } else {
+        // Fallback to original table if no preview profiles
+        const { data, error } = await supabase
+          .from('photographers')
+          .select(`
+            *,
+            users!inner(full_name, avatar_url),
+            pay_tiers(name, hourly_rate, badge_color)
+          `)
+          .eq('is_public', true)
+          .eq('is_verified', true)
+          .order('average_rating', { ascending: false })
+          .limit(3)
+
+        if (!error && data) {
+          setFeaturedPhotographers(data)
+        }
       }
     } catch (error) {
       console.error('Error loading photographers:', error)
@@ -404,7 +431,7 @@ const Home = () => {
           </div>
 
           <div className="text-center mt-12">
-            <Link to="/browse">
+            <Link to="/photographers">
               <Button size="lg" className="group">
                 View All Photographers
                 <ArrowRightIcon className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />

@@ -385,7 +385,7 @@ const CustomerDashboard = () => {
             <p className="text-dusty-600 mb-6 max-w-md mx-auto">
               Start your journey by finding the perfect photographer for your special moments
             </p>
-            <Link to="/browse">
+            <Link to="/photographers">
               <Button size="lg">
                 Browse Photographers
               </Button>

@@ -91,13 +91,13 @@ const PhotographerProfile = () => {
           setPhotographer(data)
         } else {
           toast.error('Photographer not found')
-          navigate('/browse')
+          navigate('/photographers')
         }
       }
     } catch (error) {
       console.error('Error loading photographer:', error)
       toast.error('Failed to load photographer profile')
-      navigate('/browse')
+      navigate('/photographers')
     } finally {
       setLoading(false)
     }
@@ -116,7 +116,7 @@ const PhotographerProfile = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-semibold text-dusty-900 mb-2">Photographer not found</h2>
-          <Button onClick={() => navigate('/browse')}>
+          <Button onClick={() => navigate('/photographers')}>
             Back to Browse
           </Button>
         </div>
@@ -130,7 +130,7 @@ const PhotographerProfile = () => {
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <button
-            onClick={() => navigate('/browse')}
+            onClick={() => navigate('/photographers')}
             className="flex items-center text-dusty-600 hover:text-dusty-900"
           >
             <ArrowLeftIcon className="w-5 h-5 mr-2" />
