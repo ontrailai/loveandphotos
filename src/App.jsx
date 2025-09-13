@@ -4,6 +4,8 @@ import { Toaster } from 'react-hot-toast'
 import { AuthProvider, ProtectedRoute } from '@contexts/AuthContext'
 import { validateEnvironment } from '@utils/validateEnv'
 import DevBanner from '@components/DevBanner'
+import { TwentyFirstToolbar } from '@21st-extension/toolbar-react'
+import { ReactPlugin } from '@21st-extension/react'
 
 // Layout Components
 import Layout from '@components/Layout'
@@ -21,6 +23,8 @@ const PageLoader = () => (
 import Home from '@pages/Home'
 import Login from '@pages/Login'
 import SignUp from '@pages/SignUp'
+import SignupDemo from '@pages/SignupDemo'
+import SignupEnhanced from '@pages/SignupEnhanced'
 import ForgotPassword from '@pages/ForgotPassword'
 import ResetPassword from '@pages/ResetPassword'
 import AuthCallback from '@pages/AuthCallback'
@@ -132,6 +136,13 @@ function App() {
   return (
     <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <AuthProvider>
+        {/* 21st.dev Toolbar - Development only */}
+        <TwentyFirstToolbar 
+          config={{
+            plugins: [ReactPlugin]
+          }}
+        />
+        
         {/* Scroll to top on navigation */}
         <ScrollToTop />
         
@@ -167,6 +178,8 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
+            <Route path="/signup-demo" element={<SignupDemo />} />
+            <Route path="/signup-enhanced" element={<SignupEnhanced />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
