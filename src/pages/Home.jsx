@@ -214,12 +214,11 @@ const Home = () => {
   ]
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       {/* Hero Section */}
       <section
         ref={heroRef}
-        className="hero--landing relative pt-16 pb-8 md:pb-12 lg:pb-16 overflow-hidden !bg-white !bg-none before:!content-none after:!content-none"
-        style={{ backgroundColor: '#ffffff', backgroundImage: 'none' }}
+        className="hero--landing relative pt-16 pb-8 md:pb-12 lg:pb-16 overflow-hidden bg-background"
       >
         {/* Background removed - solid white background applied to section */}
         

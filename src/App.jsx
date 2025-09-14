@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider, ProtectedRoute } from '@contexts/AuthContext'
 import { SWRProvider } from '@providers/SWRProvider'
+import { ThemeProvider } from '@contexts/ThemeContext'
 import { validateEnvironment } from '@utils/validateEnv'
 import DevBanner from '@components/DevBanner'
 import { TwentyFirstToolbar } from '@21st-extension/toolbar-react'
@@ -137,7 +138,9 @@ function App() {
 
   return (
     <SWRProvider>
-      <AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <div className="min-h-screen bg-background text-foreground antialiased">
           {/* 21st.dev Toolbar - Development only */}
           <TwentyFirstToolbar
             config={{
@@ -381,7 +384,9 @@ function App() {
           {/* 404 Page */}
           <Route path="*" element={<NotFound />} />
         </Routes>
-      </AuthProvider>
+          </div>
+        </AuthProvider>
+      </ThemeProvider>
     </SWRProvider>
   )
 }

@@ -44,9 +44,9 @@ const footerLinks = [
 
 export function Footer() {
   return (
-    <footer className='md:rounded-t-6xl relative w-full max-w-[70rem] mx-auto flex flex-col items-center justify-center rounded-t-4xl border-t bg-[radial-gradient(35%_128px_at_50%_0%,theme(backgroundColor.white/8%),transparent)] px-6 py-12 lg:pt-8 lg:pb-4'>
+    <footer className='md:rounded-t-6xl relative w-full max-w-[60rem] mx-auto flex flex-col items-center justify-center rounded-t-4xl border-t bg-[radial-gradient(35%_128px_at_50%_0%,theme(backgroundColor.white/8%),transparent)] px-6 py-12 lg:pt-8 lg:pb-4'>
       <div className='bg-foreground/20 absolute top-0 right-1/2 left-1/2 h-px w-1/3 -translate-x-1/2 -translate-y-1/2 rounded-full blur' />
-      <div className='container mx-auto max-w-[70rem] px-4 md:px-6 py-10'>
+      <div className='container mx-auto max-w-[60rem] px-4 md:px-6 py-10'>
         {/* Grid with custom template - fixed logo width, tighter inner columns */}
         <div className='grid grid-cols-2 gap-x-4 gap-y-8 items-start md:grid-cols-[200px_max-content_max-content_max-content_max-content] md:!gap-x-[5rem]'>
           {/* Logo column */}
@@ -54,9 +54,9 @@ export function Footer() {
             <img
               src="/branding/logo.svg"
               alt="Love & Photos logo"
-              className="block w-28 md:w-32 h-auto md:ml-[50px]"
+              className="block w-28 md:w-32 h-auto md:ml-[65px]"
             />
-            <p className='text-xs text-muted-foreground mt-2 md:ml-[50px]'>
+            <p className='text-xs text-muted-foreground mt-2 md:ml-[65px]'>
               © 2025 Love & Photos
             </p>
           </AnimatedContainer>
