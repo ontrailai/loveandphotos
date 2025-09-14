@@ -9,7 +9,7 @@ const renderStars = (rating) => {
       className={`w-4 h-4 ${
         i < rating
           ? "fill-amber-400 text-amber-400"
-          : "fill-gray-200 text-gray-200"
+          : "fill-muted text-muted"
       }`}
     />
   ));
@@ -30,7 +30,7 @@ const TestimonialCard = ({ testimonial, index }) => {
       whileInView="visible"
       viewport={{ once: true, margin: "-100px" }}
       transition={{ duration: 0.6, delay: index * 0.1 }}
-      className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-300"
+      className="bg-card p-6 rounded-2xl shadow-sm border border-border hover:shadow-md transition-shadow duration-300"
     >
       {/* Rating stars */}
       <div className="flex space-x-1 mb-4">
@@ -38,7 +38,7 @@ const TestimonialCard = ({ testimonial, index }) => {
       </div>
 
       {/* Review text */}
-      <blockquote className="text-gray-700 mb-6 leading-relaxed">
+      <blockquote className="text-foreground mb-6 leading-relaxed">
         "{testimonial.comment}"
       </blockquote>
 
@@ -49,20 +49,20 @@ const TestimonialCard = ({ testimonial, index }) => {
             <img
               src={testimonial.avatar}
               alt={testimonial.name}
-              className="w-12 h-12 rounded-full object-cover border-2 border-primary-100"
+              className="w-12 h-12 rounded-full object-cover border-2 border-border"
             />
           ) : (
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center">
-              <span className="text-primary-600 font-medium text-lg">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-primary/30 flex items-center justify-center">
+              <span className="text-primary font-medium text-lg">
                 {testimonial.name.charAt(0)}
               </span>
             </div>
           )}
         </div>
         <div>
-          <div className="font-medium text-gray-900">{testimonial.name}</div>
+          <div className="font-medium text-foreground">{testimonial.name}</div>
           {testimonial.location && (
-            <div className="text-sm text-gray-500">{testimonial.location}</div>
+            <div className="text-sm text-muted-foreground">{testimonial.location}</div>
           )}
         </div>
       </div>

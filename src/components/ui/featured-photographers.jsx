@@ -22,7 +22,7 @@ const GridPattern = ({
   return (
     <svg
       aria-hidden="true"
-      className={`pointer-events-none absolute inset-0 h-full w-full fill-gray-400/30 stroke-gray-400/30 ${className}`}
+      className={`pointer-events-none absolute inset-0 h-full w-full fill-muted/30 stroke-muted/30 ${className}`}
       {...props}
     >
       <defs>
@@ -119,21 +119,21 @@ const SkeletonCard = ({ index }) => (
       <CardContent className="relative p-6">
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="h-12 w-12 bg-gray-200 dark:bg-gray-700 rounded-full" />
+            <div className="h-12 w-12 bg-muted rounded-full" />
             <div className="flex-1 min-w-0">
-              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2" />
-              <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2" />
+              <div className="h-4 bg-muted rounded w-3/4 mb-2" />
+              <div className="h-3 bg-muted rounded w-1/2" />
             </div>
           </div>
-          <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-16" />
+          <div className="h-6 bg-muted rounded w-16" />
         </div>
         <div className="space-y-3 mb-4">
-          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded" />
-          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-2/3" />
-          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
+          <div className="h-3 bg-muted rounded" />
+          <div className="h-3 bg-muted rounded w-2/3" />
+          <div className="h-3 bg-muted rounded w-3/4" />
         </div>
-        <div className="h-16 bg-gray-200 dark:bg-gray-700 rounded mb-4" />
-        <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded" />
+        <div className="h-16 bg-muted rounded mb-4" />
+        <div className="h-8 bg-muted rounded" />
       </CardContent>
     </Card>
   </motion.div>
@@ -173,7 +173,7 @@ const PhotographerCard = ({ photographer, index }) => {
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
     >
-      <Card className="group/card relative h-full rounded-2xl border border-gray-200/70 bg-white transition-colors shadow-[0_1px_1px_rgba(0,0,0,0.03)] hover:bg-[#FAFAFA] hover:border-gray-300 hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)]">
+      <Card className="group/card relative h-full rounded-2xl border border-border bg-card transition-colors shadow-[0_1px_1px_rgba(0,0,0,0.03)] hover:bg-accent hover:border-border hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)]">
         <GridPattern
           width={20}
           height={20}
@@ -266,7 +266,7 @@ const PhotographerCard = ({ photographer, index }) => {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="w-full group/btn border border-gray-200 hover:border-gray-300 hover:bg-[#F5F5F5] text-foreground shadow-none ring-0 focus-visible:ring-2 focus-visible:ring-gray-300 focus-visible:ring-offset-2"
+                  className="w-full group/btn border border-border hover:border-border hover:bg-accent text-foreground shadow-none ring-0 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   onClick={() => window.location.href = profileLink}
                 >
                   <Users className="h-4 w-4 mr-2" />
@@ -330,7 +330,7 @@ const FeaturedPhotographersSection = ({
   // Show error state
   if (error && !loading) {
     return (
-      <section className="relative w-full py-20 px-4 bg-gray-50 dark:bg-neutral-950">
+      <section className="relative w-full py-20 px-4 bg-muted">
         <div className="relative mx-auto max-w-7xl">
           <div className="text-center mb-16">
             <motion.div
@@ -356,7 +356,7 @@ const FeaturedPhotographersSection = ({
   // Show empty state if no photographers and not loading
   if (!loading && photographers.length === 0 && !error) {
     return (
-      <section className="relative w-full py-20 px-4 bg-gray-50 dark:bg-neutral-950">
+      <section className="relative w-full py-20 px-4 bg-muted">
         <div className="relative mx-auto max-w-7xl">
           <div className="text-center mb-16">
             <motion.div
@@ -380,7 +380,7 @@ const FeaturedPhotographersSection = ({
   }
 
   return (
-    <section className="relative w-full py-20 px-4 bg-[#fefefe]">
+    <section className="relative w-full py-20 px-4 bg-background">
       <div className="relative mx-auto max-w-7xl">
         {/* Header */}
         <div className="text-center mb-16">
@@ -405,22 +405,22 @@ const FeaturedPhotographersSection = ({
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.2, duration: 0.6 }}
-              className="flex flex-wrap justify-center gap-8 mt-12 p-6 bg-[#fafafa] rounded-2xl border border-gray-200"
+              className="flex flex-wrap justify-center gap-8 mt-12 p-6 bg-muted/50 rounded-2xl border border-border"
             >
               <div className="text-center">
-                <div className="text-3xl font-bold text-neutral-900">
+                <div className="text-3xl font-bold text-foreground">
                   {(metrics?.acceptanceRate ?? null) !== null ? `${Math.round(metrics.acceptanceRate)}%` : '—'}
                 </div>
                 <div className="text-sm text-muted-foreground">Booking Acceptance Rate (%)</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-neutral-900">
+                <div className="text-3xl font-bold text-foreground">
                   {(metrics?.fiveStarReviews ?? null) !== null ? `${metrics.fiveStarReviews}%` : '—'}
                 </div>
                 <div className="text-sm text-muted-foreground">5 Star Reviews (%)</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-neutral-900">
+                <div className="text-3xl font-bold text-foreground">
                   {(metrics?.responseTime ?? null) !== null ? `${Math.round(metrics.responseTime)} hrs` : '—'}
                 </div>
                 <div className="text-sm text-muted-foreground">Response Time (hrs)</div>

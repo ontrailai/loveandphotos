@@ -8,7 +8,7 @@ import BackgroundVideo from './BackgroundVideo'
 
 export default function HeroCTA() {
   return (
-    <section className="bg-white py-10 md:py-14">
+    <section className="bg-background py-10 md:py-14">
       {/* Full-bleed STYLE: centered card on a WHITE page background */}
       <div className="relative isolate mx-auto max-w-6xl aspect-[21/9] overflow-hidden rounded-3xl shadow-xl shadow-black/20 ring-1 ring-white/10">
         <BackgroundVideo />
@@ -26,7 +26,7 @@ export default function HeroCTA() {
               <Link
                 to="/book?step=availability"
                 aria-label="Reserve Date"
-                className="inline-flex items-center justify-center rounded-xl bg-white/90 hover:bg-white text-gray-900 px-6 py-3 text-sm md:text-base font-medium ring-1 ring-white/50 shadow-lg shadow-black/10 transition-colors"
+                className="inline-flex items-center justify-center rounded-xl bg-white/90 hover:bg-white text-gray-900 px-6 py-3 text-sm md:text-base font-medium ring-1 ring-white/20 shadow-lg shadow-black/10 transition-all hover:scale-105"
               >
                 Reserve Date <span className="ml-2">→</span>
               </Link>

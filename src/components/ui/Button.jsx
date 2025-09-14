@@ -7,12 +7,12 @@ import { forwardRef } from 'react'
 import { clsx } from 'clsx'
 
 const variants = {
-  primary: 'bg-primary text-primary-foreground hover:bg-primary-600 focus:ring-primary',
-  secondary: 'bg-sage-500 text-white hover:bg-sage-600 focus:ring-sage-500',
-  outline: 'border-2 border-current text-dusty-700 hover:bg-dusty-50 focus:ring-dusty-500',
-  ghost: 'text-dusty-700 hover:bg-dusty-50 focus:ring-dusty-500',
-  danger: 'bg-red-500 text-white hover:bg-red-600 focus:ring-red-500',
-  neutral: 'bg-black text-white hover:bg-black/90 border border-black/80 focus-visible:ring-black/30',
+  primary: 'bg-primary text-primary-foreground hover:bg-primary/90 focus:ring-primary',
+  secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/90 focus:ring-secondary',
+  outline: 'border-2 border-border text-foreground hover:bg-accent focus:ring-ring',
+  ghost: 'text-foreground hover:bg-accent focus:ring-ring',
+  danger: 'bg-destructive text-destructive-foreground hover:bg-destructive/90 focus:ring-destructive',
+  neutral: 'bg-muted text-muted-foreground hover:bg-muted/90 border border-border focus-visible:ring-ring',
 }
 
 const sizes = {

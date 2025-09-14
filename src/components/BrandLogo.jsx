@@ -5,6 +5,7 @@
 
 import { useState } from 'react'
 import { clsx } from 'clsx'
+import { useTheme } from '../contexts/ThemeContext'
 
 const BrandLogo = ({
   className = '',
@@ -20,6 +21,7 @@ const BrandLogo = ({
   href = null
 }) => {
   const [imageError, setImageError] = useState(false)
+  const { isDark } = useTheme()
 
   // Size presets - adjusted for better visibility
   const sizes = {
@@ -33,6 +35,14 @@ const BrandLogo = ({
 
   const currentSize = sizes[size] || sizes.md
 
+  // Determine which logo to use based on theme
+  const getLogoSrc = (format) => {
+    if (theme === 'dark' || (theme === 'auto' && isDark)) {
+      return `/branding/logo_dark.${format}`
+    }
+    return `/branding/logo.${format}`
+  }
+
   // Handle image load error
   const handleImageError = () => {
     setImageError(true)
@@ -43,7 +53,7 @@ const BrandLogo = ({
       {/* Primary SVG logo */}
       {!imageError ? (
         <img
-          src="/branding/logo.svg"
+          src={getLogoSrc('svg')}
           alt={alt}
           className={clsx(
             currentSize.logo,
@@ -59,7 +69,7 @@ const BrandLogo = ({
       ) : (
         // PNG fallback
         <img
-          src="/branding/logo.png"
+          src={getLogoSrc('png')}
           alt={alt}
           className={clsx(
             currentSize.logo,
@@ -78,9 +88,9 @@ const BrandLogo = ({
         <span className={clsx(
           'font-display font-semibold',
           currentSize.text,
-          theme === 'light' && 'text-dusty-900',
-          theme === 'dark' && 'text-white',
-          theme === 'auto' && 'text-dusty-900 dark:text-white'
+          theme === 'light' && 'text-foreground',
+          theme === 'dark' && 'text-foreground',
+          theme === 'auto' && 'text-foreground'
         )}>
           Love & Photos
         </span>
@@ -149,9 +159,7 @@ export const BrandLogoText = ({ className = '', size = 'md', theme = 'auto' }) =
     <span className={clsx(
       'font-display font-semibold',
       sizes[size] || sizes.md,
-      theme === 'light' && 'text-dusty-900',
-      theme === 'dark' && 'text-white',
-      theme === 'auto' && 'text-dusty-900 dark:text-white',
+      'text-foreground',
       className
     )}>
       Love & Photos

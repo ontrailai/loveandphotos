@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Check, X } from 'lucide-react'
+import PageHero from '@/components/marketing/PageHero'
 // TODO: Import formatMoney from @/lib/currency to replace hardcoded price strings
 
 const Pricing = () => {
@@ -28,8 +29,8 @@ const Pricing = () => {
       name: 'Silver',
       price: '$225',
       unit: '/hour',
-      color: 'border-gray-400',
-      badge: 'bg-gray-100 text-gray-800',
+      color: 'border-border',
+      badge: 'bg-muted text-foreground',
       popular: true,
       features: [
         'Priority marketplace listing',
@@ -88,19 +89,12 @@ const Pricing = () => {
   ]
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background text-foreground">
       {/* Hero Section */}
-      <section className="relative py-20 bg-gradient-to-b from-primary-50 to-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-            Simple, Transparent Pricing
-          </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            For clients, browsing and booking is completely free. 
-            For photographers, choose a tier that matches your expertise and goals.
-          </p>
-        </div>
-      </section>
+      <PageHero
+        title="Simple, Transparent Pricing"
+        subtitle="Clear packages with flexible payment options."
+      />
 
       {/* Client Pricing */}
       <section className="py-16 px-4 sm:px-6 lg:px-8">
@@ -137,7 +131,7 @@ const Pricing = () => {
             </div>
             <Link 
               to="/browse" 
-              className="mt-8 inline-block bg-white text-primary-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-50 transition"
+              className="mt-8 inline-block bg-background text-primary-600 px-8 py-3 rounded-lg font-semibold hover:bg-muted transition"
             >
               Start Browsing Free
             </Link>
@@ -146,12 +140,12 @@ const Pricing = () => {
       </section>
 
       {/* Photographer Pricing */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gray-50">
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-muted">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-4">
+          <h2 className="text-3xl font-bold text-center text-foreground mb-4">
             For Photographers
           </h2>
-          <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
+          <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
             Choose a tier based on your experience and the level of exposure you want. 
             All tiers include our core platform features.
           </p>
@@ -160,7 +154,7 @@ const Pricing = () => {
             {photographerTiers.map((tier, index) => (
               <div 
                 key={index} 
-                className={`bg-white rounded-lg shadow-lg border-2 ${tier.color} relative ${
+                className={`bg-card rounded-lg shadow-lg border-2 ${tier.color} relative ${
                   tier.popular ? 'transform scale-105' : ''
                 }`}
               >
@@ -176,21 +170,21 @@ const Pricing = () => {
                     {tier.name}
                   </div>
                   <div className="mb-6">
-                    <span className="text-3xl font-bold text-gray-900">{tier.price}</span>
-                    <span className="text-gray-600">{tier.unit}</span>
+                    <span className="text-3xl font-bold text-foreground">{tier.price}</span>
+                    <span className="text-muted-foreground">{tier.unit}</span>
                   </div>
                   
                   <div className="space-y-3 mb-6">
                     {tier.features.map((feature, idx) => (
                       <div key={idx} className="flex items-start">
                         <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-sm text-gray-600">{feature}</span>
+                        <span className="text-sm text-muted-foreground">{feature}</span>
                       </div>
                     ))}
                     {tier.notIncluded.map((feature, idx) => (
                       <div key={idx} className="flex items-start opacity-50">
-                        <X className="h-5 w-5 text-gray-400 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-sm text-gray-400">{feature}</span>
+                        <X className="h-5 w-5 text-muted-foreground mr-2 flex-shrink-0 mt-0.5" />
+                        <span className="text-sm text-muted-foreground">{feature}</span>
                       </div>
                     ))}
                   </div>
@@ -200,7 +194,7 @@ const Pricing = () => {
                     className={`block text-center px-4 py-2 rounded-lg font-semibold transition ${
                       tier.popular 
                         ? 'bg-primary-600 text-white hover:bg-primary-700' 
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        : 'bg-muted text-foreground hover:bg-border'
                     }`}
                   >
                     Get Started
@@ -211,7 +205,7 @@ const Pricing = () => {
           </div>
 
           <div className="mt-12 text-center">
-            <p className="text-gray-600 mb-4">
+            <p className="text-muted-foreground mb-4">
               All photographer tiers require a minimum number of completed jobs to qualify.
             </p>
             <Link 
@@ -227,34 +221,34 @@ const Pricing = () => {
       {/* FAQ Section */}
       <section className="py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mx-auto">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
+          <h2 className="text-3xl font-bold text-center text-foreground mb-12">
             Pricing FAQs
           </h2>
           <div className="space-y-6">
-            <div className="bg-gray-50 rounded-lg p-6">
-              <h3 className="font-semibold text-gray-900 mb-2">
+            <div className="bg-muted rounded-lg p-6">
+              <h3 className="font-semibold text-foreground mb-2">
                 How does the platform fee work?
               </h3>
-              <p className="text-gray-600">
-                We charge photographers a 20% platform fee on each booking. This covers payment processing, 
+              <p className="text-muted-foreground">
+                We charge photographers a 20% platform fee on each booking. This covers payment processing,
                 customer support, marketing, and platform maintenance.
               </p>
             </div>
-            <div className="bg-gray-50 rounded-lg p-6">
-              <h3 className="font-semibold text-gray-900 mb-2">
+            <div className="bg-muted rounded-lg p-6">
+              <h3 className="font-semibold text-foreground mb-2">
                 Can I change my tier later?
               </h3>
-              <p className="text-gray-600">
-                Yes! As you complete more jobs and build your reputation, you can upgrade to higher tiers. 
+              <p className="text-muted-foreground">
+                Yes! As you complete more jobs and build your reputation, you can upgrade to higher tiers.
                 Tier changes are reviewed monthly based on your performance metrics.
               </p>
             </div>
-            <div className="bg-gray-50 rounded-lg p-6">
-              <h3 className="font-semibold text-gray-900 mb-2">
+            <div className="bg-muted rounded-lg p-6">
+              <h3 className="font-semibold text-foreground mb-2">
                 Are there any hidden fees for clients?
               </h3>
-              <p className="text-gray-600">
-                No. Clients pay only the photographer's listed price. There are no booking fees, 
+              <p className="text-muted-foreground">
+                No. Clients pay only the photographer's listed price. There are no booking fees,
                 service charges, or any other hidden costs.
               </p>
             </div>

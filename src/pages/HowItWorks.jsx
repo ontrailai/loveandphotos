@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Search, Calendar, Camera, Star, Shield, CreditCard } from 'lucide-react'
+import PageHero from '@/components/marketing/PageHero'
 
 const HowItWorks = () => {
   const steps = [
@@ -55,24 +56,16 @@ const HowItWorks = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Hero Section */}
-      <section className="relative py-20 bg-gradient-to-b from-primary-50 to-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-            How Love & Photos Works
-          </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Booking a professional photographer has never been easier. 
-            Follow our simple process to capture your perfect moments.
-          </p>
-        </div>
-      </section>
+    <div className="min-h-screen bg-background text-foreground">
+      <PageHero
+        title="How Love & Photos Works"
+        subtitle="A simple path to photographs you'll love."
+      />
 
       {/* Process Steps */}
       <section className="py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
+          <h2 className="text-3xl font-bold text-center text-foreground mb-12">
             Your Journey to Perfect Photos
           </h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -87,14 +80,14 @@ const HowItWorks = () => {
                       </div>
                     </div>
                     <div className="ml-4">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      <h3 className="text-lg font-semibold text-foreground mb-2">
                         {index + 1}. {step.title}
                       </h3>
-                      <p className="text-gray-600">{step.description}</p>
+                      <p className="text-muted-foreground">{step.description}</p>
                     </div>
                   </div>
                   {index < steps.length - 1 && (
-                    <div className="hidden lg:block absolute top-6 left-[60px] w-[calc(100%-60px)] h-[1px] bg-gray-200" />
+                    <div className="hidden lg:block absolute top-6 left-[60px] w-[calc(100%-60px)] h-[1px] bg-border" />
                   )}
                 </div>
               )
@@ -104,22 +97,22 @@ const HowItWorks = () => {
       </section>
 
       {/* Benefits Section */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 bg-muted">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
+          <h2 className="text-3xl font-bold text-center text-foreground mb-12">
             Why Choose Love & Photos?
           </h2>
           <div className="grid md:grid-cols-2 gap-12">
             {/* For Clients */}
-            <div className="bg-white rounded-lg shadow-lg p-8">
-              <h3 className="text-2xl font-bold text-gray-900 mb-6">For Clients</h3>
+            <div className="bg-background rounded-lg shadow-lg p-8">
+              <h3 className="text-2xl font-bold text-foreground mb-6">For Clients</h3>
               <ul className="space-y-3">
                 {benefits.clients.map((benefit, index) => (
                   <li key={index} className="flex items-start">
                     <svg className="h-6 w-6 text-green-500 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
-                    <span className="text-gray-600">{benefit}</span>
+                    <span className="text-muted-foreground">{benefit}</span>
                   </li>
                 ))}
               </ul>
@@ -132,15 +125,15 @@ const HowItWorks = () => {
             </div>
 
             {/* For Photographers */}
-            <div className="bg-white rounded-lg shadow-lg p-8">
-              <h3 className="text-2xl font-bold text-gray-900 mb-6">For Photographers</h3>
+            <div className="bg-background rounded-lg shadow-lg p-8">
+              <h3 className="text-2xl font-bold text-foreground mb-6">For Photographers</h3>
               <ul className="space-y-3">
                 {benefits.photographers.map((benefit, index) => (
                   <li key={index} className="flex items-start">
                     <svg className="h-6 w-6 text-green-500 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
-                    <span className="text-gray-600">{benefit}</span>
+                    <span className="text-muted-foreground">{benefit}</span>
                   </li>
                 ))}
               </ul>
@@ -158,8 +151,8 @@ const HowItWorks = () => {
       {/* FAQ Preview */}
       <section className="py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6">Still Have Questions?</h2>
-          <p className="text-gray-600 mb-8">
+          <h2 className="text-3xl font-bold text-foreground mb-6">Still Have Questions?</h2>
+          <p className="text-muted-foreground mb-8">
             Check out our comprehensive FAQ section or get in touch with our support team.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">

@@ -112,7 +112,7 @@ function Dropdown({ trigger, children, isOpen, onToggle }) {
           updatePosition()
         }}
         onBlur={() => setIsFocused(false)}
-        className="inline-flex h-9 items-center rounded-md px-4 text-sm font-medium transition-colors hover:bg-gray-100 hover:text-gray-900"
+        className="inline-flex h-9 items-center rounded-md px-4 text-sm font-medium transition-colors hover:opacity-70"
         aria-expanded={shouldShow}
         aria-haspopup="true"
       >
@@ -179,7 +179,7 @@ function MobileSheet({ isOpen, onClose, children }) {
           <h2 className="text-lg font-semibold">Navigation</h2>
           <button
             onClick={onClose}
-            className="rounded-md p-2 hover:bg-gray-100"
+            className="rounded-md p-2 hover:opacity-70"
             aria-label="Close menu"
           >
             <X size={20} />
@@ -279,7 +279,7 @@ export function CleanNavbar({ className = '' }) {
                       <Link
                         key={j}
                         to={sub.href}
-                        className="block rounded-md p-3 no-underline transition-colors hover:bg-gray-50"
+                        className="block rounded-md p-3 no-underline transition-colors hover:opacity-70"
                         onClick={() => setActiveDropdown(null)}
                       >
                         <div className="text-sm font-medium leading-none">{sub.name}</div>
@@ -298,7 +298,7 @@ export function CleanNavbar({ className = '' }) {
                   >
                     <Link
                       to={item.href}
-                      className="inline-flex h-9 items-center rounded-md px-4 text-sm font-medium transition-colors hover:bg-gray-100 hover:text-gray-900"
+                      className="inline-flex h-9 items-center rounded-md px-4 text-sm font-medium transition-colors hover:opacity-70"
                     >
                       <span className="flex items-center gap-2">
                         {item.icon}
@@ -316,7 +316,7 @@ export function CleanNavbar({ className = '' }) {
             <LanguageCurrencyDialog>
               <button
                 aria-label="Change language and currency"
-                className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-gray-100 transition-colors"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:opacity-70 transition-colors"
               >
                 <Globe size={18} />
               </button>

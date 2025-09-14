@@ -25,6 +25,7 @@ import Button from '@components/ui/Button'
 import Input from '@components/ui/Input'
 import Badge from '@components/ui/Badge'
 import BrandLogo from '@components/BrandLogo'
+import ThemeToggle from '@components/ThemeToggle'
 import { supabase } from '@lib/supabase'
 import { useFullZipDatabase } from '@/hooks/useFullZipDatabase'
 
@@ -220,30 +221,33 @@ const Home = () => {
         ref={heroRef}
         className="hero--landing relative pt-16 pb-8 md:pb-12 lg:pb-16 overflow-hidden bg-background"
       >
-        {/* Background removed - solid white background applied to section */}
+        {/* Theme Toggle - Shows Origin UI theme working */}
+        <div className="absolute top-4 right-4 z-50">
+          <ThemeToggle />
+        </div>
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-16">
           <div className="text-center">
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-display font-bold text-dusty-900 mb-6">
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-display font-bold text-foreground mb-6">
               Your Perfect
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-sage-500"> Moment</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary"> Moment</span>
               <br />Deserves the Perfect Eye
             </h1>
-            <p className="text-xl text-dusty-600 mb-8 max-w-2xl mx-auto">
+            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
               Connect with verified photographers and videographers who capture your story with artistry and care.
             </p>
 
             {/* Search Bar */}
             <form onSubmit={handleSearch} className="max-w-2xl mx-auto relative" ref={searchRef}>
-              <div className="bg-white rounded-full shadow-xl p-2 flex items-center">
+              <div className="bg-card rounded-full shadow-xl p-2 flex items-center border border-border">
                 <div className="flex-1 flex items-center px-4">
-                  <MapPinIcon className="w-5 h-5 text-dusty-400 mr-2" />
+                  <MapPinIcon className="w-5 h-5 text-muted-foreground mr-2" />
                   <input
                     type="text"
                     placeholder="Enter your ZIP code or city"
                     value={searchZip}
                     onChange={handleZipChange}
-                    className="flex-1 outline-none text-dusty-900 placeholder-dusty-400"
+                    className="flex-1 outline-none text-foreground placeholder-muted-foreground bg-transparent"
                     autoComplete="off"
                   />
                 </div>
@@ -258,39 +262,39 @@ const Home = () => {
               
               {/* Autocomplete Dropdown */}
               {showSuggestions && (
-                <div className="absolute top-full mt-2 w-full bg-white rounded-lg shadow-lg border border-gray-200 max-h-60 overflow-y-auto z-50">
+                <div className="absolute top-full mt-2 w-full bg-card rounded-lg shadow-lg border border-border max-h-60 overflow-y-auto z-50">
                   {zipSuggestions.map((suggestion, index) => (
                     <button
                       key={`${index}-${suggestion.zip || suggestion.displayName}`}
                       type="button"
                       onClick={() => selectZipCode(suggestion)}
-                      className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center justify-between transition-colors border-b border-gray-100 last:border-0"
+                      className="w-full text-left px-4 py-3 hover:bg-accent flex items-center justify-between transition-colors border-b border-border last:border-0"
                     >
                       <div className="flex items-center">
-                        <MapPinIcon className="w-4 h-4 text-dusty-400 mr-2" />
+                        <MapPinIcon className="w-4 h-4 text-muted-foreground mr-2" />
                         {suggestion.isCity ? (
                           <div>
-                            <span className="font-medium text-dusty-900">{suggestion.city}</span>
-                            <span className="text-sm text-dusty-600 ml-2">{suggestion.state}</span>
+                            <span className="font-medium text-foreground">{suggestion.city}</span>
+                            <span className="text-sm text-muted-foreground ml-2">{suggestion.state}</span>
                           </div>
                         ) : (
-                          <span className="font-medium text-dusty-900">{suggestion.zip}</span>
+                          <span className="font-medium text-foreground">{suggestion.zip}</span>
                         )}
                       </div>
                       <div className="text-right">
                         {suggestion.isCity ? (
-                          <div className="text-xs text-dusty-500">
-                            {suggestion.allZips?.length > 1 
+                          <div className="text-xs text-muted-foreground">
+                            {suggestion.allZips?.length > 1
                               ? `${suggestion.allZips.length} areas`
                               : 'City-wide search'
                             }
                           </div>
                         ) : (
                           <>
-                            <div className="text-sm text-dusty-800 font-medium">
+                            <div className="text-sm text-foreground font-medium">
                               {suggestion.city}
                             </div>
-                            <div className="text-xs text-dusty-500">
+                            <div className="text-xs text-muted-foreground">
                               {suggestion.stateName || suggestion.state}
                             </div>
                           </>
@@ -304,15 +308,15 @@ const Home = () => {
 
             {/* Trust Indicators */}
             <div className="flex flex-wrap justify-center gap-6 mt-12">
-              <div className="flex items-center space-x-2 text-dusty-600">
+              <div className="flex items-center space-x-2 text-muted-foreground">
                 <CheckCircleIcon className="w-5 h-5 text-green-500" />
                 <span>2,500+ Verified Photographers</span>
               </div>
-              <div className="flex items-center space-x-2 text-dusty-600">
+              <div className="flex items-center space-x-2 text-muted-foreground">
                 <StarIcon className="w-5 h-5 text-yellow-400 fill-yellow-400" />
                 <span>4.9 Average Rating</span>
               </div>
-              <div className="flex items-center space-x-2 text-dusty-600">
+              <div className="flex items-center space-x-2 text-muted-foreground">
                 <HeartIcon className="w-5 h-5 text-primary fill-primary" />
                 <span>10,000+ Happy Moments</span>
               </div>

@@ -65,7 +65,7 @@ export function Footer() {
           {footerLinks.map((section, i) => (
             <AnimatedContainer key={section.label} delay={0.1 + i * 0.1} className='col-span-1 space-y-2'>
               <div className='space-y-2'>
-              <h3 className='text-xs font-semibold uppercase tracking-wider text-gray-900 mb-4'>
+              <h3 className='text-xs font-semibold uppercase tracking-wider text-foreground mb-4'>
                 {section.label}
               </h3>
               <ul className='text-muted-foreground mt-4 space-y-2 text-sm'>
@@ -73,7 +73,7 @@ export function Footer() {
                   <li key={link.title}>
                     <a
                       href={link.href}
-                      className='hover:text-foreground inline-flex items-center transition-all duration-300 text-gray-600 hover:text-gray-900'
+                      className='hover:text-foreground inline-flex items-center transition-all duration-300 text-muted-foreground hover:text-foreground'
                       target={link.href.startsWith('http') ? '_blank' : undefined}
                       rel={link.href.startsWith('http') ? 'noopener noreferrer' : undefined}
                     >

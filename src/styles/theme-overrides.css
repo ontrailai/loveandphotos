@@ -1,0 +1,253 @@
+/* Theme Overrides - Force Origin UI tokens over hardcoded styles */
+
+/* Override ALL hardcoded white backgrounds */
+.bg-white,
+[class*="bg-white"] {
+  background-color: var(--background) !important;
+}
+
+/* Override ALL hardcoded gray backgrounds */
+.bg-gray-50,
+.bg-gray-100,
+.bg-gray-200,
+.bg-gray-300,
+.bg-gray-400,
+.bg-gray-500,
+.bg-gray-600,
+.bg-gray-700,
+.bg-gray-800,
+.bg-gray-900,
+[class*="bg-gray-"] {
+  background-color: var(--muted) !important;
+}
+
+/* Override hover states */
+.hover\:bg-gray-50:hover,
+.hover\:bg-gray-100:hover,
+.hover\:bg-gray-200:hover,
+[class*="hover:bg-gray-"]:hover {
+  background-color: var(--accent) !important;
+}
+
+/* Override ALL hardcoded text colors */
+.text-black,
+[class*="text-black"] {
+  color: var(--foreground) !important;
+}
+
+.text-gray-500,
+.text-gray-600,
+.text-gray-700,
+.text-gray-800,
+.text-gray-900,
+[class*="text-gray-"] {
+  color: var(--muted-foreground) !important;
+}
+
+/* Override dusty colors (custom colors in your app) */
+.text-dusty-600,
+.text-dusty-700,
+.text-dusty-800,
+.text-dusty-900,
+[class*="text-dusty-"] {
+  color: var(--foreground) !important;
+}
+
+.hover\:text-dusty-900:hover,
+[class*="hover:text-dusty-"]:hover {
+  color: var(--foreground) !important;
+}
+
+/* Override hardcoded border colors */
+.border-gray-100,
+.border-gray-200,
+.border-gray-300,
+[class*="border-gray-"] {
+  border-color: var(--border) !important;
+}
+
+/* Override neutral colors */
+.text-neutral-900,
+[class*="text-neutral-"] {
+  color: var(--foreground) !important;
+}
+
+/* Force card backgrounds */
+.bg-card {
+  background-color: var(--card) !important;
+}
+
+/* Force popover backgrounds */
+.bg-popover {
+  background-color: var(--popover) !important;
+}
+
+/* Override any inline background white styles */
+[style*="background-color: white"],
+[style*="background-color:#fff"],
+[style*="background-color: #fff"],
+[style*="background-color:white"],
+[style*="background-color: rgb(255, 255, 255)"] {
+  background-color: var(--background) !important;
+}
+
+/* Override any inline text black styles */
+[style*="color: black"],
+[style*="color:#000"],
+[style*="color: #000"],
+[style*="color:black"],
+[style*="color: rgb(0, 0, 0)"] {
+  color: var(--foreground) !important;
+}
+
+/* Specific component overrides */
+
+/* Navbar - ensure it uses theme tokens */
+nav.bg-white {
+  background-color: var(--background) !important;
+  backdrop-filter: blur(10px);
+  background-color: hsl(var(--background) / 0.95) !important;
+}
+
+/* Featured Photographers section */
+section[class*="bg-\[#fefefe\]"],
+section[class*="bg-\[#fafafa\]"] {
+  background-color: var(--background) !important;
+}
+
+/* Testimonials section */
+.testimonials-section {
+  background-color: var(--background) !important;
+}
+
+/* CTA section */
+.cta-section {
+  background-color: var(--background) !important;
+}
+
+/* Forms and inputs */
+input:not([type="checkbox"]):not([type="radio"]),
+textarea,
+select {
+  background-color: var(--background) !important;
+  color: var(--foreground) !important;
+  border-color: var(--border) !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--muted-foreground) !important;
+}
+
+/* Dropdown menus */
+[role="menu"],
+[data-radix-collection-item],
+.dropdown-menu,
+.dropdown-content {
+  background-color: var(--popover) !important;
+  color: var(--popover-foreground) !important;
+  border-color: var(--border) !important;
+}
+
+/* Loading skeletons */
+.animate-pulse,
+.skeleton {
+  background-color: var(--muted) !important;
+}
+
+/* Override fill colors for SVGs */
+.fill-gray-200,
+.fill-gray-300,
+.fill-gray-400,
+[class*="fill-gray-"] {
+  fill: var(--muted) !important;
+}
+
+/* Ensure dark mode works */
+.dark {
+  color-scheme: dark;
+}
+
+/* Override any !important declarations with higher specificity */
+html body * {
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+/* Force background on body and html */
+html,
+body {
+  background-color: var(--background) !important;
+  color: var(--foreground) !important;
+}
+
+/* Override sage colors (another custom color in your app) */
+[class*="bg-sage-"],
+[class*="text-sage-"] {
+  background-color: var(--secondary) !important;
+  color: var(--secondary-foreground) !important;
+}
+
+/* Ensure Origin UI fonts are applied */
+body,
+* {
+  font-family: var(--font-sans) !important;
+}
+
+/* Override any hardcoded rounded corners */
+.rounded-xl {
+  border-radius: var(--radius) !important;
+}
+
+.rounded-lg {
+  border-radius: calc(var(--radius) - 2px) !important;
+}
+
+.rounded-md {
+  border-radius: calc(var(--radius) - 4px) !important;
+}
+
+/* Ensure theme transitions are smooth */
+* {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Remove background boxes from ALL header buttons and icons */
+nav button,
+nav a button,
+header button,
+header a button,
+.absolute.top-4.right-4 button,
+button.hover\:bg-accent {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+nav button:hover,
+nav a button:hover,
+header button:hover,
+header a button:hover,
+.absolute.top-4.right-4 button:hover,
+button.hover\:bg-accent:hover {
+  background-color: transparent !important;
+  opacity: 0.7;
+}
+
+/* Keep primary buttons styled */
+nav button.bg-primary,
+nav a button.bg-primary,
+header button.bg-primary,
+header a button.bg-primary {
+  background-color: hsl(var(--primary)) !important;
+  border: none !important;
+}
+
+nav button.bg-primary:hover,
+nav a button.bg-primary:hover,
+header button.bg-primary:hover,
+header a button.bg-primary:hover {
+  background-color: hsl(var(--primary) / 0.9) !important;
+  opacity: 1;
+}

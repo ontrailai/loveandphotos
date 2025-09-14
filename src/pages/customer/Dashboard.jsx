@@ -6,7 +6,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '@contexts/AuthContext'
-import { 
+import {
   CalendarIcon,
   CameraIcon,
   ClockIcon,
@@ -25,6 +25,7 @@ import Card from '@components/ui/Card'
 import Badge from '@components/ui/Badge'
 import Avatar from '@components/shared/Avatar'
 import RatingStars from '@components/shared/RatingStars'
+import PageHero from '@components/marketing/PageHero'
 import { supabase } from '@lib/supabase'
 import { format, formatDistanceToNow, isPast, isFuture } from 'date-fns'
 import toast from 'react-hot-toast'
@@ -139,32 +140,25 @@ const CustomerDashboard = () => {
   // Don't render early - this breaks hooks
   // Instead, show loading or content conditionally
   return loading ? (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+    <div className="min-h-screen bg-background flex items-center justify-center">
       <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
     </div>
   ) : (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background text-foreground">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-display font-bold text-dusty-900">
-                Welcome back{profile?.full_name ? `, ${profile.full_name.split(' ')[0]}` : ''}!
-              </h1>
-              <p className="text-dusty-600 mt-1">
-                Manage your bookings and discover new photographers
-              </p>
-            </div>
-            <Link to="/browse">
-              <Button>
-                <PlusIcon className="w-5 h-5 mr-2" />
-                Book Photographer
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </div>
+      <PageHero
+        title={`Welcome back${profile?.full_name ? `, ${profile.full_name.split(' ')[0]}` : ''}!`}
+        subtitle="Manage your bookings and discover new photographers."
+        align="left"
+        actions={
+          <Link to="/browse">
+            <Button>
+              <PlusIcon className="w-5 h-5 mr-2" />
+              Book Photographer
+            </Button>
+          </Link>
+        }
+      />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Grid */}
@@ -221,7 +215,7 @@ const CustomerDashboard = () => {
         {/* Upcoming Bookings */}
         {upcomingBookings.length > 0 && (
           <div className="mb-8">
-            <h2 className="text-xl font-semibold text-dusty-900 mb-4">Upcoming Events</h2>
+            <h2 className="text-xl font-semibold text-foreground mb-4">Upcoming Events</h2>
             <div className="grid gap-4">
               {upcomingBookings.map((booking) => (
                 <Card key={booking.id} className="overflow-hidden">
@@ -234,7 +228,7 @@ const CustomerDashboard = () => {
                       />
                       <div>
                         <div className="flex items-center space-x-2 mb-1">
-                          <h3 className="font-semibold text-dusty-900">
+                          <h3 className="font-semibold text-foreground">
                             {booking.photographers?.users?.full_name}
                           </h3>
                           <Badge 
@@ -247,10 +241,10 @@ const CustomerDashboard = () => {
                             {getBookingStatus(booking).label}
                           </Badge>
                         </div>
-                        <p className="text-sm text-dusty-600 mb-2">
+                        <p className="text-sm text-muted-foreground mb-2">
                           {booking.packages?.title} • {booking.packages?.duration_minutes} minutes
                         </p>
-                        <div className="flex items-center space-x-4 text-sm text-dusty-600">
+                        <div className="flex items-center space-x-4 text-sm text-muted-foreground">
                           <span className="flex items-center">
                             <CalendarIcon className="w-4 h-4 mr-1" />
                             {format(new Date(booking.event_date), 'MMM dd, yyyy')}
@@ -282,9 +276,9 @@ const CustomerDashboard = () => {
                   </div>
 
                   {/* Event countdown */}
-                  <div className="mt-4 pt-4 border-t border-gray-100">
+                  <div className="mt-4 pt-4 border-t border-border">
                     <div className="flex items-center justify-between">
-                      <p className="text-sm text-dusty-600">
+                      <p className="text-sm text-muted-foreground">
                         Event in {formatDistanceToNow(new Date(booking.event_date), { addSuffix: false })}
                       </p>
                       {booking.contract_signed_at ? (
@@ -309,10 +303,10 @@ const CustomerDashboard = () => {
         {/* Past Bookings */}
         {pastBookings.length > 0 && (
           <div>
-            <h2 className="text-xl font-semibold text-dusty-900 mb-4">Past Events</h2>
+            <h2 className="text-xl font-semibold text-foreground mb-4">Past Events</h2>
             <div className="grid gap-4">
               {pastBookings.slice(0, 5).map((booking) => (
-                <Card key={booking.id} className="bg-gray-50">
+                <Card key={booking.id} className="bg-background">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
                       <Avatar
@@ -321,10 +315,10 @@ const CustomerDashboard = () => {
                         size="md"
                       />
                       <div>
-                        <h3 className="font-semibold text-dusty-900">
+                        <h3 className="font-semibold text-foreground">
                           {booking.photographers?.users?.full_name}
                         </h3>
-                        <p className="text-sm text-dusty-600">
+                        <p className="text-sm text-muted-foreground">
                           {booking.event_type} • {format(new Date(booking.event_date), 'MMM dd, yyyy')}
                         </p>
                         {booking.reviews?.[0] ? (
@@ -379,10 +373,10 @@ const CustomerDashboard = () => {
         {bookings.length === 0 && (
           <Card className="text-center py-12">
             <CameraIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-dusty-900 mb-2">
+            <h3 className="text-xl font-semibold text-foreground mb-2">
               No bookings yet
             </h3>
-            <p className="text-dusty-600 mb-6 max-w-md mx-auto">
+            <p className="text-muted-foreground mb-6 max-w-md mx-auto">
               Start your journey by finding the perfect photographer for your special moments
             </p>
             <Link to="/photographers">

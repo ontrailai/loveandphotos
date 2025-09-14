@@ -16,7 +16,7 @@ const Card = ({
   return (
     <div
       className={clsx(
-        'bg-white rounded-xl shadow-sm border border-gray-100',
+        'bg-card rounded-xl shadow-sm border border-border text-card-foreground',
         {
           'hover:shadow-lg hover:scale-[1.02] transition-all duration-300 cursor-pointer': hover,
           'p-6': padding,

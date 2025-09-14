@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Phone, Mail, MessageCircle, Clock, MapPin } from 'lucide-react'
 import { supabase } from '@lib/supabase'
+import PageHero from '@components/marketing/PageHero'
 import toast from 'react-hot-toast'
 
 const Contact = () => {
@@ -130,23 +131,20 @@ const Contact = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cream-50 to-primary-50">
+    <div className="min-h-screen bg-background text-foreground">
+      <PageHero
+        title="Get in Touch"
+        subtitle="We'll respond within 24 hours. Tell us about your date and vision."
+        align="left"
+      />
+
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-5xl font-display font-bold text-dusty-900 mb-4">
-            Get in Touch
-          </h1>
-          <p className="text-xl text-dusty-600 max-w-2xl mx-auto">
-            We'd love to hear from you! Whether you have questions about our services or you're ready to book your perfect photographer, we're here to help.
-          </p>
-        </div>
 
         {/* Contact Cards */}
         <div className="grid md:grid-cols-2 gap-8 mb-12">
           {/* Quick Contact Info */}
-          <div className="bg-white rounded-xl shadow-lg p-8">
-            <h2 className="text-2xl font-display font-semibold text-dusty-900 mb-6">
+          <div className="bg-card rounded-xl shadow-lg p-8">
+            <h2 className="text-2xl font-display font-semibold text-foreground mb-6">
               Contact Information
             </h2>
             
@@ -160,8 +158,8 @@ const Contact = () => {
                   <Phone className="w-6 h-6" />
                 </div>
                 <div>
-                  <p className="text-dusty-500 text-sm mb-1">Call Us</p>
-                  <p className="text-dusty-900 font-semibold text-lg group-hover:text-primary-600 transition-colors">
+                  <p className="text-muted-foreground text-sm mb-1">Call Us</p>
+                  <p className="text-foreground font-semibold text-lg group-hover:text-primary-600 transition-colors">
                     (323) 701-1703
                   </p>
                 </div>
@@ -176,8 +174,8 @@ const Contact = () => {
                   <Mail className="w-6 h-6" />
                 </div>
                 <div>
-                  <p className="text-dusty-500 text-sm mb-1">Email Us</p>
-                  <p className="text-dusty-900 font-semibold text-lg group-hover:text-primary-600 transition-colors break-all">
+                  <p className="text-muted-foreground text-sm mb-1">Email Us</p>
+                  <p className="text-foreground font-semibold text-lg group-hover:text-primary-600 transition-colors break-all">
                     matthew@loveandphotos.com
                   </p>
                 </div>
@@ -189,8 +187,8 @@ const Contact = () => {
                   <Clock className="w-6 h-6" />
                 </div>
                 <div>
-                  <p className="text-dusty-500 text-sm mb-1">Response Time</p>
-                  <p className="text-dusty-900 font-semibold">
+                  <p className="text-muted-foreground text-sm mb-1">Response Time</p>
+                  <p className="text-foreground font-semibold">
                     Within 24 hours
                   </p>
                 </div>
@@ -202,8 +200,8 @@ const Contact = () => {
                   <MapPin className="w-6 h-6" />
                 </div>
                 <div>
-                  <p className="text-dusty-500 text-sm mb-1">Service Area</p>
-                  <p className="text-dusty-900 font-semibold">
+                  <p className="text-muted-foreground text-sm mb-1">Service Area</p>
+                  <p className="text-foreground font-semibold">
                     Nationwide Coverage
                   </p>
                 </div>
@@ -212,15 +210,15 @@ const Contact = () => {
           </div>
 
           {/* Contact Form */}
-          <div className="bg-white rounded-xl shadow-lg p-8">
-            <h2 className="text-2xl font-display font-semibold text-dusty-900 mb-6">
+          <div className="bg-card rounded-xl shadow-lg p-8">
+            <h2 className="text-2xl font-display font-semibold text-foreground mb-6">
               Send Us a Message
             </h2>
             
             <form className="space-y-4" onSubmit={handleSubmit}>
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="firstName" className="block text-sm font-medium text-dusty-700 mb-1">
+                  <label htmlFor="firstName" className="block text-sm font-medium text-muted-foreground mb-1">
                     First Name *
                   </label>
                   <input
@@ -229,13 +227,13 @@ const Contact = () => {
                     name="firstName"
                     value={formData.firstName}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
+                    className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
                     placeholder="John"
                     required
                   />
                 </div>
                 <div>
-                  <label htmlFor="lastName" className="block text-sm font-medium text-dusty-700 mb-1">
+                  <label htmlFor="lastName" className="block text-sm font-medium text-muted-foreground mb-1">
                     Last Name *
                   </label>
                   <input
@@ -244,7 +242,7 @@ const Contact = () => {
                     name="lastName"
                     value={formData.lastName}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
+                    className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
                     placeholder="Doe"
                     required
                   />
@@ -252,7 +250,7 @@ const Contact = () => {
               </div>
 
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-dusty-700 mb-1">
+                <label htmlFor="email" className="block text-sm font-medium text-muted-foreground mb-1">
                   Email Address *
                 </label>
                 <input
@@ -261,14 +259,14 @@ const Contact = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
+                  className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
                   placeholder="john@example.com"
                   required
                 />
               </div>
 
               <div>
-                <label htmlFor="phone" className="block text-sm font-medium text-dusty-700 mb-1">
+                <label htmlFor="phone" className="block text-sm font-medium text-muted-foreground mb-1">
                   Phone Number (Optional)
                 </label>
                 <input
@@ -277,13 +275,13 @@ const Contact = () => {
                   name="phone"
                   value={formData.phone}
                   onChange={handlePhoneChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
+                  className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
                   placeholder="(555) 123-4567"
                 />
               </div>
 
               <div>
-                <label htmlFor="eventType" className="block text-sm font-medium text-dusty-700 mb-1">
+                <label htmlFor="eventType" className="block text-sm font-medium text-muted-foreground mb-1">
                   Event Type
                 </label>
                 <select
@@ -291,7 +289,7 @@ const Contact = () => {
                   name="eventType"
                   value={formData.eventType}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
+                  className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
                 >
                   <option value="">Select an event type</option>
                   <option value="wedding">Wedding</option>
@@ -303,7 +301,7 @@ const Contact = () => {
               </div>
 
               <div>
-                <label htmlFor="message" className="block text-sm font-medium text-dusty-700 mb-1">
+                <label htmlFor="message" className="block text-sm font-medium text-muted-foreground mb-1">
                   Message *
                 </label>
                 <textarea
@@ -312,7 +310,7 @@ const Contact = () => {
                   value={formData.message}
                   onChange={handleInputChange}
                   rows="4"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors resize-none"
+                  className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors resize-none"
                   placeholder="Tell us about your event and how we can help..."
                   required
                 ></textarea>
@@ -334,44 +332,44 @@ const Contact = () => {
         </div>
 
         {/* FAQ Section */}
-        <div className="bg-white rounded-xl shadow-lg p-8">
-          <h2 className="text-2xl font-display font-semibold text-dusty-900 mb-6">
+        <div className="bg-card rounded-xl shadow-lg p-8">
+          <h2 className="text-2xl font-display font-semibold text-foreground mb-6">
             Frequently Asked Questions
           </h2>
           
           <div className="grid md:grid-cols-2 gap-6">
             <div>
-              <h3 className="font-semibold text-dusty-900 mb-2">
+              <h3 className="font-semibold text-foreground mb-2">
                 How quickly can I book a photographer?
               </h3>
-              <p className="text-dusty-600">
+              <p className="text-muted-foreground">
                 We can accommodate bookings as soon as 48 hours in advance, though we recommend booking at least 2-4 weeks ahead for the best availability.
               </p>
             </div>
-            
+
             <div>
-              <h3 className="font-semibold text-dusty-900 mb-2">
+              <h3 className="font-semibold text-foreground mb-2">
                 Do you travel for events?
               </h3>
-              <p className="text-dusty-600">
+              <p className="text-muted-foreground">
                 Yes! Our photographers are available nationwide. Travel fees may apply for locations outside major metropolitan areas.
               </p>
             </div>
-            
+
             <div>
-              <h3 className="font-semibold text-dusty-900 mb-2">
+              <h3 className="font-semibold text-foreground mb-2">
                 What's included in the packages?
               </h3>
-              <p className="text-dusty-600">
+              <p className="text-muted-foreground">
                 All packages include professional editing, digital delivery, and printing rights. Video packages include drone footage when possible.
               </p>
             </div>
-            
+
             <div>
-              <h3 className="font-semibold text-dusty-900 mb-2">
+              <h3 className="font-semibold text-foreground mb-2">
                 How do I receive my photos?
               </h3>
-              <p className="text-dusty-600">
+              <p className="text-muted-foreground">
                 Photos are delivered via a secure online gallery within 3 months. Rush delivery options are available for faster turnaround.
               </p>
             </div>
@@ -381,10 +379,10 @@ const Contact = () => {
         {/* Call to Action */}
         <div className="text-center mt-12 bg-primary-50 rounded-xl p-8">
           <MessageCircle className="w-16 h-16 mx-auto mb-4 text-primary-500" />
-          <h2 className="text-2xl font-display font-semibold text-dusty-900 mb-3">
+          <h2 className="text-2xl font-display font-semibold text-foreground mb-3">
             Ready to Get Started?
           </h2>
-          <p className="text-dusty-600 mb-6 max-w-md mx-auto">
+          <p className="text-muted-foreground mb-6 max-w-md mx-auto">
             Don't wait to capture your special moments. Contact us today and let's create something beautiful together.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">

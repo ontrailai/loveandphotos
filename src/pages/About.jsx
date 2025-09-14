@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { ArrowRight, Camera, Users, Award, Heart } from 'lucide-react'
+import PageHero from '@/components/marketing/PageHero'
 
 const About = () => {
   const stats = [
@@ -33,27 +34,19 @@ const About = () => {
   ]
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Hero Section */}
-      <section className="relative py-20 bg-gradient-to-b from-primary-50 to-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-            About Love & Photos
-          </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            We're on a mission to make professional photography accessible and delightful for everyone, 
-            connecting talented photographers with clients who value their craft.
-          </p>
-        </div>
-      </section>
+    <div className="min-h-screen bg-background text-foreground">
+      <PageHero
+        title="About Love & Photos"
+        subtitle="We're on a mission to make professional photography accessible and delightful for everyone, connecting talented photographers with clients who value their craft."
+      />
 
       {/* Our Story Section */}
       <section className="py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-6">Our Story</h2>
-              <div className="space-y-4 text-gray-600">
+              <h2 className="text-3xl font-bold text-foreground mb-6">Our Story</h2>
+              <div className="space-y-4 text-muted-foreground">
                 <p>
                   Love & Photos was born from a simple observation: finding the right photographer 
                   for your special moments shouldn't be stressful or time-consuming.
@@ -82,15 +75,15 @@ const About = () => {
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 bg-muted">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat, index) => (
               <div key={index} className="text-center">
-                <div className="text-3xl md:text-4xl font-bold text-primary-600 mb-2">
+                <div className="text-3xl md:text-4xl font-bold text-primary mb-2">
                   {stat.number}
                 </div>
-                <div className="text-gray-600">{stat.label}</div>
+                <div className="text-muted-foreground">{stat.label}</div>
               </div>
             ))}
           </div>
@@ -100,17 +93,17 @@ const About = () => {
       {/* Our Values Section */}
       <section className="py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">Our Values</h2>
+          <h2 className="text-3xl font-bold text-center text-foreground mb-12">Our Values</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {values.map((value, index) => {
               const Icon = value.icon
               return (
                 <div key={index} className="text-center">
                   <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 rounded-full mb-4">
-                    <Icon className="h-8 w-8 text-primary-600" />
+                    <Icon className="h-8 w-8 text-primary" />
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">{value.title}</h3>
-                  <p className="text-gray-600">{value.description}</p>
+                  <h3 className="text-xl font-semibold text-foreground mb-2">{value.title}</h3>
+                  <p className="text-muted-foreground">{value.description}</p>
                 </div>
               )
             })}
@@ -128,9 +121,9 @@ const About = () => {
             Join thousands of happy clients who've found their perfect photographer match.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link 
-              to="/browse" 
-              className="inline-flex items-center justify-center px-8 py-3 bg-white text-primary-600 font-semibold rounded-lg hover:bg-gray-50 transition"
+            <Link
+              to="/browse"
+              className="inline-flex items-center justify-center px-8 py-3 bg-background text-primary font-semibold rounded-lg hover:bg-muted transition"
             >
               Find a Photographer
               <ArrowRight className="ml-2 h-5 w-5" />
