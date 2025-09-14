@@ -54,7 +54,7 @@ class ErrorBoundary extends React.Component {
       const isDevelopment = import.meta.env.DEV
 
       return (
-        <div className="min-h-screen bg-gradient-to-br from-blush-50 to-sage-50 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-gradient-to-br from-primary-50 to-sage-50 flex items-center justify-center p-4">
           <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
             <div className="flex flex-col items-center text-center">
               {/* Error Icon */}
@@ -97,7 +97,7 @@ class ErrorBoundary extends React.Component {
               <div className="flex flex-col sm:flex-row gap-3 w-full">
                 <button 
                   onClick={this.handleReset}
-                  className="flex-1 inline-flex items-center justify-center px-4 py-2 bg-blush-500 text-white rounded-lg hover:bg-blush-600 transition-colors"
+                  className="flex-1 inline-flex items-center justify-center px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary-600 transition-colors"
                 >
                   <RefreshCwIcon className="w-4 h-4 mr-2" />
                   Try Again

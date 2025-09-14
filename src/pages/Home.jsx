@@ -34,10 +34,38 @@ const Home = () => {
   const [zipSuggestions, setZipSuggestions] = useState([])
   const [showSuggestions, setShowSuggestions] = useState(false)
   const searchRef = useRef(null)
+  const heroRef = useRef(null)
   const { searchZipCodes, isReady } = useFullZipDatabase()
 
   useEffect(() => {
     loadFeaturedPhotographers()
+  }, [])
+
+  // Hero background verification hook (development only)
+  useEffect(() => {
+    if (heroRef.current && process.env.NODE_ENV === 'development') {
+      const element = heroRef.current
+      const computedStyles = window.getComputedStyle(element)
+
+      console.log('🎯 HERO BACKGROUND VERIFICATION:')
+      console.log('  backgroundColor:', computedStyles.backgroundColor)
+      console.log('  backgroundImage:', computedStyles.backgroundImage)
+      console.log('  background:', computedStyles.background)
+      console.log('  Expected: backgroundColor = "rgb(255, 255, 255)" or "white"')
+      console.log('  Expected: backgroundImage = "none"')
+
+      const isWhite = computedStyles.backgroundColor === 'rgb(255, 255, 255)' ||
+                     computedStyles.backgroundColor === 'white'
+      const hasNoImage = computedStyles.backgroundImage === 'none'
+
+      if (isWhite && hasNoImage) {
+        console.log('✅ SUCCESS: Hero background is pure white!')
+      } else {
+        console.log('❌ ISSUE: Hero background is not pure white:')
+        console.log('  - White bg:', isWhite)
+        console.log('  - No image:', hasNoImage)
+      }
+    }
   }, [])
 
   const loadFeaturedPhotographers = async () => {
@@ -218,15 +246,18 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="relative pt-16 pb-32 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-blush-50 via-white to-sage-50" />
-        <div className="absolute inset-0 bg-hero-pattern opacity-50" />
+      <section
+        ref={heroRef}
+        className="hero--landing relative pt-16 pb-32 overflow-hidden !bg-white !bg-none before:!content-none after:!content-none"
+        style={{ backgroundColor: '#ffffff', backgroundImage: 'none' }}
+      >
+        {/* Background removed - solid white background applied to section */}
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-16">
           <div className="text-center">
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-display font-bold text-dusty-900 mb-6">
               Your Perfect
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blush-500 to-sage-500"> Moment</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-sage-500"> Moment</span>
               <br />Deserves the Perfect Eye
             </h1>
             <p className="text-xl text-dusty-600 mb-8 max-w-2xl mx-auto">
@@ -247,9 +278,9 @@ const Home = () => {
                     autoComplete="off"
                   />
                 </div>
-                <button 
-                  type="submit" 
-                  className="bg-blush-600 hover:bg-blush-700 text-white rounded-full p-3 transition-colors"
+                <button
+                  type="submit"
+                  className="bg-primary hover:bg-primary-600 text-primary-foreground rounded-full p-3 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                   aria-label="Search"
                 >
                   <SearchIcon className="w-5 h-5" />
@@ -313,7 +344,7 @@ const Home = () => {
                 <span>4.9 Average Rating</span>
               </div>
               <div className="flex items-center space-x-2 text-dusty-600">
-                <HeartIcon className="w-5 h-5 text-blush-500 fill-blush-500" />
+                <HeartIcon className="w-5 h-5 text-primary fill-primary" />
                 <span>10,000+ Happy Moments</span>
               </div>
             </div>
@@ -388,7 +419,7 @@ const Home = () => {
           <div className="grid md:grid-cols-3 gap-8">
             {features.map((feature, index) => (
               <Card key={index} className="text-center group hover:shadow-xl transition-all duration-300">
-                <div className="w-16 h-16 bg-gradient-to-br from-blush-400 to-sage-400 rounded-full flex items-center justify-center text-white mx-auto mb-4 group-hover:scale-110 transition-transform">
+                <div className="w-16 h-16 bg-gradient-to-br from-primary-400 to-sage-400 rounded-full flex items-center justify-center text-white mx-auto mb-4 group-hover:scale-110 transition-transform">
                   {feature.icon}
                 </div>
                 <h3 className="text-xl font-semibold text-dusty-900 mb-2">
@@ -476,7 +507,7 @@ const Home = () => {
       </section>
 
       {/* Testimonials */}
-      <section className="py-20 bg-gradient-to-br from-blush-50 to-sage-50">
+      <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-display font-bold text-dusty-900 mb-4">
@@ -490,7 +521,7 @@ const Home = () => {
           <div className="grid md:grid-cols-3 gap-8">
             {testimonials.map((testimonial) => (
               <Card key={testimonial.id} className="relative">
-                <div className="absolute -top-4 -right-4 text-6xl text-blush-200 font-serif">
+                <div className="absolute -top-4 -right-4 text-6xl text-primary-200 font-serif">
                   "
                 </div>
                 <div className="relative">
@@ -527,7 +558,7 @@ const Home = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/signup">
-              <Button size="lg" className="bg-blush-500 text-white hover:bg-blush-600 shadow-lg">
+              <Button size="lg" className="shadow-lg">
                 Get Started Free
               </Button>
             </Link>

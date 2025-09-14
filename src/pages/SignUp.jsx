@@ -54,7 +54,7 @@ const SignUp = () => {
   if (authLoading && user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blush-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
       </div>
     )
   }
@@ -120,7 +120,7 @@ const SignUp = () => {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blush-50 via-white to-sage-50 flex">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-sage-50 flex">
       {/* Left Side - Form */}
       <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
         <div className="max-w-md w-full">
@@ -143,7 +143,7 @@ const SignUp = () => {
                   className={clsx(
                     'cursor-pointer transition-all duration-200',
                     selectedRole === option.id
-                      ? 'ring-2 ring-blush-500 bg-blush-50'
+                      ? 'ring-2 ring-primary-500 bg-primary-50'
                       : 'hover:shadow-md'
                   )}
                   onClick={() => setSelectedRole(option.id)}
@@ -152,7 +152,7 @@ const SignUp = () => {
                     <div className={clsx(
                       'w-12 h-12 rounded-lg flex items-center justify-center',
                       selectedRole === option.id
-                        ? 'bg-blush-500 text-white'
+                        ? 'bg-primary-500 text-white'
                         : 'bg-gray-100 text-dusty-600'
                     )}>
                       {option.icon}
@@ -174,7 +174,7 @@ const SignUp = () => {
                       </ul>
                     </div>
                     {selectedRole === option.id && (
-                      <CheckIcon className="w-6 h-6 text-blush-500 flex-shrink-0" />
+                      <CheckIcon className="w-6 h-6 text-primary-500 flex-shrink-0" />
                     )}
                   </div>
                 </Card>
@@ -191,7 +191,7 @@ const SignUp = () => {
 
               <p className="text-center text-sm text-dusty-600">
                 Already have an account?{' '}
-                <Link to="/login" className="text-blush-600 hover:text-blush-700 font-medium">
+                <Link to="/login" className="text-primary-600 hover:text-primary-700 font-medium">
                   Sign in
                 </Link>
               </p>
@@ -323,15 +323,15 @@ const SignUp = () => {
                   {...register('terms', {
                     required: 'You must accept the terms and conditions'
                   })}
-                  className="mt-1 h-4 w-4 text-blush-600 border-gray-300 rounded focus:ring-blush-500"
+                  className="mt-1 h-4 w-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
                 />
                 <label className="ml-2 text-sm text-dusty-600">
                   I agree to the{' '}
-                  <Link to="/terms" className="text-blush-600 hover:text-blush-700">
+                  <Link to="/terms" className="text-primary-600 hover:text-primary-700">
                     Terms of Service
                   </Link>{' '}
                   and{' '}
-                  <Link to="/privacy" className="text-blush-600 hover:text-blush-700">
+                  <Link to="/privacy" className="text-primary-600 hover:text-primary-700">
                     Privacy Policy
                   </Link>
                 </label>

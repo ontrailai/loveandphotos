@@ -37,7 +37,7 @@ const Avatar = ({
     <div className={clsx('relative inline-block', className)}>
       <div
         className={clsx(
-          'relative rounded-full bg-gradient-to-br from-blush-400 to-sage-400',
+          'relative rounded-full bg-gradient-to-br from-primary-400 to-sage-400',
           'flex items-center justify-center overflow-hidden',
           sizes[size]
         )}

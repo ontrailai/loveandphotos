@@ -43,7 +43,7 @@ const Login = () => {
   if (authLoading && user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blush-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
       </div>
     )
   }
@@ -75,7 +75,7 @@ const Login = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blush-50 via-white to-sage-50 flex">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-sage-50 flex">
       {/* Left Side - Form */}
       <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
         <div className="max-w-md w-full">
@@ -142,7 +142,7 @@ const Login = () => {
                   type="checkbox"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
-                  className="h-4 w-4 text-blush-600 focus:ring-blush-500 border-gray-300 rounded"
+                  className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
                 />
                 <label htmlFor="remember-me" className="ml-2 block text-sm text-dusty-600">
                   Remember me
@@ -151,7 +151,7 @@ const Login = () => {
 
               <Link
                 to="/forgot-password"
-                className="text-sm font-medium text-blush-600 hover:text-blush-700 transition-colors"
+                className="text-sm font-medium text-primary-600 hover:text-primary-700 transition-colors"
               >
                 Forgot password?
               </Link>
@@ -173,7 +173,7 @@ const Login = () => {
                   <div className="w-full border-t border-gray-200"></div>
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-gradient-to-br from-blush-50/50 via-white/50 to-sage-50/50 text-dusty-600">
+                  <span className="px-2 bg-gradient-to-br from-primary-50/50 via-white/50 to-sage-50/50 text-dusty-600">
                     New to Love & Photos?
                   </span>
                 </div>

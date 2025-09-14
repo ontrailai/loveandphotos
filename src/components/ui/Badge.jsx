@@ -7,7 +7,7 @@ import { clsx } from 'clsx'
 
 const variants = {
   default: 'bg-gray-100 text-gray-800',
-  primary: 'bg-blush-100 text-blush-800',
+  primary: 'bg-primary-100 text-primary-800',
   secondary: 'bg-sage-100 text-sage-800',
   success: 'bg-green-100 text-green-800',
   warning: 'bg-yellow-100 text-yellow-800',

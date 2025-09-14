@@ -11,7 +11,7 @@ export const BRAND = {
   domain: 'loveandphotos.com',
   productionUrl: 'https://love-and-photos.onrender.com',
   colors: {
-    primary: '#EC4899', // blush-500
+    primary: '#EC4899', // primary-500
     secondary: '#F43F5E', // rose-500
     accent: '#FB923C', // orange-400
   },

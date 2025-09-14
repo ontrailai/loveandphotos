@@ -7,7 +7,7 @@ import { forwardRef } from 'react'
 import { clsx } from 'clsx'
 
 const variants = {
-  primary: 'bg-blush-500 text-white hover:bg-blush-600 focus:ring-blush-500',
+  primary: 'bg-primary text-primary-foreground hover:bg-primary-600 focus:ring-primary',
   secondary: 'bg-sage-500 text-white hover:bg-sage-600 focus:ring-sage-500',
   outline: 'border-2 border-current text-dusty-700 hover:bg-dusty-50 focus:ring-dusty-500',
   ghost: 'text-dusty-700 hover:bg-dusty-50 focus:ring-dusty-500',

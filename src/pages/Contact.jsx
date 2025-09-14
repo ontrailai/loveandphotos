@@ -130,7 +130,7 @@ const Contact = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cream-50 to-blush-50">
+    <div className="min-h-screen bg-gradient-to-br from-cream-50 to-primary-50">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
         <div className="text-center mb-12">
@@ -156,12 +156,12 @@ const Contact = () => {
                 href="tel:3237011703" 
                 className="flex items-start space-x-4 group hover:bg-cream-50 p-3 rounded-lg transition-colors"
               >
-                <div className="bg-blush-500 p-3 rounded-full text-white flex-shrink-0">
+                <div className="bg-primary-500 p-3 rounded-full text-white flex-shrink-0">
                   <Phone className="w-6 h-6" />
                 </div>
                 <div>
                   <p className="text-dusty-500 text-sm mb-1">Call Us</p>
-                  <p className="text-dusty-900 font-semibold text-lg group-hover:text-blush-600 transition-colors">
+                  <p className="text-dusty-900 font-semibold text-lg group-hover:text-primary-600 transition-colors">
                     (323) 701-1703
                   </p>
                 </div>
@@ -172,12 +172,12 @@ const Contact = () => {
                 href="mailto:matthew@loveandphotos.com" 
                 className="flex items-start space-x-4 group hover:bg-cream-50 p-3 rounded-lg transition-colors"
               >
-                <div className="bg-blush-500 p-3 rounded-full text-white flex-shrink-0">
+                <div className="bg-primary-500 p-3 rounded-full text-white flex-shrink-0">
                   <Mail className="w-6 h-6" />
                 </div>
                 <div>
                   <p className="text-dusty-500 text-sm mb-1">Email Us</p>
-                  <p className="text-dusty-900 font-semibold text-lg group-hover:text-blush-600 transition-colors break-all">
+                  <p className="text-dusty-900 font-semibold text-lg group-hover:text-primary-600 transition-colors break-all">
                     matthew@loveandphotos.com
                   </p>
                 </div>
@@ -185,7 +185,7 @@ const Contact = () => {
 
               {/* Response Time */}
               <div className="flex items-start space-x-4 p-3">
-                <div className="bg-blush-500 p-3 rounded-full text-white flex-shrink-0">
+                <div className="bg-primary-500 p-3 rounded-full text-white flex-shrink-0">
                   <Clock className="w-6 h-6" />
                 </div>
                 <div>
@@ -198,7 +198,7 @@ const Contact = () => {
 
               {/* Service Area */}
               <div className="flex items-start space-x-4 p-3">
-                <div className="bg-blush-500 p-3 rounded-full text-white flex-shrink-0">
+                <div className="bg-primary-500 p-3 rounded-full text-white flex-shrink-0">
                   <MapPin className="w-6 h-6" />
                 </div>
                 <div>
@@ -229,7 +229,7 @@ const Contact = () => {
                     name="firstName"
                     value={formData.firstName}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blush-500 focus:border-transparent transition-colors"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
                     placeholder="John"
                     required
                   />
@@ -244,7 +244,7 @@ const Contact = () => {
                     name="lastName"
                     value={formData.lastName}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blush-500 focus:border-transparent transition-colors"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
                     placeholder="Doe"
                     required
                   />
@@ -261,7 +261,7 @@ const Contact = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blush-500 focus:border-transparent transition-colors"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
                   placeholder="john@example.com"
                   required
                 />
@@ -277,7 +277,7 @@ const Contact = () => {
                   name="phone"
                   value={formData.phone}
                   onChange={handlePhoneChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blush-500 focus:border-transparent transition-colors"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
                   placeholder="(555) 123-4567"
                 />
               </div>
@@ -291,7 +291,7 @@ const Contact = () => {
                   name="eventType"
                   value={formData.eventType}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blush-500 focus:border-transparent transition-colors"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
                 >
                   <option value="">Select an event type</option>
                   <option value="wedding">Wedding</option>
@@ -312,7 +312,7 @@ const Contact = () => {
                   value={formData.message}
                   onChange={handleInputChange}
                   rows="4"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blush-500 focus:border-transparent transition-colors resize-none"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors resize-none"
                   placeholder="Tell us about your event and how we can help..."
                   required
                 ></textarea>
@@ -324,7 +324,7 @@ const Contact = () => {
                 className={`w-full font-semibold py-3 rounded-lg transform transition-all duration-200 shadow-lg ${
                   isSubmitting 
                     ? 'bg-gray-400 cursor-not-allowed' 
-                    : 'bg-blush-500 text-white hover:bg-blush-600 hover:scale-[1.02]'
+                    : 'bg-primary-500 text-white hover:bg-primary-600 hover:scale-[1.02]'
                 }`}
               >
                 {isSubmitting ? 'Sending...' : 'Send Message'}
@@ -379,8 +379,8 @@ const Contact = () => {
         </div>
 
         {/* Call to Action */}
-        <div className="text-center mt-12 bg-blush-50 rounded-xl p-8">
-          <MessageCircle className="w-16 h-16 mx-auto mb-4 text-blush-500" />
+        <div className="text-center mt-12 bg-primary-50 rounded-xl p-8">
+          <MessageCircle className="w-16 h-16 mx-auto mb-4 text-primary-500" />
           <h2 className="text-2xl font-display font-semibold text-dusty-900 mb-3">
             Ready to Get Started?
           </h2>
@@ -390,14 +390,14 @@ const Contact = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
               href="tel:3237011703"
-              className="inline-flex items-center justify-center px-6 py-3 bg-white text-blush-600 font-semibold rounded-lg hover:bg-gray-50 transition-colors shadow-md"
+              className="inline-flex items-center justify-center px-6 py-3 bg-white text-primary-600 font-semibold rounded-lg hover:bg-gray-50 transition-colors shadow-md"
             >
               <Phone className="w-5 h-5 mr-2" />
               Call Now
             </a>
             <a
               href="mailto:matthew@loveandphotos.com"
-              className="inline-flex items-center justify-center px-6 py-3 bg-blush-500 text-white font-semibold rounded-lg hover:bg-blush-600 transition-all shadow-md"
+              className="inline-flex items-center justify-center px-6 py-3 bg-primary-500 text-white font-semibold rounded-lg hover:bg-primary-600 transition-all shadow-md"
             >
               <Mail className="w-5 h-5 mr-2" />
               Email Us

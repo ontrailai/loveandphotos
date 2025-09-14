@@ -21,7 +21,7 @@ const getColorFromName = (name) => {
   if (!name) return 'from-gray-400 to-gray-500'
 
   const colors = [
-    'from-blush-400 to-blush-500',
+    'from-primary-400 to-primary-500',
     'from-sage-400 to-sage-500',
     'from-dusty-400 to-dusty-500',
     'from-purple-400 to-purple-500',

@@ -6,7 +6,7 @@ const PrivacyPolicy = () => {
   }, [])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cream-50 to-blush-50">
+    <div className="min-h-screen bg-gradient-to-br from-cream-50 to-primary-50">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="bg-white rounded-lg shadow-lg p-8 sm:p-12">
           <h1 className="text-4xl font-display font-bold text-dusty-900 mb-4">
@@ -20,7 +20,7 @@ const PrivacyPolicy = () => {
                 1. Introduction
               </h2>
               <p className="leading-relaxed">
-                Welcome to Love & Photos ("we," "us," "our"). We are committed to protecting your privacy and ensuring you have a positive experience on our website, <a href="https://loveandphotos.com/" className="text-blush-600 hover:text-blush-700 underline">https://loveandphotos.com/</a> ("Site"). This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our Site or otherwise interact with us. By accessing or using our Site, you agree to the terms of this Privacy Policy.
+                Welcome to Love & Photos ("we," "us," "our"). We are committed to protecting your privacy and ensuring you have a positive experience on our website, <a href="https://loveandphotos.com/" className="text-primary-600 hover:text-primary-700 underline">https://loveandphotos.com/</a> ("Site"). This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our Site or otherwise interact with us. By accessing or using our Site, you agree to the terms of this Privacy Policy.
               </p>
             </section>
 
@@ -33,19 +33,19 @@ const PrivacyPolicy = () => {
               </p>
               <ul className="space-y-3 ml-6">
                 <li className="flex">
-                  <span className="text-blush-500 mr-2">•</span>
+                  <span className="text-primary-500 mr-2">•</span>
                   <div>
                     <strong>Personal Information:</strong> Such as your name, email address, phone number, and any other information you voluntarily provide when signing up, subscribing, or contacting us.
                   </div>
                 </li>
                 <li className="flex">
-                  <span className="text-blush-500 mr-2">•</span>
+                  <span className="text-primary-500 mr-2">•</span>
                   <div>
                     <strong>Usage Data:</strong> Information automatically collected when you visit our Site, including your IP address, browser type, operating system, referring URLs, pages viewed, and the dates/times of your visits.
                   </div>
                 </li>
                 <li className="flex">
-                  <span className="text-blush-500 mr-2">•</span>
+                  <span className="text-primary-500 mr-2">•</span>
                   <div>
                     <strong>Cookies and Similar Technologies:</strong> We may use cookies and similar tracking technologies to enhance your experience and analyze Site usage.
                   </div>
@@ -62,13 +62,13 @@ const PrivacyPolicy = () => {
               </p>
               <ul className="space-y-3 ml-6">
                 <li className="flex">
-                  <span className="text-blush-500 mr-2">•</span>
+                  <span className="text-primary-500 mr-2">•</span>
                   <div>
                     <strong>Providing Services:</strong> To operate, maintain, and improve our Site, and to provide you with the services and information you request.
                   </div>
                 </li>
                 <li className="flex">
-                  <span className="text-blush-500 mr-2">•</span>
+                  <span className="text-primary-500 mr-2">•</span>
                   <div>
                     <strong>Communication:</strong>
                     <div className="mt-2 ml-4">
@@ -80,13 +80,13 @@ const PrivacyPolicy = () => {
                   </div>
                 </li>
                 <li className="flex">
-                  <span className="text-blush-500 mr-2">•</span>
+                  <span className="text-primary-500 mr-2">•</span>
                   <div>
                     <strong>Analytics and Improvements:</strong> To analyze trends, monitor site activity, and improve our offerings.
                   </div>
                 </li>
                 <li className="flex">
-                  <span className="text-blush-500 mr-2">•</span>
+                  <span className="text-primary-500 mr-2">•</span>
                   <div>
                     <strong>Legal Obligations:</strong> To comply with applicable legal requirements and protect the rights and safety of our users and the public.
                   </div>
@@ -103,19 +103,19 @@ const PrivacyPolicy = () => {
               </p>
               <ul className="space-y-3 ml-6">
                 <li className="flex">
-                  <span className="text-blush-500 mr-2">•</span>
+                  <span className="text-primary-500 mr-2">•</span>
                   <div>
                     <strong>Service Providers:</strong> With vendors and service providers who perform services on our behalf, such as website hosting, data analysis, payment processing, and communication services.
                   </div>
                 </li>
                 <li className="flex">
-                  <span className="text-blush-500 mr-2">•</span>
+                  <span className="text-primary-500 mr-2">•</span>
                   <div>
                     <strong>Legal Requirements:</strong> When required to do so by law or in response to valid requests by public authorities (e.g., a court or government agency).
                   </div>
                 </li>
                 <li className="flex">
-                  <span className="text-blush-500 mr-2">•</span>
+                  <span className="text-primary-500 mr-2">•</span>
                   <div>
                     <strong>Business Transfers:</strong> In connection with any merger, sale of company assets, financing, or acquisition of all or a portion of our business to another company, provided that the recipient agrees to handle your information in a manner consistent with this Privacy Policy.
                   </div>
@@ -138,19 +138,19 @@ const PrivacyPolicy = () => {
               </h2>
               <ul className="space-y-3 ml-6">
                 <li className="flex">
-                  <span className="text-blush-500 mr-2">•</span>
+                  <span className="text-primary-500 mr-2">•</span>
                   <div>
                     <strong>Opting In and Out:</strong> When you opt in to receive communications via email or SMS, you agree to receive such messages from us. To opt out of receiving email communications, please click the unsubscribe link included in our emails. To opt out of receiving SMS messages, reply "STOP" to any SMS message you receive from us.
                   </div>
                 </li>
                 <li className="flex">
-                  <span className="text-blush-500 mr-2">•</span>
+                  <span className="text-primary-500 mr-2">•</span>
                   <div>
                     <strong>Access and Correction:</strong> You may have the right to access, update, or correct your personal information. Please contact us at Matthew@loveandphotos.com to request any changes.
                   </div>
                 </li>
                 <li className="flex">
-                  <span className="text-blush-500 mr-2">•</span>
+                  <span className="text-primary-500 mr-2">•</span>
                   <div>
                     <strong>Do Not Track Signals:</strong> Our Site does not currently respond to "Do Not Track" signals, but you can control cookies and other tracking technologies through your browser settings.
                   </div>
@@ -202,7 +202,7 @@ const PrivacyPolicy = () => {
                 If you have any questions about this Privacy Policy or our data practices, please contact us at:
               </p>
               <p className="font-medium">
-                <a href="mailto:Matthew@loveandphotos.com" className="text-blush-600 hover:text-blush-700 underline">
+                <a href="mailto:Matthew@loveandphotos.com" className="text-primary-600 hover:text-primary-700 underline">
                   Matthew@loveandphotos.com
                 </a>
               </p>

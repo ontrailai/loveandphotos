@@ -313,14 +313,14 @@ const Quiz = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blush-50 via-white to-sage-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blush-500"></div>
+      <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-sage-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blush-50 via-white to-sage-50">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-sage-50">
       {/* Header */}
       <div className="bg-white/80 backdrop-blur-sm border-b border-gray-100">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -345,7 +345,7 @@ const Quiz = () => {
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div 
-                className="bg-gradient-to-r from-blush-500 to-sage-500 h-2 rounded-full transition-all duration-500"
+                className="bg-gradient-to-r from-primary-500 to-sage-500 h-2 rounded-full transition-all duration-500"
                 style={{ width: `${(currentStep / totalSteps) * 100}%` }}
               />
             </div>
@@ -369,7 +369,7 @@ const Quiz = () => {
                   className={clsx(
                     'cursor-pointer transition-all overflow-hidden',
                     quizData.style === style.id 
-                      ? 'ring-2 ring-blush-500 shadow-lg transform scale-105' 
+                      ? 'ring-2 ring-primary-500 shadow-lg transform scale-105' 
                       : 'hover:shadow-md'
                   )}
                   onClick={() => setQuizData({ ...quizData, style: style.id })}
@@ -419,7 +419,7 @@ const Quiz = () => {
                   className={clsx(
                     'cursor-pointer transition-all',
                     quizData.mood === mood.id 
-                      ? 'ring-2 ring-blush-500 shadow-lg transform scale-105' 
+                      ? 'ring-2 ring-primary-500 shadow-lg transform scale-105' 
                       : 'hover:shadow-md'
                   )}
                   onClick={() => setQuizData({ ...quizData, mood: mood.id })}
@@ -433,7 +433,7 @@ const Quiz = () => {
                     </div>
                     {quizData.mood === mood.id && (
                       <div className="absolute top-4 right-4">
-                        <CheckCircleIcon className="w-6 h-6 text-blush-500" />
+                        <CheckCircleIcon className="w-6 h-6 text-primary-500" />
                       </div>
                     )}
                   </div>
@@ -467,14 +467,14 @@ const Quiz = () => {
                   className={clsx(
                     'p-4 rounded-lg border-2 transition-all text-center',
                     quizData.shots.includes(shot.id)
-                      ? 'border-blush-500 bg-blush-50'
+                      ? 'border-primary-500 bg-primary-50'
                       : 'border-gray-200 hover:border-gray-300'
                   )}
                 >
                   <div className="text-2xl mb-1">{shot.icon}</div>
                   <p className="text-sm text-dusty-700">{shot.label}</p>
                   {quizData.shots.includes(shot.id) && (
-                    <CheckCircleIcon className="w-4 h-4 text-blush-500 mx-auto mt-2" />
+                    <CheckCircleIcon className="w-4 h-4 text-primary-500 mx-auto mt-2" />
                   )}
                 </button>
               ))}
@@ -496,7 +496,7 @@ const Quiz = () => {
                   className={clsx(
                     'cursor-pointer transition-all',
                     quizData.musicMood === music.id 
-                      ? 'ring-2 ring-blush-500 shadow-lg' 
+                      ? 'ring-2 ring-primary-500 shadow-lg' 
                       : 'hover:shadow-md'
                   )}
                   onClick={() => setQuizData({ ...quizData, musicMood: music.id })}
@@ -512,7 +512,7 @@ const Quiz = () => {
                       </p>
                     </div>
                     {quizData.musicMood === music.id && (
-                      <CheckCircleIcon className="w-6 h-6 text-blush-500" />
+                      <CheckCircleIcon className="w-6 h-6 text-primary-500" />
                     )}
                   </div>
                 </Card>
@@ -543,7 +543,7 @@ const Quiz = () => {
                         className={clsx(
                           'p-3 rounded-lg border text-sm transition-all',
                           quizData.specialMoments.includes(moment.id)
-                            ? 'border-blush-500 bg-blush-50'
+                            ? 'border-primary-500 bg-primary-50'
                             : 'border-gray-200 hover:border-gray-300'
                         )}
                       >
@@ -563,7 +563,7 @@ const Quiz = () => {
                     value={quizData.notes}
                     onChange={(e) => setQuizData({ ...quizData, notes: e.target.value })}
                     placeholder="Any specific requests, family dynamics to be aware of, or other important details..."
-                    className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blush-500 focus:border-transparent"
+                    className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                     rows={4}
                   />
                 </div>

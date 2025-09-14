@@ -106,7 +106,7 @@ const PhotographerProfile = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blush-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
       </div>
     )
   }
@@ -159,7 +159,7 @@ const PhotographerProfile = () => {
                   key={index}
                   onClick={() => setSelectedImage(index)}
                   className={`aspect-w-16 aspect-h-10 rounded-lg overflow-hidden border-2 ${
-                    selectedImage === index ? 'border-blush-500' : 'border-transparent'
+                    selectedImage === index ? 'border-primary-500' : 'border-transparent'
                   }`}
                 >
                   <img

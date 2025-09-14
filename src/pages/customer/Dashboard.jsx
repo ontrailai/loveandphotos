@@ -140,7 +140,7 @@ const CustomerDashboard = () => {
   // Instead, show loading or content conditionally
   return loading ? (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blush-500"></div>
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
     </div>
   ) : (
     <div className="min-h-screen bg-gray-50">
@@ -169,13 +169,13 @@ const CustomerDashboard = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-gradient-to-br from-blush-50 to-blush-100 border-blush-200">
+          <Card className="bg-gradient-to-br from-primary-50 to-primary-100 border-primary-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-blush-600 text-sm font-medium">Total Bookings</p>
-                <p className="text-3xl font-bold text-blush-900">{stats.totalBookings}</p>
+                <p className="text-primary-600 text-sm font-medium">Total Bookings</p>
+                <p className="text-3xl font-bold text-primary-900">{stats.totalBookings}</p>
               </div>
-              <div className="w-12 h-12 bg-blush-500 rounded-lg flex items-center justify-center">
+              <div className="w-12 h-12 bg-primary-500 rounded-lg flex items-center justify-center">
                 <CameraIcon className="w-6 h-6 text-white" />
               </div>
             </div>
@@ -332,7 +332,7 @@ const CustomerDashboard = () => {
                             <RatingStars rating={booking.reviews[0].rating} size="sm" />
                           </div>
                         ) : (
-                          <p className="text-sm text-blush-600 mt-1">Review pending</p>
+                          <p className="text-sm text-primary-600 mt-1">Review pending</p>
                         )}
                       </div>
                     </div>

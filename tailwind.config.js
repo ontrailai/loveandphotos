@@ -8,6 +8,33 @@ export default {
     extend: {
       colors: {
         // Brand colors inspired by Lily & Lime
+        brand: {
+          DEFAULT: '#fe395f',
+          50: '#fef2f4',
+          100: '#fee2e7',
+          200: '#fdc9d1',
+          300: '#fba3b2',
+          400: '#f77291',
+          500: '#fe395f',
+          600: '#e23354',
+          700: '#c11d40',
+          800: '#9f1a38',
+          900: '#881734',
+        },
+        primary: {
+          DEFAULT: '#fe395f',
+          50: '#fef2f4',
+          100: '#fee2e7',
+          200: '#fdc9d1',
+          300: '#fba3b2',
+          400: '#f77291',
+          500: '#fe395f',
+          600: '#e23354',
+          700: '#c11d40',
+          800: '#9f1a38',
+          900: '#881734',
+          foreground: '#ffffff',
+        },
         blush: {
           50: '#fdf2f4',
           100: '#fce8ec',

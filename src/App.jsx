@@ -16,7 +16,7 @@ import ScrollToTop from '@components/ScrollToTop'
 // Page Loading Component
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center">
-    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blush-500" />
+    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary" />
   </div>
 )
 
@@ -51,13 +51,13 @@ const Quiz = lazy(() => import('@pages/customer/Quiz'))
 // Lazy load placeholder pages
 const LazyPlaceholders = lazy(() => import('@pages/customer/placeholders'))
 const PhotographerProfile = lazy(() => import('@pages/customer/PhotographerProfile'))
-const BookingPage = lazy(() => 
+const BookingPage = lazy(() =>
   import('@pages/customer/placeholders').then(module => ({ default: module.BookingPage }))
 )
-const CustomerBookings = lazy(() => 
+const CustomerBookings = lazy(() =>
   import('@pages/customer/placeholders').then(module => ({ default: module.CustomerBookings }))
 )
-const CustomerProfile = lazy(() => 
+const CustomerProfile = lazy(() =>
   import('@pages/customer/placeholders').then(module => ({ default: module.CustomerProfile }))
 )
 
@@ -67,36 +67,36 @@ const PhotographerUploads = lazy(() => import('@pages/photographer/Uploads'))
 
 // Lazy load photographer placeholders
 const PhotographerPlaceholders = lazy(() => import('@pages/placeholders'))
-const PhotographerDashboard = lazy(() => 
+const PhotographerDashboard = lazy(() =>
   import('@pages/placeholders').then(module => ({ default: module.PhotographerDashboard }))
 )
-const PhotographerOnboarding = lazy(() => 
+const PhotographerOnboarding = lazy(() =>
   import('@pages/placeholders').then(module => ({ default: module.PhotographerOnboarding }))
 )
-const PhotographerAvailability = lazy(() => 
+const PhotographerAvailability = lazy(() =>
   import('@pages/placeholders').then(module => ({ default: module.PhotographerAvailability }))
 )
-const PhotographerPortfolio = lazy(() => 
+const PhotographerPortfolio = lazy(() =>
   import('@pages/placeholders').then(module => ({ default: module.PhotographerPortfolio }))
 )
-const PhotographerPackages = lazy(() => 
+const PhotographerPackages = lazy(() =>
   import('@pages/placeholders').then(module => ({ default: module.PhotographerPackages }))
 )
-const PhotographerJobs = lazy(() => 
+const PhotographerJobs = lazy(() =>
   import('@pages/placeholders').then(module => ({ default: module.PhotographerJobs }))
 )
-const PhotographerTraining = lazy(() => 
+const PhotographerTraining = lazy(() =>
   import('@pages/placeholders').then(module => ({ default: module.PhotographerTraining }))
 )
-const PhotographerSettings = lazy(() => 
+const PhotographerSettings = lazy(() =>
   import('@pages/placeholders').then(module => ({ default: module.PhotographerProfile }))
 )
-const PhotographerEarnings = lazy(() => 
+const PhotographerEarnings = lazy(() =>
   import('@pages/placeholders').then(module => ({ default: module.PhotographerEarnings }))
 )
 
 // Admin Pages (lazy loaded)
-const AdminDashboard = lazy(() => 
+const AdminDashboard = lazy(() =>
   import('@pages/placeholders').then(module => ({ default: module.AdminDashboard }))
 )
 
@@ -104,18 +104,18 @@ function App() {
   // Check environment configuration on mount
   useEffect(() => {
     const env = validateEnvironment()
-    
+
     if (!env.isValid) {
       console.warn('🚨 Environment Configuration Issues Detected:')
-      
+
       if (env.missing.length > 0) {
         console.warn('❌ Missing variables:', env.missing.join(', '))
       }
-      
+
       if (env.placeholder.length > 0) {
         console.warn('⚠️ Using placeholder values:', env.placeholder.join(', '))
       }
-      
+
       console.log('\n📚 Quick Setup Guide:')
       console.log('1. Create a Supabase project at https://app.supabase.com')
       console.log('2. Get your Stripe keys from https://dashboard.stripe.com')
@@ -124,7 +124,7 @@ function App() {
     } else {
       console.log('✅ Environment properly configured')
     }
-    
+
     // Log configuration status for debugging
     if (import.meta.env.DEV) {
       console.log('📊 Configuration Status:', {
@@ -145,13 +145,13 @@ function App() {
               plugins: [ReactPlugin]
             }}
           />
-        
+
         {/* Scroll to top on navigation */}
         <ScrollToTop />
-        
+
         {/* Development environment banner */}
         {import.meta.env.DEV && <DevBanner />}
-        
+
         {/* Toast notifications */}
         <Toaster
           position="top-right"
@@ -180,7 +180,9 @@ function App() {
           <Route element={<PublicLayout />}>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/signin" element={<Navigate to="/login" replace />} />
             <Route path="/signup" element={<SignUp />} />
+            <Route path="/get-started" element={<Navigate to="/signup" replace />} />
             <Route path="/signup-demo" element={<SignupDemo />} />
             <Route path="/signup-enhanced" element={<SignupEnhanced />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />

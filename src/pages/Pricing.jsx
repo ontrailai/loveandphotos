@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Check, X } from 'lucide-react'
+// TODO: Import formatMoney from @/lib/currency to replace hardcoded price strings
 
 const Pricing = () => {
   const photographerTiers = [
@@ -89,7 +90,7 @@ const Pricing = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="relative py-20 bg-gradient-to-b from-blush-50 to-white">
+      <section className="relative py-20 bg-gradient-to-b from-primary-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
             Simple, Transparent Pricing
@@ -104,13 +105,13 @@ const Pricing = () => {
       {/* Client Pricing */}
       <section className="py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="bg-gradient-to-r from-blush-500 to-blush-600 rounded-2xl shadow-xl p-8 md:p-12 text-white">
+          <div className="bg-gradient-to-r from-primary-500 to-primary-600 rounded-2xl shadow-xl p-8 md:p-12 text-white">
             <h2 className="text-3xl font-bold mb-6">For Clients</h2>
             <div className="grid md:grid-cols-2 gap-8">
               <div>
                 <h3 className="text-5xl font-bold mb-4">$0</h3>
                 <p className="text-2xl mb-6">No fees, ever.</p>
-                <p className="text-blush-100">
+                <p className="text-primary-100">
                   Browse, book, and pay photographers directly through our platform 
                   without any additional fees or hidden charges.
                 </p>
@@ -136,7 +137,7 @@ const Pricing = () => {
             </div>
             <Link 
               to="/browse" 
-              className="mt-8 inline-block bg-white text-blush-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-50 transition"
+              className="mt-8 inline-block bg-white text-primary-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-50 transition"
             >
               Start Browsing Free
             </Link>
@@ -165,7 +166,7 @@ const Pricing = () => {
               >
                 {tier.popular && (
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <span className="bg-blush-600 text-white px-4 py-1 rounded-full text-sm font-semibold">
+                    <span className="bg-primary-600 text-white px-4 py-1 rounded-full text-sm font-semibold">
                       Most Popular
                     </span>
                   </div>
@@ -198,7 +199,7 @@ const Pricing = () => {
                     to="/signup?role=photographer" 
                     className={`block text-center px-4 py-2 rounded-lg font-semibold transition ${
                       tier.popular 
-                        ? 'bg-blush-600 text-white hover:bg-blush-700' 
+                        ? 'bg-primary-600 text-white hover:bg-primary-700' 
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   >
@@ -215,7 +216,7 @@ const Pricing = () => {
             </p>
             <Link 
               to="/photographer-faq" 
-              className="text-blush-600 font-semibold hover:text-blush-700"
+              className="text-primary-600 font-semibold hover:text-primary-700"
             >
               Learn more about tier requirements →
             </Link>
@@ -261,7 +262,7 @@ const Pricing = () => {
           <div className="text-center mt-8">
             <Link 
               to="/faq" 
-              className="text-blush-600 font-semibold hover:text-blush-700"
+              className="text-primary-600 font-semibold hover:text-primary-700"
             >
               View all FAQs →
             </Link>

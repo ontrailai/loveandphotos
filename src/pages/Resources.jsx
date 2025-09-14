@@ -111,7 +111,7 @@ const Resources = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="relative py-20 bg-gradient-to-b from-blush-50 to-white">
+      <section className="relative py-20 bg-gradient-to-b from-primary-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
             Photographer Resources
@@ -131,8 +131,8 @@ const Resources = () => {
             return (
               <div key={categoryIndex} className="mb-16">
                 <div className="flex items-center mb-8">
-                  <div className="flex items-center justify-center w-12 h-12 bg-blush-100 rounded-lg mr-4">
-                    <Icon className="h-6 w-6 text-blush-600" />
+                  <div className="flex items-center justify-center w-12 h-12 bg-primary-100 rounded-lg mr-4">
+                    <Icon className="h-6 w-6 text-primary-600" />
                   </div>
                   <h2 className="text-2xl font-bold text-gray-900">{category.category}</h2>
                 </div>
@@ -153,7 +153,7 @@ const Resources = () => {
                       </p>
                       <a 
                         href={item.link} 
-                        className="text-blush-600 font-semibold hover:text-blush-700"
+                        className="text-primary-600 font-semibold hover:text-primary-700"
                       >
                         Access Resource →
                       </a>
@@ -175,7 +175,7 @@ const Resources = () => {
               <div key={index} className="bg-white rounded-lg p-6">
                 <h3 className="font-semibold text-gray-900 mb-2">{link.title}</h3>
                 <p className="text-sm text-gray-600 mb-3">{link.description}</p>
-                <a href="#" className="text-sm text-blush-600 font-semibold hover:text-blush-700">
+                <a href="#" className="text-sm text-primary-600 font-semibold hover:text-primary-700">
                   Learn more →
                 </a>
               </div>
@@ -187,7 +187,7 @@ const Resources = () => {
       {/* Community Section */}
       <section className="py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center">
-          <Users className="h-12 w-12 text-blush-600 mx-auto mb-6" />
+          <Users className="h-12 w-12 text-primary-600 mx-auto mb-6" />
           <h2 className="text-3xl font-bold text-gray-900 mb-6">
             Join Our Photographer Community
           </h2>
@@ -198,7 +198,7 @@ const Resources = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a 
               href="#" 
-              className="px-6 py-3 bg-blush-600 text-white font-semibold rounded-lg hover:bg-blush-700 transition"
+              className="px-6 py-3 bg-primary-600 text-white font-semibold rounded-lg hover:bg-primary-700 transition"
             >
               Join Community Forum
             </a>
@@ -213,12 +213,12 @@ const Resources = () => {
       </section>
 
       {/* Newsletter Section */}
-      <section className="py-16 bg-blush-600">
+      <section className="py-16 bg-primary-600">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold text-white mb-6">
             Stay Updated with Photography Tips
           </h2>
-          <p className="text-blush-100 mb-8">
+          <p className="text-primary-100 mb-8">
             Get weekly tips, industry insights, and platform updates delivered to your inbox.
           </p>
           <form className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
@@ -229,7 +229,7 @@ const Resources = () => {
             />
             <button 
               type="submit" 
-              className="px-6 py-3 bg-white text-blush-600 font-semibold rounded-lg hover:bg-gray-50 transition"
+              className="px-6 py-3 bg-white text-primary-600 font-semibold rounded-lg hover:bg-gray-50 transition"
             >
               Subscribe
             </button>

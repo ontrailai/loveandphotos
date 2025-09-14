@@ -330,7 +330,7 @@ const Browse = () => {
                     placeholder="ZIP code or city"
                     value={filters.zip}
                     onChange={(e) => handleFilterChange('zip', e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blush-500"
+                    className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                   />
                 </div>
                 <div className="relative">
@@ -339,7 +339,7 @@ const Browse = () => {
                     type="date"
                     value={filters.date}
                     onChange={(e) => handleFilterChange('date', e.target.value)}
-                    className="pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blush-500"
+                    className="pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                   />
                 </div>
                 <Button variant="outline" onClick={() => loadPhotographers()}>
@@ -358,7 +358,7 @@ const Browse = () => {
                 <FilterIcon className="w-5 h-5 mr-2" />
                 Filters
                 {activeFilterCount > 0 && (
-                  <span className="absolute -top-2 -right-2 w-5 h-5 bg-blush-500 text-white text-xs rounded-full flex items-center justify-center">
+                  <span className="absolute -top-2 -right-2 w-5 h-5 bg-primary-500 text-white text-xs rounded-full flex items-center justify-center">
                     {activeFilterCount}
                   </span>
                 )}
@@ -401,7 +401,7 @@ const Browse = () => {
                 {activeFilterCount > 0 && (
                   <button
                     onClick={clearFilters}
-                    className="text-sm text-blush-600 hover:text-blush-700"
+                    className="text-sm text-primary-600 hover:text-primary-700"
                   >
                     Clear all
                   </button>
@@ -416,7 +416,7 @@ const Browse = () => {
                 <select
                   value={filters.priceRange}
                   onChange={(e) => handleFilterChange('priceRange', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blush-500"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                 >
                   {priceRanges.map(range => (
                     <option key={range.value} value={range.value}>

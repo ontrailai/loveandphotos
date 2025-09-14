@@ -57,7 +57,7 @@ const HowItWorks = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="relative py-20 bg-gradient-to-b from-blush-50 to-white">
+      <section className="relative py-20 bg-gradient-to-b from-primary-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
             How Love & Photos Works
@@ -82,7 +82,7 @@ const HowItWorks = () => {
                 <div key={index} className="relative">
                   <div className="flex items-start">
                     <div className="flex-shrink-0">
-                      <div className="flex items-center justify-center w-12 h-12 bg-blush-600 rounded-full">
+                      <div className="flex items-center justify-center w-12 h-12 bg-primary-600 rounded-full">
                         <Icon className="h-6 w-6 text-white" />
                       </div>
                     </div>
@@ -125,7 +125,7 @@ const HowItWorks = () => {
               </ul>
               <Link 
                 to="/browse" 
-                className="mt-6 inline-block bg-blush-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blush-700 transition"
+                className="mt-6 inline-block bg-primary-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary-700 transition"
               >
                 Find Photographers
               </Link>
@@ -146,7 +146,7 @@ const HowItWorks = () => {
               </ul>
               <Link 
                 to="/signup?role=photographer" 
-                className="mt-6 inline-block bg-blush-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blush-700 transition"
+                className="mt-6 inline-block bg-primary-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary-700 transition"
               >
                 Join as Photographer
               </Link>
@@ -171,7 +171,7 @@ const HowItWorks = () => {
             </Link>
             <Link 
               to="/contact" 
-              className="px-6 py-3 bg-blush-600 text-white font-semibold rounded-lg hover:bg-blush-700 transition"
+              className="px-6 py-3 bg-primary-600 text-white font-semibold rounded-lg hover:bg-primary-700 transition"
             >
               Contact Support
             </Link>

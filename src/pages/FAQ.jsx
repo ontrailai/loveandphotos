@@ -104,7 +104,7 @@ const FAQ = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="relative py-20 bg-gradient-to-b from-blush-50 to-white">
+      <section className="relative py-20 bg-gradient-to-b from-primary-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
             Frequently Asked Questions
@@ -179,7 +179,7 @@ const FAQ = () => {
             </a>
             <a 
               href="/contact" 
-              className="px-6 py-3 bg-blush-600 text-white font-semibold rounded-lg hover:bg-blush-700 transition"
+              className="px-6 py-3 bg-primary-600 text-white font-semibold rounded-lg hover:bg-primary-700 transition"
             >
               Contact Form
             </a>

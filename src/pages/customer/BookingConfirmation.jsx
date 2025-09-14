@@ -506,8 +506,8 @@ const BookingConfirmation = () => {
           
           <div className="space-y-4">
             <div className="flex items-start">
-              <div className="flex-shrink-0 w-8 h-8 bg-blush-100 rounded-full flex items-center justify-center mr-4">
-                <span className="text-blush-600 font-semibold text-sm">1</span>
+              <div className="flex-shrink-0 w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center mr-4">
+                <span className="text-primary-600 font-semibold text-sm">1</span>
               </div>
               <div>
                 <h3 className="font-medium text-dusty-900 mb-1">
@@ -606,7 +606,7 @@ const BookingConfirmation = () => {
         {sendingEmail && (
           <div className="mt-8 text-center text-dusty-600">
             <div className="inline-flex items-center">
-              <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-blush-500 mr-2"></div>
+              <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-primary-500 mr-2"></div>
               Sending confirmation emails...
             </div>
           </div>

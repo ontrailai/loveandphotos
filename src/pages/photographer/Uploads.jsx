@@ -357,7 +357,7 @@ const Uploads = () => {
             {/* Upload Section */}
             <div className="lg:col-span-2 space-y-6">
               {/* Job Info */}
-              <Card className="bg-gradient-to-br from-blush-50 to-sage-50">
+              <Card className="bg-gradient-to-br from-primary-50 to-sage-50">
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="font-semibold text-dusty-900">
@@ -382,7 +382,7 @@ const Uploads = () => {
                 <div
                   className={clsx(
                     'border-2 border-dashed rounded-lg p-8 text-center transition-colors',
-                    dragActive ? 'border-blush-500 bg-blush-50' : 'border-gray-300 hover:border-gray-400',
+                    dragActive ? 'border-primary-500 bg-primary-50' : 'border-gray-300 hover:border-gray-400',
                     uploading && 'opacity-50 pointer-events-none'
                   )}
                   onDragEnter={handleDrag}
@@ -406,7 +406,7 @@ const Uploads = () => {
                       <p className="text-dusty-600 mb-2">Uploading...</p>
                       <div className="w-full bg-gray-200 rounded-full h-2">
                         <div 
-                          className="bg-blush-500 h-2 rounded-full transition-all duration-300"
+                          className="bg-primary-500 h-2 rounded-full transition-all duration-300"
                           style={{ width: `${uploadProgress}%` }}
                         />
                       </div>

@@ -49,7 +49,7 @@ const SignupEnhanced = () => {
   if (authLoading && user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blush-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
       </div>
     )
   }
@@ -178,7 +178,7 @@ const SignupEnhanced = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blush-50 via-white to-sage-50 flex">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-sage-50 flex">
       {/* Left Side - Form */}
       <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
         <div className="max-w-md w-full">
@@ -201,7 +201,7 @@ const SignupEnhanced = () => {
                 className={cn(
                   "flex-1 py-3 px-4 rounded-lg border-2 transition-all",
                   selectedRole === 'customer'
-                    ? "border-blush-500 bg-blush-50 text-blush-700"
+                    ? "border-primary-500 bg-primary-50 text-primary-700"
                     : "border-gray-200 hover:border-gray-300"
                 )}
               >
@@ -214,7 +214,7 @@ const SignupEnhanced = () => {
                 className={cn(
                   "flex-1 py-3 px-4 rounded-lg border-2 transition-all",
                   selectedRole === 'photographer'
-                    ? "border-blush-500 bg-blush-50 text-blush-700"
+                    ? "border-primary-500 bg-primary-50 text-primary-700"
                     : "border-gray-200 hover:border-gray-300"
                 )}
               >
@@ -406,15 +406,15 @@ const SignupEnhanced = () => {
                 id="terms"
                 checked={termsAccepted}
                 onChange={(e) => setTermsAccepted(e.target.checked)}
-                className="mt-1 h-4 w-4 text-blush-600 border-gray-300 rounded focus:ring-blush-500"
+                className="mt-1 h-4 w-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
               />
               <label htmlFor="terms" className="ml-2 text-sm text-dusty-600">
                 I agree to the{' '}
-                <Link to="/terms" className="text-blush-600 hover:text-blush-700">
+                <Link to="/terms" className="text-primary-600 hover:text-primary-700">
                   Terms of Service
                 </Link>{' '}
                 and{' '}
-                <Link to="/privacy" className="text-blush-600 hover:text-blush-700">
+                <Link to="/privacy" className="text-primary-600 hover:text-primary-700">
                   Privacy Policy
                 </Link>
               </label>
@@ -433,7 +433,7 @@ const SignupEnhanced = () => {
 
             <p className="text-center text-sm text-dusty-600">
               Already have an account?{' '}
-              <Link to="/login" className="text-blush-600 hover:text-blush-700 font-medium">
+              <Link to="/login" className="text-primary-600 hover:text-primary-700 font-medium">
                 Sign in
               </Link>
             </p>

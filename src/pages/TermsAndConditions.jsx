@@ -6,7 +6,7 @@ const TermsAndConditions = () => {
   }, [])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cream-50 to-blush-50">
+    <div className="min-h-screen bg-gradient-to-br from-cream-50 to-primary-50">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="bg-white rounded-lg shadow-lg p-8 sm:p-12">
           <h1 className="text-4xl font-display font-bold text-dusty-900 mb-4">
@@ -14,7 +14,7 @@ const TermsAndConditions = () => {
           </h1>
           <p className="text-dusty-600 mb-8">Last Updated: September 8th, 2025</p>
 
-          <div className="bg-blush-50 border-l-4 border-blush-500 p-6 mb-8">
+          <div className="bg-primary-50 border-l-4 border-primary-500 p-6 mb-8">
             <h2 className="text-xl font-semibold text-dusty-900 mb-3">IMPORTANT:</h2>
             <p className="text-dusty-700 leading-relaxed">
               These Terms and Conditions must be accepted by the Client before payment is accepted or services are rendered. By clicking the payment button, providing payment, or otherwise confirming your booking—and submitting payment—the Client acknowledges that they have reviewed our website and have selected a specific photography and/or photography + video package (the "Package"), and that all details provided (including the wedding date and location) are correct and complete. These Terms and Conditions supersede any prior or simultaneous agreements between the parties.
@@ -83,7 +83,7 @@ const TermsAndConditions = () => {
                 <div>
                   <h3 className="text-lg font-semibold text-dusty-800 mb-2">2.4 Cancellation Policy for Month-to-Month Payment Clients</h3>
                   <p className="leading-relaxed">
-                    For clients who elect to pay on a month-to-month basis rather than the full Package Price upfront, all payments remain non-refundable. If the Client cancels the services under the month-to-month payment arrangement, a cancellation fee of $150 will be billed. In addition, clients choosing the month-to-month payment plan will incur a $150 processing fee (this fee can be avoided by paying in full upfront). To initiate cancellation, the Client must provide written confirmation via email to: <a href="mailto:studio@loveandphotos.com" className="text-blush-600 hover:text-blush-700 underline">studio@loveandphotos.com</a>
+                    For clients who elect to pay on a month-to-month basis rather than the full Package Price upfront, all payments remain non-refundable. If the Client cancels the services under the month-to-month payment arrangement, a cancellation fee of $150 will be billed. In addition, clients choosing the month-to-month payment plan will incur a $150 processing fee (this fee can be avoided by paying in full upfront). To initiate cancellation, the Client must provide written confirmation via email to: <a href="mailto:studio@loveandphotos.com" className="text-primary-600 hover:text-primary-700 underline">studio@loveandphotos.com</a>
                   </p>
                 </div>
 
@@ -190,11 +190,11 @@ const TermsAndConditions = () => {
                   </p>
                   <ul className="ml-6 space-y-2">
                     <li className="flex">
-                      <span className="text-blush-500 mr-2">•</span>
+                      <span className="text-primary-500 mr-2">•</span>
                       <span>For photo-only Packages: $100 per hour, per second shooter</span>
                     </li>
                     <li className="flex">
-                      <span className="text-blush-500 mr-2">•</span>
+                      <span className="text-primary-500 mr-2">•</span>
                       <span>For photo + video Packages: 50% of the total Package Price, per second shooter</span>
                     </li>
                   </ul>
@@ -322,19 +322,19 @@ const TermsAndConditions = () => {
                     </p>
                     <ul className="space-y-2">
                       <li className="flex">
-                        <span className="text-blush-500 mr-2">•</span>
+                        <span className="text-primary-500 mr-2">•</span>
                         <span>5–10 minute highlight film: Included with all photo + video Packages</span>
                       </li>
                       <li className="flex">
-                        <span className="text-blush-500 mr-2">•</span>
+                        <span className="text-primary-500 mr-2">•</span>
                         <span>60-second sneak peek film: $450</span>
                       </li>
                       <li className="flex">
-                        <span className="text-blush-500 mr-2">•</span>
+                        <span className="text-primary-500 mr-2">•</span>
                         <span>20–25 minute film: $650</span>
                       </li>
                       <li className="flex">
-                        <span className="text-blush-500 mr-2">•</span>
+                        <span className="text-primary-500 mr-2">•</span>
                         <span>30–60 minute film: $1,150</span>
                       </li>
                     </ul>
@@ -512,15 +512,15 @@ const TermsAndConditions = () => {
                   </p>
                   <ul className="ml-6 space-y-2">
                     <li className="flex">
-                      <span className="text-blush-500 mr-2">•</span>
+                      <span className="text-primary-500 mr-2">•</span>
                       <span>Publishing Deliverables on Love & Photos' website and online galleries</span>
                     </li>
                     <li className="flex">
-                      <span className="text-blush-500 mr-2">•</span>
+                      <span className="text-primary-500 mr-2">•</span>
                       <span>Sharing Deliverables on social media platforms (e.g., Instagram, Facebook, TikTok, Pinterest)</span>
                     </li>
                     <li className="flex">
-                      <span className="text-blush-500 mr-2">•</span>
+                      <span className="text-primary-500 mr-2">•</span>
                       <span>Incorporating Deliverables in print and digital advertising, brochures, proposals, and portfolio presentations</span>
                     </li>
                   </ul>
@@ -587,7 +587,7 @@ const TermsAndConditions = () => {
                 For questions, concerns, or notices regarding these Terms and Conditions, please contact:
               </p>
               <p className="font-medium">
-                Email: <a href="mailto:studio@loveandphotos.com" className="text-blush-600 hover:text-blush-700 underline">studio@loveandphotos.com</a>
+                Email: <a href="mailto:studio@loveandphotos.com" className="text-primary-600 hover:text-primary-700 underline">studio@loveandphotos.com</a>
               </p>
             </section>
 

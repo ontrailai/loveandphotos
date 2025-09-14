@@ -1,11 +1,13 @@
 import { Outlet } from 'react-router-dom'
-import Navbar from './Navbar'
+import { CleanNavbar } from './ui/clean-navbar'
 
 const PublicLayout = () => {
   return (
     <div className="min-h-screen">
-      <Navbar />
-      <Outlet />
+      <CleanNavbar />
+      <div className="pt-16 md:pt-20">
+        <Outlet />
+      </div>
     </div>
   )
 }

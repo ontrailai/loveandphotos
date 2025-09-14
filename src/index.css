@@ -2,6 +2,14 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
+/* Design System: Primary Brand Colors */
+:root {
+  --primary: 348 99% 62%; /* #fe395f */
+  --primary-foreground: 0 0% 100%; /* white */
+  --primary-hover: 348 99% 56%; /* #e23354 */
+  --primary-focus: 348 99% 62%; /* #fe395f with opacity */
+}
+
 /* Custom global styles */
 * {
   margin: 0;
@@ -79,4 +87,18 @@ body {
   .md\:w-32 {
     width: 8rem !important;
   }
+}
+
+/* Hero background override - force pure white */
+.hero--landing {
+  background-color: #ffffff !important;
+  background-image: none !important;
+  background: #ffffff !important;
+}
+
+.hero--landing::before,
+.hero--landing::after {
+  display: none !important;
+  content: none !important;
+  background: none !important;
 }

@@ -5,7 +5,7 @@ import { FacebookIcon, FrameIcon, InstagramIcon, LinkedinIcon, YoutubeIcon } fro
 
 const footerLinks = [
   {
-    label: 'For Clients',
+    label: 'Clients',
     links: [
       { title: 'Find Photographers', href: '/photographers' },
       { title: 'How It Works', href: '/how-it-works' },
@@ -14,7 +14,7 @@ const footerLinks = [
     ]
   },
   {
-    label: 'For Photographers',
+    label: 'Photographers',
     links: [
       { title: 'Join as Photographer', href: '/signup?role=photographer' },
       { title: 'Resources', href: '/resources' },

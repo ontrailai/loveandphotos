@@ -130,7 +130,7 @@ const UploadForm = ({
       <div
         className={clsx(
           'border-2 border-dashed rounded-lg p-8 text-center transition-all duration-200',
-          dragActive ? 'border-blush-500 bg-blush-50' : 'border-gray-300 hover:border-gray-400',
+          dragActive ? 'border-primary bg-primary-50' : 'border-gray-300 hover:border-gray-400',
           uploading && 'opacity-50 pointer-events-none'
         )}
         onDragEnter={handleDrag}
@@ -155,7 +155,7 @@ const UploadForm = ({
             <div className="max-w-xs mx-auto">
               <div className="w-full bg-gray-200 rounded-full h-2">
                 <div 
-                  className="bg-blush-500 h-2 rounded-full transition-all duration-300"
+                  className="bg-primary h-2 rounded-full transition-all duration-300"
                   style={{ width: `${uploadProgress}%` }}
                 />
               </div>
