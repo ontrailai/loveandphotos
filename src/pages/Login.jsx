@@ -2,15 +2,15 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@contexts/AuthContext'
 import { useForm } from 'react-hook-form'
-import { 
-  CameraIcon, 
-  MailIcon, 
+import {
+  MailIcon,
   LockIcon,
   ArrowRightIcon,
   EyeIcon,
   EyeOffIcon
 } from 'lucide-react'
 import Button from '@components/ui/Button'
+import BrandLogo from '@components/BrandLogo'
 import Input from '@components/ui/Input'
 import Card from '@components/ui/Card'
 import toast from 'react-hot-toast'
@@ -80,10 +80,6 @@ const Login = () => {
       <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
         <div className="max-w-md w-full">
           <div className="text-center mb-8">
-            <Link to="/" className="inline-flex items-center space-x-2 mb-6">
-              <CameraIcon className="w-10 h-10 text-blush-500" />
-              <span className="text-3xl font-display font-bold text-dusty-900">LoveP</span>
-            </Link>
             <h2 className="text-3xl font-display font-bold text-dusty-900">
               Welcome back
             </h2>
@@ -178,7 +174,7 @@ const Login = () => {
                 </div>
                 <div className="relative flex justify-center text-sm">
                   <span className="px-2 bg-gradient-to-br from-blush-50/50 via-white/50 to-sage-50/50 text-dusty-600">
-                    New to LoveP?
+                    New to Love & Photos?
                   </span>
                 </div>
               </div>
@@ -206,17 +202,7 @@ const Login = () => {
             alt="Wedding photography"
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-dusty-900/50 to-transparent" />
-        </div>
-        <div className="relative flex items-end p-12">
-          <div className="text-white">
-            <h3 className="text-3xl font-display font-bold mb-2">
-              Capture life's precious moments
-            </h3>
-            <p className="text-lg text-white/80">
-              Connect with talented photographers who bring your vision to life
-            </p>
-          </div>
+          <div className="absolute inset-0 bg-gradient-to-t from-dusty-900/60 to-transparent" />
         </div>
       </div>
     </div>

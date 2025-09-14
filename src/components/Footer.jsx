@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import BrandLogo from '@components/BrandLogo'
 
 const Footer = () => {
   return (
@@ -7,9 +8,17 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Love & Photos</h3>
+            <BrandLogo
+              href="/"
+              size="lg"
+              variant="icon"
+              theme="dark"
+              className="mb-4"
+              alt="Love & Photos"
+              ariaLabel="Love & Photos - Go to homepage"
+            />
             <p className="text-gray-400 text-sm">
-              Connecting clients with talented photographers and videographers for unforgettable events.
+              Connecting moments with the perfect lens since 2024
             </p>
           </div>
 

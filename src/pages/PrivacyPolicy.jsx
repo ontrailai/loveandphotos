@@ -10,7 +10,7 @@ const PrivacyPolicy = () => {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="bg-white rounded-lg shadow-lg p-8 sm:p-12">
           <h1 className="text-4xl font-display font-bold text-dusty-900 mb-4">
-            Privacy Policy for Love and Photos
+            Privacy Policy for Love & Photos
           </h1>
           <p className="text-dusty-600 mb-8">Last Updated: February 03, 2025</p>
 
@@ -20,7 +20,7 @@ const PrivacyPolicy = () => {
                 1. Introduction
               </h2>
               <p className="leading-relaxed">
-                Welcome to Love and Photos ("we," "us," "our"). We are committed to protecting your privacy and ensuring you have a positive experience on our website, <a href="https://loveandphotos.com/" className="text-blush-600 hover:text-blush-700 underline">https://loveandphotos.com/</a> ("Site"). This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our Site or otherwise interact with us. By accessing or using our Site, you agree to the terms of this Privacy Policy.
+                Welcome to Love & Photos ("we," "us," "our"). We are committed to protecting your privacy and ensuring you have a positive experience on our website, <a href="https://loveandphotos.com/" className="text-blush-600 hover:text-blush-700 underline">https://loveandphotos.com/</a> ("Site"). This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our Site or otherwise interact with us. By accessing or using our Site, you agree to the terms of this Privacy Policy.
               </p>
             </section>
 

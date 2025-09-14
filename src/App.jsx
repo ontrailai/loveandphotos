@@ -40,6 +40,7 @@ import HowItWorks from '@pages/HowItWorks'
 import Pricing from '@pages/Pricing'
 import FAQ from '@pages/FAQ'
 import Resources from '@pages/Resources'
+import Demo from '@pages/Demo'
 
 // Customer Pages (lazy loaded)
 const CustomerDashboard = lazy(() => import('@pages/customer/Dashboard'))
@@ -198,6 +199,7 @@ function App() {
             <Route path="/photographer-resources" element={<Resources />} />
             <Route path="/photographer-faq" element={<FAQ />} />
             <Route path="/join" element={<SignUp />} />
+            <Route path="/demo" element={<Demo />} />
             <Route path="/photographers" element={
               <Suspense fallback={<PageLoader />}>
                 <BrowsePhotographers />

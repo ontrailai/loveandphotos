@@ -70,7 +70,8 @@ export default defineConfig({
       'lucide-react',
       'clsx',
       'tailwind-merge',
-      'swr'
+      'swr',
+      'motion/react'
     ]
   },
 

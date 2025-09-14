@@ -1,7 +1,7 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '@contexts/AuthContext'
 import Button from '@components/ui/Button'
-import Logo, { LogoMinimal, LogoMonogram } from '@components/Logo'
+import BrandLogo from '@components/BrandLogo'
 import { useState } from 'react'
 
 const Navbar = () => {
@@ -19,22 +19,15 @@ const Navbar = () => {
 
   return (
     <nav className="bg-white shadow-sm sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full px-40 sm:px-56 lg:px-72">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
-            <Link to="/" className="flex items-center space-x-2 group">
-              <div className="transform transition-transform group-hover:scale-110">
-                {/* Option 1: Modern camera with heart (default) */}
-                {/* <Logo className="w-10 h-10" /> */}
-                
-                {/* Option 2: Minimalist overlapping circles */}
-                {/* <LogoMinimal className="w-10 h-10" /> */}
-                
-                {/* Option 3: L&P Monogram */}
-                <LogoMonogram className="w-10 h-10" />
-              </div>
-              <span className="text-2xl font-display font-bold text-dusty-900">Love & Photos</span>
-            </Link>
+            <BrandLogo
+              href="/"
+              size="lg"
+              variant="icon"
+              className="hover:opacity-90 transition-opacity"
+            />
           </div>
 
           {/* Desktop Menu */}

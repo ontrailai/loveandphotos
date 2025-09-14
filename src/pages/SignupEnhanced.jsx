@@ -10,6 +10,7 @@ import { Eye, EyeOff, Camera, Check, X, UserIcon, MailIcon, PhoneIcon, LockIcon,
 import Button from '@components/ui/Button'
 import BasicInput from '@components/ui/BasicInput'
 import Label from '@components/ui/Label'
+import BrandLogo from '@components/BrandLogo'
 import { cn } from '@/lib/utils'
 import toast from 'react-hot-toast'
 
@@ -182,10 +183,7 @@ const SignupEnhanced = () => {
       <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
         <div className="max-w-md w-full">
           <div className="text-center mb-8">
-            <Link to="/" className="inline-flex items-center space-x-2 mb-6">
-              <Camera className="w-10 h-10 text-blush-500" />
-              <span className="text-3xl font-display font-bold text-dusty-900">LoveP</span>
-            </Link>
+            <BrandLogo href="/" size="xl" variant="full" className="mb-6" />
             <h2 className="text-3xl font-display font-bold text-dusty-900">
               Create your account
             </h2>

@@ -10,6 +10,7 @@ import SignupFormEnhanced from '@components/SignupFormEnhanced'
 import { CameraIcon, CheckIcon, SparklesIcon, ArrowRightIcon } from 'lucide-react'
 import Button from '@components/ui/Button'
 import Card from '@components/ui/Card'
+import BrandLogo from '@components/BrandLogo'
 import { clsx } from 'clsx'
 import toast from 'react-hot-toast'
 
@@ -78,15 +79,12 @@ const SignupDemo = () => {
       <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
         <div className="max-w-md w-full">
           <div className="text-center mb-8">
-            <Link to="/" className="inline-flex items-center space-x-2 mb-6">
-              <CameraIcon className="w-10 h-10 text-blush-500" />
-              <span className="text-3xl font-display font-bold text-dusty-900">LoveP</span>
-            </Link>
+            <BrandLogo href="/" size="xl" variant="full" className="mb-6" />
             <h2 className="text-3xl font-display font-bold text-dusty-900">
               {step === 1 ? 'Choose your path' : 'Create your account'}
             </h2>
             <p className="mt-2 text-dusty-600">
-              {step === 1 ? 'How would you like to use LoveP?' : 'Enhanced form with real-time validation'}
+              {step === 1 ? 'How would you like to use Love & Photos?' : 'Enhanced form with real-time validation'}
             </p>
           </div>
 

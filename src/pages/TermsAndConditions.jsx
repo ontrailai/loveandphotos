@@ -10,7 +10,7 @@ const TermsAndConditions = () => {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="bg-white rounded-lg shadow-lg p-8 sm:p-12">
           <h1 className="text-4xl font-display font-bold text-dusty-900 mb-4">
-            Terms and Conditions for Love and Photos
+            Terms and Conditions for Love & Photos
           </h1>
           <p className="text-dusty-600 mb-8">Last Updated: September 8th, 2025</p>
 
@@ -39,7 +39,7 @@ const TermsAndConditions = () => {
                 <div>
                   <h3 className="text-lg font-semibold text-dusty-800 mb-2">1.2 Service Execution</h3>
                   <p className="leading-relaxed">
-                    In exchange for the full Package Price (as defined below), Love and Photos commits to performing all services as described in the Package on the wedding date. Our services commence upon receipt of payment and include all necessary pre-event planning, coordination, and arrangements.
+                    In exchange for the full Package Price (as defined below), Love & Photos commits to performing all services as described in the Package on the wedding date. Our services commence upon receipt of payment and include all necessary pre-event planning, coordination, and arrangements.
                   </p>
                 </div>
 
@@ -76,7 +76,7 @@ const TermsAndConditions = () => {
                 <div>
                   <h3 className="text-lg font-semibold text-dusty-800 mb-2">2.3 Immediate Service Commitments</h3>
                   <p className="leading-relaxed">
-                    Upon payment, Love and Photos immediately begins its preparatory work (scheduling, securing assignments, coordinating with our team, etc.). The Client acknowledges that our pre-event commitments and financial expenditures are time-sensitive. As a result, even if the Client cancels or reschedules (see Section 4.3), all payments remain final except as specifically noted herein.
+                    Upon payment, Love & Photos immediately begins its preparatory work (scheduling, securing assignments, coordinating with our team, etc.). The Client acknowledges that our pre-event commitments and financial expenditures are time-sensitive. As a result, even if the Client cancels or reschedules (see Section 4.3), all payments remain final except as specifically noted herein.
                   </p>
                 </div>
 
@@ -113,7 +113,7 @@ const TermsAndConditions = () => {
                 <div>
                   <h3 className="text-lg font-semibold text-dusty-800 mb-2">3.2 Proof of Insurance</h3>
                   <p className="leading-relaxed">
-                    If the Client has purchased the Insured Photographer Add-On, Love and Photos will provide a Certificate of Insurance (COI) for the assigned contractor. Proof of insurance will be available no earlier than one (1) week prior to the wedding date and will only be provided upon request. Clients who do not purchase this Add-On are not eligible to receive insurance documentation.
+                    If the Client has purchased the Insured Photographer Add-On, Love & Photos will provide a Certificate of Insurance (COI) for the assigned contractor. Proof of insurance will be available no earlier than one (1) week prior to the wedding date and will only be provided upon request. Clients who do not purchase this Add-On are not eligible to receive insurance documentation.
                   </p>
                 </div>
               </div>
@@ -129,14 +129,14 @@ const TermsAndConditions = () => {
                 <div>
                   <h3 className="text-lg font-semibold text-dusty-800 mb-2">4.1 Arrival Time and Address</h3>
                   <p className="leading-relaxed">
-                    The Client must provide an arrival address and arrival time for the event via the electronic questionnaire at least fourteen (14) days before the wedding date. If no arrival time or address is given, Love and Photos will not be present, and the client will not be issued a refund. The start time is considered the start of continuous, paid coverage and should be at least 30 minutes prior to any scheduled event activities (e.g., ceremonies or first looks).
+                    The Client must provide an arrival address and arrival time for the event via the electronic questionnaire at least fourteen (14) days before the wedding date. If no arrival time or address is given, Love & Photos will not be present, and the client will not be issued a refund. The start time is considered the start of continuous, paid coverage and should be at least 30 minutes prior to any scheduled event activities (e.g., ceremonies or first looks).
                   </p>
                 </div>
 
                 <div>
                   <h3 className="text-lg font-semibold text-dusty-800 mb-2">4.2 Coverage Hours</h3>
                   <p className="leading-relaxed mb-3">
-                    Coverage hours are continuous and billed in full-hour increments. The scheduled start and end times, as submitted by the Client, define our paid coverage period. If an important activity is still in progress at the end of the scheduled period—and if our on-site crew determines that departing would disrupt the event—Love and Photos may extend coverage by one (1) additional hour. Any additional hours will be added to the Package Price at a rate of $300 per additional hour, per team member.
+                    Coverage hours are continuous and billed in full-hour increments. The scheduled start and end times, as submitted by the Client, define our paid coverage period. If an important activity is still in progress at the end of the scheduled period—and if our on-site crew determines that departing would disrupt the event—Love & Photos may extend coverage by one (1) additional hour. Any additional hours will be added to the Package Price at a rate of $300 per additional hour, per team member.
                   </p>
                   
                   <div className="ml-6 space-y-3">
@@ -217,7 +217,7 @@ const TermsAndConditions = () => {
                 5. STUDIO TEAM SELECTION
               </h2>
               <p className="leading-relaxed">
-                Love and Photos relies on a team of skilled professionals to deliver our services. We retain sole discretion in selecting the lead and, if applicable, the assistant photographer and/or videographer. In the event of illness, scheduling conflicts, or other unforeseen circumstances, we may substitute team members with qualified professionals who meet our standards for technical and artistic quality.
+                Love & Photos relies on a team of skilled professionals to deliver our services. We retain sole discretion in selecting the lead and, if applicable, the assistant photographer and/or videographer. In the event of illness, scheduling conflicts, or other unforeseen circumstances, we may substitute team members with qualified professionals who meet our standards for technical and artistic quality.
               </p>
             </section>
 
@@ -231,14 +231,14 @@ const TermsAndConditions = () => {
                 <div>
                   <h3 className="text-lg font-semibold text-dusty-800 mb-2">6.1 Safe Environment</h3>
                   <p className="leading-relaxed">
-                    The Client is responsible for ensuring that the event environment is safe, legal, and free from harassment, threats, or dangerous conditions. If our team encounters behavior or conditions that are unsafe, threatening, or abusive, Love and Photos reserves the right to cease services immediately and depart the premises. In such cases, no refund will be issued.
+                    The Client is responsible for ensuring that the event environment is safe, legal, and free from harassment, threats, or dangerous conditions. If our team encounters behavior or conditions that are unsafe, threatening, or abusive, Love & Photos reserves the right to cease services immediately and depart the premises. In such cases, no refund will be issued.
                   </p>
                 </div>
 
                 <div>
                   <h3 className="text-lg font-semibold text-dusty-800 mb-2">6.2 Equipment Protection</h3>
                   <p className="leading-relaxed">
-                    The Client must exercise reasonable care to safeguard any Love and Photos equipment (cameras, lenses, lighting, etc.) that may come under the control of any Client Party. Should any equipment be damaged or lost due to negligence or other improper acts while under Client control, the Client agrees to promptly reimburse Love and Photos for the replacement cost and any related expenses.
+                    The Client must exercise reasonable care to safeguard any Love & Photos equipment (cameras, lenses, lighting, etc.) that may come under the control of any Client Party. Should any equipment be damaged or lost due to negligence or other improper acts while under Client control, the Client agrees to promptly reimburse Love & Photos for the replacement cost and any related expenses.
                   </p>
                 </div>
               </div>
@@ -254,7 +254,7 @@ const TermsAndConditions = () => {
                 <div>
                   <h3 className="text-lg font-semibold text-dusty-800 mb-2">7.1 Cancellation and Non-Refundability</h3>
                   <p className="leading-relaxed">
-                    Because Love and Photos commits significant resources and schedules our team based on the agreed wedding date, all payments are final and non-refundable. If the Client cancels the event or our services for any reason, all funds paid remain non-refundable and non-transferable to any future date, unless otherwise agreed to in writing by Love and Photos.
+                    Because Love & Photos commits significant resources and schedules our team based on the agreed wedding date, all payments are final and non-refundable. If the Client cancels the event or our services for any reason, all funds paid remain non-refundable and non-transferable to any future date, unless otherwise agreed to in writing by Love & Photos.
                   </p>
                 </div>
 
@@ -268,7 +268,7 @@ const TermsAndConditions = () => {
                 <div>
                   <h3 className="text-lg font-semibold text-dusty-800 mb-2">7.3 Studio Cancellation and Refund</h3>
                   <p className="leading-relaxed">
-                    In the event that Love and Photos cancels the services and is unable to provide a replacement photographer, the Client will receive a full refund of all payments made.
+                    In the event that Love & Photos cancels the services and is unable to provide a replacement photographer, the Client will receive a full refund of all payments made.
                   </p>
                 </div>
               </div>
@@ -284,7 +284,7 @@ const TermsAndConditions = () => {
                 <div>
                   <h3 className="text-lg font-semibold text-dusty-800 mb-2">8.1 Delivery of Edited Media and Turnaround Time</h3>
                   <p className="leading-relaxed">
-                    Final edited photos will be delivered to the Client up to 3 months from the wedding date. The edited video will be available up to 4 months from the wedding date. Following the event and subsequent editing process, Love and Photos will deliver the final, edited photos (and video, if applicable) via a download link or digital album provided to the Client. These methods are the sole method for accessing the final deliverables. Once the media is delivered, it is considered final. The Company has no obligation to perform any further edits to any photos or video, even if requested by the Client.
+                    Final edited photos will be delivered to the Client up to 3 months from the wedding date. The edited video will be available up to 4 months from the wedding date. Following the event and subsequent editing process, Love & Photos will deliver the final, edited photos (and video, if applicable) via a download link or digital album provided to the Client. These methods are the sole method for accessing the final deliverables. Once the media is delivered, it is considered final. The Company has no obligation to perform any further edits to any photos or video, even if requested by the Client.
                   </p>
                 </div>
 
@@ -347,7 +347,7 @@ const TermsAndConditions = () => {
                 <div>
                   <h3 className="text-lg font-semibold text-dusty-800 mb-2">8.6 Backup & Storage</h3>
                   <p className="leading-relaxed mb-3">
-                    Love and Photos will keep a backup of your wedding photos and video for 2 months after we deliver them. After that, we're no longer responsible for storing or providing copies.
+                    Love & Photos will keep a backup of your wedding photos and video for 2 months after we deliver them. After that, we're no longer responsible for storing or providing copies.
                   </p>
                   <p className="leading-relaxed mb-3">
                     If you request copies after the 2-month window, there's a $400 storage fee to unarchive the files. This gives you temporary access for 30 days.
@@ -383,28 +383,28 @@ const TermsAndConditions = () => {
                 <div>
                   <h3 className="text-lg font-semibold text-dusty-800 mb-2">9.1 Warranty and "As-Is" Services</h3>
                   <p className="leading-relaxed">
-                    Love and Photos retains full production and editorial control over all deliverables. Except as provided herein, all services and deliverables are provided "as-is" without any warranty of any kind—express or implied—including any warranty of merchantability or fitness for a particular purpose.
+                    Love & Photos retains full production and editorial control over all deliverables. Except as provided herein, all services and deliverables are provided "as-is" without any warranty of any kind—express or implied—including any warranty of merchantability or fitness for a particular purpose.
                   </p>
                 </div>
 
                 <div>
                   <h3 className="text-lg font-semibold text-dusty-800 mb-2">9.2 Professional Exclusivity</h3>
                   <p className="leading-relaxed">
-                    The Client agrees that Love and Photos is the exclusive provider of professional photography and/or videography services on the wedding date. The Client shall not engage any additional professionals to perform similar services during the event.
+                    The Client agrees that Love & Photos is the exclusive provider of professional photography and/or videography services on the wedding date. The Client shall not engage any additional professionals to perform similar services during the event.
                   </p>
                 </div>
 
                 <div>
                   <h3 className="text-lg font-semibold text-dusty-800 mb-2">9.3 Copyright and Client Photo Rights</h3>
                   <p className="leading-relaxed">
-                    Love and Photos retains copyright ownership of the images. The Client will receive full printing, sharing, and distribution rights to the final edited images for personal use, including printing, sharing online, and creating photo albums. The Client is not permitted to modify the deliverables or use them for commercial purposes without our prior written consent.
+                    Love & Photos retains copyright ownership of the images. The Client will receive full printing, sharing, and distribution rights to the final edited images for personal use, including printing, sharing online, and creating photo albums. The Client is not permitted to modify the deliverables or use them for commercial purposes without our prior written consent.
                   </p>
                 </div>
 
                 <div>
                   <h3 className="text-lg font-semibold text-dusty-800 mb-2">9.4 WARRANTY OF MERCHANTABILITY</h3>
                   <p className="leading-relaxed">
-                    Client grants Love and Photos full production and editorial control regarding all aspects of the Products. Love and Photos makes no guarantee, either expressed or implied, regarding the aesthetic qualities of the Products and services offered, including any specific effect, request, and/or pose, photographed or videotaped segments. EXCEPT AS SET FORTH IN THIS SECTION, AND TO THE MAXIMUM EXTENT PERMITTED BY LAW, ALL SERVICES AND GOODS, INCLUDING PHOTOGRAPHS AND VIDEO, PROVIDED HEREUNDER ARE PROVIDED "AS-IS", WITHOUT ANY WARRANTY OF ANY KIND AND LOVE AND PHOTOS HEREBY DISCLAIMS ALL OTHER WARRANTIES, EXPRESS, IMPLIED OR STATUTORY, INCLUDING, WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+                    Client grants Love & Photos full production and editorial control regarding all aspects of the Products. Love & Photos makes no guarantee, either expressed or implied, regarding the aesthetic qualities of the Products and services offered, including any specific effect, request, and/or pose, photographed or videotaped segments. EXCEPT AS SET FORTH IN THIS SECTION, AND TO THE MAXIMUM EXTENT PERMITTED BY LAW, ALL SERVICES AND GOODS, INCLUDING PHOTOGRAPHS AND VIDEO, PROVIDED HEREUNDER ARE PROVIDED "AS-IS", WITHOUT ANY WARRANTY OF ANY KIND AND LOVE AND PHOTOS HEREBY DISCLAIMS ALL OTHER WARRANTIES, EXPRESS, IMPLIED OR STATUTORY, INCLUDING, WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
                   </p>
                 </div>
               </div>
@@ -450,7 +450,7 @@ const TermsAndConditions = () => {
                 <div>
                   <h3 className="text-lg font-semibold text-dusty-800 mb-2">11.1 Indemnification</h3>
                   <p className="leading-relaxed">
-                    The Client agrees to indemnify and hold harmless Love and Photos, its affiliates, employees, contractors, and agents from any losses, damages, or liabilities arising from any breach of these Terms and Conditions by the Client or from the performance of our services, except in cases of gross negligence or willful misconduct.
+                    The Client agrees to indemnify and hold harmless Love & Photos, its affiliates, employees, contractors, and agents from any losses, damages, or liabilities arising from any breach of these Terms and Conditions by the Client or from the performance of our services, except in cases of gross negligence or willful misconduct.
                   </p>
                 </div>
 
@@ -478,14 +478,14 @@ const TermsAndConditions = () => {
                 <div>
                   <h3 className="text-lg font-semibold text-dusty-800 mb-2">11.5 Entire Agreement</h3>
                   <p className="leading-relaxed">
-                    These Terms and Conditions, including any forms or questionnaires completed online, constitute the entire agreement between the Client and Love and Photos regarding the subject matter herein and supersede all prior agreements—written or oral.
+                    These Terms and Conditions, including any forms or questionnaires completed online, constitute the entire agreement between the Client and Love & Photos regarding the subject matter herein and supersede all prior agreements—written or oral.
                   </p>
                 </div>
 
                 <div>
                   <h3 className="text-lg font-semibold text-dusty-800 mb-2">11.6 Modifications to Terms and Conditions</h3>
                   <p className="leading-relaxed">
-                    Love and Photos reserves the right to modify, update, or change these Terms and Conditions at any time without prior notice. It is the Client's responsibility to review these Terms and Conditions periodically. Continued use of our services after any modifications constitutes acceptance of the revised terms.
+                    Love & Photos reserves the right to modify, update, or change these Terms and Conditions at any time without prior notice. It is the Client's responsibility to review these Terms and Conditions periodically. Continued use of our services after any modifications constitutes acceptance of the revised terms.
                   </p>
                 </div>
 
@@ -566,13 +566,13 @@ const TermsAndConditions = () => {
                 <div>
                   <h3 className="text-lg font-semibold text-dusty-800 mb-2">13.1 Disclaimer of Liability</h3>
                   <p className="leading-relaxed mb-3">
-                    Love and Photos shall not be liable to you for any injury, loss, expense, or damages incurred or sustained by you or any member of your family or guests arising from, relating to, or connected with the use of the Love and Photos website or services, including without limitation, the acts or omissions of any assigned Love and Photos photographer, videographer, contractor, or staff member.
+                    Love & Photos shall not be liable to you for any injury, loss, expense, or damages incurred or sustained by you or any member of your family or guests arising from, relating to, or connected with the use of the Love & Photos website or services, including without limitation, the acts or omissions of any assigned Love & Photos photographer, videographer, contractor, or staff member.
                   </p>
                   <p className="leading-relaxed mb-3">
-                    Love and Photos, its contractors, and its employees are not responsible for any loss or damage to image or video files created, stored, or delivered, even if caused by negligence or other fault. Without limiting the foregoing, in no case shall Love and Photos, its directors, officers, employees, affiliates, agents, contractors, interns, suppliers, service providers, or licensors be liable for any injury, loss, claim, or any direct, indirect, incidental, punitive, special, or consequential damages of any kind, including but not limited to lost profits, lost revenue, lost savings, loss of data, replacement costs, or any similar damages, whether based in contract, tort (including negligence), strict liability, or otherwise, arising from your use of any of our services or any products procured using the services, or for any other claim related in any way to your use of the services or any product, including but not limited to any errors or omissions in content or any loss or damage of any kind incurred as a result of the use of our services or any content posted, transmitted, or otherwise made available via the services.
+                    Love & Photos, its contractors, and its employees are not responsible for any loss or damage to image or video files created, stored, or delivered, even if caused by negligence or other fault. Without limiting the foregoing, in no case shall Love & Photos, its directors, officers, employees, affiliates, agents, contractors, interns, suppliers, service providers, or licensors be liable for any injury, loss, claim, or any direct, indirect, incidental, punitive, special, or consequential damages of any kind, including but not limited to lost profits, lost revenue, lost savings, loss of data, replacement costs, or any similar damages, whether based in contract, tort (including negligence), strict liability, or otherwise, arising from your use of any of our services or any products procured using the services, or for any other claim related in any way to your use of the services or any product, including but not limited to any errors or omissions in content or any loss or damage of any kind incurred as a result of the use of our services or any content posted, transmitted, or otherwise made available via the services.
                   </p>
                   <p className="leading-relaxed">
-                    If applicable law does not permit the exclusion or limitation of liability for consequential or incidental damages, in such jurisdictions Love and Photos' liability shall be limited to the maximum extent permitted by law.
+                    If applicable law does not permit the exclusion or limitation of liability for consequential or incidental damages, in such jurisdictions Love & Photos' liability shall be limited to the maximum extent permitted by law.
                   </p>
                 </div>
               </div>

@@ -23,6 +23,7 @@ import {
 import Button from '@components/ui/Button'
 import Input from '@components/ui/Input'
 import Card from '@components/ui/Card'
+import BrandLogo from '@components/BrandLogo'
 import { clsx } from 'clsx'
 import toast from 'react-hot-toast'
 
@@ -124,15 +125,12 @@ const SignUp = () => {
       <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
         <div className="max-w-md w-full">
           <div className="text-center mb-8">
-            <Link to="/" className="inline-flex items-center space-x-2 mb-6">
-              <CameraIcon className="w-10 h-10 text-blush-500" />
-              <span className="text-3xl font-display font-bold text-dusty-900">LoveP</span>
-            </Link>
+            <BrandLogo href="/" size="xl" variant="full" className="mb-6" />
             <h2 className="text-3xl font-display font-bold text-dusty-900">
               {step === 1 ? 'Choose your path' : 'Create your account'}
             </h2>
             <p className="mt-2 text-dusty-600">
-              {step === 1 ? 'How would you like to use LoveP?' : 'Join thousands of happy users'}
+              {step === 1 ? 'How would you like to use Love & Photos?' : 'Join thousands of happy users'}
             </p>
           </div>
 

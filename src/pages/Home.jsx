@@ -5,6 +5,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { Footer } from '../components/ui/footer-section'
 import { 
   SearchIcon, 
   MapPinIcon, 
@@ -16,12 +17,12 @@ import {
   HeartIcon,
   ShieldCheckIcon
 } from 'lucide-react'
-import Logo, { LogoMinimal, LogoMonogram } from '@components/Logo'
 import Button from '@components/ui/Button'
 import Input from '@components/ui/Input'
 import Card from '@components/ui/Card'
 import Badge from '@components/ui/Badge'
 import RatingStars from '@components/shared/RatingStars'
+import BrandLogo from '@components/BrandLogo'
 import { supabase } from '@lib/supabase'
 import { useFullZipDatabase } from '@/hooks/useFullZipDatabase'
 
@@ -540,55 +541,7 @@ const Home = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            <div className="col-span-2 md:col-span-1">
-              <Link to="/" className="flex items-center space-x-2 mb-4">
-                <LogoMonogram className="w-10 h-10" />
-                <span className="text-2xl font-display font-bold text-dusty-900">Love & Photos</span>
-              </Link>
-              <p className="text-dusty-600 text-sm">
-                Connecting moments with the perfect lens since 2024
-              </p>
-            </div>
-
-            <div>
-              <h4 className="font-semibold text-dusty-900 mb-4">For Clients</h4>
-              <ul className="space-y-2">
-                <li><Link to="/photographers" className="text-dusty-600 hover:text-dusty-900 text-sm">Find Photographers</Link></li>
-                <li><Link to="/how-it-works" className="text-dusty-600 hover:text-dusty-900 text-sm">How It Works</Link></li>
-                <li><Link to="/pricing" className="text-dusty-600 hover:text-dusty-900 text-sm">Pricing</Link></li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-semibold text-dusty-900 mb-4">For Photographers</h4>
-              <ul className="space-y-2">
-                <li><Link to="/signup?role=photographer" className="text-dusty-600 hover:text-dusty-900 text-sm">Join as Photographer</Link></li>
-                <li><Link to="/resources" className="text-dusty-600 hover:text-dusty-900 text-sm">Resources</Link></li>
-                <li><Link to="/faq" className="text-dusty-600 hover:text-dusty-900 text-sm">FAQ</Link></li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-semibold text-dusty-900 mb-4">Company</h4>
-              <ul className="space-y-2">
-                <li><Link to="/about" className="text-dusty-600 hover:text-dusty-900 text-sm">About</Link></li>
-                <li><Link to="/contact" className="text-dusty-600 hover:text-dusty-900 text-sm">Contact</Link></li>
-                <li><Link to="/terms" className="text-dusty-600 hover:text-dusty-900 text-sm">Terms</Link></li>
-                <li><Link to="/privacy" className="text-dusty-600 hover:text-dusty-900 text-sm">Privacy</Link></li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="mt-8 pt-8 border-t border-gray-100 text-center">
-            <p className="text-dusty-500 text-sm">
-              Copyright 2025. Love & Photos. All Rights Reserved.
-            </p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   )
 }

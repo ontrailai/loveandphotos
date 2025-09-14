@@ -197,8 +197,8 @@ const generateCustomerEmail = (booking) => {
         </div>
         
         <div class="footer">
-          <p>Questions? Reply to this email or contact us at support@lovep.com</p>
-          <p>© ${new Date().getFullYear()} LoveP Marketplace. All rights reserved.</p>
+          <p>Questions? Reply to this email or contact us at support@loveandphotos.com</p>
+          <p>© ${new Date().getFullYear()} Love & Photos. All rights reserved.</p>
         </div>
       </div>
     </body>
@@ -228,7 +228,7 @@ NEXT STEPS:
 
 View in dashboard: ${dashboardUrl}
 
-Questions? Contact us at support@lovep.com
+Questions? Contact us at support@loveandphotos.com
   `
 
   return { subject, html, text }
@@ -437,7 +437,7 @@ export const sendDeliveryNotification = async ({ bookingId, deliveryUrl, deliver
               <a href="${deliveryUrl}" class="button">View Your Photos</a>
             </p>
             
-            <p>Thank you for choosing LoveP!</p>
+            <p>Thank you for choosing Love & Photos!</p>
           </div>
         </div>
       </body>
