@@ -9,6 +9,7 @@ import { Footer } from '../components/ui/footer-section'
 import { Feature } from '@components/ui/feature-with-advantages'
 import { FeaturedPhotographersSection } from '@components/ui/featured-photographers'
 import TestimonialsSection from '@components/TestimonialsSection'
+import HeroCTA from '../components/cta/HeroCTA'
 import {
   SearchIcon,
   MapPinIcon,
@@ -383,28 +384,7 @@ const Home = () => {
       <TestimonialsSection />
 
       {/* CTA Section */}
-      <section className="py-20 bg-dusty-900">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl font-display font-bold text-white mb-4">
-            Ready to Capture Your Perfect Moment?
-          </h2>
-          <p className="text-xl text-dusty-300 mb-8">
-            Join thousands of happy clients who found their perfect photographer match
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/signup">
-              <Button size="lg" className="shadow-lg">
-                Get Started Free
-              </Button>
-            </Link>
-            <Link to="/photographers">
-              <Button size="lg" variant="outline" className="text-white border-white hover:bg-white/10">
-                Browse Photographers
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
+      <HeroCTA />
 
       {/* Footer */}
       <Footer />
