@@ -31,4 +31,17 @@ const Card = ({
   )
 }
 
+const CardContent = ({
+  children,
+  className = '',
+  ...props
+}) => {
+  return (
+    <div className={clsx('', className)} {...props}>
+      {children}
+    </div>
+  )
+}
+
+export { Card, CardContent }
 export default Card

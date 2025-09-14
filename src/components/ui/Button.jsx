@@ -12,6 +12,7 @@ const variants = {
   outline: 'border-2 border-current text-dusty-700 hover:bg-dusty-50 focus:ring-dusty-500',
   ghost: 'text-dusty-700 hover:bg-dusty-50 focus:ring-dusty-500',
   danger: 'bg-red-500 text-white hover:bg-red-600 focus:ring-red-500',
+  neutral: 'bg-black text-white hover:bg-black/90 border border-black/80 focus-visible:ring-black/30',
 }
 
 const sizes = {

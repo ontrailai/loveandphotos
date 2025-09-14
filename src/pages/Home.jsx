@@ -6,10 +6,12 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Footer } from '../components/ui/footer-section'
-import { 
-  SearchIcon, 
-  MapPinIcon, 
-  CalendarIcon, 
+import { Feature } from '@components/ui/feature-with-advantages'
+import { FeaturedPhotographersSection } from '@components/ui/featured-photographers'
+import {
+  SearchIcon,
+  MapPinIcon,
+  CalendarIcon,
   SparklesIcon,
   CheckCircleIcon,
   ArrowRightIcon,
@@ -29,17 +31,11 @@ import { useFullZipDatabase } from '@/hooks/useFullZipDatabase'
 const Home = () => {
   const navigate = useNavigate()
   const [searchZip, setSearchZip] = useState('')
-  const [featuredPhotographers, setFeaturedPhotographers] = useState([])
-  const [loading, setLoading] = useState(true)
   const [zipSuggestions, setZipSuggestions] = useState([])
   const [showSuggestions, setShowSuggestions] = useState(false)
   const searchRef = useRef(null)
   const heroRef = useRef(null)
   const { searchZipCodes, isReady } = useFullZipDatabase()
-
-  useEffect(() => {
-    loadFeaturedPhotographers()
-  }, [])
 
   // Hero background verification hook (development only)
   useEffect(() => {
@@ -248,7 +244,7 @@ const Home = () => {
       {/* Hero Section */}
       <section
         ref={heroRef}
-        className="hero--landing relative pt-16 pb-32 overflow-hidden !bg-white !bg-none before:!content-none after:!content-none"
+        className="hero--landing relative pt-16 pb-8 md:pb-12 lg:pb-16 overflow-hidden !bg-white !bg-none before:!content-none after:!content-none"
         style={{ backgroundColor: '#ffffff', backgroundImage: 'none' }}
       >
         {/* Background removed - solid white background applied to section */}
@@ -405,106 +401,10 @@ const Home = () => {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-display font-bold text-dusty-900 mb-4">
-              Why Choose Love & Photos
-            </h2>
-            <p className="text-lg text-dusty-600 max-w-2xl mx-auto">
-              We make finding and booking the perfect photographer simple, safe, and delightful
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {features.map((feature, index) => (
-              <Card key={index} className="text-center group hover:shadow-xl transition-all duration-300">
-                <div className="w-16 h-16 bg-gradient-to-br from-primary-400 to-sage-400 rounded-full flex items-center justify-center text-white mx-auto mb-4 group-hover:scale-110 transition-transform">
-                  {feature.icon}
-                </div>
-                <h3 className="text-xl font-semibold text-dusty-900 mb-2">
-                  {feature.title}
-                </h3>
-                <p className="text-dusty-600">
-                  {feature.description}
-                </p>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
+      <Feature />
 
       {/* Featured Photographers */}
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-display font-bold text-dusty-900 mb-4">
-              Featured Photographers
-            </h2>
-            <p className="text-lg text-dusty-600">
-              Top-rated professionals ready to capture your moments
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {loading ? (
-              // Loading skeletons
-              [...Array(3)].map((_, i) => (
-                <Card key={i} className="animate-pulse">
-                  <div className="h-48 bg-gray-200 rounded-lg mb-4" />
-                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
-                  <div className="h-4 bg-gray-200 rounded w-1/2" />
-                </Card>
-              ))
-            ) : (
-              featuredPhotographers.map((photographer) => (
-                <Card 
-                  key={photographer.id} 
-                  hover 
-                  className="cursor-pointer"
-                  onClick={() => navigate(`/photographer/${photographer.id}`)}
-                >
-                  <div className="aspect-w-16 aspect-h-12 mb-4">
-                    <img 
-                      src={photographer.users?.avatar_url || `https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=400`}
-                      alt={photographer.users?.full_name}
-                      className="w-full h-48 object-cover rounded-lg"
-                    />
-                  </div>
-                  <div className="flex items-start justify-between mb-2">
-                    <div>
-                      <h3 className="font-semibold text-dusty-900">
-                        {photographer.users?.full_name || 'Photographer'}
-                      </h3>
-                      <p className="text-sm text-dusty-600">
-                        {photographer.specialties?.join(', ') || 'All Events'}
-                      </p>
-                    </div>
-                    <Badge variant={photographer.pay_tiers?.name.toLowerCase() || 'default'} size="sm">
-                      {photographer.pay_tiers?.name || 'Bronze'}
-                    </Badge>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <RatingStars rating={photographer.average_rating || 0} size="sm" />
-                    <span className="text-sm font-medium text-dusty-700">
-                      ${photographer.pay_tiers?.hourly_rate || 150}/hr
-                    </span>
-                  </div>
-                </Card>
-              ))
-            )}
-          </div>
-
-          <div className="text-center mt-12">
-            <Link to="/photographers">
-              <Button size="lg" className="group">
-                View All Photographers
-                <ArrowRightIcon className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
+      <FeaturedPhotographersSection />
 
       {/* Testimonials */}
       <section className="py-20 bg-white">
