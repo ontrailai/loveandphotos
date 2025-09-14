@@ -4,10 +4,13 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"npm run dev:client\" \"npm run dev:api\"",
+    "dev": "npm run check:react && concurrently \"npm run dev:client\" \"npm run dev:api\"",
     "dev:client": "vite",
     "dev:api": "node api/server.js",
-    "dev:frontend-only": "vite",
+    "dev:frontend-only": "npm run check:react && vite",
+    "dev:bypass": "node scripts/check-react-singleton-bypass.js && vite",
+    "dev:direct": "vite",
+    "check:react": "node scripts/check-react-singleton.js",
     "prebuild": "node scripts/validate-imports.js",
     "build": "vite build",
     "build:analyze": "vite build --mode analyze",
@@ -57,6 +60,14 @@
     "tailwind-merge": "^3.3.1",
     "uuid": "^13.0.0"
   },
+  "resolutions": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "overrides": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
   "devDependencies": {
     "@axe-core/react": "^4.10.2",
     "@babel/preset-env": "^7.23.0",
@@ -92,5 +103,8 @@
     "supertest": "^6.3.3",
     "tailwindcss": "^3.3.6",
     "vite": "^5.0.7"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "^4.50.1"
   }
 }

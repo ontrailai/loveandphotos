@@ -1,5 +1,12 @@
 # Claude Code Configuration - Love & Photos Project
 
+## Important User Preferences
+**DESKTOP ORGANIZATION**:
+- ⚠️ **NEVER save files directly on the desktop** - User prefers a clean desktop
+- ✅ Always save files within project directories (e.g., `/mnt/c/Users/riley/Desktop/loveandphotos/`)
+- ✅ Create subdirectories for organization (e.g., `scripts/`, `tests/`, `docs/`)
+- ❌ Do not create loose files on `/mnt/c/Users/riley/Desktop/`
+
 ## MCP Servers Setup ✅
 
 ### 1. Render MCP Server
@@ -117,4 +124,10 @@ The Supabase MCP works behind the scenes. You can ask Claude to query the databa
 - `supabase/database.types.ts` - Auto-generated TypeScript types from database schema
 - `supabase/schema-docker-test.sql` - Database schema dump (created with Docker)
 
-Last Updated: 2025-01-12 (Supabase CLI and Docker added)
+Last Updated: 2025-01-14 (Added desktop organization preference)
+# important-instruction-reminders
+Do what has been asked; nothing more, nothing less.
+NEVER create files unless they're absolutely necessary for achieving your goal.
+ALWAYS prefer editing an existing file to creating a new one.
+NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.
+NEVER save files directly on the desktop - always use project directories.

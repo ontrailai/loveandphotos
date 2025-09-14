@@ -8,6 +8,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Footer } from '../components/ui/footer-section'
 import { Feature } from '@components/ui/feature-with-advantages'
 import { FeaturedPhotographersSection } from '@components/ui/featured-photographers'
+import TestimonialsSection from '@components/TestimonialsSection'
 import {
   SearchIcon,
   MapPinIcon,
@@ -21,9 +22,7 @@ import {
 } from 'lucide-react'
 import Button from '@components/ui/Button'
 import Input from '@components/ui/Input'
-import Card from '@components/ui/Card'
 import Badge from '@components/ui/Badge'
-import RatingStars from '@components/shared/RatingStars'
 import BrandLogo from '@components/BrandLogo'
 import { supabase } from '@lib/supabase'
 import { useFullZipDatabase } from '@/hooks/useFullZipDatabase'
@@ -194,32 +193,6 @@ const Home = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  const testimonials = [
-    {
-      id: 1,
-      name: 'Sarah & Michael Chen',
-      event: 'Wedding',
-      rating: 5,
-      comment: 'Our photographer captured every magical moment perfectly. The attention to detail was incredible!',
-      image: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=400'
-    },
-    {
-      id: 2,
-      name: 'Emily Rodriguez',
-      event: 'Corporate Event',
-      rating: 5,
-      comment: 'Professional, creative, and delivered beyond our expectations. Highly recommend!',
-      image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400'
-    },
-    {
-      id: 3,
-      name: 'James & Lisa Park',
-      event: 'Engagement',
-      rating: 5,
-      comment: 'The photos are absolutely stunning. We couldn\'t be happier with our choice!',
-      image: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=400'
-    }
-  ]
 
   const features = [
     {
@@ -407,45 +380,7 @@ const Home = () => {
       <FeaturedPhotographersSection />
 
       {/* Testimonials */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-display font-bold text-dusty-900 mb-4">
-              Love Stories from Our Clients
-            </h2>
-            <p className="text-lg text-dusty-600">
-              Real moments, real memories, real testimonials
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial) => (
-              <Card key={testimonial.id} className="relative">
-                <div className="absolute -top-4 -right-4 text-6xl text-primary-200 font-serif">
-                  "
-                </div>
-                <div className="relative">
-                  <div className="mb-4">
-                    <img 
-                      src={testimonial.image}
-                      alt={testimonial.event}
-                      className="w-full h-48 object-cover rounded-lg"
-                    />
-                  </div>
-                  <RatingStars rating={testimonial.rating} size="sm" className="mb-3" />
-                  <p className="text-dusty-600 italic mb-4">
-                    {testimonial.comment}
-                  </p>
-                  <div>
-                    <p className="font-semibold text-dusty-900">{testimonial.name}</p>
-                    <p className="text-sm text-dusty-500">{testimonial.event}</p>
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
+      <TestimonialsSection />
 
       {/* CTA Section */}
       <section className="py-20 bg-dusty-900">

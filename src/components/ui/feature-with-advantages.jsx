@@ -1,6 +1,14 @@
 import { Check } from "lucide-react";
 import Badge from "@components/ui/Badge";
 
+// Helper function to sanitize subtext by removing trailing dashes and adding proper periods
+const sanitizeSubtext = (text) => {
+  let s = text.replace(/[—–-]\s*$/, '').trimEnd();
+  if (!/[.!?]$/.test(s)) s += '.';
+  // Ensure no double periods
+  return s.replace(/\.{2,}/, '.');
+};
+
 function Feature() {
   return (
     <div className="w-full pt-8 md:pt-10 lg:pt-12 pb-20 lg:pb-40">
@@ -24,7 +32,7 @@ function Feature() {
                 <div className="flex flex-col gap-1">
                   <p className="font-medium">Transparent Pricing</p>
                   <p className="text-muted-foreground text-sm">
-                    Clear, upfront pricing with no hidden fees or surprises—
+                    {sanitizeSubtext('Clear, upfront pricing with no hidden fees or surprises—')}
                   </p>
                 </div>
               </div>
@@ -33,7 +41,7 @@ function Feature() {
                 <div className="flex flex-col gap-1">
                   <p className="font-medium">Vetted Talent</p>
                   <p className="text-muted-foreground text-sm">
-                    All photographers are carefully screened and verified for quality—
+                    {sanitizeSubtext('All photographers are carefully screened and verified for quality—')}
                   </p>
                 </div>
               </div>
@@ -42,7 +50,7 @@ function Feature() {
                 <div className="flex flex-col gap-1">
                   <p className="font-medium">Smart Matching</p>
                   <p className="text-muted-foreground text-sm">
-                    AI-powered matching finds the perfect photographer for your style—
+                    {sanitizeSubtext('AI-powered matching finds the perfect photographer for your style—')}
                   </p>
                 </div>
               </div>
@@ -51,7 +59,7 @@ function Feature() {
                 <div className="flex flex-col gap-1">
                   <p className="font-medium">Secure Payments</p>
                   <p className="text-muted-foreground text-sm">
-                    Safe, encrypted payment processing with buyer protection—
+                    {sanitizeSubtext('Safe, encrypted payment processing with buyer protection—')}
                   </p>
                 </div>
               </div>
@@ -60,7 +68,7 @@ function Feature() {
                 <div className="flex flex-col gap-1">
                   <p className="font-medium">Auto Contracts</p>
                   <p className="text-muted-foreground text-sm">
-                    Automated legal contracts protect both you and your photographer—
+                    {sanitizeSubtext('Automated legal contracts protect both you and your photographer—')}
                   </p>
                 </div>
               </div>
@@ -69,7 +77,7 @@ function Feature() {
                 <div className="flex flex-col gap-1">
                   <p className="font-medium">Flexible Plans</p>
                   <p className="text-muted-foreground text-sm">
-                    Choose from packages or custom pricing to fit your needs—
+                    {sanitizeSubtext('Choose from packages or custom pricing to fit your needs—')}
                   </p>
                 </div>
               </div>
@@ -78,7 +86,7 @@ function Feature() {
                 <div className="flex flex-col gap-1">
                   <p className="font-medium">Rush Delivery</p>
                   <p className="text-muted-foreground text-sm">
-                    Need photos fast? Express delivery options available—
+                    {sanitizeSubtext('Need photos fast? Express delivery options available—')}
                   </p>
                 </div>
               </div>
@@ -87,7 +95,7 @@ function Feature() {
                 <div className="flex flex-col gap-1">
                   <p className="font-medium">On-Time Media</p>
                   <p className="text-muted-foreground text-sm">
-                    Guaranteed delivery timelines with progress tracking—
+                    {sanitizeSubtext('Guaranteed delivery timelines with progress tracking—')}
                   </p>
                 </div>
               </div>
@@ -96,7 +104,7 @@ function Feature() {
                 <div className="flex flex-col gap-1">
                   <p className="font-medium">24/7 Support</p>
                   <p className="text-muted-foreground text-sm">
-                    Our support team is here to help whenever you need us—
+                    {sanitizeSubtext('Our support team is here to help whenever you need us—')}
                   </p>
                 </div>
               </div>

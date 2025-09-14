@@ -75,7 +75,8 @@ export default defineConfig({
       'tailwind-merge',
       'swr',
       'motion/react'
-    ]
+    ],
+    force: true // Force re-optimization on every start
   },
 
   // Environment handling

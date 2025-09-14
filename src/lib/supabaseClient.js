@@ -69,7 +69,9 @@ export async function getFeaturedPhotographers(limit = 6) {
       .eq('is_public', true)
       .not('users.avatar_url', 'is', null)
       .not('users.full_name', 'is', null)
+      .gte('total_reviews', 2) // Require at least 2 reviews to be featured
       .order('average_rating', { ascending: false, nullsLast: true })
+      .order('total_reviews', { ascending: false, nullsLast: true })
       .limit(limit)
 
     if (error) {
@@ -221,7 +223,7 @@ export async function getFeaturedPhotographers5StarReviews(photographerIds) {
     }
 
     const fiveStarPercentage = (fiveStarReviews / totalReviews) * 100
-    return parseFloat(fiveStarPercentage.toFixed(1))
+    return Math.round(fiveStarPercentage)
   } catch (error) {
     console.error('Error calculating 5-star review percentage:', error)
     throw error
@@ -319,4 +321,131 @@ export function getPhotographerProfileLink(photographer) {
     return `/photographers/${photographer.id}`
   }
   return null // Return null to hide button if no valid link
+}
+
+/**
+ * Fetch featured testimonials/reviews for testimonials section
+ * Gets high-quality reviews with user information for display
+ */
+export async function getFeaturedTestimonials(limit = 12) {
+  try {
+    const { data, error } = await supabaseClient
+      .from('reviews')
+      .select(`
+        id,
+        rating,
+        comment,
+        created_at,
+        reviewer_id,
+        photographer_id,
+        users!inner (
+          id,
+          full_name,
+          avatar_url
+        )
+      `)
+      .eq('is_featured', true)
+      .not('comment', 'is', null)
+      .not('users.full_name', 'is', null)
+      .gte('rating', 4) // Only 4 and 5 star reviews for testimonials
+      .order('created_at', { ascending: false })
+      .limit(limit)
+
+    if (error) {
+      console.error('Database query error:', error)
+      throw error
+    }
+
+    if (!data || data.length === 0) {
+      return []
+    }
+
+    // Get photographer location data for context
+    const photographerIds = [...new Set(data.map(r => r.photographer_id))];
+    let locationData = {};
+    if (photographerIds.length > 0) {
+      const { data: locations } = await supabaseClient
+        .from('photographer_preview_profiles')
+        .select('user_id, location_city, location_state')
+        .in('user_id', photographerIds);
+
+      if (locations) {
+        locationData = locations.reduce((acc, loc) => {
+          acc[loc.user_id] = {
+            city: loc.location_city,
+            state: loc.location_state
+          };
+          return acc;
+        }, {});
+      }
+    }
+
+    // Transform data to testimonials component format
+    const testimonials = data.map(review => {
+      const location = locationData[review.photographer_id];
+      const locationString = location && location.city && location.state
+        ? `${location.city}, ${location.state}`
+        : null;
+
+      return {
+        id: review.id,
+        name: review.users.full_name,
+        avatar: review.users.avatar_url,
+        rating: review.rating,
+        comment: review.comment,
+        location: locationString,
+        date: new Date(review.created_at).toLocaleDateString('en-US', {
+          month: 'long',
+          year: 'numeric'
+        })
+      };
+    });
+
+    return testimonials
+  } catch (error) {
+    console.error('Error fetching featured testimonials:', error)
+    throw error // Re-throw to handle at component level
+  }
+}
+
+/**
+ * Get testimonials statistics for display
+ * Returns overall stats about reviews and satisfaction
+ */
+export async function getTestimonialsStats() {
+  try {
+    // Get review statistics
+    const { data: reviewStats, error: statsError } = await supabaseClient
+      .from('reviews')
+      .select('rating')
+      .not('rating', 'is', null)
+
+    if (statsError) {
+      console.error('Error fetching review stats:', statsError)
+      throw statsError
+    }
+
+    if (!reviewStats || reviewStats.length === 0) {
+      return {
+        totalReviews: 0,
+        averageRating: 0,
+        fiveStarPercentage: 0
+      }
+    }
+
+    const totalReviews = reviewStats.length
+    const totalRating = reviewStats.reduce((sum, review) => sum + review.rating, 0)
+    const averageRating = totalRating / totalReviews
+    const fiveStarReviews = reviewStats.filter(review => review.rating === 5).length
+    const fiveStarPercentage = (fiveStarReviews / totalReviews) * 100
+
+    return {
+      totalReviews,
+      averageRating: parseFloat(averageRating.toFixed(1)),
+      fiveStarPercentage: Math.round(fiveStarPercentage)
+    }
+  } catch (error) {
+    console.error('Error fetching testimonials stats:', error)
+    throw error
+  }
 }
