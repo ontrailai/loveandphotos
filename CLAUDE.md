@@ -7,6 +7,12 @@
 - ✅ Create subdirectories for organization (e.g., `scripts/`, `tests/`, `docs/`)
 - ❌ Do not create loose files on `/mnt/c/Users/riley/Desktop/`
 
+**DEVELOPMENT SERVER MANAGEMENT**:
+- ⚠️ **ALWAYS restart the dev server after making changes to React components or frontend code**
+- ✅ After any frontend changes: Kill current server → Restart with `npm run dev:direct`
+- ✅ Run in background mode to continue working
+- 📝 This ensures the user sees changes immediately without having to ask
+
 ## MCP Servers Setup ✅
 
 ### 1. Render MCP Server

@@ -7,28 +7,28 @@ const footerLinks = [
   {
     label: 'Clients',
     links: [
-      { title: 'Find Photographers', href: '/photographers' },
-      { title: 'How It Works', href: '/how-it-works' },
+      { title: 'Book', href: '/photographers' },
+      { title: 'Guide', href: '/how-it-works' },
       { title: 'Pricing', href: '/pricing' },
-      { title: 'Browse by Location', href: '/browse' }
+      { title: 'Locations', href: '/browse' }
     ]
   },
   {
-    label: 'Photographers',
+    label: 'Talent',
     links: [
-      { title: 'Join as Photographer', href: '/signup?role=photographer' },
-      { title: 'Resources', href: '/resources' },
+      { title: 'Join', href: '/signup?role=photographer' },
+      { title: 'Tools', href: '/resources' },
       { title: 'FAQ', href: '/faq' },
-      { title: 'Training', href: '/training' }
+      { title: 'Learn', href: '/training' }
     ]
   },
   {
     label: 'Company',
     links: [
-      { title: 'About Us', href: '/about' },
+      { title: 'About', href: '/about' },
       { title: 'Contact', href: '/contact' },
-      { title: 'Privacy Policy', href: '/privacy' },
-      { title: 'Terms of Service', href: '/terms' }
+      { title: 'Privacy', href: '/privacy' },
+      { title: 'Terms', href: '/terms' }
     ]
   },
   {
@@ -44,25 +44,27 @@ const footerLinks = [
 
 export function Footer() {
   return (
-    <footer className='md:rounded-t-6xl relative w-full max-w-6xl mx-auto flex flex-col items-center justify-center rounded-t-4xl border-t bg-[radial-gradient(35%_128px_at_50%_0%,theme(backgroundColor.white/8%),transparent)] px-6 py-12 lg:py-16'>
+    <footer className='md:rounded-t-6xl relative w-full max-w-[70rem] mx-auto flex flex-col items-center justify-center rounded-t-4xl border-t bg-[radial-gradient(35%_128px_at_50%_0%,theme(backgroundColor.white/8%),transparent)] px-6 py-12 lg:pt-8 lg:pb-4'>
       <div className='bg-foreground/20 absolute top-0 right-1/2 left-1/2 h-px w-1/3 -translate-x-1/2 -translate-y-1/2 rounded-full blur' />
-      <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-6 md:gap-12 items-start'>
-        {/* Col 1: Logo */}
-        <AnimatedContainer className='flex flex-col items-start space-y-2'>
-          <img
-            src="/branding/logo.svg"
-            alt="Love & Photos logo"
-            className="block w-28 md:w-32 h-auto"
-          />
-          <p className='text-xs text-muted-foreground mt-2'>
-            © 2025 Love & Photos
-          </p>
-        </AnimatedContainer>
+      <div className='container mx-auto max-w-[70rem] px-4 md:px-6 py-10'>
+        {/* Grid with custom template - fixed logo width, tighter inner columns */}
+        <div className='grid grid-cols-2 gap-x-4 gap-y-8 items-start md:grid-cols-[200px_max-content_max-content_max-content_max-content] md:!gap-x-[5rem]'>
+          {/* Logo column */}
+          <AnimatedContainer className='col-span-2 md:col-span-1'>
+            <img
+              src="/branding/logo.svg"
+              alt="Love & Photos logo"
+              className="block w-28 md:w-32 h-auto md:ml-[50px]"
+            />
+            <p className='text-xs text-muted-foreground mt-2 md:ml-[50px]'>
+              © 2025 Love & Photos
+            </p>
+          </AnimatedContainer>
 
-        {/* Cols 2-5: Link columns */}
-        {footerLinks.map((section, i) => (
-          <AnimatedContainer key={section.label} delay={0.1 + i * 0.1}>
-            <div className='space-y-2'>
+          {/* All four link columns - no spacers */}
+          {footerLinks.map((section, i) => (
+            <AnimatedContainer key={section.label} delay={0.1 + i * 0.1} className='col-span-1 space-y-2'>
+              <div className='space-y-2'>
               <h3 className='text-xs font-semibold uppercase tracking-wider text-gray-900 mb-4'>
                 {section.label}
               </h3>
@@ -83,7 +85,8 @@ export function Footer() {
               </ul>
             </div>
           </AnimatedContainer>
-        ))}
+          ))}
+        </div>
       </div>
     </footer>
   );

@@ -5,9 +5,9 @@ const Footer = () => {
   return (
     <footer className="bg-gray-900 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-x-10 lg:gap-x-12 gap-y-6 items-start">
           {/* Company */}
-          <div>
+          <div className="min-w-[180px] space-y-2">
             <BrandLogo
               href="/"
               size="lg"
@@ -23,17 +23,17 @@ const Footer = () => {
           </div>
 
           {/* For Customers */}
-          <div>
+          <div className="min-w-[180px] space-y-2">
             <h4 className="text-sm font-semibold uppercase tracking-wider mb-4">For Customers</h4>
             <ul className="space-y-2">
               <li>
                 <Link to="/browse" className="text-gray-400 hover:text-white text-sm transition">
-                  Find Photographers
+                  Book
                 </Link>
               </li>
               <li>
                 <Link to="/how-it-works" className="text-gray-400 hover:text-white text-sm transition">
-                  How It Works
+                  Guide
                 </Link>
               </li>
               <li>
@@ -45,12 +45,12 @@ const Footer = () => {
           </div>
 
           {/* For Photographers */}
-          <div>
+          <div className="min-w-[180px] space-y-2">
             <h4 className="text-sm font-semibold uppercase tracking-wider mb-4">For Photographers</h4>
             <ul className="space-y-2">
               <li>
                 <Link to="/join" className="text-gray-400 hover:text-white text-sm transition">
-                  Join as Photographer
+                  Join
                 </Link>
               </li>
               <li>
@@ -67,7 +67,7 @@ const Footer = () => {
           </div>
 
           {/* Support */}
-          <div>
+          <div className="min-w-[180px] space-y-2">
             <h4 className="text-sm font-semibold uppercase tracking-wider mb-4">Support</h4>
             <ul className="space-y-2">
               <li>
@@ -77,12 +77,12 @@ const Footer = () => {
               </li>
               <li>
                 <Link to="/terms" className="text-gray-400 hover:text-white text-sm transition">
-                  Terms of Service
+                  Terms
                 </Link>
               </li>
               <li>
                 <Link to="/privacy" className="text-gray-400 hover:text-white text-sm transition">
-                  Privacy Policy
+                  Privacy
                 </Link>
               </li>
             </ul>
