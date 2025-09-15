@@ -75,25 +75,30 @@ const Login = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-sage-50 flex">
+    <div className="min-h-screen bg-background flex">
       {/* Left Side - Form */}
       <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
         <div className="max-w-md w-full">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-display font-bold text-dusty-900">
+            <div className="flex justify-center mb-6">
+              <Link to="/">
+                <BrandLogo size="lg" variant="icon" showText={false} />
+              </Link>
+            </div>
+            <h2 className="text-3xl font-display font-bold text-foreground">
               Welcome back
             </h2>
-            <p className="mt-2 text-dusty-600">
+            <p className="mt-2 text-muted-foreground">
               Sign in to continue to your account
             </p>
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-4">
+            <div className="bg-card rounded-xl shadow-sm border border-border p-6 space-y-4">
               <Input
                 label="Email Address"
                 type="email"
-                icon={<MailIcon className="w-5 h-5 text-dusty-400" />}
+                icon={<MailIcon className="w-5 h-5 text-muted-foreground" />}
                 {...register('email', {
                   required: 'Email is required',
                   pattern: {
@@ -109,7 +114,7 @@ const Login = () => {
                 <Input
                   label="Password"
                   type={showPassword ? "text" : "password"}
-                  icon={<LockIcon className="w-5 h-5 text-dusty-400" />}
+                  icon={<LockIcon className="w-5 h-5 text-muted-foreground" />}
                   {...register('password', {
                     required: 'Password is required',
                     minLength: {
@@ -123,7 +128,7 @@ const Login = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-[38px] text-dusty-400 hover:text-dusty-600 transition-colors"
+                  className="absolute right-3 top-[38px] text-muted-foreground hover:text-foreground transition-colors"
                 >
                   {showPassword ? (
                     <EyeOffIcon className="w-5 h-5" />
@@ -142,16 +147,16 @@ const Login = () => {
                   type="checkbox"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
-                  className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                  className="h-4 w-4 text-primary focus:ring-primary border-border rounded"
                 />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-dusty-600">
+                <label htmlFor="remember-me" className="ml-2 block text-sm text-muted-foreground">
                   Remember me
                 </label>
               </div>
 
               <Link
                 to="/forgot-password"
-                className="text-sm font-medium text-primary-600 hover:text-primary-700 transition-colors"
+                className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
               >
                 Forgot password?
               </Link>
@@ -170,10 +175,10 @@ const Login = () => {
 
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-200"></div>
+                  <div className="w-full border-t border-border"></div>
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-gradient-to-br from-primary-50/50 via-white/50 to-sage-50/50 text-dusty-600">
+                  <span className="px-2 bg-background text-muted-foreground">
                     New to Love & Photos?
                   </span>
                 </div>
@@ -182,7 +187,7 @@ const Login = () => {
               <Link to="/signup" className="block">
                 <Button
                   variant="outline"
-                  className="w-full border-dusty-300 text-dusty-700 hover:bg-dusty-50"
+                  className="w-full border-border text-foreground hover:bg-muted"
                   size="lg"
                   type="button"
                 >

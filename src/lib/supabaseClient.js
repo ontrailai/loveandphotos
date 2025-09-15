@@ -329,70 +329,80 @@ export function getPhotographerProfileLink(photographer) {
  */
 export async function getFeaturedTestimonials(limit = 12) {
   try {
-    const { data, error } = await supabaseClient
+    // First get the reviews
+    const { data: reviews, error: reviewsError } = await supabaseClient
       .from('reviews')
-      .select(`
-        id,
-        rating,
-        comment,
-        created_at,
-        reviewer_id,
-        photographer_id,
-        users!inner (
-          id,
-          full_name,
-          avatar_url
-        )
-      `)
-      .eq('is_featured', true)
+      .select('*')
       .not('comment', 'is', null)
-      .not('users.full_name', 'is', null)
       .gte('rating', 4) // Only 4 and 5 star reviews for testimonials
       .order('created_at', { ascending: false })
       .limit(limit)
 
-    if (error) {
-      console.error('Database query error:', error)
-      throw error
+    if (reviewsError) {
+      console.error('Database query error:', reviewsError)
+      throw reviewsError
     }
+
+    if (!reviews || reviews.length === 0) {
+      return []
+    }
+
+    // Get user data for the reviews
+    const reviewerIds = [...new Set(reviews.map(r => r.reviewer_id))]
+    const { data: users, error: usersError } = await supabaseClient
+      .from('users')
+      .select('id, full_name, avatar_url')
+      .in('id', reviewerIds)
+
+    if (usersError) {
+      console.error('Error fetching users:', usersError)
+      throw usersError
+    }
+
+    // Create a map of users by ID
+    const usersMap = {}
+    if (users) {
+      users.forEach(user => {
+        usersMap[user.id] = user
+      })
+    }
+
+    // Combine reviews with user data
+    const data = reviews
+      .map(review => {
+        const user = usersMap[review.reviewer_id]
+        if (!user || !user.full_name) return null
+        return {
+          ...review,
+          users: user
+        }
+      })
+      .filter(item => item !== null)
 
     if (!data || data.length === 0) {
       return []
     }
 
-    // Get photographer location data for context
-    const photographerIds = [...new Set(data.map(r => r.photographer_id))];
-    let locationData = {};
-    if (photographerIds.length > 0) {
-      const { data: locations } = await supabaseClient
-        .from('photographer_preview_profiles')
-        .select('user_id, location_city, location_state')
-        .in('user_id', photographerIds);
-
-      if (locations) {
-        locationData = locations.reduce((acc, loc) => {
-          acc[loc.user_id] = {
-            city: loc.location_city,
-            state: loc.location_state
-          };
-          return acc;
-        }, {});
-      }
-    }
+    // Note: User location data (city/state) columns don't exist in users table
+    // Location feature temporarily disabled until columns are added to database
+    const locationData = {};
 
     // Transform data to testimonials component format
+    // Note: TestimonialsColumn component expects 'text' not 'comment', and 'image' not 'avatar'
     const testimonials = data.map(review => {
-      const location = locationData[review.photographer_id];
+      const location = locationData[review.reviewer_id];
       const locationString = location && location.city && location.state
         ? `${location.city}, ${location.state}`
+        : location && location.city
+        ? location.city
         : null;
 
       return {
         id: review.id,
         name: review.users.full_name,
-        avatar: review.users.avatar_url,
+        image: review.users.avatar_url,  // Component expects 'image' prop
+        text: review.comment,             // Component expects 'text' prop
         rating: review.rating,
-        comment: review.comment,
         location: locationString,
         date: new Date(review.created_at).toLocaleDateString('en-US', {
           month: 'long',

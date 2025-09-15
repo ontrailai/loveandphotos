@@ -22,6 +22,7 @@ import {
 } from 'lucide-react'
 import Button from '@components/ui/Button'
 import Input from '@components/ui/Input'
+import PhoneInput from '@components/forms/PhoneInput'
 import Card from '@components/ui/Card'
 import BrandLogo from '@components/BrandLogo'
 import { clsx } from 'clsx'
@@ -120,16 +121,20 @@ const SignUp = () => {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-sage-50 flex">
+    <div className="min-h-screen bg-background flex">
       {/* Left Side - Form */}
       <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
         <div className="max-w-md w-full">
           <div className="text-center mb-8">
-            <BrandLogo href="/" size="xl" variant="full" className="mb-6" />
-            <h2 className="text-3xl font-display font-bold text-dusty-900">
+            <div className="flex justify-center mb-6">
+              <Link to="/">
+                <BrandLogo size="lg" variant="icon" showText={false} />
+              </Link>
+            </div>
+            <h2 className="text-3xl font-display font-bold text-foreground">
               {step === 1 ? 'Choose your path' : 'Create your account'}
             </h2>
-            <p className="mt-2 text-dusty-600">
+            <p className="mt-2 text-muted-foreground">
               {step === 1 ? 'How would you like to use Love & Photos?' : 'Join thousands of happy users'}
             </p>
           </div>
@@ -143,8 +148,8 @@ const SignUp = () => {
                   className={clsx(
                     'cursor-pointer transition-all duration-200',
                     selectedRole === option.id
-                      ? 'ring-2 ring-primary-500 bg-primary-50'
-                      : 'hover:shadow-md'
+                      ? 'ring-2 ring-primary bg-primary/5'
+                      : 'hover:shadow-md bg-card'
                   )}
                   onClick={() => setSelectedRole(option.id)}
                 >
@@ -152,21 +157,21 @@ const SignUp = () => {
                     <div className={clsx(
                       'w-12 h-12 rounded-lg flex items-center justify-center',
                       selectedRole === option.id
-                        ? 'bg-primary-500 text-white'
-                        : 'bg-gray-100 text-dusty-600'
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-muted text-muted-foreground'
                     )}>
                       {option.icon}
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-semibold text-dusty-900 mb-1">
+                      <h3 className="font-semibold text-foreground mb-1">
                         {option.title}
                       </h3>
-                      <p className="text-sm text-dusty-600 mb-3">
+                      <p className="text-sm text-muted-foreground mb-3">
                         {option.description}
                       </p>
                       <ul className="space-y-1">
                         {option.benefits.map((benefit, index) => (
-                          <li key={index} className="flex items-center text-sm text-dusty-600">
+                          <li key={index} className="flex items-center text-sm text-muted-foreground">
                             <CheckIcon className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" />
                             {benefit}
                           </li>
@@ -174,7 +179,7 @@ const SignUp = () => {
                       </ul>
                     </div>
                     {selectedRole === option.id && (
-                      <CheckIcon className="w-6 h-6 text-primary-500 flex-shrink-0" />
+                      <CheckIcon className="w-6 h-6 text-primary flex-shrink-0" />
                     )}
                   </div>
                 </Card>
@@ -189,9 +194,9 @@ const SignUp = () => {
                 <ArrowRightIcon className="w-5 h-5 ml-2" />
               </Button>
 
-              <p className="text-center text-sm text-dusty-600">
+              <p className="text-center text-sm text-muted-foreground">
                 Already have an account?{' '}
-                <Link to="/login" className="text-primary-600 hover:text-primary-700 font-medium">
+                <Link to="/login" className="text-primary hover:text-primary/80 font-medium">
                   Sign in
                 </Link>
               </p>
@@ -199,10 +204,10 @@ const SignUp = () => {
           ) : (
             // Step 2: Account Details
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-4">
+              <div className="bg-card rounded-xl shadow-sm border border-border p-6 space-y-4">
                 <Input
                   label="Full Name"
-                  icon={<UserIcon className="w-5 h-5 text-dusty-400" />}
+                  icon={<UserIcon className="w-5 h-5 text-muted-foreground" />}
                   {...register('fullName', {
                     required: 'Full name is required'
                   })}
@@ -212,7 +217,7 @@ const SignUp = () => {
                 <Input
                   label="Email Address"
                   type="email"
-                  icon={<MailIcon className="w-5 h-5 text-dusty-400" />}
+                  icon={<MailIcon className="w-5 h-5 text-muted-foreground" />}
                   {...register('email', {
                     required: 'Email is required',
                     pattern: {
@@ -223,18 +228,17 @@ const SignUp = () => {
                   error={errors.email?.message}
                 />
 
-                <Input
+                <PhoneInput
                   label="Phone Number"
-                  type="tel"
-                  icon={<PhoneIcon className="w-5 h-5 text-dusty-400" />}
+                  icon={<PhoneIcon className="w-5 h-5 text-muted-foreground" />}
                   {...register('phone', {
                     required: 'Phone number is required',
-                    pattern: {
-                      value: /^[0-9]{10}$/,
-                      message: 'Enter a valid 10-digit phone number'
+                    validate: value => {
+                      const digits = value.replace(/\D/g, '');
+                      return digits.length === 10 || 'Enter a valid 10-digit phone number';
                     }
                   })}
-                  placeholder="1234567890"
+                  placeholder="(555) 123-4567"
                   error={errors.phone?.message}
                 />
 
@@ -242,7 +246,7 @@ const SignUp = () => {
                   <Input
                     label="Password"
                     type={showPassword ? "text" : "password"}
-                    icon={<LockIcon className="w-5 h-5 text-dusty-400" />}
+                    icon={<LockIcon className="w-5 h-5 text-muted-foreground" />}
                     {...register('password', {
                       required: 'Password is required',
                       minLength: {
@@ -259,7 +263,7 @@ const SignUp = () => {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-[38px] text-dusty-400 hover:text-dusty-600"
+                    className="absolute right-3 top-[38px] text-muted-foreground hover:text-foreground"
                   >
                     {showPassword ? (
                       <EyeOffIcon className="w-5 h-5" />
@@ -273,7 +277,7 @@ const SignUp = () => {
                   <Input
                     label="Confirm Password"
                     type={showPassword ? "text" : "password"}
-                    icon={<LockIcon className="w-5 h-5 text-dusty-400" />}
+                    icon={<LockIcon className="w-5 h-5 text-muted-foreground" />}
                     {...register('confirmPassword', {
                       required: 'Please confirm your password',
                       validate: value => value === password || 'Passwords do not match'
@@ -283,7 +287,7 @@ const SignUp = () => {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-[38px] text-dusty-400 hover:text-dusty-600"
+                    className="absolute right-3 top-[38px] text-muted-foreground hover:text-foreground"
                   >
                     {showPassword ? (
                       <EyeOffIcon className="w-5 h-5" />
@@ -295,14 +299,14 @@ const SignUp = () => {
               </div>
 
               {/* Selected Role Display */}
-              <div className="bg-sage-50 rounded-lg p-4 flex items-center justify-between">
+              <div className="bg-muted/50 rounded-lg p-4 flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-sage-500 text-white rounded-lg flex items-center justify-center">
+                  <div className="w-10 h-10 bg-primary text-primary-foreground rounded-lg flex items-center justify-center">
                     {selectedRole === 'photographer' ? <CameraIcon className="w-5 h-5" /> : <SparklesIcon className="w-5 h-5" />}
                   </div>
                   <div>
-                    <p className="text-sm text-sage-700">Signing up as</p>
-                    <p className="font-semibold text-sage-900">
+                    <p className="text-sm text-muted-foreground">Signing up as</p>
+                    <p className="font-semibold text-foreground">
                       {selectedRole === 'photographer' ? 'Photographer' : 'Customer'}
                     </p>
                   </div>
@@ -310,7 +314,7 @@ const SignUp = () => {
                 <button
                   type="button"
                   onClick={() => setStep(1)}
-                  className="text-sage-600 hover:text-sage-700 text-sm font-medium"
+                  className="text-muted-foreground hover:text-foreground text-sm font-medium"
                 >
                   Change
                 </button>
@@ -323,15 +327,15 @@ const SignUp = () => {
                   {...register('terms', {
                     required: 'You must accept the terms and conditions'
                   })}
-                  className="mt-1 h-4 w-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                  className="mt-1 h-4 w-4 text-primary border-border rounded focus:ring-primary"
                 />
-                <label className="ml-2 text-sm text-dusty-600">
+                <label className="ml-2 text-sm text-muted-foreground">
                   I agree to the{' '}
-                  <Link to="/terms" className="text-primary-600 hover:text-primary-700">
+                  <Link to="/terms" className="text-primary hover:text-primary/80">
                     Terms of Service
                   </Link>{' '}
                   and{' '}
-                  <Link to="/privacy" className="text-primary-600 hover:text-primary-700">
+                  <Link to="/privacy" className="text-primary hover:text-primary/80">
                     Privacy Policy
                   </Link>
                 </label>
@@ -353,7 +357,7 @@ const SignUp = () => {
                 <button
                   type="button"
                   onClick={() => setStep(1)}
-                  className="w-full text-dusty-600 hover:text-dusty-700 text-sm font-medium"
+                  className="w-full text-muted-foreground hover:text-foreground text-sm font-medium"
                 >
                   ← Back to role selection
                 </button>
@@ -373,20 +377,7 @@ const SignUp = () => {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-dusty-900/50 to-transparent" />
         </div>
-        <div className="relative flex items-end p-12">
-          <div className="text-white">
-            <h3 className="text-3xl font-display font-bold mb-2">
-              {selectedRole === 'photographer'
-                ? 'Turn your passion into profit'
-                : 'Find your perfect match'}
-            </h3>
-            <p className="text-lg text-white/80">
-              {selectedRole === 'photographer'
-                ? 'Join our community of professional photographers and grow your business'
-                : 'Connect with verified photographers who bring your vision to life'}
-            </p>
-          </div>
-        </div>
+        {/* Keep only the subtle overlay for image depth - no text */}
       </div>
     </div>
   )

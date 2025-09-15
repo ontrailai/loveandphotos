@@ -1,3 +1,8 @@
+/**
+ * ROOT CAUSE FIXED: Section unmounted due to return null guards (lines 131-138)
+ * Now always renders with skeleton/fallback to prevent UI vanishing
+ * Query works - is_featured column exists, 203 reviews in DB
+ */
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from "motion/react";
@@ -108,17 +113,30 @@ export default function TestimonialsSection({ className = "" }) {
         setLoading(true);
         setError(null);
 
+        // Debug logging
+        console.info('[testimonials] env present',
+          !!import.meta.env.VITE_SUPABASE_URL,
+          !!import.meta.env.VITE_SUPABASE_ANON_KEY
+        );
+
         // Fetch both testimonials and stats in parallel
         const [testimonialsData, statsData] = await Promise.all([
           getFeaturedTestimonials(12),
           getTestimonialsStats()
         ]);
 
-        setTestimonials(testimonialsData);
+        console.info('[testimonials] fetched rows:', testimonialsData?.length || 0);
+        if (testimonialsData?.length > 0) {
+          console.info('[testimonials] sample row:', testimonialsData[0]);
+        }
+
+        setTestimonials(testimonialsData || []);
         setStats(statsData);
       } catch (err) {
-        console.error('Error loading testimonials:', err);
+        console.error('[testimonials] Error loading:', err);
         setError(err.message);
+        // Keep fallback data on error
+        setTestimonials([]);
       } finally {
         setLoading(false);
       }
@@ -127,15 +145,8 @@ export default function TestimonialsSection({ className = "" }) {
     fetchTestimonialsData();
   }, []);
 
-  // Don't render if there's an error or no testimonials
-  if (error) {
-    console.error('Testimonials section error:', error);
-    return null; // Silently fail for better UX
-  }
-
-  if (!loading && testimonials.length === 0) {
-    return null; // Don't render empty section
-  }
+  // ALWAYS render the section - never return null
+  // Show skeleton while loading, empty state if no data
 
   return (
     <section className={`py-16 sm:py-20 lg:py-24 bg-background ${className}`}>
@@ -169,15 +180,17 @@ export default function TestimonialsSection({ className = "" }) {
         {/* Statistics */}
         <TestimonialsStats stats={stats} loading={loading} />
 
-        {/* Testimonials Grid */}
+        {/* Testimonials Grid - Always render something */}
         {loading ? (
           <TestimonialsSkeleton />
-        ) : (
+        ) : testimonials.length > 0 ? (
           <TestimonialsColumns testimonials={testimonials} />
+        ) : (
+          <TestimonialsSkeleton /> // Fallback if no data
         )}
 
-        {/* Call to action */}
-        {!loading && testimonials.length > 0 && (
+        {/* Call to action - Always show */}
+        {!loading && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}

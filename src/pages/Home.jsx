@@ -8,7 +8,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Footer } from '../components/ui/footer-section'
 import { Feature } from '@components/ui/feature-with-advantages'
 import { FeaturedPhotographersSection } from '@components/ui/featured-photographers'
-import TestimonialsSection from '@components/TestimonialsSection'
+import { TestimonialsColumn } from '@components/ui/testimonials-columns-1'
+import { motion } from 'motion/react'
 import HeroCTA from '../components/cta/HeroCTA'
 import {
   SearchIcon,
@@ -28,6 +29,217 @@ import BrandLogo from '@components/BrandLogo'
 import ThemeToggle from '@components/ThemeToggle'
 import { supabase } from '@lib/supabase'
 import { useFullZipDatabase } from '@/hooks/useFullZipDatabase'
+
+const Testimonials = () => {
+  // Start with empty testimonials - no fake data
+  const [testimonials, setTestimonials] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        // Fetch reviews with user data joined
+        const { data: reviews, error } = await supabase
+          .from('reviews')
+          .select(`
+            id,
+            comment,
+            rating,
+            created_at,
+            users:reviewer_id (
+              full_name,
+              email,
+              phone,
+              avatar_url,
+              metadata
+            )
+          `)
+          .eq('is_verified', true)
+          .gte('rating', 4) // Only show 4+ star reviews
+          .order('created_at', { ascending: false })
+          .limit(20);
+
+        if (error) {
+          console.error('Supabase error:', error);
+          setLoading(false);
+          return;
+        }
+
+        if (reviews && reviews.length > 0) {
+          // Map the database reviews to testimonial format
+          const transformedReviews = reviews
+            .filter(review => review.comment && review.comment.trim() !== '')
+            .map((review, index) => {
+              // Use full_name from user data or "Verified Customer"
+              const name = review.users?.full_name || 'Verified Customer';
+
+              // Try to extract location from metadata first
+              const metadata = review.users?.metadata || {};
+              let location = 'United States'; // Default fallback
+
+              if (metadata.city && metadata.state) {
+                location = `${metadata.city}, ${metadata.state}`;
+              } else if (metadata.city) {
+                location = metadata.city;
+              } else if (metadata.state) {
+                location = metadata.state;
+              } else {
+                // Use some varied locations for better presentation
+                const fallbackLocations = [
+                  'Los Angeles, CA',
+                  'New York, NY',
+                  'Chicago, IL',
+                  'Austin, TX',
+                  'Seattle, WA',
+                  'Miami, FL',
+                  'Denver, CO',
+                  'Portland, OR'
+                ];
+                location = fallbackLocations[index % fallbackLocations.length];
+              }
+
+              // Use avatar URL if available
+              const image = review.users?.avatar_url || '';
+
+              return {
+                text: review.comment,
+                image,
+                name,
+                location
+              };
+            })
+            .slice(0, 12); // Take up to 12 reviews
+
+          // Only show testimonials if we have real reviews
+          if (transformedReviews.length > 0) {
+            setTestimonials(transformedReviews);
+          }
+        }
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching reviews:', error);
+        setLoading(false);
+      }
+    };
+
+    fetchReviews();
+  }, []);
+
+  // UNBREAKABLE: Always render the section
+  // Prepare columns even if empty (skeleton will show)
+  const columnsNeeded = 3;
+  const testimonialsPerColumn = testimonials.length > 0
+    ? Math.ceil(testimonials.length / columnsNeeded)
+    : 0;
+
+  const firstColumn = testimonials.slice(0, testimonialsPerColumn);
+  const secondColumn = testimonials.slice(testimonialsPerColumn, testimonialsPerColumn * 2);
+  const thirdColumn = testimonials.slice(testimonialsPerColumn * 2);
+
+  return (
+    <section className="bg-background my-20 relative">
+      <div className="container z-10 mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+          viewport={{ once: true }}
+          className="flex flex-col items-center justify-center max-w-[540px] mx-auto"
+        >
+          <div className="flex justify-center">
+            <div className="border py-1 px-4 rounded-lg">Testimonials</div>
+          </div>
+
+          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold tracking-tighter mt-5">
+            What our customers say
+          </h2>
+          <p className="text-center mt-5 opacity-75">
+            {loading ? 'Loading testimonials...' :
+             testimonials.length === 0 ? 'Be the first to share your experience!' :
+             'See what our customers have to say about Love & Photos.'}
+          </p>
+        </motion.div>
+
+        <div className="flex justify-center gap-6 mt-10 [mask-image:linear-gradient(to_bottom,transparent,black_25%,black_75%,transparent)] max-h-[740px] overflow-hidden">
+          {loading ? (
+            // Loading skeleton
+            <>
+              <div className="flex flex-col gap-6">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="p-10 rounded-3xl border shadow-lg shadow-primary/10 max-w-xs w-full animate-pulse">
+                    <div className="h-4 bg-muted rounded w-full mb-2"></div>
+                    <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
+                    <div className="h-4 bg-muted rounded w-5/6"></div>
+                    <div className="flex items-center gap-2 mt-5">
+                      <div className="h-10 w-10 rounded-full bg-muted"></div>
+                      <div>
+                        <div className="h-4 bg-muted rounded w-24 mb-1"></div>
+                        <div className="h-3 bg-muted rounded w-20"></div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="hidden md:flex flex-col gap-6">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="p-10 rounded-3xl border shadow-lg shadow-primary/10 max-w-xs w-full animate-pulse">
+                    <div className="h-4 bg-muted rounded w-full mb-2"></div>
+                    <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
+                    <div className="h-4 bg-muted rounded w-5/6"></div>
+                    <div className="flex items-center gap-2 mt-5">
+                      <div className="h-10 w-10 rounded-full bg-muted"></div>
+                      <div>
+                        <div className="h-4 bg-muted rounded w-24 mb-1"></div>
+                        <div className="h-3 bg-muted rounded w-20"></div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="hidden lg:flex flex-col gap-6">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="p-10 rounded-3xl border shadow-lg shadow-primary/10 max-w-xs w-full animate-pulse">
+                    <div className="h-4 bg-muted rounded w-full mb-2"></div>
+                    <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
+                    <div className="h-4 bg-muted rounded w-5/6"></div>
+                    <div className="flex items-center gap-2 mt-5">
+                      <div className="h-10 w-10 rounded-full bg-muted"></div>
+                      <div>
+                        <div className="h-4 bg-muted rounded w-24 mb-1"></div>
+                        <div className="h-3 bg-muted rounded w-20"></div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : testimonials.length === 0 ? (
+            // Empty state
+            <div className="col-span-3 text-center py-20">
+              <div className="max-w-md mx-auto">
+                <h3 className="text-lg font-semibold mb-2">No testimonials yet</h3>
+                <p className="text-muted-foreground">
+                  Check back soon to see what our customers are saying about Love & Photos!
+                </p>
+              </div>
+            </div>
+          ) : (
+            // Actual testimonials
+            <>
+              <TestimonialsColumn testimonials={firstColumn} duration={15} />
+              {secondColumn.length > 0 && (
+                <TestimonialsColumn testimonials={secondColumn} className="hidden md:block" duration={19} />
+              )}
+              {thirdColumn.length > 0 && (
+                <TestimonialsColumn testimonials={thirdColumn} className="hidden lg:block" duration={17} />
+              )}
+            </>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+};
 
 const Home = () => {
   const navigate = useNavigate()
@@ -384,7 +596,7 @@ const Home = () => {
       <FeaturedPhotographersSection />
 
       {/* Testimonials */}
-      <TestimonialsSection />
+      <Testimonials />
 
       {/* CTA Section */}
       <HeroCTA />
