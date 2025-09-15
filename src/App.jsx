@@ -203,6 +203,8 @@ function App() {
             <Route path="/photographer-resources" element={<Resources />} />
             <Route path="/photographer-faq" element={<FAQ />} />
             <Route path="/join" element={<SignUp />} />
+            {/* Temporary redirect for debugging - /talent should redirect to signup with photographer role */}
+            <Route path="/talent" element={<Navigate to="/signup?role=photographer" replace />} />
             <Route path="/demo" element={<Demo />} />
             <Route path="/photographers" element={
               <Suspense fallback={<PageLoader />}>

@@ -22,9 +22,9 @@ const navItems = [
   },
   {
     name: 'Join',
-    href: '/talent',
+    // Remove href for dropdown-only items - NO MORE /talent!
     submenu: [
-      { name: 'Become a Photographer', href: '/talent', description: 'Apply & see pay tiers' },
+      { name: 'Become a Photographer', href: '/signup?role=photographer', description: 'Apply & see pay tiers' },
       { name: 'Resources', href: '/resources', description: 'Training & guidelines' }
     ]
   },
@@ -194,10 +194,13 @@ function MobileSheet({ isOpen, onClose, children }) {
 }
 
 export function CleanNavbar({ className = '' }) {
-  const { user, signOut } = useAuth()
+  const { user, signOut, profile } = useAuth()
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [activeDropdown, setActiveDropdown] = useState(null)
+
+  // Check if current user is already a photographer
+  const isPhotographer = profile?.role === 'photographer' || user?.user_metadata?.role === 'photographer'
 
   const handleSignOut = async () => {
     const result = await signOut()
@@ -275,7 +278,9 @@ export function CleanNavbar({ className = '' }) {
                       setActiveDropdown(activeDropdown === i ? null : i)
                     }}
                   >
-                    {item.submenu.map((sub, j) => (
+                    {item.submenu
+                      .filter(sub => !(sub.name.includes('Become a Photographer') && isPhotographer))
+                      .map((sub, j) => (
                       <Link
                         key={j}
                         to={sub.href}
@@ -378,7 +383,9 @@ export function CleanNavbar({ className = '' }) {
                     <span>{item.name}</span>
                   </div>
                   <div className="ml-6 space-y-2">
-                    {item.submenu.map((sub, j) => (
+                    {item.submenu
+                      .filter(sub => !(sub.name.includes('Become a Photographer') && isPhotographer))
+                      .map((sub, j) => (
                       <Link
                         key={j}
                         to={sub.href}

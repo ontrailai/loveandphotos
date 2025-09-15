@@ -37,6 +37,9 @@ const SignUp = () => {
   const [step, setStep] = useState(1)
   const [showPassword, setShowPassword] = useState(false)
 
+  // Check if user is already a photographer
+  const isPhotographer = profile?.role === 'photographer' || user?.user_metadata?.role === 'photographer'
+
   // Redirect if already logged in
   useEffect(() => {
     // Only redirect if we have a user AND profile loaded
@@ -49,6 +52,15 @@ const SignUp = () => {
       }
     }
   }, [user, profile, navigate])
+
+  // Defensive guard: redirect existing photographers who manually hit /signup?role=photographer
+  useEffect(() => {
+    const preselectedRole = searchParams.get('role')
+    if (user && profile && isPhotographer && preselectedRole === 'photographer') {
+      console.log('Photographer attempting to access photographer signup, redirecting to dashboard...')
+      navigate('/dashboard/photographer')
+    }
+  }, [user, profile, isPhotographer, searchParams, navigate])
 
   // Show spinner only while checking auth AND user exists
   // This prevents infinite spinner for non-logged-in users
