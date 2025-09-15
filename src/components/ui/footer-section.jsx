@@ -3,6 +3,24 @@ import React from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import { FacebookIcon, FrameIcon, InstagramIcon, LinkedinIcon, YoutubeIcon } from 'lucide-react';
 
+// Custom The Knot Icon Component
+const TheKnotIcon = () => (
+  <img
+    src='/brands/knot.svg'
+    alt='The Knot'
+    className='h-5 w-5 object-contain'
+  />
+);
+
+// Custom Yelp Icon Component
+const YelpIcon = () => (
+  <img
+    src='/brands/yelp.svg'
+    alt='Yelp'
+    className='h-5 w-5 object-contain'
+  />
+);
+
 const footerLinks = [
   {
     label: 'Clients',
@@ -10,7 +28,7 @@ const footerLinks = [
       { title: 'Book', href: '/photographers' },
       { title: 'Guide', href: '/how-it-works' },
       { title: 'Pricing', href: '/pricing' },
-      { title: 'Locations', href: '/browse' }
+      { title: 'Locations', href: '/photographers' }
     ]
   },
   {
@@ -19,7 +37,7 @@ const footerLinks = [
       { title: 'Join', href: '/signup?role=photographer' },
       { title: 'Tools', href: '/resources' },
       { title: 'FAQ', href: '/faq' },
-      { title: 'Learn', href: '/training' }
+      { title: 'Learn', href: '/learn' }
     ]
   },
   {
@@ -34,10 +52,10 @@ const footerLinks = [
   {
     label: 'Connect',
     links: [
-      { title: 'Facebook', href: 'https://facebook.com/loveandphotos', icon: FacebookIcon },
-      { title: 'Instagram', href: 'https://instagram.com/loveandphotos', icon: InstagramIcon },
-      { title: 'YouTube', href: 'https://youtube.com/loveandphotos', icon: YoutubeIcon },
-      { title: 'LinkedIn', href: 'https://linkedin.com/company/loveandphotos', icon: LinkedinIcon }
+      { title: 'Facebook', href: 'https://www.facebook.com/profile.php?id=61573197380793', icon: FacebookIcon },
+      { title: 'Instagram', href: 'https://www.instagram.com/lovesandphotos/', icon: InstagramIcon },
+      { title: 'Yelp', href: 'https://www.yelp.com/biz/love-and-photos-arden-arcade-2?utm_campaign=www_business_share_popup&utm_medium=copy_link&utm_source=(direct)', icon: YelpIcon },
+      { title: 'The Knot', href: 'https://www.theknot.com/marketplace/love-and-photos-springfield-mo-2092546', icon: TheKnotIcon }
     ]
   },
 ];
@@ -76,6 +94,7 @@ export function Footer() {
                       className='hover:text-foreground inline-flex items-center transition-all duration-300 text-muted-foreground hover:text-foreground'
                       target={link.href.startsWith('http') ? '_blank' : undefined}
                       rel={link.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                      aria-label={link.title}
                     >
                       {link.icon && <link.icon className='me-1 size-4' />}
                       {link.title}

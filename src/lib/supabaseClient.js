@@ -315,10 +315,11 @@ export async function getFeaturedPhotographersMetrics(photographerIds) {
  * Returns proper routing path or null if not available
  */
 export function getPhotographerProfileLink(photographer) {
+  // Use singular 'photographer' to match App.jsx route: /photographer/:id
   if (photographer.slug) {
-    return `/photographers/${photographer.slug}`
+    return `/photographer/${photographer.slug}`
   } else if (photographer.id) {
-    return `/photographers/${photographer.id}`
+    return `/photographer/${photographer.id}`
   }
   return null // Return null to hide button if no valid link
 }

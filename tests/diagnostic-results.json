@@ -1,0 +1,60 @@
+{
+  "filesCheck": [
+    {
+      "filePath": "tests/safeavatar-debug-console.js",
+      "description": "Browser Console Script",
+      "exists": true
+    },
+    {
+      "filePath": "src/components/shared/SafeAvatar.jsx",
+      "description": "Enhanced SafeAvatar Component",
+      "exists": true
+    },
+    {
+      "filePath": "tests/unit/SafeAvatar.test.js",
+      "description": "Unit Tests",
+      "exists": true
+    },
+    {
+      "filePath": "tests/integration/browse-avatar-integration.test.js",
+      "description": "Integration Tests",
+      "exists": true
+    },
+    {
+      "filePath": "tests/e2e/browse-thumbnails.spec.js",
+      "description": "E2E Tests",
+      "exists": true
+    },
+    {
+      "filePath": "tests/analysis/browse-data-transformation.test.js",
+      "description": "Data Analysis Tests",
+      "exists": true
+    },
+    {
+      "filePath": "tests/README-SafeAvatar-Diagnostics.md",
+      "description": "Documentation",
+      "exists": true
+    }
+  ],
+  "unitTests": {
+    "success": false,
+    "output": null,
+    "error": "Command failed: npx vitest run tests/unit/SafeAvatar.test.js\nCannot parse /mnt/c/Users/riley/Desktop/loveandphotos/tests/unit/SafeAvatar.test.js:\nExpression expected.\n\n⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯\n\n FAIL  tests/unit/SafeAvatar.test.js [ tests/unit/SafeAvatar.test.js ]\nRollupError: Parse failure: Expression expected\nAt file: /mnt/c/Users/riley/Desktop/loveandphotos/tests/unit/SafeAvatar.test.js:37:15\n  File: /mnt/c/Users/riley/Desktop/loveandphotos/tests/unit/SafeAvatar.test.js:37:15\n  35 |        // Test each URL by creating components and checking rendering\n  36 |        for (const url of validUrls) {\n  37 |          render(<SafeAvatar src={url} name=\"Test User\" />)\n     |                                                     ^\n  38 |  \n  39 |          // If URL is valid, should render img element\n ❯ getRollupError ../../../../../../home/riley/.npm/_npx/69c381f8ad94b576/node_modules/rollup/dist/es/shared/parseAst.js:401:41\n ❯ convertProgram ../../../../../../home/riley/.npm/_npx/69c381f8ad94b576/node_modules/rollup/dist/es/shared/parseAst.js:1098:26\n ❯ parseAstAsync ../../../../../../home/riley/.npm/_npx/69c381f8ad94b576/node_modules/rollup/dist/es/shared/parseAst.js:2084:106\n ❯ ssrTransformScript ../../../../../../home/riley/.npm/_npx/69c381f8ad94b576/node_modules/vite/dist/node/chunks/dep-M_KD0XSK.js:19127:9\n ❯ loadAndTransform ../../../../../../home/riley/.npm/_npx/69c381f8ad94b576/node_modules/vite/dist/node/chunks/dep-M_KD0XSK.js:26438:64\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯\n\n"
+  },
+  "integrationTests": {
+    "success": false,
+    "output": null,
+    "error": "Command failed: npx vitest run tests/integration/browse-avatar-integration.test.js\nCannot parse /mnt/c/Users/riley/Desktop/loveandphotos/tests/integration/browse-avatar-integration.test.js:\nExpression expected.\n\n⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯\n\n FAIL  tests/integration/browse-avatar-integration.test.js [ tests/integration/browse-avatar-integration.test.js ]\nError: Failed to parse source for import analysis because the content contains invalid JS syntax. If you are using JSX, make sure to name the file with the .jsx or .tsx extension.\n  Plugin: vite:import-analysis\n  File: /mnt/c/Users/riley/Desktop/loveandphotos/tests/integration/browse-avatar-integration.test.js:107:22\n  110 |      // Wait for data to load\n  111 |      await waitFor(() => {\n  112 |        expect(screen.getByText('3 Photographers Available')).toBeInTheDocument()\n      |                                             ^\n  113 |      })\n  114 |  \n ❯ TransformPluginContext._formatLog ../../../../../../home/riley/.npm/_npx/69c381f8ad94b576/node_modules/vite/dist/node/chunks/dep-M_KD0XSK.js:31527:43\n ❯ TransformPluginContext.error ../../../../../../home/riley/.npm/_npx/69c381f8ad94b576/node_modules/vite/dist/node/chunks/dep-M_KD0XSK.js:31524:14\n ❯ TransformPluginContext.transform ../../../../../../home/riley/.npm/_npx/69c381f8ad94b576/node_modules/vite/dist/node/chunks/dep-M_KD0XSK.js:29959:10\n ❯ EnvironmentPluginContainer.transform ../../../../../../home/riley/.npm/_npx/69c381f8ad94b576/node_modules/vite/dist/node/chunks/dep-M_KD0XSK.js:31325:14\n ❯ loadAndTransform ../../../../../../home/riley/.npm/_npx/69c381f8ad94b576/node_modules/vite/dist/node/chunks/dep-M_KD0XSK.js:26407:26\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯\n\n"
+  },
+  "dataAnalysisTests": {
+    "success": false,
+    "output": null,
+    "error": "Command failed: npx vitest run tests/analysis/browse-data-transformation.test.js\n\n⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯\n\n FAIL  tests/analysis/browse-data-transformation.test.js > Browse Data Transformation Analysis > Data Structure Consistency > should provide valid avatar URLs for all scenarios\nAssertionError: expected '' not to be '' // Object.is equality\n ❯ tests/analysis/browse-data-transformation.test.js:214:51\n    212|       transformed.forEach((photographer, index) => {\n    213|         expect(photographer.users.avatar_url).toBeDefined()\n    214|         expect(photographer.users.avatar_url).not.toBe('')\n       |                                                   ^\n    215|         expect(photographer.users.avatar_url).not.toBe(null)\n    216|         expect(photographer.users.avatar_url).not.toBe(undefined)\n ❯ tests/analysis/browse-data-transformation.test.js:212:19\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯\n\n FAIL  tests/analysis/browse-data-transformation.test.js > Browse Data Transformation Analysis > Fallback Array Validation > should ensure all fallback URLs are accessible format\nAssertionError: expected 'https://images.unsplash.com/photo-150…' to match /\\.(jpg|jpeg|png|gif|webp)(\\?|$)/i\n\n\u001b[32m- Expected:\u001b[39m \n/\\.(jpg|jpeg|png|gif|webp)(\\?|$)/i\n\n\u001b[31m+ Received:\u001b[39m \n\"https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face&auto=format&q=80\"\n\n ❯ tests/analysis/browse-data-transformation.test.js:259:21\n    257| \n    258|         // Should be image format\n    259|         expect(url).toMatch(/\\.(jpg|jpeg|png|gif|webp)(\\?|$)/i)\n       |                     ^\n    260|       })\n    261|     })\n ❯ tests/analysis/browse-data-transformation.test.js:251:15\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯\n\n"
+  },
+  "e2eTests": {
+    "success": false,
+    "output": null,
+    "error": "Command failed: npx playwright test tests/e2e/browse-thumbnails.spec.js --headed=false\nerror: unknown option '--headed=false'\n"
+  },
+  "overallSuccess": false
+}

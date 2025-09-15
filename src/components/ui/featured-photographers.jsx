@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Star, ArrowRight, MapPin, Calendar, Users, Heart, AlertCircle } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/Avatar';
@@ -62,11 +63,13 @@ const EmptyState = () => (
         We're currently updating our photographer network. Please check back soon or browse our full directory.
       </p>
       <Button
-        onClick={() => window.location.href = '/photographers'}
         className="bg-primary hover:bg-primary/90 text-primary-foreground"
+        asChild
       >
-        View All Photographers
-        <ArrowRight className="h-4 w-4 ml-2" />
+        <Link to="/photographers">
+          View All Photographers
+          <ArrowRight className="h-4 w-4 ml-2" />
+        </Link>
       </Button>
     </div>
   </motion.div>
@@ -95,11 +98,13 @@ const ErrorState = ({ onRetry }) => (
           Try Again
         </Button>
         <Button
-          onClick={() => window.location.href = '/photographers'}
           className="bg-primary hover:bg-primary/90 text-primary-foreground"
+          asChild
         >
-          View All Photographers
-          <ArrowRight className="h-4 w-4 ml-2" />
+          <Link to="/photographers">
+            View All Photographers
+            <ArrowRight className="h-4 w-4 ml-2" />
+          </Link>
         </Button>
       </div>
     </div>
@@ -189,7 +194,7 @@ const PhotographerCard = ({ photographer, index }) => {
             <div className="flex items-center gap-3">
               <div className="relative">
                 <Avatar className="h-12 w-12 border-2 border-background shadow-md">
-                  <AvatarImage src={photographer.avatar_url} alt={photographer.full_name} />
+                  <AvatarImage src={photographer.users?.avatar_url || photographer.avatar_url} alt={photographer.full_name} />
                   <AvatarFallback className="bg-primary/10 text-primary font-semibold">
                     {photographer.full_name?.split(' ').map(n => n[0]).join('') || 'P'}
                   </AvatarFallback>
@@ -233,15 +238,15 @@ const PhotographerCard = ({ photographer, index }) => {
           {/* Stats Grid */}
           <div className="grid grid-cols-3 gap-4 mb-4 p-3 bg-muted/30 rounded-lg">
             <div className="text-center">
-              <div className="font-semibold text-foreground">{formatNumber(photographer.total_reviews)}</div>
+              <div className="font-semibold text-foreground tabular-nums">{formatNumber(photographer.total_reviews)}</div>
               <div className="text-xs text-muted-foreground">Reviews</div>
             </div>
             <div className="text-center">
-              <div className="font-semibold text-foreground">{photographer.weddings_completed || 0}</div>
+              <div className="font-semibold text-foreground tabular-nums">{photographer.weddings_completed || 0}</div>
               <div className="text-xs text-muted-foreground">Weddings</div>
             </div>
             <div className="text-center">
-              <div className="font-semibold text-foreground flex items-center justify-center gap-1">
+              <div className="font-semibold text-foreground tabular-nums flex items-center justify-center gap-1">
                 {photographer.average_rating ? Number(photographer.average_rating).toFixed(1) : '0.0'}
                 <Star className="h-3 w-3 text-yellow-500 fill-current" />
               </div>
@@ -263,15 +268,34 @@ const PhotographerCard = ({ photographer, index }) => {
                 animate={{ x: isHovered ? 4 : 0 }}
                 transition={{ duration: 0.2 }}
               >
+                {/*
+                  ADR: React Router Link + Button Pattern
+
+                  Decision: Use Button asChild with Link for proper navigation semantics
+                  Rationale:
+                  - Avoids nested interactive elements (a > button)
+                  - Maintains shadcn/ui Button styling
+                  - Provides proper React Router navigation
+                  - Supports keyboard accessibility (Enter/Space)
+                  - No JavaScript required for navigation
+
+                  Alternative considered: onClick with navigate() - requires JS and less semantic
+                */}
                 <Button
                   variant="outline"
                   size="sm"
                   className="w-full group/btn border border-border hover:border-border hover:bg-accent text-foreground shadow-none ring-0 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                  onClick={() => window.location.href = profileLink}
+                  asChild
                 >
-                  <Users className="h-4 w-4 mr-2" />
-                  View Profile
-                  <ArrowRight className="h-4 w-4 ml-2 group-hover/btn:translate-x-1 transition-transform" />
+                  <Link
+                    to={profileLink}
+                    aria-label={`View ${photographer.full_name}'s profile`}
+                    className="flex items-center justify-center"
+                  >
+                    <Users className="h-4 w-4 mr-2" />
+                    View Profile
+                    <ArrowRight className="h-4 w-4 ml-2 group-hover/btn:translate-x-1 transition-transform" />
+                  </Link>
                 </Button>
               </motion.div>
             </div>
@@ -339,7 +363,7 @@ const FeaturedPhotographersSection = ({
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
-              <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground mb-4">
+              <h2 className="lp-h2 mb-4">
                 {title}
               </h2>
               <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
@@ -365,7 +389,7 @@ const FeaturedPhotographersSection = ({
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
-              <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground mb-4">
+              <h2 className="lp-h2 mb-4">
                 {title}
               </h2>
               <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
@@ -408,19 +432,19 @@ const FeaturedPhotographersSection = ({
               className="flex flex-wrap justify-center gap-8 mt-12 p-6 bg-muted/50 rounded-2xl border border-border"
             >
               <div className="text-center">
-                <div className="text-3xl font-bold text-foreground">
+                <div className="text-3xl font-bold text-foreground tabular-nums">
                   {(metrics?.acceptanceRate ?? null) !== null ? `${Math.round(metrics.acceptanceRate)}%` : '—'}
                 </div>
                 <div className="text-sm text-muted-foreground">Booking Acceptance Rate (%)</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-foreground">
+                <div className="text-3xl font-bold text-foreground tabular-nums">
                   {(metrics?.fiveStarReviews ?? null) !== null ? `${metrics.fiveStarReviews}%` : '—'}
                 </div>
                 <div className="text-sm text-muted-foreground">5 Star Reviews (%)</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-foreground">
+                <div className="text-3xl font-bold text-foreground tabular-nums">
                   {(metrics?.responseTime ?? null) !== null ? `${Math.round(metrics.responseTime)} hrs` : '—'}
                 </div>
                 <div className="text-sm text-muted-foreground">Response Time (hrs)</div>
@@ -461,10 +485,12 @@ const FeaturedPhotographersSection = ({
               variant="neutral"
               size="sm"
               className="rounded-full h-9 px-4 shadow-none"
-              onClick={() => window.location.href = '/photographers'}
+              asChild
             >
-              View Photographers
-              <ArrowRight className="h-4 w-4 ml-2" />
+              <Link to="/photographers" className="flex items-center justify-center">
+                View Photographers
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Link>
             </Button>
           </motion.div>
         )}

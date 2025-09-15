@@ -41,6 +41,8 @@ import HowItWorks from '@pages/HowItWorks'
 import Pricing from '@pages/Pricing'
 import FAQ from '@pages/FAQ'
 import Resources from '@pages/Resources'
+import Learn from '@pages/Learn'
+import Profile from '@pages/Profile'
 import Demo from '@pages/Demo'
 
 // Customer Pages (lazy loaded)
@@ -136,6 +138,13 @@ function App() {
     }
   }, [])
 
+  // Safety guard to ensure title is always 'Love & Photos'
+  useEffect(() => {
+    if (document?.title !== 'Love & Photos') {
+      document.title = 'Love & Photos'
+    }
+  }, [])
+
   return (
     <SWRProvider>
       <ThemeProvider>
@@ -200,6 +209,7 @@ function App() {
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/faq" element={<FAQ />} />
             <Route path="/resources" element={<Resources />} />
+            <Route path="/learn" element={<Learn />} />
             <Route path="/photographer-resources" element={<Resources />} />
             <Route path="/photographer-faq" element={<FAQ />} />
             <Route path="/join" element={<SignUp />} />
@@ -266,9 +276,7 @@ function App() {
             } />
             <Route path="/profile" element={
               <ProtectedRoute>
-                <Suspense fallback={<PageLoader />}>
-                  <CustomerProfile />
-                </Suspense>
+                <Profile />
               </ProtectedRoute>
             } />
           </Route>

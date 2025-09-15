@@ -9,6 +9,7 @@ import { motion } from "motion/react";
 import { Star, Users, Heart, CalendarDays } from "lucide-react";
 import TestimonialsColumns from './ui/testimonials-columns-1.jsx';
 import { getFeaturedTestimonials, getTestimonialsStats } from '../lib/supabaseClient.js';
+import Button from './ui/Button';
 
 // Loading skeleton component
 const TestimonialsSkeleton = () => {
@@ -201,15 +202,21 @@ export default function TestimonialsSection({ className = "" }) {
             <p className="text-lg text-muted-foreground mb-6">
               Ready to create your own amazing photography experience?
             </p>
-            <Link to="/book">
-              <motion.button
+            <Link to="/photographers">
+              <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full h-9 px-4 border border-primary/80 focus-visible:ring-primary/30 shadow-none transition-colors duration-200 inline-flex items-center font-medium"
               >
-                <CalendarDays className="h-4 w-4 mr-2" />
-                Check Availability
-              </motion.button>
+                <Button
+                  variant="primary"
+                  size="md"
+                  className="inline-flex items-center"
+                  aria-label="Browse photographers and check availability"
+                >
+                  <CalendarDays className="h-4 w-4 mr-2" />
+                  Check Availability
+                </Button>
+              </motion.div>
             </Link>
           </motion.div>
         )}

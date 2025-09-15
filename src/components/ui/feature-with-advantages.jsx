@@ -15,10 +15,10 @@ function Feature() {
       <div className="container mx-auto px-4">
         <div className="flex gap-4 flex-col items-start">
           <div>
-            <Badge variant="default">Included with Every Booking</Badge>
+            <Badge variant="default" className="lp-kicker">Included with Every Booking</Badge>
           </div>
           <div className="flex gap-2 flex-col">
-            <h2 className="text-3xl md:text-5xl tracking-tighter lg:max-w-xl font-regular">
+            <h2 className="lp-h2 lg:max-w-xl">
               Why Couples Choose Love & Photos
             </h2>
             <p className="text-lg max-w-xl lg:max-w-xl leading-relaxed tracking-tight text-muted-foreground">

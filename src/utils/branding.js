@@ -53,11 +53,11 @@ export function getBrandEmail(department = 'support') {
 
 /**
  * Get page title with brand
- * @param {string} pageTitle - Page specific title
- * @returns {string} Full page title
+ * @param {string} pageTitle - Page specific title (ignored - always returns brand name only)
+ * @returns {string} Full page title (always 'Love & Photos')
  */
 export function getPageTitle(pageTitle) {
-  return pageTitle ? `${pageTitle} | ${BRAND.name}` : `${BRAND.name} - ${BRAND.tagline}`
+  return BRAND.name
 }
 
 /**

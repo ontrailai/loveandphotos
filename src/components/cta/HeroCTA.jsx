@@ -24,8 +24,8 @@ export default function HeroCTA() {
 
             <div className="mt-6">
               <Link
-                to="/book?step=availability"
-                aria-label="Reserve Date"
+                to="/photographers"
+                aria-label="Browse photographers and reserve your date"
                 className="inline-flex items-center justify-center rounded-xl bg-white/90 hover:bg-white text-gray-900 px-6 py-3 text-sm md:text-base font-medium ring-1 ring-white/20 shadow-lg shadow-black/10 transition-all hover:scale-105"
               >
                 Reserve Date <span className="ml-2">→</span>

@@ -1,0 +1,660 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e4]:
+    - banner [ref=e5]:
+      - generic [ref=e7]:
+        - link "Love & Photos home" [ref=e9] [cursor=pointer]:
+          - /url: /
+          - img "Love & Photos logo" [ref=e10] [cursor=pointer]
+          - generic [ref=e11] [cursor=pointer]: Love & Photos
+        - navigation [ref=e12]:
+          - link "Home" [ref=e15] [cursor=pointer]:
+            - /url: /
+            - generic [ref=e16] [cursor=pointer]:
+              - img [ref=e17] [cursor=pointer]
+              - text: Home
+          - button "Book Now" [ref=e22] [cursor=pointer]:
+            - generic [ref=e23] [cursor=pointer]: Book Now
+            - img [ref=e24] [cursor=pointer]
+          - button "Join" [ref=e28] [cursor=pointer]:
+            - generic [ref=e29] [cursor=pointer]: Join
+            - img [ref=e30] [cursor=pointer]
+          - link "About About" [ref=e34] [cursor=pointer]:
+            - /url: /about
+            - generic [ref=e35] [cursor=pointer]:
+              - img "About" [ref=e36] [cursor=pointer]
+              - text: About
+          - link "Contact" [ref=e43] [cursor=pointer]:
+            - /url: /contact
+            - generic [ref=e44] [cursor=pointer]: Contact
+        - generic [ref=e45]:
+          - button "Change language and currency" [ref=e47] [cursor=pointer]:
+            - img [ref=e48] [cursor=pointer]
+          - generic [ref=e51]:
+            - link "Sign In" [ref=e52] [cursor=pointer]:
+              - /url: /login
+              - button "Sign In" [ref=e53] [cursor=pointer]
+            - link "Get Started" [ref=e54] [cursor=pointer]:
+              - /url: /signup
+              - button "Get Started" [ref=e55] [cursor=pointer]
+    - generic [ref=e57]:
+      - generic [ref=e58]:
+        - button "Switch to dark mode" [ref=e60] [cursor=pointer]:
+          - img [ref=e61] [cursor=pointer]
+        - generic [ref=e63]:
+          - generic [ref=e64]:
+            - heading "Your Perfect Moment Deserves the Perfect Eye" [level=1] [ref=e65]:
+              - text: Your Perfect
+              - generic [ref=e66]: Moment
+              - text: Deserves the Perfect Eye
+            - paragraph [ref=e67]: Connect with verified photographers and videographers who capture your story with artistry and care.
+            - generic [ref=e68]:
+              - generic [ref=e69]:
+                - generic [ref=e70]:
+                  - img [ref=e71]
+                  - textbox "Enter your ZIP code or city" [active] [ref=e74]: "92101"
+                - button "Search" [ref=e75] [cursor=pointer]:
+                  - img [ref=e76] [cursor=pointer]
+              - button "92101 San Diego California" [ref=e80] [cursor=pointer]:
+                - generic [ref=e81] [cursor=pointer]:
+                  - img [ref=e82] [cursor=pointer]
+                  - generic [ref=e85] [cursor=pointer]: "92101"
+                - generic [ref=e86] [cursor=pointer]:
+                  - generic [ref=e87] [cursor=pointer]: San Diego
+                  - generic [ref=e88] [cursor=pointer]: California
+            - generic [ref=e89]:
+              - generic [ref=e90]:
+                - img [ref=e91]
+                - generic [ref=e94]: 2,500+ Verified Photographers
+              - generic [ref=e95]:
+                - img [ref=e96]
+                - generic [ref=e98]: 4.9 Average Rating
+              - generic [ref=e99]:
+                - img [ref=e100]
+                - generic [ref=e102]: 10,000+ Happy Moments
+          - generic [ref=e103]:
+            - generic [ref=e104]:
+              - img "Wedding" [ref=e105]
+              - img "Wedding couple" [ref=e106]
+            - generic [ref=e107]:
+              - img "Portrait" [ref=e108]
+              - img "Family" [ref=e109]
+            - generic [ref=e110]:
+              - img "Event" [ref=e111]
+              - img "Newborn" [ref=e112]
+            - generic [ref=e113]:
+              - img "Corporate" [ref=e114]
+              - img "Birthday" [ref=e115]
+      - generic [ref=e118]:
+        - generic [ref=e120]: Included with Every Booking
+        - generic [ref=e121]:
+          - heading "Why Couples Choose Love & Photos" [level=2] [ref=e122]
+          - paragraph [ref=e123]: Pro photos, zero hassle. We match you with vetted talent, keep pricing clear, and handle the details.
+        - generic [ref=e125]:
+          - generic [ref=e126]:
+            - img [ref=e127]
+            - generic [ref=e129]:
+              - paragraph [ref=e130]: Transparent Pricing
+              - paragraph [ref=e131]: Clear, upfront pricing with no hidden fees or surprises.
+          - generic [ref=e132]:
+            - img [ref=e133]
+            - generic [ref=e135]:
+              - paragraph [ref=e136]: Vetted Talent
+              - paragraph [ref=e137]: All photographers are carefully screened and verified for quality.
+          - generic [ref=e138]:
+            - img [ref=e139]
+            - generic [ref=e141]:
+              - paragraph [ref=e142]: Smart Matching
+              - paragraph [ref=e143]: AI-powered matching finds the perfect photographer for your style.
+          - generic [ref=e144]:
+            - img [ref=e145]
+            - generic [ref=e147]:
+              - paragraph [ref=e148]: Secure Payments
+              - paragraph [ref=e149]: Safe, encrypted payment processing with buyer protection.
+          - generic [ref=e150]:
+            - img [ref=e151]
+            - generic [ref=e153]:
+              - paragraph [ref=e154]: Auto Contracts
+              - paragraph [ref=e155]: Automated legal contracts protect both you and your photographer.
+          - generic [ref=e156]:
+            - img [ref=e157]
+            - generic [ref=e159]:
+              - paragraph [ref=e160]: Flexible Plans
+              - paragraph [ref=e161]: Choose from packages or custom pricing to fit your needs.
+          - generic [ref=e162]:
+            - img [ref=e163]
+            - generic [ref=e165]:
+              - paragraph [ref=e166]: Rush Delivery
+              - paragraph [ref=e167]: Need photos fast? Express delivery options available.
+          - generic [ref=e168]:
+            - img [ref=e169]
+            - generic [ref=e171]:
+              - paragraph [ref=e172]: On-Time Media
+              - paragraph [ref=e173]: Guaranteed delivery timelines with progress tracking.
+          - generic [ref=e174]:
+            - img [ref=e175]
+            - generic [ref=e177]:
+              - paragraph [ref=e178]: 24/7 Support
+              - paragraph [ref=e179]: Our support team is here to help whenever you need us.
+      - generic [ref=e181]:
+        - generic [ref=e182]:
+          - generic [ref=e183]:
+            - heading "Featured Photographers" [level=2] [ref=e184]
+            - paragraph [ref=e185]: Handpicked, vetted wedding photographers ready for your date.
+          - generic [ref=e186]:
+            - generic [ref=e187]:
+              - generic [ref=e188]: 81%
+              - generic [ref=e189]: Booking Acceptance Rate (%)
+            - generic [ref=e190]:
+              - generic [ref=e191]: 100%
+              - generic [ref=e192]: 5 Star Reviews (%)
+            - generic [ref=e193]:
+              - generic [ref=e194]: 34 hrs
+              - generic [ref=e195]: Response Time (hrs)
+        - generic [ref=e196]:
+          - generic [ref=e198]:
+            - img
+            - generic [ref=e199]:
+              - generic [ref=e200]:
+                - generic [ref=e201]:
+                  - generic [ref=e202]:
+                    - generic [ref=e203]:
+                      - img "Alishia Blount" [ref=e204]
+                      - generic [ref=e205]: AB
+                    - img [ref=e207]
+                  - generic [ref=e209]:
+                    - heading "Alishia Blount" [level=3] [ref=e210]
+                    - paragraph [ref=e211]: From $500/hr
+                - generic [ref=e212]: Platinum
+              - generic [ref=e213]:
+                - generic [ref=e214]:
+                  - img [ref=e215]
+                  - generic [ref=e218]: San Diego, California
+                - generic [ref=e219]:
+                  - img [ref=e220]
+                  - generic [ref=e222]: Joined Sep 2025
+              - generic [ref=e223]:
+                - generic [ref=e224]:
+                  - generic [ref=e225]: "92"
+                  - generic [ref=e226]: Reviews
+                - generic [ref=e227]:
+                  - generic [ref=e228]: "91"
+                  - generic [ref=e229]: Weddings
+                - generic [ref=e230]:
+                  - generic [ref=e231]:
+                    - text: "5.0"
+                    - img [ref=e232]
+                  - generic [ref=e234]: Rating
+              - blockquote [ref=e235]: "\"Professional photographer specializing in capturing life's precious moments. Expert in wedding, portrait, and event photography.\""
+              - button "View Alishia Blount's profile" [ref=e238] [cursor=pointer]:
+                - link "View Alishia Blount's profile" [ref=e239] [cursor=pointer]:
+                  - /url: /photographer/308075ee-603f-487a-8e70-d98eff148d34
+                  - img [ref=e240] [cursor=pointer]
+                  - text: View Profile
+                  - img [ref=e245] [cursor=pointer]
+          - generic [ref=e248]:
+            - img
+            - generic [ref=e249]:
+              - generic [ref=e250]:
+                - generic [ref=e251]:
+                  - generic [ref=e252]:
+                    - generic [ref=e253]:
+                      - img "Purity Martinez" [ref=e254]
+                      - generic [ref=e255]: PM
+                    - img [ref=e257]
+                  - generic [ref=e259]:
+                    - heading "Purity Martinez" [level=3] [ref=e260]
+                    - paragraph [ref=e261]: From $500/hr
+                - generic [ref=e262]: Platinum
+              - generic [ref=e263]:
+                - generic [ref=e264]:
+                  - img [ref=e265]
+                  - generic [ref=e268]: Red Oak, Texas
+                - generic [ref=e269]:
+                  - img [ref=e270]
+                  - generic [ref=e272]: Joined Sep 2025
+              - generic [ref=e273]:
+                - generic [ref=e274]:
+                  - generic [ref=e275]: "69"
+                  - generic [ref=e276]: Reviews
+                - generic [ref=e277]:
+                  - generic [ref=e278]: "119"
+                  - generic [ref=e279]: Weddings
+                - generic [ref=e280]:
+                  - generic [ref=e281]:
+                    - text: "5.0"
+                    - img [ref=e282]
+                  - generic [ref=e284]: Rating
+              - blockquote [ref=e285]: "\"Professional photographer specializing in capturing life's precious moments. Expert in wedding, portrait, and event photography.\""
+              - button "View Purity Martinez's profile" [ref=e288] [cursor=pointer]:
+                - link "View Purity Martinez's profile" [ref=e289] [cursor=pointer]:
+                  - /url: /photographer/ec09da9d-6155-4ff7-a201-28e33de5b55d
+                  - img [ref=e290] [cursor=pointer]
+                  - text: View Profile
+                  - img [ref=e295] [cursor=pointer]
+          - generic [ref=e298]:
+            - img
+            - generic [ref=e299]:
+              - generic [ref=e300]:
+                - generic [ref=e301]:
+                  - generic [ref=e303]:
+                    - img "Barry Dreyer" [ref=e304]
+                    - generic [ref=e305]: BD
+                  - generic [ref=e306]:
+                    - heading "Barry Dreyer" [level=3] [ref=e307]
+                    - paragraph [ref=e308]: From $350/hr
+                - generic [ref=e309]: Gold
+              - generic [ref=e310]:
+                - generic [ref=e311]:
+                  - img [ref=e312]
+                  - generic [ref=e315]: Oakland, CA
+                - generic [ref=e316]:
+                  - img [ref=e317]
+                  - generic [ref=e319]: Joined Sep 2025
+              - generic [ref=e320]:
+                - generic [ref=e321]:
+                  - generic [ref=e322]: "53"
+                  - generic [ref=e323]: Reviews
+                - generic [ref=e324]:
+                  - generic [ref=e325]: "100"
+                  - generic [ref=e326]: Weddings
+                - generic [ref=e327]:
+                  - generic [ref=e328]:
+                    - text: "5.0"
+                    - img [ref=e329]
+                  - generic [ref=e331]: Rating
+              - blockquote [ref=e332]: "\"Professional photographer specializing in capturing life's precious moments. Expert in wedding, portrait, and event photography.\""
+              - button "View Barry Dreyer's profile" [ref=e335] [cursor=pointer]:
+                - link "View Barry Dreyer's profile" [ref=e336] [cursor=pointer]:
+                  - /url: /photographer/91708685-f659-4b63-ab22-22b4e51451da
+                  - img [ref=e337] [cursor=pointer]
+                  - text: View Profile
+                  - img [ref=e342] [cursor=pointer]
+          - generic [ref=e345]:
+            - img
+            - generic [ref=e346]:
+              - generic [ref=e347]:
+                - generic [ref=e348]:
+                  - generic [ref=e349]:
+                    - generic [ref=e350]:
+                      - img "Winston Hermann" [ref=e351]
+                      - generic [ref=e352]: WH
+                    - img [ref=e354]
+                  - generic [ref=e356]:
+                    - heading "Winston Hermann" [level=3] [ref=e357]
+                    - paragraph [ref=e358]: From $350/hr
+                - generic [ref=e359]: Gold
+              - generic [ref=e360]:
+                - generic [ref=e361]:
+                  - img [ref=e362]
+                  - generic [ref=e365]: Brentwood, Tennessee
+                - generic [ref=e366]:
+                  - img [ref=e367]
+                  - generic [ref=e369]: Joined Sep 2025
+              - generic [ref=e370]:
+                - generic [ref=e371]:
+                  - generic [ref=e372]: "7"
+                  - generic [ref=e373]: Reviews
+                - generic [ref=e374]:
+                  - generic [ref=e375]: "28"
+                  - generic [ref=e376]: Weddings
+                - generic [ref=e377]:
+                  - generic [ref=e378]:
+                    - text: "5.0"
+                    - img [ref=e379]
+                  - generic [ref=e381]: Rating
+              - blockquote [ref=e382]: "\"Professional photographer specializing in capturing life's precious moments. Expert in wedding, portrait, and event photography.\""
+              - button "View Winston Hermann's profile" [ref=e385] [cursor=pointer]:
+                - link "View Winston Hermann's profile" [ref=e386] [cursor=pointer]:
+                  - /url: /photographer/381c3890-880a-4286-9f46-93b18e2279a9
+                  - img [ref=e387] [cursor=pointer]
+                  - text: View Profile
+                  - img [ref=e392] [cursor=pointer]
+          - generic [ref=e395]:
+            - img
+            - generic [ref=e396]:
+              - generic [ref=e397]:
+                - generic [ref=e398]:
+                  - generic [ref=e399]:
+                    - generic [ref=e400]:
+                      - img "Sirena Salazar" [ref=e401]
+                      - generic [ref=e402]: SS
+                    - img [ref=e404]
+                  - generic [ref=e406]:
+                    - heading "Sirena Salazar" [level=3] [ref=e407]
+                    - paragraph [ref=e408]: From $350/hr
+                - generic [ref=e409]: Gold
+              - generic [ref=e410]:
+                - generic [ref=e411]:
+                  - img [ref=e412]
+                  - generic [ref=e415]: San Diego, California
+                - generic [ref=e416]:
+                  - img [ref=e417]
+                  - generic [ref=e419]: Joined Sep 2025
+              - generic [ref=e420]:
+                - generic [ref=e421]:
+                  - generic [ref=e422]: "7"
+                  - generic [ref=e423]: Reviews
+                - generic [ref=e424]:
+                  - generic [ref=e425]: "73"
+                  - generic [ref=e426]: Weddings
+                - generic [ref=e427]:
+                  - generic [ref=e428]:
+                    - text: "5.0"
+                    - img [ref=e429]
+                  - generic [ref=e431]: Rating
+              - blockquote [ref=e432]: "\"Professional photographer specializing in capturing life's precious moments. Expert in wedding, portrait, and event photography.\""
+              - button "View Sirena Salazar's profile" [ref=e435] [cursor=pointer]:
+                - link "View Sirena Salazar's profile" [ref=e436] [cursor=pointer]:
+                  - /url: /photographer/4873cdf5-b4f9-4fec-ac3b-ab69a88e4a81
+                  - img [ref=e437] [cursor=pointer]
+                  - text: View Profile
+                  - img [ref=e442] [cursor=pointer]
+          - generic [ref=e445]:
+            - img
+            - generic [ref=e446]:
+              - generic [ref=e447]:
+                - generic [ref=e448]:
+                  - generic [ref=e450]:
+                    - img "Meghana Kappala" [ref=e451]
+                    - generic [ref=e452]: MK
+                  - generic [ref=e453]:
+                    - heading "Meghana Kappala" [level=3] [ref=e454]
+                    - paragraph [ref=e455]: From $225/hr
+                - generic [ref=e456]: Silver
+              - generic [ref=e457]:
+                - generic [ref=e458]:
+                  - img [ref=e459]
+                  - generic [ref=e462]: Tega Cay, South Carolina
+                - generic [ref=e463]:
+                  - img [ref=e464]
+                  - generic [ref=e466]: Joined Sep 2025
+              - generic [ref=e467]:
+                - generic [ref=e468]:
+                  - generic [ref=e469]: "7"
+                  - generic [ref=e470]: Reviews
+                - generic [ref=e471]:
+                  - generic [ref=e472]: "69"
+                  - generic [ref=e473]: Weddings
+                - generic [ref=e474]:
+                  - generic [ref=e475]:
+                    - text: "5.0"
+                    - img [ref=e476]
+                  - generic [ref=e478]: Rating
+              - blockquote [ref=e479]: "\"Professional photographer specializing in capturing life's precious moments. Expert in wedding, portrait, and event photography.\""
+              - button "View Meghana Kappala's profile" [ref=e482] [cursor=pointer]:
+                - link "View Meghana Kappala's profile" [ref=e483] [cursor=pointer]:
+                  - /url: /photographer/c17b38d1-4099-46f5-a84f-550ed8fc867e
+                  - img [ref=e484] [cursor=pointer]
+                  - text: View Profile
+                  - img [ref=e489] [cursor=pointer]
+        - button "View Photographers" [ref=e492] [cursor=pointer]:
+          - link "View Photographers" [ref=e493] [cursor=pointer]:
+            - /url: /photographers
+            - text: View Photographers
+            - img [ref=e494] [cursor=pointer]
+      - generic [ref=e497]:
+        - generic [ref=e498]:
+          - generic [ref=e500]: Testimonials
+          - heading "What our customers say" [level=2] [ref=e501]
+          - paragraph [ref=e502]: See what our customers have to say about Love & Photos.
+        - generic [ref=e503]:
+          - generic [ref=e505]:
+            - generic [ref=e506]:
+              - generic [ref=e507]: Riley did an amazing job with our family portraits! Very professional, great with kids, and the photos turned out beautiful. The turnaround time was quick and the online gallery was easy to use. Highly recommend!
+              - generic [ref=e508]:
+                - generic [ref=e510]: RP
+                - generic [ref=e511]:
+                  - generic [ref=e512]: Riley Pasha
+                  - generic [ref=e513]: Los Angeles, CA
+            - generic [ref=e514]:
+              - generic [ref=e515]: Patient with our large family group and got amazing shots.
+              - generic [ref=e516]:
+                - generic [ref=e518]: QX
+                - generic [ref=e519]:
+                  - generic [ref=e520]: Qi Xin
+                  - generic [ref=e521]: New York, NY
+            - generic [ref=e522]:
+              - generic [ref=e523]: Professional from start to finish. Great to work with.
+              - generic [ref=e524]:
+                - generic [ref=e526]: AR
+                - generic [ref=e527]:
+                  - generic [ref=e528]: Alondra Rodríguez
+                  - generic [ref=e529]: Chicago, IL
+            - generic [ref=e530]:
+              - generic [ref=e531]: The photos captured the emotion of our day perfectly.
+              - generic [ref=e532]:
+                - generic [ref=e534]: AM
+                - generic [ref=e535]:
+                  - generic [ref=e536]: Alexia Morales
+                  - generic [ref=e537]: Austin, TX
+            - generic [ref=e538]:
+              - generic [ref=e539]: Riley did an amazing job with our family portraits! Very professional, great with kids, and the photos turned out beautiful. The turnaround time was quick and the online gallery was easy to use. Highly recommend!
+              - generic [ref=e540]:
+                - generic [ref=e542]: RP
+                - generic [ref=e543]:
+                  - generic [ref=e544]: Riley Pasha
+                  - generic [ref=e545]: Los Angeles, CA
+            - generic [ref=e546]:
+              - generic [ref=e547]: Patient with our large family group and got amazing shots.
+              - generic [ref=e548]:
+                - generic [ref=e550]: QX
+                - generic [ref=e551]:
+                  - generic [ref=e552]: Qi Xin
+                  - generic [ref=e553]: New York, NY
+            - generic [ref=e554]:
+              - generic [ref=e555]: Professional from start to finish. Great to work with.
+              - generic [ref=e556]:
+                - generic [ref=e558]: AR
+                - generic [ref=e559]:
+                  - generic [ref=e560]: Alondra Rodríguez
+                  - generic [ref=e561]: Chicago, IL
+            - generic [ref=e562]:
+              - generic [ref=e563]: The photos captured the emotion of our day perfectly.
+              - generic [ref=e564]:
+                - generic [ref=e566]: AM
+                - generic [ref=e567]:
+                  - generic [ref=e568]: Alexia Morales
+                  - generic [ref=e569]: Austin, TX
+          - generic [ref=e571]:
+            - generic [ref=e572]:
+              - generic [ref=e573]: Professional from start to finish. Great to work with.
+              - generic [ref=e574]:
+                - generic [ref=e576]: PR
+                - generic [ref=e577]:
+                  - generic [ref=e578]: Patrick Richards
+                  - generic [ref=e579]: Seattle, WA
+            - generic [ref=e580]:
+              - generic [ref=e581]: The editing was perfect - not overdone but enhanced beautifully.
+              - generic [ref=e582]:
+                - generic [ref=e584]: BB
+                - generic [ref=e585]:
+                  - generic [ref=e586]: Blake Booth
+                  - generic [ref=e587]: Miami, FL
+            - generic [ref=e588]:
+              - generic [ref=e589]: Professional from start to finish. Great to work with.
+              - generic [ref=e590]:
+                - generic [ref=e592]: CS
+                - generic [ref=e593]:
+                  - generic [ref=e594]: Craig Smith
+                  - generic [ref=e595]: Denver, CO
+            - generic [ref=e596]:
+              - generic [ref=e597]: Went above and beyond what we expected. Amazing service!
+              - generic [ref=e598]:
+                - generic [ref=e600]: LG
+                - generic [ref=e601]:
+                  - generic [ref=e602]: Loredana Gasparotto
+                  - generic [ref=e603]: Portland, OR
+            - generic [ref=e604]:
+              - generic [ref=e605]: Professional from start to finish. Great to work with.
+              - generic [ref=e606]:
+                - generic [ref=e608]: PR
+                - generic [ref=e609]:
+                  - generic [ref=e610]: Patrick Richards
+                  - generic [ref=e611]: Seattle, WA
+            - generic [ref=e612]:
+              - generic [ref=e613]: The editing was perfect - not overdone but enhanced beautifully.
+              - generic [ref=e614]:
+                - generic [ref=e616]: BB
+                - generic [ref=e617]:
+                  - generic [ref=e618]: Blake Booth
+                  - generic [ref=e619]: Miami, FL
+            - generic [ref=e620]:
+              - generic [ref=e621]: Professional from start to finish. Great to work with.
+              - generic [ref=e622]:
+                - generic [ref=e624]: CS
+                - generic [ref=e625]:
+                  - generic [ref=e626]: Craig Smith
+                  - generic [ref=e627]: Denver, CO
+            - generic [ref=e628]:
+              - generic [ref=e629]: Went above and beyond what we expected. Amazing service!
+              - generic [ref=e630]:
+                - generic [ref=e632]: LG
+                - generic [ref=e633]:
+                  - generic [ref=e634]: Loredana Gasparotto
+                  - generic [ref=e635]: Portland, OR
+          - generic [ref=e637]:
+            - generic [ref=e638]:
+              - generic [ref=e639]: Worth every penny. The quality of work is outstanding.
+              - generic [ref=e640]:
+                - generic [ref=e642]: YC
+                - generic [ref=e643]:
+                  - generic [ref=e644]: Yukang Chou
+                  - generic [ref=e645]: Los Angeles, CA
+            - generic [ref=e646]:
+              - generic [ref=e647]: Captured all the important moments and many we didn't even notice.
+              - generic [ref=e648]:
+                - generic [ref=e650]: EF
+                - generic [ref=e651]:
+                  - generic [ref=e652]: Elizabeth Findley
+                  - generic [ref=e653]: New York, NY
+            - generic [ref=e654]:
+              - generic [ref=e655]: The editing was perfect - not overdone but enhanced beautifully.
+              - generic [ref=e656]:
+                - generic [ref=e658]: JM
+                - generic [ref=e659]:
+                  - generic [ref=e660]: Jonathan Moore
+                  - generic [ref=e661]: Chicago, IL
+            - generic [ref=e662]:
+              - generic [ref=e663]: Great communication throughout the entire process.
+              - generic [ref=e664]:
+                - generic [ref=e666]: JB
+                - generic [ref=e667]:
+                  - generic [ref=e668]: Jan Buitenhuis
+                  - generic [ref=e669]: Austin, TX
+            - generic [ref=e670]:
+              - generic [ref=e671]: Worth every penny. The quality of work is outstanding.
+              - generic [ref=e672]:
+                - generic [ref=e674]: YC
+                - generic [ref=e675]:
+                  - generic [ref=e676]: Yukang Chou
+                  - generic [ref=e677]: Los Angeles, CA
+            - generic [ref=e678]:
+              - generic [ref=e679]: Captured all the important moments and many we didn't even notice.
+              - generic [ref=e680]:
+                - generic [ref=e682]: EF
+                - generic [ref=e683]:
+                  - generic [ref=e684]: Elizabeth Findley
+                  - generic [ref=e685]: New York, NY
+            - generic [ref=e686]:
+              - generic [ref=e687]: The editing was perfect - not overdone but enhanced beautifully.
+              - generic [ref=e688]:
+                - generic [ref=e690]: JM
+                - generic [ref=e691]:
+                  - generic [ref=e692]: Jonathan Moore
+                  - generic [ref=e693]: Chicago, IL
+            - generic [ref=e694]:
+              - generic [ref=e695]: Great communication throughout the entire process.
+              - generic [ref=e696]:
+                - generic [ref=e698]: JB
+                - generic [ref=e699]:
+                  - generic [ref=e700]: Jan Buitenhuis
+                  - generic [ref=e701]: Austin, TX
+      - generic [ref=e706]:
+        - heading "Forever Starts Here" [level=2] [ref=e707]
+        - link "Browse photographers and reserve your date" [ref=e709] [cursor=pointer]:
+          - /url: /photographers
+          - text: Reserve Date
+          - generic [ref=e710] [cursor=pointer]: →
+      - contentinfo [ref=e711]:
+        - generic [ref=e714]:
+          - generic [ref=e715]:
+            - img "Love & Photos logo" [ref=e716]
+            - paragraph [ref=e717]: © 2025 Love & Photos
+          - generic [ref=e719]:
+            - heading "Clients" [level=3] [ref=e720]
+            - list [ref=e721]:
+              - listitem [ref=e722]:
+                - link "Book" [ref=e723] [cursor=pointer]:
+                  - /url: /photographers
+              - listitem [ref=e724]:
+                - link "Guide" [ref=e725] [cursor=pointer]:
+                  - /url: /how-it-works
+              - listitem [ref=e726]:
+                - link "Pricing" [ref=e727] [cursor=pointer]:
+                  - /url: /pricing
+              - listitem [ref=e728]:
+                - link "Locations" [ref=e729] [cursor=pointer]:
+                  - /url: /photographers
+          - generic [ref=e731]:
+            - heading "Talent" [level=3] [ref=e732]
+            - list [ref=e733]:
+              - listitem [ref=e734]:
+                - link "Join" [ref=e735] [cursor=pointer]:
+                  - /url: /signup?role=photographer
+              - listitem [ref=e736]:
+                - link "Tools" [ref=e737] [cursor=pointer]:
+                  - /url: /resources
+              - listitem [ref=e738]:
+                - link "FAQ" [ref=e739] [cursor=pointer]:
+                  - /url: /faq
+              - listitem [ref=e740]:
+                - link "Learn" [ref=e741] [cursor=pointer]:
+                  - /url: /learn
+          - generic [ref=e743]:
+            - heading "Company" [level=3] [ref=e744]
+            - list [ref=e745]:
+              - listitem [ref=e746]:
+                - link "About" [ref=e747] [cursor=pointer]:
+                  - /url: /about
+              - listitem [ref=e748]:
+                - link "Contact" [ref=e749] [cursor=pointer]:
+                  - /url: /contact
+              - listitem [ref=e750]:
+                - link "Privacy" [ref=e751] [cursor=pointer]:
+                  - /url: /privacy
+              - listitem [ref=e752]:
+                - link "Terms" [ref=e753] [cursor=pointer]:
+                  - /url: /terms
+          - generic [ref=e755]:
+            - heading "Connect" [level=3] [ref=e756]
+            - list [ref=e757]:
+              - listitem [ref=e758]:
+                - link "Facebook" [ref=e759] [cursor=pointer]:
+                  - /url: https://www.facebook.com/profile.php?id=61573197380793
+                  - img [ref=e760] [cursor=pointer]
+                  - text: Facebook
+              - listitem [ref=e762]:
+                - link "Instagram" [ref=e763] [cursor=pointer]:
+                  - /url: https://www.instagram.com/lovesandphotos/
+                  - img [ref=e764] [cursor=pointer]
+                  - text: Instagram
+              - listitem [ref=e767]:
+                - link "Yelp" [ref=e768] [cursor=pointer]:
+                  - /url: https://www.yelp.com/biz/love-and-photos-arden-arcade-2?utm_campaign=www_business_share_popup&utm_medium=copy_link&utm_source=(direct)
+                  - img "Yelp" [ref=e769] [cursor=pointer]
+                  - text: Yelp
+              - listitem [ref=e770]:
+                - link "The Knot" [ref=e771] [cursor=pointer]:
+                  - /url: https://www.theknot.com/marketplace/love-and-photos-springfield-mo-2092546
+                  - img "The Knot" [ref=e772] [cursor=pointer]
+                  - text: The Knot
+  - generic:
+    - button
+    - button [ref=e773] [cursor=pointer]:
+      - img [ref=e775] [cursor=pointer]
+      - generic:
+        - img
+```

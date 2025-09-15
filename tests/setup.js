@@ -1,108 +1,78 @@
 /**
- * Global test setup configuration
- * Runs before all test suites
+ * Test Setup Configuration
+ * Global setup for Jest tests
  */
 
-import dotenv from 'dotenv';
-import { jest } from '@jest/globals';
+import '@testing-library/jest-dom'
 
-// Load test environment variables
-dotenv.config({ path: '.env.test' });
+// Mock window.matchMedia for components that use responsive hooks
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: jest.fn().mockImplementation(query => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: jest.fn(), // deprecated
+    removeListener: jest.fn(), // deprecated
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn(),
+    dispatchEvent: jest.fn(),
+  })),
+})
 
-// Global test timeout
-jest.setTimeout(10000);
+// Mock ResizeObserver
+global.ResizeObserver = jest.fn().mockImplementation(() => ({
+  observe: jest.fn(),
+  unobserve: jest.fn(),
+  disconnect: jest.fn(),
+}))
 
-// Global test variables
-globalThis.TEST_PORT = 3002;
-globalThis.TEST_BASE_URL = `http://localhost:${globalThis.TEST_PORT}`;
+// Mock IntersectionObserver for components that use it
+global.IntersectionObserver = jest.fn().mockImplementation(() => ({
+  observe: jest.fn(),
+  unobserve: jest.fn(),
+  disconnect: jest.fn(),
+  root: null,
+  rootMargin: '',
+  thresholds: [],
+}))
 
-// Mock console methods in tests to reduce noise
-const originalConsoleLog = console.log;
-const originalConsoleError = console.error;
-const originalConsoleWarn = console.warn;
+// Suppress console warnings in tests unless explicitly needed
+const originalError = console.error
+beforeAll(() => {
+  console.error = (...args) => {
+    if (
+      typeof args[0] === 'string' &&
+      (args[0].includes('Warning:') || args[0].includes('validateDOMNesting'))
+    ) {
+      return
+    }
+    originalError.call(console, ...args)
+  }
+})
 
-// Store original methods for restoration
-globalThis.restoreConsole = () => {
-  console.log = originalConsoleLog;
-  console.error = originalConsoleError;
-  console.warn = originalConsoleWarn;
-};
-
-// Mock console by default (can be restored in individual tests)
-if (process.env.NODE_ENV === 'test' && !process.env.VERBOSE_TESTS) {
-  console.log = jest.fn();
-  console.warn = jest.fn();
-  // Keep error logging for debugging
-  console.error = originalConsoleError;
-}
+afterAll(() => {
+  console.error = originalError
+})
 
 // Global test utilities
-globalThis.testUtils = {
-  delay: (ms) => new Promise(resolve => setTimeout(resolve, ms)),
+global.testUtils = {
+  // Helper to wait for async operations
+  waitFor: (ms) => new Promise(resolve => setTimeout(resolve, ms)),
 
-  // Generate test data
-  generateTestUser: (overrides = {}) => ({
-    id: `test-user-${Date.now()}`,
-    email: `test${Date.now()}@example.com`,
-    name: 'Test User',
-    created_at: new Date().toISOString(),
+  // Helper to create mock user objects
+  createMockUser: (overrides = {}) => ({
+    id: 'test-user-id',
+    email: 'test@example.com',
+    created_at: '2024-01-01T00:00:00Z',
     ...overrides
   }),
 
-  generateTestPhotographer: (overrides = {}) => ({
-    id: `test-photographer-${Date.now()}`,
-    user_id: `test-user-${Date.now()}`,
-    business_name: 'Test Photography',
-    location: 'Test City, TS',
-    price_range: '$500-$1000',
-    rating: 4.8,
-    review_count: 25,
-    bio: 'Test photographer bio',
-    created_at: new Date().toISOString(),
-    ...overrides
-  }),
-
-  generateTestPackage: (overrides = {}) => ({
-    id: `test-package-${Date.now()}`,
-    photographer_id: `test-photographer-${Date.now()}`,
-    name: 'Test Package',
-    price: 799,
-    tier_id: 'silver',
-    duration: '2 hours',
-    deliverables: 'Digital gallery, 25 edited photos',
-    created_at: new Date().toISOString(),
-    ...overrides
-  }),
-
-  generateTestBooking: (overrides = {}) => ({
-    id: `test-booking-${Date.now()}`,
-    user_id: `test-user-${Date.now()}`,
-    photographer_id: `test-photographer-${Date.now()}`,
-    package_id: `test-package-${Date.now()}`,
-    event_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 days from now
-    status: 'pending',
-    total_amount: 799,
-    created_at: new Date().toISOString(),
+  // Helper to create mock profile objects
+  createMockProfile: (overrides = {}) => ({
+    id: 'test-user-id',
+    full_name: 'Test User',
+    role: 'customer',
     ...overrides
   })
-};
-
-// Global cleanup function
-globalThis.cleanup = async () => {
-  // Cleanup test data, close connections, etc.
-  // This will be called after test suites
-};
-
-// Handle unhandled promise rejections in tests
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
-  // Don't exit the process in tests, just log
-});
-
-// Clean exit handling
-process.on('SIGTERM', async () => {
-  await globalThis.cleanup();
-  process.exit(0);
-});
-
-console.log('🧪 Test environment initialized');
+}

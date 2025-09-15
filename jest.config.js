@@ -1,6 +1,6 @@
 export default {
   // Test environment
-  testEnvironment: 'node',
+  testEnvironment: 'jsdom',
 
   // Module handling for ES modules
   preset: null,
@@ -15,8 +15,11 @@ export default {
   // Test file patterns
   testMatch: [
     '**/tests/**/*.test.js',
+    '**/tests/**/*.test.jsx',
     '**/tests/**/*.spec.js',
-    '**/__tests__/**/*.js'
+    '**/tests/**/*.spec.jsx',
+    '**/__tests__/**/*.js',
+    '**/__tests__/**/*.jsx'
   ],
 
   // Coverage configuration
@@ -73,7 +76,10 @@ export default {
   // Transform configuration for ES modules
   transform: {
     '^.+\\.jsx?$': ['babel-jest', {
-      presets: [['@babel/preset-env', { targets: { node: 'current' }, modules: 'auto' }]]
+      presets: [
+        ['@babel/preset-env', { targets: { node: 'current' }, modules: 'auto' }],
+        ['@babel/preset-react', { runtime: 'automatic' }]
+      ]
     }]
   }
 };

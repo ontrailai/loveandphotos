@@ -3,11 +3,12 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'motion/react'
-import { Home, Globe, Menu, X, ChevronDown, User } from 'lucide-react'
+import { Home, Globe, Menu, X, ChevronDown, User, Users } from 'lucide-react'
 import { useAuth } from '@contexts/AuthContext'
 import Button from '@components/ui/Button'
 import { LanguageCurrencyDialog } from '@components/ui/language-currency-dialog'
 import { Portal } from '@components/ui/Portal'
+import { createPortal } from 'react-dom'
 
 const navItems = [
   { name: 'Home', href: '/', icon: <Home size={16} /> },
@@ -16,7 +17,7 @@ const navItems = [
     href: '/photographers',
     submenu: [
       { name: 'Find Photographers', href: '/photographers', description: 'Search by ZIP, style, or date' },
-      { name: 'How It Works', href: '/how-it-works', description: 'Booking, payment & timelines' },
+      { name: 'Guide', href: '/how-it-works', description: 'Booking, payment & timelines' },
       { name: 'Pricing', href: '/pricing', description: 'Simple packages & add-ons' }
     ]
   },
@@ -25,70 +26,117 @@ const navItems = [
     // Remove href for dropdown-only items - NO MORE /talent!
     submenu: [
       { name: 'Become a Photographer', href: '/signup?role=photographer', description: 'Apply & see pay tiers' },
-      { name: 'Resources', href: '/resources', description: 'Training & guidelines' }
+      { name: 'Learn', href: '/learn', description: 'Training guides & tutorials' },
+      { name: 'Resources', href: '/resources', description: 'Training & guidelines' },
+      { name: 'FAQ', href: '/faq', description: 'Frequently asked questions' }
     ]
   },
-  { name: 'About', href: '/about', icon: <User size={16} /> },
+  { name: 'About', href: '/about', icon: <Users size={16} aria-label="About" /> },
   { name: 'Contact', href: '/contact' }
 ]
 
-// Hover-enabled Dropdown Component with Portal support
+// Hover-enabled Dropdown Component with robust positioning
 function Dropdown({ trigger, children, isOpen, onToggle }) {
   const [isHovered, setIsHovered] = useState(false)
   const [isFocused, setIsFocused] = useState(false)
-  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 })
+  const [position, setPosition] = useState({ top: 0, left: 0 })
   const hoverTimeoutRef = useRef(null)
-  const triggerRef = useRef(null)
+  const buttonRef = useRef(null)
+  const dropdownRef = useRef(null)
 
   // Show dropdown on hover or keyboard focus/click
   const shouldShow = isHovered || isOpen || isFocused
 
-  // Calculate dropdown position relative to viewport
-  const updatePosition = () => {
-    if (triggerRef.current) {
-      const rect = triggerRef.current.getBoundingClientRect()
-      setDropdownPosition({
-        top: rect.bottom + window.scrollY + 4, // 4px gap (mt-1)
-        left: rect.left + window.scrollX
-      })
+  // Calculate optimal dropdown position
+  const calculatePosition = () => {
+    if (!buttonRef.current) {
+      return { top: 0, left: 0 }
     }
+
+    const buttonRect = buttonRef.current.getBoundingClientRect()
+
+    // Check if we got valid coordinates
+    if (!buttonRect || buttonRect.width === 0 || buttonRect.height === 0) {
+      return { top: 0, left: 0 }
+    }
+
+    const dropdownWidth = 320 // w-80 = 320px
+    const dropdownHeight = 200 // Estimated height
+    const offset = 8
+
+    // Calculate position below button
+    let top = buttonRect.bottom + offset
+    let left = buttonRect.left
+
+    // Viewport constraints
+    const viewportWidth = window.innerWidth
+    const viewportHeight = window.innerHeight
+
+    // Ensure dropdown doesn't go off right edge
+    if (left + dropdownWidth > viewportWidth) {
+      left = viewportWidth - dropdownWidth - 16 // 16px margin
+    }
+
+    // Ensure dropdown doesn't go off left edge
+    if (left < 16) {
+      left = 16
+    }
+
+    // If dropdown would go below viewport, show above button
+    if (top + dropdownHeight > viewportHeight) {
+      top = buttonRect.top - dropdownHeight - offset
+    }
+
+    // Ensure dropdown doesn't go above viewport
+    if (top < 16) {
+      top = 16
+    }
+
+    return { top: Math.round(top), left: Math.round(left) }
   }
+
+  // Update position when dropdown should be shown
+  useEffect(() => {
+    if (shouldShow) {
+      // Use setTimeout to ensure the button is fully rendered
+      const timer = setTimeout(() => {
+        const newPosition = calculatePosition()
+        setPosition(newPosition)
+      }, 0)
+
+      // Update position on scroll and resize
+      const handleUpdate = () => {
+        const newPosition = calculatePosition()
+        setPosition(newPosition)
+      }
+
+      window.addEventListener('scroll', handleUpdate, { passive: true })
+      window.addEventListener('resize', handleUpdate, { passive: true })
+
+      return () => {
+        clearTimeout(timer)
+        window.removeEventListener('scroll', handleUpdate)
+        window.removeEventListener('resize', handleUpdate)
+      }
+    }
+  }, [shouldShow])
 
   const handleMouseEnter = () => {
     if (hoverTimeoutRef.current) {
       clearTimeout(hoverTimeoutRef.current)
     }
     setIsHovered(true)
-    updatePosition()
   }
 
   const handleMouseLeave = () => {
     hoverTimeoutRef.current = setTimeout(() => {
       setIsHovered(false)
-    }, 100) // Small delay to prevent flickering when moving between trigger and dropdown
+    }, 100)
   }
 
   const handleToggle = (e) => {
-    updatePosition()
     onToggle(e)
   }
-
-  // Update position on scroll and resize
-  useEffect(() => {
-    if (shouldShow) {
-      updatePosition()
-      const handleScroll = () => updatePosition()
-      const handleResize = () => updatePosition()
-
-      window.addEventListener('scroll', handleScroll)
-      window.addEventListener('resize', handleResize)
-
-      return () => {
-        window.removeEventListener('scroll', handleScroll)
-        window.removeEventListener('resize', handleResize)
-      }
-    }
-  }, [shouldShow])
 
   useEffect(() => {
     return () => {
@@ -99,18 +147,13 @@ function Dropdown({ trigger, children, isOpen, onToggle }) {
   }, [])
 
   return (
-    <div
-      className="relative group"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-    >
+    <div className="relative group">
       <button
-        ref={triggerRef}
+        ref={buttonRef}
         onClick={handleToggle}
-        onFocus={() => {
-          setIsFocused(true)
-          updatePosition()
-        }}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
         className="inline-flex h-9 items-center rounded-md px-4 text-sm font-medium transition-colors hover:opacity-70"
         aria-expanded={shouldShow}
@@ -122,14 +165,16 @@ function Dropdown({ trigger, children, isOpen, onToggle }) {
       {shouldShow && (
         <Portal>
           <motion.div
+            ref={dropdownRef}
             initial={{ opacity: 0, scale: 0.95, y: -10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="fixed z-[9999] w-80 rounded-md border bg-white p-4 shadow-lg"
+            className="z-[9999] w-80 rounded-md border bg-white p-4 shadow-lg"
             style={{
-              top: `${dropdownPosition.top}px`,
-              left: `${dropdownPosition.left}px`
+              position: 'fixed',
+              top: `${position.top}px`,
+              left: `${position.left}px`,
             }}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
@@ -144,7 +189,7 @@ function Dropdown({ trigger, children, isOpen, onToggle }) {
   )
 }
 
-// Mobile Sheet Component
+// Mobile Sheet Component with Portal and Safe Area Support
 function MobileSheet({ isOpen, onClose, children }) {
   useEffect(() => {
     if (isOpen) {
@@ -160,20 +205,25 @@ function MobileSheet({ isOpen, onClose, children }) {
 
   if (!isOpen) return null
 
-  return (
+  // Portal the mobile sheet to body to avoid transform ancestors
+  return createPortal(
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 z-[9999] bg-black/50"
+        className="fixed inset-0 z-[100] bg-black/50"
         onClick={onClose}
       />
-      {/* Sheet */}
-      <motion.div
+      {/* Sheet with safe area support */}
+      <motion.aside
         initial={{ x: '100%' }}
         animate={{ x: 0 }}
         exit={{ x: '100%' }}
         transition={{ type: 'tween', duration: 0.3 }}
-        className="fixed right-0 top-0 z-[9999] h-full w-80 bg-white shadow-lg"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Mobile navigation"
+        className="fixed right-0 z-[100] h-full w-80 bg-white shadow-xl pt-[env(safe-area-inset-top)]"
+        style={{ top: 0 }}
       >
         <div className="flex items-center justify-between border-b px-6 py-4">
           <h2 className="text-lg font-semibold">Navigation</h2>
@@ -188,8 +238,9 @@ function MobileSheet({ isOpen, onClose, children }) {
         <div className="p-6">
           {children}
         </div>
-      </motion.div>
-    </>
+      </motion.aside>
+    </>,
+    document.body
   )
 }
 
@@ -231,7 +282,7 @@ export function CleanNavbar({ className = '' }) {
     <motion.header
       className={`fixed top-0 left-0 right-0 z-30 transition-all duration-300 ${
         isScrolled
-          ? 'bg-white/90 backdrop-blur-md border-b border-gray-200 shadow-sm'
+          ? 'bg-white/90 md:backdrop-blur-md backdrop-blur-0 border-b border-gray-200 shadow-sm'
           : 'bg-transparent'
       } ${className}`}
       initial={{ y: -100 }}
@@ -334,7 +385,7 @@ export function CleanNavbar({ className = '' }) {
                   </Link>
                   <Link to="/profile">
                     <Button variant="ghost" size="sm">
-                      <User size={16} className="mr-1" />
+                      <User size={16} className="mr-1" aria-label="Profile" />
                       Profile
                     </Button>
                   </Link>
@@ -427,7 +478,7 @@ export function CleanNavbar({ className = '' }) {
                 </Link>
                 <Link to="/profile">
                   <Button variant="ghost" className="w-full justify-start">
-                    <User size={16} className="mr-2" />
+                    <User size={16} className="mr-2" aria-label="Profile" />
                     Profile
                   </Button>
                 </Link>

@@ -29,6 +29,7 @@ import BrandLogo from '@components/BrandLogo'
 import ThemeToggle from '@components/ThemeToggle'
 import { supabase } from '@lib/supabase'
 import { useFullZipDatabase } from '@/hooks/useFullZipDatabase'
+import { normalizeLocationQuery, getCanonicalQueryParam } from '@lib/utils/normalizeLocationQuery'
 
 const Testimonials = () => {
   // Start with empty testimonials - no fake data
@@ -150,7 +151,7 @@ const Testimonials = () => {
             <div className="border py-1 px-4 rounded-lg">Testimonials</div>
           </div>
 
-          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold tracking-tighter mt-5">
+          <h2 className="lp-h2 mt-5">
             What our customers say
           </h2>
           <p className="text-center mt-5 opacity-75">
@@ -364,7 +365,10 @@ const Home = () => {
   const handleSearch = (e) => {
     e.preventDefault()
     if (searchZip) {
-      navigate(`/photographers?zip=${searchZip}`)
+      // Normalize the search input and use canonical parameter
+      const normalized = normalizeLocationQuery(searchZip)
+      const canonicalParam = getCanonicalQueryParam(normalized)
+      navigate(`/photographers?q=${encodeURIComponent(canonicalParam)}`)
     }
   }
 
@@ -440,7 +444,7 @@ const Home = () => {
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-16">
           <div className="text-center">
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-display font-bold text-foreground mb-6">
+            <h1 className="lp-h1 mb-6">
               Your Perfect
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary"> Moment</span>
               <br />Deserves the Perfect Eye
