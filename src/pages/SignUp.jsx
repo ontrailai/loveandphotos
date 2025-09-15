@@ -22,7 +22,6 @@ import {
 } from 'lucide-react'
 import Button from '@components/ui/Button'
 import Input from '@components/ui/Input'
-import PhoneInput from '@components/forms/PhoneInput'
 import Card from '@components/ui/Card'
 import BrandLogo from '@components/BrandLogo'
 import { clsx } from 'clsx'
@@ -85,10 +84,13 @@ const SignUp = () => {
     setLoading(true)
 
     try {
+      // Extract raw digits from phone if it's formatted
+      const phoneDigits = data.phone ? data.phone.replace(/\D/g, '') : '';
+
       const result = await signUp(data.email, data.password, {
         role: selectedRole,
         fullName: data.fullName,
-        phone: data.phone
+        phone: phoneDigits
       })
 
       if (result.success) {
@@ -240,12 +242,14 @@ const SignUp = () => {
                   error={errors.email?.message}
                 />
 
-                <PhoneInput
+                <Input
                   label="Phone Number"
+                  type="tel"
                   icon={<PhoneIcon className="w-5 h-5 text-muted-foreground" />}
                   {...register('phone', {
                     required: 'Phone number is required',
                     validate: value => {
+                      if (!value) return 'Phone number is required';
                       const digits = value.replace(/\D/g, '');
                       return digits.length === 10 || 'Enter a valid 10-digit phone number';
                     }

@@ -1,9 +1,10 @@
 /**
  * PhoneInput Component
  * Live-formatting phone input with US format (555) 123-4567
+ * Works with react-hook-form by storing formatted value
  */
 
-import { useState, forwardRef, useImperativeHandle, useRef } from 'react';
+import { useState, forwardRef, useImperativeHandle, useRef, useEffect } from 'react';
 import { formatUSPhone, isValidUSPhone } from '@/utils/formatPhone';
 import { clsx } from 'clsx';
 import { PhoneIcon } from 'lucide-react';
@@ -17,60 +18,76 @@ interface PhoneInputProps {
   className?: string;
   containerClassName?: string;
   onDigits?: (digits: string) => void;
-  onChange?: (formatted: string, digits: string) => void;
+  onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   defaultValue?: string;
   value?: string;
   icon?: React.ReactNode;
+  onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void;
 }
 
-const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(({
-  name = 'phone',
-  label,
-  error,
-  required,
-  placeholder = '(555) 123-4567',
-  className = '',
-  containerClassName = '',
-  onDigits,
-  onChange,
-  defaultValue = '',
-  value: controlledValue,
-  icon = <PhoneIcon className="w-5 h-5 text-muted-foreground" />
-}, ref) => {
+const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>((props, ref) => {
+  const {
+    name = 'phone',
+    label,
+    error,
+    required,
+    placeholder = '(555) 123-4567',
+    className = '',
+    containerClassName = '',
+    onDigits,
+    onChange,
+    defaultValue = '',
+    value: controlledValue,
+    icon = <PhoneIcon className="w-5 h-5 text-muted-foreground" />,
+    onBlur
+  } = props;
+
   const [internalValue, setInternalValue] = useState(() => {
     const initialValue = controlledValue || defaultValue;
     return formatUSPhone(initialValue).formatted;
   });
 
   const inputRef = useRef<HTMLInputElement>(null);
-  const hiddenInputRef = useRef<HTMLInputElement>(null);
 
-  // Expose both inputs via ref
+  // Expose the input ref
   useImperativeHandle(ref, () => inputRef.current!);
 
-  // Use controlled value if provided, otherwise use internal state
-  const displayValue = controlledValue !== undefined
-    ? formatUSPhone(controlledValue).formatted
-    : internalValue;
+  // Update internal value when controlled value changes
+  useEffect(() => {
+    if (controlledValue !== undefined) {
+      setInternalValue(formatUSPhone(controlledValue).formatted);
+    }
+  }, [controlledValue]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target.value;
-    const { formatted, digits } = formatUSPhone(input);
+    const { formatted } = formatUSPhone(input);
 
-    // Update internal state if not controlled
+    // Update internal value if not controlled
     if (controlledValue === undefined) {
       setInternalValue(formatted);
     }
 
-    // Update hidden input with raw digits
-    if (hiddenInputRef.current) {
-      hiddenInputRef.current.value = digits;
+    // Set the input value to formatted value for display
+    if (inputRef.current) {
+      inputRef.current.value = formatted;
     }
 
-    // Call callbacks
-    onDigits?.(digits);
-    onChange?.(formatted, digits);
+    // Create event with formatted value for react-hook-form
+    const modifiedEvent = {
+      ...e,
+      target: {
+        ...e.target,
+        value: formatted
+      }
+    };
+
+    onChange?.(modifiedEvent);
   };
+
+  const displayValue = controlledValue !== undefined ?
+    formatUSPhone(controlledValue).formatted :
+    internalValue;
 
   const isValid = isValidUSPhone(displayValue);
   const showError = error || (required && displayValue && !isValid);
@@ -91,12 +108,14 @@ const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(({
         )}
         <input
           ref={inputRef}
+          name={name}
           type="tel"
           inputMode="tel"
           autoComplete="tel"
           placeholder={placeholder}
           value={displayValue}
           onChange={handleChange}
+          onBlur={onBlur}
           required={required}
           aria-invalid={!!showError}
           className={clsx(
@@ -112,13 +131,6 @@ const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(({
             },
             className
           )}
-        />
-        {/* Hidden input with raw digits for form submission */}
-        <input
-          ref={hiddenInputRef}
-          type="hidden"
-          name={`${name}_raw`}
-          value={formatUSPhone(displayValue).digits}
         />
       </div>
       {showError && (
