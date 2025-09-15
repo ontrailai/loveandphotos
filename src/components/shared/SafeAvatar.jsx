@@ -1,9 +1,10 @@
 /**
  * SafeAvatar Component
  * Enhanced avatar with smart fallbacks and error handling
+ * ENHANCED WITH DEBUG LOGGING
  */
 
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, useRef, useEffect } from 'react'
 import { clsx } from 'clsx'
 import { UserIcon } from 'lucide-react'
 
@@ -14,6 +15,16 @@ const sizes = {
   lg: 'w-16 h-16 text-lg',
   xl: 'w-20 h-20 text-xl',
   '2xl': 'w-24 h-24 text-2xl',
+}
+
+// Debug flag - set to false to disable debug logging
+const DEBUG_AVATAR = process.env.NODE_ENV === 'development'
+
+// Debug logger
+const debugLog = (message, data = {}) => {
+  if (DEBUG_AVATAR) {
+    console.log(`[SafeAvatar Debug] ${message}`, data)
+  }
 }
 
 // Generate consistent color based on name
@@ -59,7 +70,10 @@ const getInitials = (name) => {
 
 // Validate image URL
 const isValidImageUrl = (url) => {
-  if (!url) return false
+  if (!url) {
+    debugLog('URL validation failed - empty URL', { url })
+    return false
+  }
 
   try {
     const urlObj = new URL(url)
@@ -72,15 +86,35 @@ const isValidImageUrl = (url) => {
       'gravatar',
       'githubusercontent',
       'googleusercontent',
-      'supabase'
+      'supabase',
+      'unsplash'
     ]
 
     const urlString = urlObj.toString().toLowerCase()
-    return validPatterns.some(pattern => urlString.includes(pattern)) ||
-           /\.(jpg|jpeg|png|gif|webp|svg)($|\?)/i.test(urlString)
-  } catch {
+    const patternMatch = validPatterns.some(pattern => urlString.includes(pattern))
+    const extensionMatch = /\.(jpg|jpeg|png|gif|webp|svg)($|\?)/i.test(urlString)
+
+    const isValid = patternMatch || extensionMatch
+
+    debugLog('URL validation result', {
+      url,
+      urlString: urlString.slice(0, 100),
+      patternMatch,
+      extensionMatch,
+      isValid,
+      validPatterns: validPatterns.filter(p => urlString.includes(p))
+    })
+
+    return isValid
+  } catch (error) {
     // Relative path or invalid URL
-    return url.startsWith('/') || url.startsWith('data:') || url.startsWith('blob:')
+    const isRelative = url.startsWith('/') || url.startsWith('data:') || url.startsWith('blob:')
+    debugLog('URL validation caught error, checking relative paths', {
+      url,
+      error: error.message,
+      isRelative
+    })
+    return isRelative
   }
 }
 
@@ -98,11 +132,44 @@ const SafeAvatar = ({
 }) => {
   const [imageError, setImageError] = useState(false)
   const [imageLoading, setImageLoading] = useState(true)
+  const debugId = useRef(`${name || 'Anonymous'}-${Math.random().toString(36).substr(2, 9)}`)
+
+  // Debug initial props
+  useEffect(() => {
+    debugLog(`SafeAvatar initialized`, {
+      id: debugId.current,
+      src,
+      name,
+      alt,
+      size,
+      forceInitials
+    })
+  }, [src, name, alt, size, forceInitials])
 
   // Determine what to display
   const validSrc = useMemo(() => {
-    if (!src || imageError || forceInitials) return null
-    return isValidImageUrl(src) ? src : null
+    if (!src || imageError || forceInitials) {
+      debugLog(`validSrc -> null`, {
+        id: debugId.current,
+        reason: !src ? 'no src' : imageError ? 'image error' : 'force initials',
+        src,
+        imageError,
+        forceInitials
+      })
+      return null
+    }
+
+    const isValid = isValidImageUrl(src)
+    const result = isValid ? src : null
+
+    debugLog(`validSrc determination`, {
+      id: debugId.current,
+      src,
+      isValid,
+      result: result ? 'valid URL' : 'invalid URL - will show fallback'
+    })
+
+    return result
   }, [src, imageError, forceInitials])
 
   const initials = useMemo(() => getInitials(name), [name])
@@ -110,6 +177,14 @@ const SafeAvatar = ({
 
   // Handle image load error
   const handleImageError = useCallback((e) => {
+    debugLog(`Image load ERROR`, {
+      id: debugId.current,
+      src,
+      name,
+      alt,
+      error: e.type,
+      errorTarget: e.target?.src
+    })
     console.warn(`Avatar image failed to load: ${src}`, {
       name,
       alt,
@@ -121,8 +196,30 @@ const SafeAvatar = ({
 
   // Handle image load success
   const handleImageLoad = useCallback(() => {
+    debugLog(`Image load SUCCESS`, {
+      id: debugId.current,
+      src,
+      name
+    })
     setImageLoading(false)
-  }, [])
+  }, [src, name])
+
+  // Debug final render decision
+  useEffect(() => {
+    const renderType = validSrc ?
+      (imageLoading ? 'loading image' : 'image') :
+      initials ? 'initials' :
+      showFallbackIcon ? 'icon' : 'empty'
+
+    debugLog(`Render decision`, {
+      id: debugId.current,
+      renderType,
+      validSrc: !!validSrc,
+      imageLoading,
+      initials,
+      showFallbackIcon
+    })
+  }, [validSrc, imageLoading, initials, showFallbackIcon])
 
   const badgeColors = {
     green: 'bg-green-500',

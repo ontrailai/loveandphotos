@@ -102,15 +102,15 @@ const FAQ = () => {
   ]
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="relative py-20 bg-gradient-to-b from-primary-50 to-white">
+      <section className="relative py-20 bg-muted/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+          <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
             Frequently Asked Questions
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Find answers to common questions about Love & Photos. 
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            Find answers to common questions about Love & Photos.
             Can't find what you're looking for? Contact our support team.
           </p>
         </div>
@@ -121,35 +121,35 @@ const FAQ = () => {
         <div className="max-w-4xl mx-auto">
           {faqCategories.map((category, categoryIndex) => (
             <div key={categoryIndex} className="mb-12">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+              <h2 className="text-2xl font-bold text-foreground mb-6">
                 {category.title}
               </h2>
               <div className="space-y-4">
                 {category.items.map((item, itemIndex) => {
                   const globalIndex = `${categoryIndex}-${itemIndex}`
                   const isOpen = openItems[globalIndex]
-                  
+
                   return (
-                    <div 
-                      key={itemIndex} 
-                      className="bg-gray-50 rounded-lg overflow-hidden"
+                    <div
+                      key={itemIndex}
+                      className="bg-card rounded-lg overflow-hidden border"
                     >
                       <button
-                        className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-100 transition"
+                        className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-accent transition"
                         onClick={() => toggleItem(globalIndex)}
                       >
-                        <span className="font-semibold text-gray-900">
+                        <span className="font-semibold text-foreground">
                           {item.question}
                         </span>
                         {isOpen ? (
-                          <ChevronUp className="h-5 w-5 text-gray-500 flex-shrink-0" />
+                          <ChevronUp className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                         ) : (
-                          <ChevronDown className="h-5 w-5 text-gray-500 flex-shrink-0" />
+                          <ChevronDown className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                         )}
                       </button>
                       {isOpen && (
                         <div className="px-6 pb-4">
-                          <p className="text-gray-600">{item.answer}</p>
+                          <p className="text-muted-foreground">{item.answer}</p>
                         </div>
                       )}
                     </div>
@@ -162,24 +162,24 @@ const FAQ = () => {
       </section>
 
       {/* Contact Section */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 bg-muted/30">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6">
+          <h2 className="text-3xl font-bold text-foreground mb-6">
             Still Have Questions?
           </h2>
-          <p className="text-gray-600 mb-8">
+          <p className="text-muted-foreground mb-8">
             Our support team is here to help. Reach out anytime and we'll get back to you within 24 hours.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a 
-              href="mailto:support@loveandphotos.com" 
-              className="px-6 py-3 bg-white text-gray-700 font-semibold rounded-lg hover:bg-gray-100 transition border border-gray-200"
+            <a
+              href="mailto:support@loveandphotos.com"
+              className="px-6 py-3 bg-card text-foreground font-semibold rounded-lg hover:bg-accent transition border"
             >
               Email Support
             </a>
-            <a 
-              href="/contact" 
-              className="px-6 py-3 bg-primary-600 text-white font-semibold rounded-lg hover:bg-primary-700 transition"
+            <a
+              href="/contact"
+              className="px-6 py-3 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90 transition"
             >
               Contact Form
             </a>

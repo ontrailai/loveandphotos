@@ -32,6 +32,8 @@ import ImageErrorBoundary from '@components/shared/ImageErrorBoundary'
 import RatingStars from '@components/shared/RatingStars'
 import { supabase } from '@lib/supabase'
 import { clsx } from 'clsx'
+import { normalizeLocationQuery, getCanonicalQueryParam } from '@lib/utils/normalizeLocationQuery'
+import { resolveZipToCity } from '@lib/server/resolveZipToCity'
 
 // Array of real people profile images - guaranteed to load, professional headshots
 const profileImages = [
@@ -83,7 +85,6 @@ const portfolioImages = [
   'https://images.unsplash.com/photo-1529636798458-92182e662485?w=600',
   'https://images.unsplash.com/photo-1545232979-8bf68ee9b1af?w=600',
   'https://images.unsplash.com/photo-1513279922550-250c2129b13a?w=600',
-  'https://images.unsplash.com/photo-1552750085-1cbc45a53c52?w=600',
   'https://images.unsplash.com/photo-1469371670807-013ccf25f16a?w=600'
 ]
 
@@ -97,7 +98,7 @@ const Browse = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [filters, setFilters] = useState({
-    zip: searchParams.get('zip') || '',
+    zip: searchParams.get('q') || searchParams.get('search') || searchParams.get('zip') || '',
     date: '',
     priceRange: 'all',
     rating: 0,
@@ -241,11 +242,46 @@ const Browse = () => {
         }
         
         if (filters.zip) {
-          const searchTerm = filters.zip.toLowerCase()
-          filtered = filtered.filter(p => 
-            p.location_city?.toLowerCase().includes(searchTerm) ||
-            p.location_state?.toLowerCase().includes(searchTerm)
-          )
+          const rawQ = filters.zip
+          const normalized = normalizeLocationQuery(rawQ)
+          let cityKey = ''
+
+          if (normalized.kind === 'zip' && normalized.zip) {
+            // Try to resolve ZIP to city
+            const resolved = await resolveZipToCity(supabase, normalized.zip)
+            if (resolved) {
+              cityKey = resolved.city.toLowerCase()
+            } else {
+              // Unknown ZIP - show empty results with friendly message
+              console.log(`Unknown ZIP: ${normalized.zip}`)
+              filtered = []
+              setError(`We don't recognize that ZIP code yet. Please try entering the city name instead.`)
+              setAllPhotographers([])
+              setPhotographers([])
+              setLoading(false)
+              return
+            }
+          } else if (normalized.kind === 'city' && normalized.city) {
+            cityKey = normalized.city.toLowerCase()
+          }
+
+          if (cityKey) {
+            console.log(`Filtering by city: ${cityKey}`)
+            filtered = filtered.filter(p =>
+              p.location_city?.toLowerCase().includes(cityKey) ||
+              p.location_state?.toLowerCase().includes(cityKey)
+            )
+          }
+
+          // Log for debugging
+          if (process.env.NODE_ENV === 'development') {
+            console.log('Search normalization:', {
+              rawQ,
+              normalized,
+              resolvedCity: cityKey,
+              returned: filtered.length
+            })
+          }
         }
         
         console.log(`Applied filters, ${filtered.length} photographers remaining`)

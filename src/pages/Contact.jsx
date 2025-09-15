@@ -150,32 +150,32 @@ const Contact = () => {
             
             <div className="space-y-6">
               {/* Phone */}
-              <a 
-                href="tel:3237011703" 
-                className="flex items-start space-x-4 group hover:bg-cream-50 p-3 rounded-lg transition-colors"
+              <a
+                href="tel:3237011703"
+                className="flex items-start space-x-4 group hover:bg-accent p-3 rounded-lg transition-colors"
               >
-                <div className="bg-primary-500 p-3 rounded-full text-white flex-shrink-0">
+                <div className="bg-primary p-3 rounded-full text-primary-foreground flex-shrink-0">
                   <Phone className="w-6 h-6" />
                 </div>
                 <div>
                   <p className="text-muted-foreground text-sm mb-1">Call Us</p>
-                  <p className="text-foreground font-semibold text-lg group-hover:text-primary-600 transition-colors">
+                  <p className="text-foreground font-semibold text-lg group-hover:text-primary transition-colors">
                     (323) 701-1703
                   </p>
                 </div>
               </a>
 
               {/* Email */}
-              <a 
-                href="mailto:matthew@loveandphotos.com" 
-                className="flex items-start space-x-4 group hover:bg-cream-50 p-3 rounded-lg transition-colors"
+              <a
+                href="mailto:matthew@loveandphotos.com"
+                className="flex items-start space-x-4 group hover:bg-accent p-3 rounded-lg transition-colors"
               >
-                <div className="bg-primary-500 p-3 rounded-full text-white flex-shrink-0">
+                <div className="bg-primary p-3 rounded-full text-primary-foreground flex-shrink-0">
                   <Mail className="w-6 h-6" />
                 </div>
                 <div>
                   <p className="text-muted-foreground text-sm mb-1">Email Us</p>
-                  <p className="text-foreground font-semibold text-lg group-hover:text-primary-600 transition-colors break-all">
+                  <p className="text-foreground font-semibold text-lg group-hover:text-primary transition-colors break-all">
                     matthew@loveandphotos.com
                   </p>
                 </div>
@@ -183,7 +183,7 @@ const Contact = () => {
 
               {/* Response Time */}
               <div className="flex items-start space-x-4 p-3">
-                <div className="bg-primary-500 p-3 rounded-full text-white flex-shrink-0">
+                <div className="bg-primary p-3 rounded-full text-primary-foreground flex-shrink-0">
                   <Clock className="w-6 h-6" />
                 </div>
                 <div>
@@ -196,7 +196,7 @@ const Contact = () => {
 
               {/* Service Area */}
               <div className="flex items-start space-x-4 p-3">
-                <div className="bg-primary-500 p-3 rounded-full text-white flex-shrink-0">
+                <div className="bg-primary p-3 rounded-full text-primary-foreground flex-shrink-0">
                   <MapPin className="w-6 h-6" />
                 </div>
                 <div>
@@ -227,7 +227,7 @@ const Contact = () => {
                     name="firstName"
                     value={formData.firstName}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
+                    className="w-full px-4 py-2 bg-card text-foreground border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
                     placeholder="John"
                     required
                   />
@@ -242,7 +242,7 @@ const Contact = () => {
                     name="lastName"
                     value={formData.lastName}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
+                    className="w-full px-4 py-2 bg-card text-foreground border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
                     placeholder="Doe"
                     required
                   />
@@ -320,9 +320,9 @@ const Contact = () => {
                 type="submit"
                 disabled={isSubmitting}
                 className={`w-full font-semibold py-3 rounded-lg transform transition-all duration-200 shadow-lg ${
-                  isSubmitting 
-                    ? 'bg-gray-400 cursor-not-allowed' 
-                    : 'bg-primary-500 text-white hover:bg-primary-600 hover:scale-[1.02]'
+                  isSubmitting
+                    ? 'bg-muted text-muted-foreground cursor-not-allowed'
+                    : 'bg-primary text-primary-foreground hover:bg-primary/90 hover:scale-[1.02]'
                 }`}
               >
                 {isSubmitting ? 'Sending...' : 'Send Message'}
@@ -377,8 +377,8 @@ const Contact = () => {
         </div>
 
         {/* Call to Action */}
-        <div className="text-center mt-12 bg-primary-50 rounded-xl p-8">
-          <MessageCircle className="w-16 h-16 mx-auto mb-4 text-primary-500" />
+        <div className="text-center mt-12 bg-muted/50 rounded-xl p-8">
+          <MessageCircle className="w-16 h-16 mx-auto mb-4 text-primary" />
           <h2 className="text-2xl font-display font-semibold text-foreground mb-3">
             Ready to Get Started?
           </h2>
@@ -388,14 +388,14 @@ const Contact = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
               href="tel:3237011703"
-              className="inline-flex items-center justify-center px-6 py-3 bg-white text-primary-600 font-semibold rounded-lg hover:bg-gray-50 transition-colors shadow-md"
+              className="inline-flex items-center justify-center px-6 py-3 bg-card text-primary font-semibold rounded-lg hover:bg-accent transition-colors shadow-md border"
             >
               <Phone className="w-5 h-5 mr-2" />
               Call Now
             </a>
             <a
               href="mailto:matthew@loveandphotos.com"
-              className="inline-flex items-center justify-center px-6 py-3 bg-primary-500 text-white font-semibold rounded-lg hover:bg-primary-600 transition-all shadow-md"
+              className="inline-flex items-center justify-center px-6 py-3 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90 transition-all shadow-md"
             >
               <Mail className="w-5 h-5 mr-2" />
               Email Us
