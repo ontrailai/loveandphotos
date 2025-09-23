@@ -5,7 +5,6 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Footer } from '../components/ui/footer-section'
 import { Feature } from '@components/ui/feature-with-advantages'
 import { FeaturedPhotographersSection } from '@components/ui/featured-photographers'
 import { TestimonialsColumn } from '@components/ui/testimonials-columns-1'
@@ -329,34 +328,11 @@ const Home = () => {
       throw new Error('No featured photographers found')
       
     } catch (error) {
-      console.error('Error loading real featured photographers:', error)
-      console.log('Using fallback mock featured photographers')
+      console.error('Error loading featured photographers:', error)
       
-      // Fallback mock data
-      const mockData = [
-        {
-          id: 1,
-          average_rating: 4.9,
-          users: { full_name: 'Sarah Johnson', avatar_url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop&crop=face&auto=format&q=80' },
-          pay_tiers: { name: 'Professional', hourly_rate: 200, badge_color: 'bg-yellow-500' },
-          specialties: ['Wedding', 'Portrait']
-        },
-        {
-          id: 2,
-          average_rating: 4.8,
-          users: { full_name: 'Michael Chen', avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face&auto=format&q=80' },
-          pay_tiers: { name: 'Expert', hourly_rate: 250, badge_color: 'bg-purple-500' },
-          specialties: ['Event', 'Corporate']
-        },
-        {
-          id: 3,
-          average_rating: 4.7,
-          users: { full_name: 'Emily Rodriguez', avatar_url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop&crop=face&auto=format&q=80' },
-          pay_tiers: { name: 'Professional', hourly_rate: 175, badge_color: 'bg-yellow-500' },
-          specialties: ['Family', 'Newborn']
-        }
-      ]
-      setFeaturedPhotographers(mockData)
+      // PRODUCTION: No fallback mock data - show proper empty state
+      // The FeaturedPhotographers component will handle empty state gracefully
+      setFeaturedPhotographers([])
     } finally {
       setLoading(false)
     }
@@ -452,6 +428,31 @@ const Home = () => {
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
               Connect with verified photographers and videographers who capture your story with artistry and care.
             </p>
+
+            {/* Pricing CTA */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="max-w-md mx-auto mb-8"
+            >
+              <div className="bg-gradient-to-r from-[#fe395f]/5 to-[#fe395f]/10 border border-[#fe395f]/20 rounded-2xl p-6 text-center">
+                <p className="text-lg font-semibold text-foreground mb-3">
+                  Packages start at $550 upfront or $199/month
+                </p>
+                <Link
+                  to="/pricing/client"
+                  className="inline-flex items-center justify-center bg-[#fe395f] hover:bg-[#fe395f]/90 text-white font-medium px-6 py-3 rounded-full transition-all duration-200 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#fe395f] focus:ring-offset-2 shadow-lg hover:shadow-xl"
+                  aria-label="View detailed pricing packages starting at $550 upfront or $199 per month"
+                >
+                  View Pricing
+                  <ArrowRightIcon className="w-4 h-4 ml-2" />
+                </Link>
+                <p className="text-sm text-muted-foreground mt-3">
+                  Transparent pricing. No hidden fees.
+                </p>
+              </div>
+            </motion.div>
 
             {/* Search Bar */}
             <form onSubmit={handleSearch} className="max-w-2xl mx-auto relative" ref={searchRef}>
@@ -605,8 +606,6 @@ const Home = () => {
       {/* CTA Section */}
       <HeroCTA />
 
-      {/* Footer */}
-      <Footer />
     </div>
   )
 }

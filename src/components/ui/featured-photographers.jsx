@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { Star, ArrowRight, MapPin, Calendar, Users, Heart, AlertCircle } from 'lucide-react';
+import { Star, ArrowRight, MapPin, Calendar, Users, Heart, AlertCircle, Lock } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/Avatar';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
 import { Card, CardContent } from '@/components/ui/Card';
+import LoveAndPhotosChoiceBadge from '@/components/badges/LoveAndPhotosChoiceBadge';
 import { getFeaturedPhotographers, getFeaturedPhotographersMetrics, getPhotographerProfileLink, formatCurrency } from '@/lib/supabaseClient';
+import { useAuth } from '@/contexts/AuthContext';
 
 // GridPattern helper component
 const GridPattern = ({
@@ -145,7 +147,7 @@ const SkeletonCard = ({ index }) => (
 );
 
 // Photographer Card Component
-const PhotographerCard = ({ photographer, index }) => {
+const PhotographerCard = ({ photographer, index, shouldShowPricing = false }) => {
   const [isHovered, setIsHovered] = useState(false);
 
   const profileLink = getPhotographerProfileLink(photographer);
@@ -207,16 +209,26 @@ const PhotographerCard = ({ photographer, index }) => {
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="font-semibold text-foreground truncate">{photographer.full_name}</h3>
-                {photographer.hourly_rate && formatCurrency(photographer.hourly_rate) && (
+                {shouldShowPricing && photographer.hourly_rate && formatCurrency(photographer.hourly_rate) ? (
                   <p className="text-sm text-muted-foreground truncate">
                     From {formatCurrency(photographer.hourly_rate)}/hr
                   </p>
-                )}
+                ) : !shouldShowPricing ? (
+                  <p className="text-sm text-muted-foreground truncate flex items-center">
+                    <Lock className="h-3 w-3 mr-1" />
+                    Contact for pricing
+                  </p>
+                ) : null}
               </div>
             </div>
-            <Badge variant="outline" className={`text-xs font-medium ${getTierColor(photographer.tier)}`}>
-              {photographer.tier}
-            </Badge>
+            <div className="flex flex-col gap-2 items-end">
+              {photographer.is_love_and_photos_choice && (
+                <LoveAndPhotosChoiceBadge size="small" />
+              )}
+              <Badge variant="outline" className={`text-xs font-medium ${getTierColor(photographer.tier)}`}>
+                {photographer.tier}
+              </Badge>
+            </div>
           </div>
 
           {/* Info Section */}
@@ -313,6 +325,9 @@ const FeaturedPhotographersSection = ({
   showStats = true,
   maxUsers = 6
 }) => {
+  const { profile } = useAuth();
+  const shouldShowPricing = profile?.role === 'admin' || profile?.role === 'photographer';
+  
   const [photographers, setPhotographers] = useState([]);
   const [metrics, setMetrics] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -467,6 +482,7 @@ const FeaturedPhotographersSection = ({
                 key={photographer.id}
                 photographer={photographer}
                 index={index}
+                shouldShowPricing={shouldShowPricing}
               />
             ))
           )}

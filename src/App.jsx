@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider, ProtectedRoute } from '@contexts/AuthContext'
+import { GuestBookingProvider } from '@contexts/GuestBookingContext'
 import { SWRProvider } from '@providers/SWRProvider'
 import { ThemeProvider } from '@contexts/ThemeContext'
 import { validateEnvironment } from '@utils/validateEnv'
@@ -12,6 +13,9 @@ import { ReactPlugin } from '@21st-extension/react'
 // Layout Components
 import Layout from '@components/Layout'
 import PublicLayout from '@components/PublicLayout'
+import ClientLayout from '@components/ClientLayout'
+import TalentLayout from '@components/TalentLayout'
+import AdminLayout from '@components/AdminLayout'
 import ScrollToTop from '@components/ScrollToTop'
 
 // Page Loading Component
@@ -31,6 +35,7 @@ import ForgotPassword from '@pages/ForgotPassword'
 import ResetPassword from '@pages/ResetPassword'
 import AuthCallback from '@pages/AuthCallback'
 import NotFound from '@pages/NotFound'
+import Forbidden from '@pages/Forbidden'
 import TestConnection from '@pages/TestConnection'
 import PrivacyPolicy from '@pages/PrivacyPolicy'
 import TermsAndConditions from '@pages/TermsAndConditions'
@@ -39,6 +44,8 @@ import TestSupabase from '@pages/TestSupabase'
 import About from '@pages/About'
 import HowItWorks from '@pages/HowItWorks'
 import Pricing from '@pages/Pricing'
+import ClientPricing from '@pages/ClientPricing'
+import TalentPricing from '@pages/pricing/TalentPricing'
 import FAQ from '@pages/FAQ'
 import Resources from '@pages/Resources'
 import Learn from '@pages/Learn'
@@ -48,6 +55,8 @@ import Demo from '@pages/Demo'
 // Customer Pages (lazy loaded)
 const CustomerDashboard = lazy(() => import('@pages/customer/Dashboard'))
 const BrowsePhotographers = lazy(() => import('@pages/customer/Browse'))
+const VideoBrowse = lazy(() => import('@pages/customer/VideoBrowse'))
+const Guide = lazy(() => import('@pages/customer/Guide'))
 const BookingConfirmation = lazy(() => import('@pages/customer/BookingConfirmation'))
 const Quiz = lazy(() => import('@pages/customer/Quiz'))
 
@@ -102,6 +111,7 @@ const PhotographerEarnings = lazy(() =>
 const AdminDashboard = lazy(() =>
   import('@pages/placeholders').then(module => ({ default: module.AdminDashboard }))
 )
+const AdminPhotographerManagement = lazy(() => import('@pages/admin/PhotographerManagement'))
 
 function App() {
   // Check environment configuration on mount
@@ -149,7 +159,8 @@ function App() {
     <SWRProvider>
       <ThemeProvider>
         <AuthProvider>
-          <div className="min-h-screen bg-background text-foreground antialiased">
+          <GuestBookingProvider>
+            <div className="min-h-screen bg-background text-foreground antialiased">
           {/* 21st.dev Toolbar - Development only */}
           <TwentyFirstToolbar
             config={{
@@ -207,6 +218,7 @@ function App() {
             <Route path="/about" element={<About />} />
             <Route path="/how-it-works" element={<HowItWorks />} />
             <Route path="/pricing" element={<Pricing />} />
+            <Route path="/pricing/client" element={<ClientPricing />} />
             <Route path="/faq" element={<FAQ />} />
             <Route path="/resources" element={<Resources />} />
             <Route path="/learn" element={<Learn />} />
@@ -221,10 +233,20 @@ function App() {
                 <BrowsePhotographers />
               </Suspense>
             } />
+            <Route path="/photographers/video" element={
+              <Suspense fallback={<PageLoader />}>
+                <VideoBrowse />
+              </Suspense>
+            } />
+            <Route path="/guide" element={
+              <Suspense fallback={<PageLoader />}>
+                <Guide />
+              </Suspense>
+            } />
           </Route>
 
           {/* Customer Routes - Lazy loaded */}
-          <Route element={<Layout />}>
+          <Route element={<ClientLayout />}>
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <Suspense fallback={<PageLoader />}>
@@ -233,25 +255,19 @@ function App() {
               </ProtectedRoute>
             } />
             <Route path="/browse" element={
-              <ProtectedRoute>
-                <Suspense fallback={<PageLoader />}>
-                  <BrowsePhotographers />
-                </Suspense>
-              </ProtectedRoute>
+              <Suspense fallback={<PageLoader />}>
+                <BrowsePhotographers />
+              </Suspense>
             } />
             <Route path="/photographer/:id" element={
-              <ProtectedRoute>
-                <Suspense fallback={<PageLoader />}>
-                  <PhotographerProfile />
-                </Suspense>
-              </ProtectedRoute>
+              <Suspense fallback={<PageLoader />}>
+                <PhotographerProfile />
+              </Suspense>
             } />
             <Route path="/book/:photographerId" element={
-              <ProtectedRoute>
-                <Suspense fallback={<PageLoader />}>
-                  <BookingPage />
-                </Suspense>
-              </ProtectedRoute>
+              <Suspense fallback={<PageLoader />}>
+                <BookingPage />
+              </Suspense>
             } />
             <Route path="/booking/confirm" element={
               <ProtectedRoute>
@@ -282,31 +298,38 @@ function App() {
           </Route>
 
           {/* Photographer Routes - Lazy loaded */}
+          <Route path="/pricing/talent" element={
+            <ProtectedRoute requireRole="photographer">
+              <TalentLayout>
+                <TalentPricing />
+              </TalentLayout>
+            </ProtectedRoute>
+          } />
           <Route path="/dashboard/photographer" element={
             <ProtectedRoute requireRole="photographer">
-              <Layout>
+              <TalentLayout>
                 <Suspense fallback={<PageLoader />}>
                   <PhotographerDashboard />
                 </Suspense>
-              </Layout>
+              </TalentLayout>
             </ProtectedRoute>
           } />
           <Route path="/dashboard/photographer/job-queue" element={
             <ProtectedRoute requireRole="photographer" requireOnboarding>
-              <Layout>
+              <TalentLayout>
                 <Suspense fallback={<PageLoader />}>
                   <PhotographerJobQueue />
                 </Suspense>
-              </Layout>
+              </TalentLayout>
             </ProtectedRoute>
           } />
           <Route path="/dashboard/photographer/uploads" element={
             <ProtectedRoute requireRole="photographer" requireOnboarding>
-              <Layout>
+              <TalentLayout>
                 <Suspense fallback={<PageLoader />}>
                   <PhotographerUploads />
                 </Suspense>
-              </Layout>
+              </TalentLayout>
             </ProtectedRoute>
           } />
           <Route path="/onboarding/photographer" element={
@@ -318,83 +341,96 @@ function App() {
           } />
           <Route path="/photographer/availability" element={
             <ProtectedRoute requireRole="photographer" requireOnboarding>
-              <Layout>
+              <TalentLayout>
                 <Suspense fallback={<PageLoader />}>
                   <PhotographerAvailability />
                 </Suspense>
-              </Layout>
+              </TalentLayout>
             </ProtectedRoute>
           } />
           <Route path="/photographer/portfolio" element={
             <ProtectedRoute requireRole="photographer" requireOnboarding>
-              <Layout>
+              <TalentLayout>
                 <Suspense fallback={<PageLoader />}>
                   <PhotographerPortfolio />
                 </Suspense>
-              </Layout>
+              </TalentLayout>
             </ProtectedRoute>
           } />
           <Route path="/photographer/packages" element={
             <ProtectedRoute requireRole="photographer" requireOnboarding>
-              <Layout>
+              <TalentLayout>
                 <Suspense fallback={<PageLoader />}>
                   <PhotographerPackages />
                 </Suspense>
-              </Layout>
+              </TalentLayout>
             </ProtectedRoute>
           } />
           <Route path="/photographer/jobs" element={
             <ProtectedRoute requireRole="photographer" requireOnboarding>
-              <Layout>
+              <TalentLayout>
                 <Suspense fallback={<PageLoader />}>
                   <PhotographerJobs />
                 </Suspense>
-              </Layout>
+              </TalentLayout>
             </ProtectedRoute>
           } />
           <Route path="/photographer/training" element={
             <ProtectedRoute requireRole="photographer">
-              <Layout>
+              <TalentLayout>
                 <Suspense fallback={<PageLoader />}>
                   <PhotographerTraining />
                 </Suspense>
-              </Layout>
+              </TalentLayout>
             </ProtectedRoute>
           } />
           <Route path="/photographer/profile" element={
             <ProtectedRoute requireRole="photographer">
-              <Layout>
+              <TalentLayout>
                 <Suspense fallback={<PageLoader />}>
                   <PhotographerSettings />
                 </Suspense>
-              </Layout>
+              </TalentLayout>
             </ProtectedRoute>
           } />
           <Route path="/photographer/earnings" element={
             <ProtectedRoute requireRole="photographer" requireOnboarding>
-              <Layout>
+              <TalentLayout>
                 <Suspense fallback={<PageLoader />}>
                   <PhotographerEarnings />
                 </Suspense>
-              </Layout>
+              </TalentLayout>
             </ProtectedRoute>
           } />
 
           {/* Admin Routes - Lazy loaded */}
           <Route path="/admin" element={
             <ProtectedRoute requireRole="admin">
-              <Layout>
+              <AdminLayout>
                 <Suspense fallback={<PageLoader />}>
                   <AdminDashboard />
                 </Suspense>
-              </Layout>
+              </AdminLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/photographers" element={
+            <ProtectedRoute requireRole="admin">
+              <AdminLayout>
+                <Suspense fallback={<PageLoader />}>
+                  <AdminPhotographerManagement />
+                </Suspense>
+              </AdminLayout>
             </ProtectedRoute>
           } />
 
+          {/* 403 Forbidden Page */}
+          <Route path="/forbidden" element={<Forbidden />} />
+          
           {/* 404 Page */}
           <Route path="*" element={<NotFound />} />
         </Routes>
-          </div>
+            </div>
+          </GuestBookingProvider>
         </AuthProvider>
       </ThemeProvider>
     </SWRProvider>

@@ -20,17 +20,21 @@ import {
   ClockIcon,
   CheckCircleIcon,
   GridIcon,
-  ListIcon
+  ListIcon,
+  LockIcon
 } from 'lucide-react'
 import Button from '@components/ui/Button'
 import Input from '@components/ui/Input'
 import Card from '@components/ui/Card'
 import Badge from '@components/ui/Badge'
+import LNPChoiceBadge from '@components/ui/LNPChoiceBadge'
+import PhotographerMetricBadges from '@components/photographer/PhotographerMetricBadges'
 import SafeAvatar from '@components/shared/SafeAvatar'
 import SafeImage from '@components/shared/SafeImage'
 import ImageErrorBoundary from '@components/shared/ImageErrorBoundary'
 import RatingStars from '@components/shared/RatingStars'
 import { supabase } from '@lib/supabase'
+import { useAuth } from '@contexts/AuthContext'
 import { clsx } from 'clsx'
 import { normalizeLocationQuery, getCanonicalQueryParam } from '@lib/utils/normalizeLocationQuery'
 import { resolveZipToCity } from '@lib/server/resolveZipToCity'
@@ -91,6 +95,10 @@ const portfolioImages = [
 const Browse = () => {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
+  const { profile } = useAuth()
+  
+  // Determine if pricing should be shown
+  const shouldShowPricing = profile?.role === 'admin' || profile?.role === 'photographer'
   
   const [photographers, setPhotographers] = useState([])
   const [allPhotographers, setAllPhotographers] = useState([])
@@ -100,14 +108,16 @@ const Browse = () => {
   const [filters, setFilters] = useState({
     zip: searchParams.get('q') || searchParams.get('search') || searchParams.get('zip') || '',
     date: '',
-    priceRange: 'all',
     rating: 0,
     tier: 'all',
     specialties: [],
-    languages: []
+    languages: [],
+    photographyStyle: 'all', // 'all', 'candid', 'posed'
+    femaleOnly: false
   })
   const [showFilters, setShowFilters] = useState(false)
   const [viewMode, setViewMode] = useState('grid')
+  const [sortBy, setSortBy] = useState('rating') // New sort state
 
   const specialtyOptions = [
     'Wedding', 'Portrait', 'Event', 'Corporate', 
@@ -119,17 +129,26 @@ const Browse = () => {
     'Korean', 'Japanese', 'Hindi', 'Arabic'
   ]
 
-  const priceRanges = [
-    { value: 'all', label: 'All Prices' },
-    { value: '0-150', label: 'Under $150/hr' },
-    { value: '150-300', label: '$150-$300/hr' },
-    { value: '300-500', label: '$300-$500/hr' },
-    { value: '500+', label: '$500+/hr' }
+  const photographyStyleOptions = [
+    { value: 'all', label: 'Everything', description: 'All photography styles' },
+    { value: 'candid', label: 'Candid', description: 'Natural, unposed moments' },
+    { value: 'posed', label: 'Posed', description: 'Traditional, directed shots' }
+  ]
+
+  // Price ranges removed - pricing no longer shown to public users
+  
+  // Sort options focused on quality and relevance
+  const sortOptions = [
+    { value: 'rating', label: 'Top Rated' },
+    { value: 'reviews', label: 'Most Reviewed' },
+    { value: 'experience', label: 'Most Experienced' },
+    { value: 'recent', label: 'Recently Joined' },
+    { value: 'available', label: 'Available Soon' }
   ]
 
   useEffect(() => {
     loadPhotographers()
-  }, [filters])
+  }, [filters, sortBy])
 
   useEffect(() => {
     // When display count changes, update displayed photographers
@@ -154,7 +173,7 @@ const Browse = () => {
       // Fetch photographers with proper error handling
       const { data: photographers, error } = await supabase
         .from('photographer_preview_profiles')
-        .select('id, display_name, portfolio_images, bio, specialties, hourly_rate, location_city, location_state, average_rating, is_verified, is_available')
+        .select('id, display_name, portfolio_images, bio, specialties, hourly_rate, location_city, location_state, average_rating, is_verified, is_available, is_love_and_photos_choice, user_id')
         .eq('is_available', true)
         .limit(1000)
 
@@ -172,13 +191,32 @@ const Browse = () => {
       if (photographers && photographers.length > 0) {
         console.log(`Successfully loaded ${photographers.length} real photographers`)
         
+        // Fetch trust metrics for photographers that have user_id
+        const userIds = photographers.filter(p => p.user_id).map(p => p.user_id)
+        let trustMetrics = {}
+        
+        if (userIds.length > 0) {
+          const { data: metricsData } = await supabase
+            .from('photographers')
+            .select('user_id, acceptance_rate, avg_response_time_minutes, has_minimum_data, manual_override_acceptance_rate, manual_override_response_time')
+            .in('user_id', userIds)
+          
+          if (metricsData) {
+            trustMetrics = metricsData.reduce((acc, metric) => {
+              acc[metric.user_id] = metric
+              return acc
+            }, {})
+          }
+        }
+        
         // Transform the real data to match expected format
         const transformedProfiles = photographers.map((profile, index) => {
           const fallbackUrl = profileImages[index % profileImages.length]
+          const metrics = trustMetrics[profile.user_id] || {}
 
           return {
             id: profile.id,
-            user_id: profile.id,
+            user_id: profile.user_id || profile.id,
             bio: profile.bio || `Professional photographer with years of experience`,
             specialties: Array.isArray(profile.specialties) ? profile.specialties : ['Wedding', 'Portrait'],
             languages: ['English'],
@@ -204,7 +242,13 @@ const Browse = () => {
               { image_url: portfolioImages[index % portfolioImages.length] },
               { image_url: portfolioImages[(index + 5) % portfolioImages.length] },
               { image_url: portfolioImages[(index + 10) % portfolioImages.length] }
-            ]
+            ],
+            // Trust metrics from photographers table
+            acceptance_rate: metrics.acceptance_rate,
+            avg_response_time_minutes: metrics.avg_response_time_minutes,
+            has_minimum_data: metrics.has_minimum_data || false,
+            manual_override_acceptance_rate: metrics.manual_override_acceptance_rate,
+            manual_override_response_time: metrics.manual_override_response_time
           }
         })
         
@@ -217,13 +261,7 @@ const Browse = () => {
           filtered = filtered.filter(p => p.average_rating >= filters.rating)
         }
         
-        if (filters.priceRange !== 'all') {
-          const [min, max] = filters.priceRange.split('-').map(v => v === '500+' ? 9999 : parseInt(v))
-          filtered = filtered.filter(p => {
-            const rate = p.hourly_rate
-            return max ? (rate >= min && rate <= max) : rate >= min
-          })
-        }
+        // Price filtering removed - pricing no longer shown to public users
         
         if (filters.specialties.length > 0) {
           filtered = filtered.filter(p => 
@@ -239,6 +277,19 @@ const Browse = () => {
               p.languages.includes(language)
             )
           )
+        }
+        
+        // Filter by photography style
+        if (filters.photographyStyle !== 'all') {
+          filtered = filtered.filter(p => {
+            const styles = p.photography_style || ['candid', 'posed']
+            return styles.includes(filters.photographyStyle)
+          })
+        }
+        
+        // Filter for female photographers only
+        if (filters.femaleOnly) {
+          filtered = filtered.filter(p => p.is_female === true)
         }
         
         if (filters.zip) {
@@ -284,9 +335,29 @@ const Browse = () => {
           }
         }
         
-        console.log(`Applied filters, ${filtered.length} photographers remaining`)
-        setAllPhotographers(filtered)
-        setPhotographers(filtered.slice(0, displayCount))
+        // Apply sorting
+        const sorted = [...filtered].sort((a, b) => {
+          switch(sortBy) {
+            case 'rating':
+              return (b.average_rating || 0) - (a.average_rating || 0)
+            case 'reviews':
+              return (b.total_reviews || 0) - (a.total_reviews || 0)
+            case 'experience':
+              return (b.years_experience || 0) - (a.years_experience || 0)
+            case 'recent':
+              // Assuming we have a created_at field or can use ID for recency
+              return new Date(b.created_at || 0) - new Date(a.created_at || 0)
+            case 'available':
+              // Prioritize available photographers
+              return (b.is_available ? 1 : 0) - (a.is_available ? 1 : 0)
+            default:
+              return 0
+          }
+        })
+        
+        console.log(`Applied filters and sorting, ${sorted.length} photographers remaining`)
+        setAllPhotographers(sorted)
+        setPhotographers(sorted.slice(0, displayCount))
         return
       }
       
@@ -334,11 +405,12 @@ const Browse = () => {
     setFilters({
       zip: '',
       date: '',
-      priceRange: 'all',
       rating: 0,
       tier: 'all',
       specialties: [],
-      languages: []
+      languages: [],
+      photographyStyle: 'all',
+      femaleOnly: false
     })
     setDisplayCount(50) // Reset display count
   }
@@ -348,7 +420,8 @@ const Browse = () => {
     filters.languages.length + 
     (filters.rating > 0 ? 1 : 0) +
     (filters.tier !== 'all' ? 1 : 0) +
-    (filters.priceRange !== 'all' ? 1 : 0)
+    (filters.photographyStyle !== 'all' ? 1 : 0) +
+    (filters.femaleOnly ? 1 : 0)
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -444,23 +517,7 @@ const Browse = () => {
                 )}
               </div>
 
-              {/* Price Range */}
-              <div className="mb-6">
-                <label className="text-sm font-medium text-dusty-700 mb-3 block">
-                  Price Range
-                </label>
-                <select
-                  value={filters.priceRange}
-                  onChange={(e) => handleFilterChange('priceRange', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                >
-                  {priceRanges.map(range => (
-                    <option key={range.value} value={range.value}>
-                      {range.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              {/* Price Range removed - pricing no longer shown to public users */}
 
               {/* Rating */}
               <div className="mb-6">
@@ -564,6 +621,70 @@ const Browse = () => {
                   ))}
                 </div>
               </div>
+
+              {/* Photography Style */}
+              <div className="space-y-3">
+                <h4 className="font-medium text-dusty-900">Photography Style</h4>
+                <div 
+                  role="radiogroup" 
+                  aria-label="Photography Style"
+                  className="space-y-2"
+                >
+                  {photographyStyleOptions.map(style => (
+                    <label
+                      key={style.value}
+                      className="flex items-start cursor-pointer hover:bg-gray-50 p-2 -mx-2 rounded group"
+                    >
+                      <input
+                        type="radio"
+                        name="photography-style"
+                        value={style.value}
+                        checked={filters.photographyStyle === style.value}
+                        onChange={() => handleFilterChange('photographyStyle', style.value)}
+                        className="mt-0.5 mr-3"
+                        aria-describedby={`style-desc-${style.value}`}
+                      />
+                      <div>
+                        <span className="text-sm font-medium text-dusty-700 group-hover:text-dusty-900">
+                          {style.label}
+                        </span>
+                        <p 
+                          id={`style-desc-${style.value}`}
+                          className="text-xs text-dusty-500 mt-0.5"
+                        >
+                          {style.description}
+                        </p>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Female Photographers Only */}
+              <div className="space-y-3">
+                <h4 className="font-medium text-dusty-900">Photographer Preference</h4>
+                <label
+                  className="flex items-center cursor-pointer hover:bg-gray-50 p-2 -mx-2 rounded"
+                  role="switch"
+                  aria-checked={filters.femaleOnly}
+                >
+                  <input
+                    type="checkbox"
+                    checked={filters.femaleOnly}
+                    onChange={(e) => handleFilterChange('femaleOnly', e.target.checked)}
+                    className="mr-3"
+                    aria-label="Show only female photographers"
+                  />
+                  <div>
+                    <span className="text-sm font-medium text-dusty-700">
+                      Female Photographers Only
+                    </span>
+                    <p className="text-xs text-dusty-500 mt-0.5">
+                      Filter to show only female photographers
+                    </p>
+                  </div>
+                </label>
+              </div>
             </div>
           </div>
 
@@ -574,6 +695,57 @@ const Browse = () => {
               <h2 className="text-2xl font-display font-semibold text-dusty-900">
                 {loading ? 'Loading...' : `${allPhotographers.length} Photographers Available`}
               </h2>
+              
+              {/* Sort and View Controls */}
+              <div className="flex items-center gap-4">
+                {/* Sort Dropdown */}
+                <div className="flex items-center gap-2">
+                  <label htmlFor="sort-select" className="text-sm text-dusty-600">
+                    Sort by:
+                  </label>
+                  <select
+                    id="sort-select"
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    aria-label="Sort photographers by"
+                  >
+                    {sortOptions.map(option => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                
+                {/* View Mode Toggle */}
+                <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden">
+                  <button
+                    onClick={() => setViewMode('grid')}
+                    className={clsx(
+                      'p-2 transition-colors',
+                      viewMode === 'grid' 
+                        ? 'bg-primary-500 text-white' 
+                        : 'bg-white text-dusty-600 hover:bg-gray-50'
+                    )}
+                    aria-label="Grid view"
+                  >
+                    <GridIcon className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => setViewMode('list')}
+                    className={clsx(
+                      'p-2 transition-colors',
+                      viewMode === 'list' 
+                        ? 'bg-primary-500 text-white' 
+                        : 'bg-white text-dusty-600 hover:bg-gray-50'
+                    )}
+                    aria-label="List view"
+                  >
+                    <ListIcon className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
             </div>
 
             {/* Error State */}
@@ -623,7 +795,13 @@ const Browse = () => {
                   No photographers found
                 </h3>
                 <p className="text-dusty-600 mb-4">
-                  Try adjusting your filters or search criteria
+                  {filters.femaleOnly && filters.photographyStyle !== 'all' 
+                    ? `No female photographers found with ${filters.photographyStyle} style. Try adjusting your preferences.`
+                    : filters.femaleOnly 
+                    ? 'No female photographers found in this area. Try expanding your search.'
+                    : filters.photographyStyle !== 'all'
+                    ? `No photographers found with ${filters.photographyStyle} style. Try selecting "Everything" to see all styles.`
+                    : 'Try adjusting your filters or search criteria'}
                 </p>
                 <Button onClick={clearFilters} variant="outline">
                   Clear Filters
@@ -664,8 +842,11 @@ const Browse = () => {
                             size="sm"
                           />
                           <div>
-                            <h3 className="font-semibold text-dusty-900">
+                            <h3 className="font-semibold text-dusty-900 flex items-center gap-2">
                               {photographer.users?.full_name?.split(' ')[0] || 'Photographer'}
+                              {photographer.is_love_and_photos_choice && (
+                                <LNPChoiceBadge size="small" />
+                              )}
                             </h3>
                             <p className="text-sm text-dusty-600">
                               {photographer.specialties?.[0] || 'All Events'}
@@ -696,9 +877,20 @@ const Browse = () => {
 
                       {/* Price & Features */}
                       <div className="flex items-center justify-between">
-                        <span className="text-lg font-semibold text-dusty-900">
-                          ${photographer.pay_tiers?.hourly_rate || 150}/hr
-                        </span>
+                        {shouldShowPricing ? (
+                          <span className="text-lg font-semibold text-dusty-900">
+                            ${photographer.pay_tiers?.hourly_rate || 150}/hr
+                          </span>
+                        ) : (
+                          <button
+                            onClick={() => navigate('/login')}
+                            className="flex items-center text-sm text-dusty-500 hover:text-primary-600"
+                            aria-label="Sign in to view pricing"
+                          >
+                            <LockIcon className="w-3 h-3 mr-1" />
+                            <span>View Pricing</span>
+                          </button>
+                        )}
                         <div className="flex items-center space-x-2">
                           {photographer.is_verified && (
                             <CheckCircleIcon className="w-5 h-5 text-green-500" title="Verified" />
@@ -708,6 +900,13 @@ const Browse = () => {
                           )}
                         </div>
                       </div>
+
+                      {/* Trust Metrics Badges */}
+                      <PhotographerMetricBadges 
+                        photographer={photographer} 
+                        className="mt-3"
+                        size="small"
+                      />
 
                       {/* Languages */}
                       {photographer.languages?.length > 0 && (
@@ -765,6 +964,9 @@ const Browse = () => {
                                 <h3 className="text-lg font-semibold text-dusty-900">
                                   {photographer.users?.full_name?.split(' ')[0] || 'Photographer'}
                                 </h3>
+                                {photographer.is_love_and_photos_choice && (
+                                  <LNPChoiceBadge size="small" />
+                                )}
                                 <Badge 
                                   variant={photographer.pay_tiers?.name?.toLowerCase() || 'default'} 
                                   size="sm"
@@ -781,9 +983,20 @@ const Browse = () => {
                             </div>
                           </div>
                           <div className="text-right">
-                            <p className="text-xl font-bold text-dusty-900">
-                              ${photographer.pay_tiers?.hourly_rate || 150}/hr
-                            </p>
+                            {shouldShowPricing ? (
+                              <p className="text-xl font-bold text-dusty-900">
+                                ${photographer.pay_tiers?.hourly_rate || 150}/hr
+                              </p>
+                            ) : (
+                              <button
+                                onClick={() => navigate('/login')}
+                                className="flex items-center text-sm text-dusty-500 hover:text-primary-600 ml-auto mb-2"
+                                aria-label="Sign in to view pricing"
+                              >
+                                <LockIcon className="w-3 h-3 mr-1" />
+                                <span>View Pricing</span>
+                              </button>
+                            )}
                             <RatingStars 
                               rating={photographer.average_rating || 0} 
                               size="sm" 
@@ -802,11 +1015,14 @@ const Browse = () => {
                             <UsersIcon className="w-4 h-4 mr-1" />
                             {photographer.languages?.join(', ') || 'English'}
                           </span>
-                          <span className="flex items-center">
-                            <ClockIcon className="w-4 h-4 mr-1" />
-                            {photographer.response_time_hours || 24}hr response
-                          </span>
                         </div>
+
+                        {/* Trust Metrics Badges */}
+                        <PhotographerMetricBadges 
+                          photographer={photographer} 
+                          className="mt-3"
+                          size="small"
+                        />
                       </div>
                     </div>
                   </Card>

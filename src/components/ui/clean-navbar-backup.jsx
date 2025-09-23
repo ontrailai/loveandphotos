@@ -317,8 +317,15 @@ export function CleanNavbar({ className = '' }) {
                   <Link to="/login">
                     <Button variant="ghost" size="sm">Sign In</Button>
                   </Link>
-                  <Link to="/signup">
-                    <Button variant="primary" size="sm" className="bg-brand hover:bg-brand/90 text-white">Get Started</Button>
+                  <Link to="/photographers">
+                    <Button 
+                      variant="primary" 
+                      size="sm" 
+                      className="bg-[#fe395f] hover:bg-[#fe395f]/90 text-white border-[#fe395f] hover:border-[#fe395f]/90 focus:ring-2 focus:ring-[#fe395f] focus:ring-offset-2 transition-all duration-200"
+                      aria-label="Get started by browsing photographers"
+                    >
+                      Get Started
+                    </Button>
                   </Link>
                 </>
               )}
@@ -419,8 +426,12 @@ export function CleanNavbar({ className = '' }) {
                     Sign In
                   </Button>
                 </Link>
-                <Link to="/signup">
-                  <Button variant="primary" className="w-full bg-brand hover:bg-brand/90 text-white">
+                <Link to="/photographers">
+                  <Button 
+                    variant="primary" 
+                    className="w-full bg-[#fe395f] hover:bg-[#fe395f]/90 text-white border-[#fe395f] hover:border-[#fe395f]/90 focus:ring-2 focus:ring-[#fe395f] focus:ring-offset-2 transition-all duration-200"
+                    aria-label="Get started by browsing photographers"
+                  >
                     Get Started
                   </Button>
                 </Link>

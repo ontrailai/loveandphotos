@@ -12,31 +12,6 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "13.0.5"
   }
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       audit_logs: {
@@ -364,6 +339,7 @@ export type Database = {
           content: string
           created_at: string | null
           id: string
+          is_initial: boolean | null
           is_read: boolean | null
           parent_message_id: string | null
           read_at: string | null
@@ -377,6 +353,7 @@ export type Database = {
           content: string
           created_at?: string | null
           id?: string
+          is_initial?: boolean | null
           is_read?: boolean | null
           parent_message_id?: string | null
           read_at?: string | null
@@ -390,6 +367,7 @@ export type Database = {
           content?: string
           created_at?: string | null
           id?: string
+          is_initial?: boolean | null
           is_read?: boolean | null
           parent_message_id?: string | null
           read_at?: string | null
@@ -523,10 +501,83 @@ export type Database = {
         }
         Relationships: []
       }
+      photographer_preview_profiles: {
+        Row: {
+          average_rating: number | null
+          bio: string | null
+          claimed_at: string | null
+          contact_email: string
+          contact_phone: string | null
+          created_at: string | null
+          display_name: string
+          hourly_rate: number | null
+          id: string
+          is_available: boolean | null
+          is_verified: boolean | null
+          languages: string[] | null
+          location_city: string
+          location_state: string
+          portfolio_images: string[] | null
+          specialties: string[] | null
+          total_bookings: number | null
+          total_reviews: number | null
+          updated_at: string | null
+          user_id: string | null
+          years_experience: number | null
+        }
+        Insert: {
+          average_rating?: number | null
+          bio?: string | null
+          claimed_at?: string | null
+          contact_email: string
+          contact_phone?: string | null
+          created_at?: string | null
+          display_name: string
+          hourly_rate?: number | null
+          id?: string
+          is_available?: boolean | null
+          is_verified?: boolean | null
+          languages?: string[] | null
+          location_city?: string
+          location_state?: string
+          portfolio_images?: string[] | null
+          specialties?: string[] | null
+          total_bookings?: number | null
+          total_reviews?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+          years_experience?: number | null
+        }
+        Update: {
+          average_rating?: number | null
+          bio?: string | null
+          claimed_at?: string | null
+          contact_email?: string
+          contact_phone?: string | null
+          created_at?: string | null
+          display_name?: string
+          hourly_rate?: number | null
+          id?: string
+          is_available?: boolean | null
+          is_verified?: boolean | null
+          languages?: string[] | null
+          location_city?: string
+          location_state?: string
+          portfolio_images?: string[] | null
+          specialties?: string[] | null
+          total_bookings?: number | null
+          total_reviews?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+          years_experience?: number | null
+        }
+        Relationships: []
+      }
       photographers: {
         Row: {
           average_rating: number | null
           bio: string | null
+          booking_acceptance_rate: number | null
           camera_type: string[] | null
           cancellation_rate: number | null
           completed_jobs_count: number | null
@@ -535,12 +586,15 @@ export type Database = {
           experience_years: number | null
           id: string
           instagram_handle: string | null
+          is_female: boolean | null
+          is_lnp_choice: boolean | null
           is_public: boolean | null
           is_verified: boolean | null
           languages: string[] | null
           onboarding_completed: boolean | null
           onboarding_step: number | null
           pay_tier_id: number | null
+          photography_style: string[] | null
           portfolio_url: string | null
           response_time_hours: number | null
           specialties: string[] | null
@@ -555,6 +609,7 @@ export type Database = {
         Insert: {
           average_rating?: number | null
           bio?: string | null
+          booking_acceptance_rate?: number | null
           camera_type?: string[] | null
           cancellation_rate?: number | null
           completed_jobs_count?: number | null
@@ -563,12 +618,15 @@ export type Database = {
           experience_years?: number | null
           id?: string
           instagram_handle?: string | null
+          is_female?: boolean | null
+          is_lnp_choice?: boolean | null
           is_public?: boolean | null
           is_verified?: boolean | null
           languages?: string[] | null
           onboarding_completed?: boolean | null
           onboarding_step?: number | null
           pay_tier_id?: number | null
+          photography_style?: string[] | null
           portfolio_url?: string | null
           response_time_hours?: number | null
           specialties?: string[] | null
@@ -583,6 +641,7 @@ export type Database = {
         Update: {
           average_rating?: number | null
           bio?: string | null
+          booking_acceptance_rate?: number | null
           camera_type?: string[] | null
           cancellation_rate?: number | null
           completed_jobs_count?: number | null
@@ -591,12 +650,15 @@ export type Database = {
           experience_years?: number | null
           id?: string
           instagram_handle?: string | null
+          is_female?: boolean | null
+          is_lnp_choice?: boolean | null
           is_public?: boolean | null
           is_verified?: boolean | null
           languages?: string[] | null
           onboarding_completed?: boolean | null
           onboarding_step?: number | null
           pay_tier_id?: number | null
+          photography_style?: string[] | null
           portfolio_url?: string | null
           response_time_hours?: number | null
           specialties?: string[] | null
@@ -695,6 +757,7 @@ export type Database = {
           helpful_count: number | null
           id: string
           is_featured: boolean | null
+          is_seeded: boolean | null
           is_verified: boolean | null
           photographer_id: string
           photos: string[] | null
@@ -711,6 +774,7 @@ export type Database = {
           helpful_count?: number | null
           id?: string
           is_featured?: boolean | null
+          is_seeded?: boolean | null
           is_verified?: boolean | null
           photographer_id: string
           photos?: string[] | null
@@ -727,6 +791,7 @@ export type Database = {
           helpful_count?: number | null
           id?: string
           is_featured?: boolean | null
+          is_seeded?: boolean | null
           is_verified?: boolean | null
           photographer_id?: string
           photos?: string[] | null
@@ -892,6 +957,27 @@ export type Database = {
         }
         Relationships: []
       }
+      zip_city: {
+        Row: {
+          city: string
+          created_at: string | null
+          state: string
+          zip: string
+        }
+        Insert: {
+          city: string
+          created_at?: string | null
+          state: string
+          zip: string
+        }
+        Update: {
+          city?: string
+          created_at?: string | null
+          state?: string
+          zip?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -900,7 +986,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      booking_status: "pending" | "confirmed" | "completed" | "cancelled"
+      booking_status: "pending" | "confirmed" | "completed" | "cancelled" | "rejected"
       payment_status: "pending" | "paid" | "refunded" | "failed"
       upload_status: "pending" | "in_progress" | "completed" | "approved"
       user_role: "customer" | "photographer" | "admin"
@@ -1029,12 +1115,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
-      booking_status: ["pending", "confirmed", "completed", "cancelled"],
+      booking_status: ["pending", "confirmed", "completed", "cancelled", "rejected"],
       payment_status: ["pending", "paid", "refunded", "failed"],
       upload_status: ["pending", "in_progress", "completed", "approved"],
       user_role: ["customer", "photographer", "admin"],

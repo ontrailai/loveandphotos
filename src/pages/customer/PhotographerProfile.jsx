@@ -11,22 +11,31 @@ import {
   MapPinIcon,
   StarIcon,
   UsersIcon,
-  VideoIcon
+  VideoIcon,
+  LockIcon
 } from 'lucide-react'
 import Button from '@components/ui/Button'
 import Card from '@components/ui/Card'
 import Badge from '@components/ui/Badge'
+import LNPChoiceBadge from '@components/ui/LNPChoiceBadge'
+import PhotographerMetricBadges from '@components/photographer/PhotographerMetricBadges'
 import Avatar from '@components/shared/Avatar'
 import RatingStars from '@components/shared/RatingStars'
+import PhotographerStatsCard from '@components/photographer/PhotographerStatsCard'
 import { supabase } from '@lib/supabase'
+import { useAuth } from '@contexts/AuthContext'
 import toast from 'react-hot-toast'
 
 const PhotographerProfile = () => {
   const { id } = useParams()
   const navigate = useNavigate()
+  const { profile } = useAuth()
   const [photographer, setPhotographer] = useState(null)
   const [loading, setLoading] = useState(true)
   const [selectedImage, setSelectedImage] = useState(0)
+  
+  // Determine if pricing should be shown
+  const shouldShowPricing = profile?.role === 'admin' || profile?.role === 'photographer'
 
   useEffect(() => {
     loadPhotographer()
@@ -56,10 +65,17 @@ const PhotographerProfile = () => {
           location_state: preview.location_state,
           is_available: preview.is_available,
           is_verified: preview.is_verified,
+          is_love_and_photos_choice: preview.is_love_and_photos_choice || false,
           average_rating: preview.average_rating || 4.5,
           total_reviews: preview.total_reviews || 0,
           total_bookings: preview.total_bookings || 0,
           response_time_hours: 24,
+          // Metrics fields (will be loaded from photographers table if exists)
+          acceptance_rate: null,
+          avg_response_time_minutes: null,
+          has_minimum_data: false,
+          manual_override_acceptance_rate: null,
+          manual_override_response_time: null,
           users: {
             full_name: preview.display_name,
             email: preview.contact_email,
@@ -73,6 +89,24 @@ const PhotographerProfile = () => {
             'https://images.unsplash.com/photo-1537633552985-df8429e8048b?w=800'
           ]
         }
+        
+        // If preview has a user_id, try to fetch additional metrics from photographers table
+        if (preview.user_id) {
+          const { data: photographerData } = await supabase
+            .from('photographers')
+            .select('acceptance_rate, avg_response_time_minutes, has_minimum_data, manual_override_acceptance_rate, manual_override_response_time')
+            .eq('user_id', preview.user_id)
+            .single()
+          
+          if (photographerData) {
+            transformed.acceptance_rate = photographerData.acceptance_rate
+            transformed.avg_response_time_minutes = photographerData.avg_response_time_minutes
+            transformed.has_minimum_data = photographerData.has_minimum_data
+            transformed.manual_override_acceptance_rate = photographerData.manual_override_acceptance_rate
+            transformed.manual_override_response_time = photographerData.manual_override_response_time
+          }
+        }
+        
         setPhotographer(transformed)
       } else {
         // Fallback to original photographers table
@@ -215,10 +249,13 @@ const PhotographerProfile = () => {
                   size="xl"
                   className="mx-auto mb-4"
                 />
-                <h1 className="text-2xl font-semibold text-dusty-900">
+                <h1 className="text-2xl font-semibold text-dusty-900 flex items-center justify-center gap-3">
                   {photographer.users?.full_name}
+                  {photographer.is_love_and_photos_choice && (
+                    <LNPChoiceBadge size="default" />
+                  )}
                 </h1>
-                <p className="text-dusty-600">
+                <p className="text-dusty-600 mt-2">
                   {photographer.location_city}, {photographer.location_state}
                 </p>
                 
@@ -238,22 +275,54 @@ const PhotographerProfile = () => {
                     <span className="text-sm font-medium">Verified Professional</span>
                   </div>
                 )}
+                
+                {/* Performance Metrics Badges */}
+                <PhotographerMetricBadges 
+                  photographer={photographer} 
+                  className="mt-4 justify-center"
+                  size="default"
+                />
               </div>
             </Card>
 
             {/* Pricing Card */}
             <Card>
-              <h3 className="font-semibold text-dusty-900 mb-4">Pricing</h3>
+              <h3 className="font-semibold text-dusty-900 mb-4">
+                {shouldShowPricing ? 'Pricing' : 'Details'}
+              </h3>
               <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="flex items-center text-dusty-600">
-                    <DollarSignIcon className="w-4 h-4 mr-2" />
-                    Hourly Rate
-                  </span>
-                  <span className="font-semibold text-dusty-900">
-                    ${photographer.hourly_rate}/hr
-                  </span>
-                </div>
+                {shouldShowPricing ? (
+                  // Show pricing for admin and photographer users
+                  <div className="flex items-center justify-between">
+                    <span className="flex items-center text-dusty-600">
+                      <DollarSignIcon className="w-4 h-4 mr-2" />
+                      Hourly Rate
+                    </span>
+                    <span className="font-semibold text-dusty-900">
+                      ${photographer.hourly_rate}/hr
+                    </span>
+                  </div>
+                ) : (
+                  // Show login prompt for pricing access
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <div className="flex items-center text-dusty-600 mb-2">
+                      <LockIcon className="w-4 h-4 mr-2" />
+                      <span className="text-sm font-medium">Pricing Information</span>
+                    </div>
+                    <p className="text-xs text-dusty-500">
+                      Contact photographer for pricing details or{' '}
+                      <button
+                        onClick={() => navigate('/login')}
+                        className="text-primary-600 hover:text-primary-700 underline font-medium"
+                        aria-label="Sign in to view pricing"
+                      >
+                        sign in as a professional
+                      </button>{' '}
+                      to view rates.
+                    </p>
+                  </div>
+                )}
+                
                 <div className="flex items-center justify-between">
                   <span className="flex items-center text-dusty-600">
                     <ClockIcon className="w-4 h-4 mr-2" />
@@ -274,6 +343,11 @@ const PhotographerProfile = () => {
                 </div>
               </div>
             </Card>
+
+            {/* Performance Stats - Only show for claimed photographers with a user_id */}
+            {photographer.users ? (
+              <PhotographerStatsCard photographerId={photographer.id} />
+            ) : null}
 
             {/* Book Now Button */}
             <Button 

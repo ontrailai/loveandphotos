@@ -1,5 +1,4 @@
 import React from 'react';
-import { Footer } from '../components/ui/footer-section';
 
 export default function Demo() {
   return (
@@ -46,10 +45,14 @@ export default function Demo() {
 
         {/* Spacer to demonstrate scroll behavior */}
         <div className="h-96"></div>
+        
+        {/* Footer Component Demo - Footer is now provided by the layout */}
+        <div className="mt-16 p-8 bg-gray-100 rounded-lg">
+          <p className="text-center text-gray-600">
+            ⬇️ Footer component appears below (provided by PublicLayout)
+          </p>
+        </div>
       </div>
-
-      {/* Footer Component Demo */}
-      <Footer />
     </div>
   );
 }

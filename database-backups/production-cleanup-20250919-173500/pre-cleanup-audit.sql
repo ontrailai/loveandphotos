@@ -1,0 +1,34 @@
+-- DATABASE AUDIT BEFORE PRODUCTION CLEANUP
+-- Generated: 2025-09-19 17:35:00
+-- 
+-- CRITICAL: This shows the current state before removing all test/demo data
+
+-- TABLE ROW COUNTS
+-- portfolio_items: 5,993 rows
+-- availability: 5,979 rows  
+-- users: 1,381 rows
+-- photographers: 1,075 rows
+-- photographer_preview_profiles: 1,070 rows
+-- messages: 679 rows
+-- packages: 594 rows
+-- bookings: 385 rows (includes our test data)
+-- reviews: 203 rows
+-- job_queue: 81 rows
+-- zip_city: 10 rows (keep - reference data)
+-- training_modules: 5 rows (keep - system data)
+-- pay_tiers: 4 rows (keep - system configuration)
+-- contact_submissions: 2 rows
+-- training_status: 0 rows
+-- audit_logs: 0 rows
+
+-- CLEANUP STRATEGY:
+-- REMOVE: All photographers, users, bookings, reviews, messages, portfolio_items, availability, packages, job_queue, contact_submissions
+-- KEEP: pay_tiers, training_modules, zip_city (reference/system data)
+-- PRESERVE: All table schemas, indexes, constraints, functions, RLS policies
+
+-- PRODUCTION-CRITICAL ITEMS TO PRESERVE:
+-- 1. pay_tiers table (Bronze, Silver, Gold, Platinum pricing)
+-- 2. training_modules (photographer onboarding content)
+-- 3. zip_city (location reference data)
+-- 4. All database schema and functions
+-- 5. Authentication and RLS policies

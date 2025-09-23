@@ -71,7 +71,12 @@ const Footer = () => {
             <h4 className="text-sm font-semibold uppercase tracking-wider mb-4">Support</h4>
             <ul className="space-y-2">
               <li>
-                <Link to="/contact" className="text-gray-400 hover:text-white text-sm transition">
+                <Link 
+                  to="/contact" 
+                  className="text-gray-400 hover:text-white text-sm transition focus:outline-none focus:ring-2 focus:ring-[#fe395f] focus:ring-offset-2 focus:ring-offset-gray-900 rounded px-1 -mx-1"
+                  aria-label="Contact Love & Photos"
+                  rel="nofollow"
+                >
                   Contact Us
                 </Link>
               </li>

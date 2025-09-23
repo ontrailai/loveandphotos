@@ -69,8 +69,12 @@ const Navbar = () => {
                     Sign In
                   </Button>
                 </Link>
-                <Link to="/signup">
-                  <Button size="sm">
+                <Link to="/photographers">
+                  <Button 
+                    size="sm"
+                    className="bg-[#fe395f] hover:bg-[#fe395f]/90 text-white border-[#fe395f] hover:border-[#fe395f]/90 focus:ring-2 focus:ring-[#fe395f] focus:ring-offset-2 transition-all duration-200"
+                    aria-label="Get started by browsing photographers"
+                  >
                     Get Started
                   </Button>
                 </Link>
@@ -140,9 +144,10 @@ const Navbar = () => {
                   Sign In
                 </Link>
                 <Link 
-                  to="/signup" 
-                  className="block px-4 py-2 text-foreground hover:bg-accent"
+                  to="/photographers" 
+                  className="block px-4 py-2 bg-[#fe395f] hover:bg-[#fe395f]/90 text-white font-medium rounded-lg mx-4 text-center transition-all duration-200 focus:ring-2 focus:ring-[#fe395f] focus:ring-offset-2"
                   onClick={() => setMobileMenuOpen(false)}
+                  aria-label="Get started by browsing photographers"
                 >
                   Get Started
                 </Link>

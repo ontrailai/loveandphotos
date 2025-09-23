@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'motion/react'
-import { Home, Globe, Menu, X, ChevronDown, User, Users } from 'lucide-react'
+import { Home, Globe, Menu, X, ChevronDown, User, Users, Video, Book } from 'lucide-react'
 import { useAuth } from '@contexts/AuthContext'
 import Button from '@components/ui/Button'
 import { LanguageCurrencyDialog } from '@components/ui/language-currency-dialog'
@@ -17,6 +17,8 @@ const navItems = [
     href: '/photographers',
     submenu: [
       { name: 'Find Photographers', href: '/photographers', description: 'Search by ZIP, style, or date' },
+      { name: 'Video Only', href: '/photographers/video', description: 'Professional videographers only', icon: <Video size={16} /> },
+      { name: 'How to Book', href: '/guide', description: '3 simple steps to book', icon: <Book size={16} /> },
       { name: 'Guide', href: '/how-it-works', description: 'Booking, payment & timelines' },
       { name: 'Pricing', href: '/pricing', description: 'Simple packages & add-ons' }
     ]
@@ -31,8 +33,7 @@ const navItems = [
       { name: 'FAQ', href: '/faq', description: 'Frequently asked questions' }
     ]
   },
-  { name: 'About', href: '/about', icon: <Users size={16} aria-label="About" /> },
-  { name: 'Contact', href: '/contact' }
+  { name: 'About', href: '/about', icon: <Users size={16} aria-label="About" /> }
 ]
 
 // Hover-enabled Dropdown Component with robust positioning
@@ -338,7 +339,10 @@ export function CleanNavbar({ className = '' }) {
                         className="block rounded-md p-3 no-underline transition-colors hover:opacity-70"
                         onClick={() => setActiveDropdown(null)}
                       >
-                        <div className="text-sm font-medium leading-none">{sub.name}</div>
+                        <div className="flex items-center gap-2 text-sm font-medium leading-none">
+                          {sub.icon && sub.icon}
+                          <span>{sub.name}</span>
+                        </div>
                         {sub.description && (
                           <p className="line-clamp-2 text-sm leading-snug text-gray-600 mt-1">
                             {sub.description}
@@ -380,8 +384,10 @@ export function CleanNavbar({ className = '' }) {
             <div className="hidden sm:flex items-center gap-2">
               {user ? (
                 <>
-                  <Link to="/dashboard">
-                    <Button variant="ghost" size="sm">Dashboard</Button>
+                  <Link to={profile?.role === 'photographer' ? '/dashboard/photographer' : profile?.role === 'admin' ? '/admin' : '/dashboard'}>
+                    <Button variant="ghost" size="sm">
+                      {profile?.role === 'photographer' ? 'Photographer Dashboard' : profile?.role === 'admin' ? 'Admin Panel' : 'Dashboard'}
+                    </Button>
                   </Link>
                   <Link to="/profile">
                     <Button variant="ghost" size="sm">
@@ -398,8 +404,15 @@ export function CleanNavbar({ className = '' }) {
                   <Link to="/login">
                     <Button variant="ghost" size="sm">Sign In</Button>
                   </Link>
-                  <Link to="/signup">
-                    <Button variant="primary" size="sm" className="bg-brand hover:bg-brand/90 text-white">Get Started</Button>
+                  <Link to="/photographers">
+                    <Button 
+                      variant="primary" 
+                      size="sm" 
+                      className="bg-[#fe395f] hover:bg-[#fe395f]/90 text-white border-[#fe395f] hover:border-[#fe395f]/90 focus:ring-2 focus:ring-[#fe395f] focus:ring-offset-2 transition-all duration-200"
+                      aria-label="Get started by browsing photographers"
+                    >
+                      Get Started
+                    </Button>
                   </Link>
                 </>
               )}
@@ -440,10 +453,11 @@ export function CleanNavbar({ className = '' }) {
                       <Link
                         key={j}
                         to={sub.href}
-                        className="block text-sm hover:text-primary transition-colors"
+                        className="flex items-center gap-2 text-sm hover:text-primary transition-colors"
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
-                        {sub.name}
+                        {sub.icon && sub.icon}
+                        <span>{sub.name}</span>
                       </Link>
                     ))}
                   </div>
@@ -471,9 +485,9 @@ export function CleanNavbar({ className = '' }) {
 
             {user ? (
               <>
-                <Link to="/dashboard">
+                <Link to={profile?.role === 'photographer' ? '/dashboard/photographer' : profile?.role === 'admin' ? '/admin' : '/dashboard'}>
                   <Button variant="ghost" className="w-full justify-start">
-                    Dashboard
+                    {profile?.role === 'photographer' ? 'Photographer Dashboard' : profile?.role === 'admin' ? 'Admin Panel' : 'Dashboard'}
                   </Button>
                 </Link>
                 <Link to="/profile">
@@ -500,8 +514,12 @@ export function CleanNavbar({ className = '' }) {
                     Sign In
                   </Button>
                 </Link>
-                <Link to="/signup">
-                  <Button variant="primary" className="w-full bg-brand hover:bg-brand/90 text-white">
+                <Link to="/photographers">
+                  <Button 
+                    variant="primary" 
+                    className="w-full bg-[#fe395f] hover:bg-[#fe395f]/90 text-white border-[#fe395f] hover:border-[#fe395f]/90 focus:ring-2 focus:ring-[#fe395f] focus:ring-offset-2 transition-all duration-200"
+                    aria-label="Get started by browsing photographers"
+                  >
                     Get Started
                   </Button>
                 </Link>

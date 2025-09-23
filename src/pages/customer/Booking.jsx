@@ -1,16 +1,19 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '@contexts/AuthContext'
+import { useGuestBooking } from '@contexts/GuestBookingContext'
 import { db } from '@lib/supabase'
 import { calculatePricing, createCheckoutSession, redirectToCheckout } from '@lib/stripe'
 import { useForm } from 'react-hook-form'
 import { CalendarIcon, ClockIcon, MapPinIcon, UsersIcon, CameraIcon, CheckIcon } from 'lucide-react'
+import InlineSignupModal from '@components/modals/InlineSignupModal'
 import toast from 'react-hot-toast'
 import { format, addDays } from 'date-fns'
 
 const Booking = () => {
   const { photographerId } = useParams()
   const { user, profile } = useAuth()
+  const { savePendingBooking, saveBookingFormData, getPendingBookingForMigration } = useGuestBooking()
   const navigate = useNavigate()
   
   const [photographer, setPhotographer] = useState(null)
@@ -20,6 +23,8 @@ const Booking = () => {
   const [pricing, setPricing] = useState(null)
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
+  const [showSignupModal, setShowSignupModal] = useState(false)
+  const [pendingFormData, setPendingFormData] = useState(null)
 
   const {
     register,
@@ -104,6 +109,45 @@ const Booking = () => {
       return
     }
 
+    // If user is not authenticated, save to guest context and show signup modal
+    if (!user) {
+      const guestBookingData = {
+        photographer_id: photographerId,
+        package_id: selectedPackage.id,
+        package_title: selectedPackage.title,
+        event_date: data.eventDate,
+        event_time: data.eventTime,
+        event_type: data.eventType,
+        venue_name: data.venueName,
+        venue_address: {
+          street: data.venueStreet,
+          city: data.venueCity,
+          state: data.venueState,
+          zip: data.venueZip
+        },
+        guest_count: data.guestCount,
+        total_amount: pricing.finalPrice,
+        special_requests: data.specialRequests,
+        personalization_data: {
+          quizCompleted: false,
+          preferences: {}
+        },
+        pricing_data: pricing
+      }
+      
+      // Save to guest context
+      savePendingBooking(guestBookingData)
+      saveBookingFormData(data)
+      setPendingFormData(data)
+      setShowSignupModal(true)
+      return
+    }
+
+    // User is authenticated, proceed with normal booking flow
+    await processAuthenticatedBooking(data)
+  }
+
+  const processAuthenticatedBooking = async (data) => {
     setSubmitting(true)
 
     try {
@@ -151,6 +195,49 @@ const Booking = () => {
     } catch (error) {
       console.error('Booking error:', error)
       toast.error('Failed to create booking. Please try again.')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const handleSignupSuccess = async (newUser) => {
+    try {
+      setSubmitting(true)
+      
+      // Get the pending booking data
+      const pendingBooking = getPendingBookingForMigration()
+      if (!pendingBooking) {
+        toast.error('No pending booking found')
+        return
+      }
+
+      // Create booking record with the new user
+      const bookingData = await db.bookings.create({
+        customer_id: newUser.id,
+        ...pendingBooking
+      })
+
+      // Create Stripe checkout session
+      const session = await createCheckoutSession({
+        customerId: newUser.id,
+        photographerId: photographerId,
+        packageId: pendingBooking.package_id,
+        eventDate: pendingBooking.event_date,
+        amount: pendingBooking.total_amount * 100, // Convert to cents
+        paymentType: pendingBooking.pricing_data?.paymentOptions?.[0]?.type || 'full',
+        customerEmail: newUser.email,
+        metadata: {
+          bookingId: bookingData.id
+        }
+      })
+
+      // Close modal and redirect to Stripe Checkout
+      setShowSignupModal(false)
+      await redirectToCheckout(session.id)
+      
+    } catch (error) {
+      console.error('Booking migration error:', error)
+      toast.error('Failed to complete booking. Please try again.')
     } finally {
       setSubmitting(false)
     }
@@ -459,11 +546,34 @@ const Booking = () => {
             type="submit"
             disabled={submitting || !selectedPackage}
             className="btn-primary"
+            aria-describedby={!user ? "guest-booking-help" : undefined}
           >
-            {submitting ? 'Processing...' : 'Proceed to Payment'}
+            {submitting ? 'Processing...' : user ? 'Proceed to Payment' : 'Continue to Checkout'}
           </button>
+          {!user && (
+            <p id="guest-booking-help" className="text-xs text-gray-600 mt-1">
+              You'll be able to create an account in the next step
+            </p>
+          )}
         </div>
       </form>
+
+      {/* Guest Signup Modal */}
+      {showSignupModal && (
+        <InlineSignupModal
+          isOpen={showSignupModal}
+          onClose={() => setShowSignupModal(false)}
+          onSuccess={handleSignupSuccess}
+          bookingData={{
+            eventDate: pendingFormData?.eventDate,
+            packageTitle: selectedPackage?.title,
+            email: pendingFormData?.email || '',
+            name: pendingFormData?.fullName || '',
+            phone: pendingFormData?.phone || ''
+          }}
+          photographer={photographer}
+        />
+      )}
     </div>
   )
 }

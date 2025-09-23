@@ -428,8 +428,12 @@ export const ProtectedRoute = ({ children, requireRole = null, requireOnboarding
 
       // Check role requirement (only if profile is loaded)
       if (requireRole && profile && !hasRole(requireRole)) {
-        toast.error('You do not have permission to access this page')
-        navigate('/dashboard')
+        // Admin can access everything
+        if (profile.role === 'admin') {
+          return
+        }
+        // Redirect to forbidden page for role mismatches
+        navigate('/forbidden')
         return
       }
 
