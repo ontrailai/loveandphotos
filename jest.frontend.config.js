@@ -26,6 +26,10 @@ export default {
     '**/tests/frontend/**/*.test.jsx',
     '**/tests/components/**/*.test.js',
     '**/tests/components/**/*.test.jsx',
+    '**/tests/contexts/**/*.test.js',
+    '**/tests/contexts/**/*.test.jsx',
+    '**/tests/integration/**/*.test.js',
+    '**/tests/integration/**/*.test.jsx',
     '**/src/**/__tests__/**/*.{js,jsx}',
     '**/src/**/*.{test,spec}.{js,jsx}'
   ],
@@ -33,9 +37,7 @@ export default {
   // Ignore backend test files
   testPathIgnorePatterns: [
     '<rootDir>/node_modules/',
-    '<rootDir>/tests/api/',
-    '<rootDir>/tests/integration/',
-    '<rootDir>/tests/unit/(?!.*frontend)'
+    '<rootDir>/tests/api/'
   ],
 
   // Coverage configuration
@@ -113,7 +115,7 @@ export default {
 
   // Transform ignore patterns
   transformIgnorePatterns: [
-    'node_modules/(?!(.*\\.mjs$|@testing-library|@21st-extension|clsx|tailwind-merge))'
+    'node_modules/(?!(.*\\.mjs$|@testing-library|@21st-extension|clsx|tailwind-merge|uuid))'
   ],
 
   // Module file extensions

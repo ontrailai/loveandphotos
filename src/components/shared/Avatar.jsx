@@ -3,6 +3,7 @@
  * User avatar with fallback initials
  */
 
+import { useState, useEffect } from 'react'
 import { clsx } from 'clsx'
 import { UserIcon } from 'lucide-react'
 
@@ -15,15 +16,17 @@ const sizes = {
   '2xl': 'w-24 h-24 text-2xl',
 }
 
-const Avatar = ({ 
-  src, 
-  alt = '', 
-  name = '', 
+const Avatar = ({
+  src,
+  alt = '',
+  name = '',
   size = 'md',
   className = '',
   badge,
-  ...props 
+  ...props
 }) => {
+  const [imageError, setImageError] = useState(false)
+
   const getInitials = (name) => {
     return name
       .split(' ')
@@ -33,21 +36,31 @@ const Avatar = ({
       .slice(0, 2)
   }
 
+  const handleImageError = () => {
+    setImageError(true)
+  }
+
+  // Reset error state when src changes
+  useEffect(() => {
+    setImageError(false)
+  }, [src])
+
   return (
     <div className={clsx('relative inline-block', className)}>
       <div
         className={clsx(
-          'relative rounded-full bg-gradient-to-br from-primary-400 to-sage-400',
+          'relative rounded-full bg-primary-500',
           'flex items-center justify-center overflow-hidden',
           sizes[size]
         )}
         {...props}
       >
-        {src ? (
+        {src && !imageError ? (
           <img
             src={src}
             alt={alt || name}
             className="w-full h-full object-cover"
+            onError={handleImageError}
           />
         ) : name ? (
           <span className="font-medium text-white">

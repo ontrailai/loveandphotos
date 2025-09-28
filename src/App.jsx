@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider, ProtectedRoute } from '@contexts/AuthContext'
 import { GuestBookingProvider } from '@contexts/GuestBookingContext'
+import { BookingFlowProvider } from '@contexts/BookingFlowContext'
 import { SWRProvider } from '@providers/SWRProvider'
 import { ThemeProvider } from '@contexts/ThemeContext'
 import { validateEnvironment } from '@utils/validateEnv'
@@ -66,6 +67,13 @@ const PhotographerProfile = lazy(() => import('@pages/customer/PhotographerProfi
 const BookingPage = lazy(() =>
   import('@pages/customer/placeholders').then(module => ({ default: module.BookingPage }))
 )
+
+// Booking wizard pages
+const PackageDetails = lazy(() => import('@pages/customer/booking/PackageDetails'))
+const LocationDetails = lazy(() => import('@pages/customer/booking/LocationDetails'))
+const AddOnsDetails = lazy(() => import('@pages/customer/booking/AddOnsDetails'))
+const BookingFlowGuard = lazy(() => import('@components/booking/BookingFlowGuard'))
+const ScheduleRedirect = lazy(() => import('@components/booking/ScheduleRedirect'))
 const CustomerBookings = lazy(() =>
   import('@pages/customer/placeholders').then(module => ({ default: module.CustomerBookings }))
 )
@@ -160,7 +168,8 @@ function App() {
       <ThemeProvider>
         <AuthProvider>
           <GuestBookingProvider>
-            <div className="min-h-screen bg-background text-foreground antialiased">
+            <BookingFlowProvider>
+              <div className="min-h-screen bg-background text-foreground antialiased">
           {/* 21st.dev Toolbar - Development only */}
           <TwentyFirstToolbar
             config={{
@@ -267,6 +276,34 @@ function App() {
             <Route path="/book/:photographerId" element={
               <Suspense fallback={<PageLoader />}>
                 <BookingPage />
+              </Suspense>
+            } />
+
+            {/* Booking Wizard Routes */}
+            <Route path="/booking/:photographerId/schedule" element={
+              <Suspense fallback={<PageLoader />}>
+                <ScheduleRedirect />
+              </Suspense>
+            } />
+            <Route path="/booking/:photographerId/package" element={
+              <Suspense fallback={<PageLoader />}>
+                <BookingFlowGuard requiredStep="package">
+                  <PackageDetails />
+                </BookingFlowGuard>
+              </Suspense>
+            } />
+            <Route path="/booking/:photographerId/location" element={
+              <Suspense fallback={<PageLoader />}>
+                <BookingFlowGuard requiredStep="location">
+                  <LocationDetails />
+                </BookingFlowGuard>
+              </Suspense>
+            } />
+            <Route path="/booking/:photographerId/addons" element={
+              <Suspense fallback={<PageLoader />}>
+                <BookingFlowGuard requiredStep="addons">
+                  <AddOnsDetails />
+                </BookingFlowGuard>
               </Suspense>
             } />
             <Route path="/booking/confirm" element={
@@ -429,7 +466,8 @@ function App() {
           {/* 404 Page */}
           <Route path="*" element={<NotFound />} />
         </Routes>
-            </div>
+              </div>
+            </BookingFlowProvider>
           </GuestBookingProvider>
         </AuthProvider>
       </ThemeProvider>

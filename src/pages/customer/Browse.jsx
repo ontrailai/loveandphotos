@@ -815,7 +815,7 @@ const Browse = () => {
                     key={photographer.id}
                     hover
                     className="cursor-pointer overflow-hidden group"
-                    onClick={() => navigate(`/photographer/${photographer.id}`)}
+                    onClick={() => navigate(`/photographer/${photographer.id}${filters.date ? `?date=${filters.date}` : ''}`)}
                   >
                     {/* Portfolio Preview */}
                     <ImageErrorBoundary>
@@ -933,7 +933,7 @@ const Browse = () => {
                     key={photographer.id}
                     hover
                     className="cursor-pointer"
-                    onClick={() => navigate(`/photographer/${photographer.id}`)}
+                    onClick={() => navigate(`/photographer/${photographer.id}${filters.date ? `?date=${filters.date}` : ''}`)}
                     padding={false}
                   >
                     <div className="flex">

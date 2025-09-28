@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { 
   ArrowLeftIcon,
   CalendarIcon,
@@ -22,6 +22,7 @@ import PhotographerMetricBadges from '@components/photographer/PhotographerMetri
 import Avatar from '@components/shared/Avatar'
 import RatingStars from '@components/shared/RatingStars'
 import PhotographerStatsCard from '@components/photographer/PhotographerStatsCard'
+import BookingSidebar from '@components/booking/BookingSidebar'
 import { supabase } from '@lib/supabase'
 import { useAuth } from '@contexts/AuthContext'
 import toast from 'react-hot-toast'
@@ -29,10 +30,14 @@ import toast from 'react-hot-toast'
 const PhotographerProfile = () => {
   const { id } = useParams()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { profile } = useAuth()
   const [photographer, setPhotographer] = useState(null)
   const [loading, setLoading] = useState(true)
   const [selectedImage, setSelectedImage] = useState(0)
+
+  // Parse initial date from URL parameter
+  const initialDate = searchParams.get('date') ? new Date(searchParams.get('date')) : null
   
   // Determine if pricing should be shown
   const shouldShowPricing = profile?.role === 'admin' || profile?.role === 'photographer'
@@ -349,14 +354,11 @@ const PhotographerProfile = () => {
               <PhotographerStatsCard photographerId={photographer.id} />
             ) : null}
 
-            {/* Book Now Button */}
-            <Button 
-              onClick={() => navigate(`/book/${photographer.id}`)}
-              className="w-full"
-              size="lg"
-            >
-              Book Now
-            </Button>
+            {/* Booking Sidebar */}
+            <BookingSidebar
+              photographer={photographer}
+              initialDate={initialDate}
+            />
 
             {/* Stats */}
             <Card>

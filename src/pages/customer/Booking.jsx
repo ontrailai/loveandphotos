@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@contexts/AuthContext'
 import { useGuestBooking } from '@contexts/GuestBookingContext'
 import { db } from '@lib/supabase'
@@ -12,9 +12,30 @@ import { format, addDays } from 'date-fns'
 
 const Booking = () => {
   const { photographerId } = useParams()
+  const [searchParams] = useSearchParams()
   const { user, profile } = useAuth()
   const { savePendingBooking, saveBookingFormData, getPendingBookingForMigration } = useGuestBooking()
   const navigate = useNavigate()
+
+  // Get date and time from URL parameters
+  const urlDate = searchParams.get('date')
+  const urlTimeOfDay = searchParams.get('timeOfDay')
+
+  // Convert timeOfDay to specific time
+  const getTimeFromTimeOfDay = (timeOfDay) => {
+    switch (timeOfDay) {
+      case 'morning':
+        return '09:00'
+      case 'afternoon':
+        return '14:00'
+      default:
+        return '10:00'
+    }
+  }
+
+  // Calculate default values
+  const defaultEventDate = urlDate || format(addDays(new Date(), 60), 'yyyy-MM-dd')
+  const defaultEventTime = urlTimeOfDay ? getTimeFromTimeOfDay(urlTimeOfDay) : '10:00'
   
   const [photographer, setPhotographer] = useState(null)
   const [packages, setPackages] = useState([])
@@ -34,8 +55,8 @@ const Booking = () => {
     formState: { errors }
   } = useForm({
     defaultValues: {
-      eventDate: format(addDays(new Date(), 60), 'yyyy-MM-dd'),
-      eventTime: '10:00',
+      eventDate: defaultEventDate,
+      eventTime: defaultEventTime,
       guestCount: 50
     }
   })
