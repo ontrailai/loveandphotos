@@ -4,6 +4,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js'
+import { fetchInBatches } from '@utils/batchSupabaseQueries'
 
 /**
  * Format currency values for display
@@ -83,23 +84,36 @@ export async function getFeaturedPhotographers(limit = 6) {
       return []
     }
 
-    // Get location data for photographers
+    // Get location data for photographers using batched queries
     const photographerIds = data.map(p => p.user_id);
     let locationData = {};
     if (photographerIds.length > 0) {
-      const { data: locations } = await supabaseClient
-        .from('photographer_preview_profiles')
-        .select('user_id, location_city, location_state')
-        .in('user_id', photographerIds);
+      try {
+        const { data: locations, error } = await fetchInBatches(
+          supabaseClient,
+          'photographer_preview_profiles',
+          'user_id, location_city, location_state',
+          'user_id',
+          photographerIds,
+          { batchSize: 50, deduplicateBy: 'user_id' }
+        );
 
-      if (locations) {
-        locationData = locations.reduce((acc, loc) => {
-          acc[loc.user_id] = {
-            city: loc.location_city,
-            state: loc.location_state
-          };
-          return acc;
-        }, {});
+        if (error) {
+          console.warn('Location data query had issues:', error);
+        }
+
+        if (locations && locations.length > 0) {
+          locationData = locations.reduce((acc, loc) => {
+            acc[loc.user_id] = {
+              city: loc.location_city,
+              state: loc.location_state
+            };
+            return acc;
+          }, {});
+        }
+      } catch (batchError) {
+        console.error('Failed to fetch location data:', batchError);
+        // Continue without location data
       }
     }
 
@@ -154,23 +168,29 @@ export async function getFeaturedPhotographersAcceptanceRate(photographerIds) {
       return null
     }
 
-    const { data, error } = await supabaseClient
-      .from('photographers')
-      .select('booking_acceptance_rate')
-      .in('id', photographerIds)
-      .not('booking_acceptance_rate', 'is', null)
+    const { data, error } = await fetchInBatches(
+      supabaseClient,
+      'photographers',
+      'booking_acceptance_rate',
+      'id',
+      photographerIds,
+      { batchSize: 50, deduplicateBy: 'id' }
+    )
+
+    // Filter out null values (equivalent to .not('booking_acceptance_rate', 'is', null))
+    const filteredData = data ? data.filter(p => p.booking_acceptance_rate != null) : []
 
     if (error) {
       console.error('Error fetching booking acceptance rates:', error)
-      throw error
+      throw new Error(error)
     }
 
-    if (!data || data.length === 0) {
+    if (!filteredData || filteredData.length === 0) {
       return null // Not enough data
     }
 
     // Calculate average acceptance rate across featured photographers
-    const acceptanceRates = data
+    const acceptanceRates = filteredData
       .map(p => parseFloat(p.booking_acceptance_rate))
       .filter(rate => !isNaN(rate) && rate > 0)
 
@@ -197,24 +217,30 @@ export async function getFeaturedPhotographers5StarReviews(photographerIds) {
       return null
     }
 
-    const { data, error } = await supabaseClient
-      .from('reviews')
-      .select('rating, photographer_id')
-      .in('photographer_id', photographerIds)
-      .not('rating', 'is', null)
+    const { data, error } = await fetchInBatches(
+      supabaseClient,
+      'reviews',
+      'rating, photographer_id',
+      'photographer_id',
+      photographerIds,
+      { batchSize: 50, deduplicateBy: 'photographer_id' }
+    )
+
+    // Filter out null ratings (equivalent to .not('rating', 'is', null))
+    const filteredData = data ? data.filter(r => r.rating != null) : []
 
     if (error) {
       console.error('Error fetching review data:', error)
-      throw error
+      throw new Error(error)
     }
 
-    if (!data || data.length === 0) {
+    if (!filteredData || filteredData.length === 0) {
       return null // Not enough data
     }
 
     // Count 5-star vs total reviews
-    const totalReviews = data.length
-    const fiveStarReviews = data.filter(review =>
+    const totalReviews = filteredData.length
+    const fiveStarReviews = filteredData.filter(review =>
       parseInt(review.rating) === 5
     ).length
 
@@ -240,23 +266,29 @@ export async function getFeaturedPhotographersResponseTime(photographerIds) {
       return null
     }
 
-    const { data, error } = await supabaseClient
-      .from('photographers')
-      .select('response_time_hours, id')
-      .in('id', photographerIds)
-      .not('response_time_hours', 'is', null)
+    const { data, error } = await fetchInBatches(
+      supabaseClient,
+      'photographers',
+      'response_time_hours, id',
+      'id',
+      photographerIds,
+      { batchSize: 50, deduplicateBy: 'id' }
+    )
+
+    // Filter out null response times (equivalent to .not('response_time_hours', 'is', null))
+    const filteredData = data ? data.filter(p => p.response_time_hours != null) : []
 
     if (error) {
       console.error('Error fetching response time data:', error)
-      throw error
+      throw new Error(error)
     }
 
-    if (!data || data.length === 0) {
+    if (!filteredData || filteredData.length === 0) {
       return null // Not enough data
     }
 
     // Get response times and calculate median
-    const responseTimes = data
+    const responseTimes = filteredData
       .map(p => parseFloat(p.response_time_hours))
       .filter(time => !isNaN(time) && time > 0)
       .sort((a, b) => a - b)

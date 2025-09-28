@@ -12,6 +12,7 @@ const variants = {
   success: 'bg-green-100 text-green-800',
   warning: 'bg-yellow-100 text-yellow-800',
   danger: 'bg-red-100 text-red-800',
+  outline: 'bg-white text-gray-700 border border-gray-300',
   bronze: 'bg-gradient-to-r from-orange-100 to-amber-100 text-amber-900',
   silver: 'bg-gradient-to-r from-gray-100 to-slate-100 text-slate-900',
   gold: 'bg-gradient-to-r from-yellow-100 to-amber-100 text-yellow-900',

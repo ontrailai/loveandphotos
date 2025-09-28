@@ -55,7 +55,7 @@ import Demo from '@pages/Demo'
 
 // Customer Pages (lazy loaded)
 const CustomerDashboard = lazy(() => import('@pages/customer/Dashboard'))
-const BrowsePhotographers = lazy(() => import('@pages/customer/Browse'))
+const BrowsePhotographers = lazy(() => import('@pages/photographers/PhotographersPage'))
 const VideoBrowse = lazy(() => import('@pages/customer/VideoBrowse'))
 const Guide = lazy(() => import('@pages/customer/Guide'))
 const BookingConfirmation = lazy(() => import('@pages/customer/BookingConfirmation'))
@@ -72,6 +72,8 @@ const BookingPage = lazy(() =>
 const PackageDetails = lazy(() => import('@pages/customer/booking/PackageDetails'))
 const LocationDetails = lazy(() => import('@pages/customer/booking/LocationDetails'))
 const AddOnsDetails = lazy(() => import('@pages/customer/booking/AddOnsDetails'))
+const ContractStep = lazy(() => import('@pages/customer/booking/ContractStep'))
+const PaymentStep = lazy(() => import('@pages/customer/booking/PaymentStep'))
 const BookingFlowGuard = lazy(() => import('@components/booking/BookingFlowGuard'))
 const ScheduleRedirect = lazy(() => import('@components/booking/ScheduleRedirect'))
 const CustomerBookings = lazy(() =>
@@ -306,7 +308,21 @@ function App() {
                 </BookingFlowGuard>
               </Suspense>
             } />
-            <Route path="/booking/confirm" element={
+            <Route path="/booking/:photographerId/contract" element={
+              <Suspense fallback={<PageLoader />}>
+                <BookingFlowGuard requiredStep="contract">
+                  <ContractStep />
+                </BookingFlowGuard>
+              </Suspense>
+            } />
+            <Route path="/booking/:photographerId/payment" element={
+              <Suspense fallback={<PageLoader />}>
+                <BookingFlowGuard requiredStep="payment">
+                  <PaymentStep />
+                </BookingFlowGuard>
+              </Suspense>
+            } />
+            <Route path="/booking/:photographerId/confirm" element={
               <ProtectedRoute>
                 <Suspense fallback={<PageLoader />}>
                   <BookingConfirmation />

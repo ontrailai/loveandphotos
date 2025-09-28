@@ -55,7 +55,7 @@ const AddOnsDetails = () => {
 
   // Build package context for pricing and validation
   const packageContext = {
-    selectedDate: bookingFlow.scheduleDetails?.selectedDate,
+    selectedDate: bookingFlow.scheduleDetails?.date,
     packageType: bookingFlow.packageDetails?.packageType === 'monthly' ? 'photoOnly' : 'photoVideo',
     packagePrice: bookingFlow.packageDetails?.packagePrice || 0,
     hoursBooked: bookingFlow.packageDetails?.hoursBooked || 6,
@@ -88,8 +88,8 @@ const AddOnsDetails = () => {
       selectedAddons: selectedAddons
     })
 
-    // Navigate to booking confirmation
-    navigate('/booking/confirm')
+    // Navigate to contract step
+    navigate(`/booking/${photographerId}/contract`)
   }
 
   // Handle skip add-ons
@@ -99,8 +99,8 @@ const AddOnsDetails = () => {
       selectedAddons: []
     })
 
-    // Navigate to booking confirmation
-    navigate('/booking/confirm')
+    // Navigate to contract step
+    navigate(`/booking/${photographerId}/contract`)
   }
 
   const steps = getStepsForStepper()

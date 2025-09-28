@@ -79,13 +79,6 @@ const TotalsPanel = ({
   // Common content
   const panelContent = (
     <>
-      {/* Header */}
-      <div className="flex items-center space-x-2 mb-4">
-        <ShoppingCartIcon className="w-5 h-5 text-gray-600" />
-        <h3 className="text-lg font-semibold text-gray-900">
-          Order Summary
-        </h3>
-      </div>
 
       {/* Package line item */}
       {packagePrice > 0 && (
@@ -185,7 +178,7 @@ const TotalsPanel = ({
           className="w-full"
           disabled={!packagePrice}
         >
-          Continue to Review
+          Continue
         </Button>
 
         {selectedAddons.length === 0 && onSkip && (

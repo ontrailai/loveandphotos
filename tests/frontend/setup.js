@@ -4,6 +4,7 @@
  */
 
 import '@testing-library/jest-dom'
+import { jest, beforeAll, afterAll } from '@jest/globals'
 
 // Mock window.matchMedia
 Object.defineProperty(window, 'matchMedia', {

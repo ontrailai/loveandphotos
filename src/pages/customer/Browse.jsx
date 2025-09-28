@@ -34,6 +34,7 @@ import SafeImage from '@components/shared/SafeImage'
 import ImageErrorBoundary from '@components/shared/ImageErrorBoundary'
 import RatingStars from '@components/shared/RatingStars'
 import { supabase } from '@lib/supabase'
+import { fetchPhotographerTrustMetrics } from '@utils/batchSupabaseQueries'
 import { useAuth } from '@contexts/AuthContext'
 import { clsx } from 'clsx'
 import { normalizeLocationQuery, getCanonicalQueryParam } from '@lib/utils/normalizeLocationQuery'
@@ -192,20 +193,40 @@ const Browse = () => {
         console.log(`Successfully loaded ${photographers.length} real photographers`)
         
         // Fetch trust metrics for photographers that have user_id
+        // Use batched queries to prevent oversized URL errors (net::ERR_FAILED)
         const userIds = photographers.filter(p => p.user_id).map(p => p.user_id)
         let trustMetrics = {}
-        
+
         if (userIds.length > 0) {
-          const { data: metricsData } = await supabase
-            .from('photographers')
-            .select('user_id, acceptance_rate, avg_response_time_minutes, has_minimum_data, manual_override_acceptance_rate, manual_override_response_time')
-            .in('user_id', userIds)
-          
-          if (metricsData) {
-            trustMetrics = metricsData.reduce((acc, metric) => {
-              acc[metric.user_id] = metric
-              return acc
-            }, {})
+          console.log(`Fetching trust metrics for ${userIds.length} photographers using batched queries`)
+
+          try {
+            const { data: metricsData, error, hadPartialFailure } = await fetchPhotographerTrustMetrics(supabase, userIds)
+
+            if (error) {
+              console.warn('Trust metrics query had issues:', error)
+              // Continue with empty metrics rather than blocking the page
+            }
+
+            if (hadPartialFailure) {
+              console.warn('Some trust metrics batches failed, but continuing with available data')
+            }
+
+            if (metricsData && metricsData.length > 0) {
+              console.log(`Successfully retrieved trust metrics for ${metricsData.length} photographers`)
+
+              // Process the batched results
+              trustMetrics = metricsData.reduce((acc, metric) => {
+                acc[metric.user_id] = metric
+                return acc
+              }, {})
+            }
+
+          } catch (batchError) {
+            console.error('Failed to fetch trust metrics in batches:', batchError)
+            // Continue without trust metrics rather than blocking the entire page
+            // This ensures the photographer grid still loads even if metrics fail
+            trustMetrics = {}
           }
         }
         

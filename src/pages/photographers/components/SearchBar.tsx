@@ -7,6 +7,8 @@ import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { MapPinIcon, CalendarIcon, SearchIcon, XIcon } from 'lucide-react'
 import Button from '@components/ui/Button'
+import DatePicker from '../DatePicker'
+import { setDateInUrl, getDateFromUrl } from '../date-utils'
 import { clsx } from 'clsx'
 import type { SearchBarProps } from '@utils/photographers/types'
 
@@ -24,10 +26,12 @@ export function SearchBar({
   const [isExpanded, setIsExpanded] = useState(false)
   const [activeField, setActiveField] = useState<string | null>(null)
   const [showSuggestions, setShowSuggestions] = useState(false)
+  // Remove showCalendar state - DatePicker handles its own open state
   const [localValue, setLocalValue] = useState(value) // Local state for immediate UI updates
   const inputRef = useRef<HTMLInputElement>(null)
-  const dateInputRef = useRef<HTMLInputElement>(null)
+  // Remove dateInputRef - DatePicker handles its own refs
   const containerRef = useRef<HTMLDivElement>(null)
+  // Remove calendarRef - DatePicker handles its own refs
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
 
@@ -155,11 +159,18 @@ export function SearchBar({
     inputRef.current?.focus()
   }
 
+  // Handle date change with URL sync
+  const handleDatePickerChange = useCallback((isoDate: string | null) => {
+    const dateValue = isoDate || ''
+    onDateChange(dateValue)
+    setDateInUrl(isoDate)
+  }, [onDateChange])
+
   // Handle clear date
-  const handleClearDate = () => {
+  const handleClearDate = useCallback(() => {
     onDateChange('')
-    dateInputRef.current?.focus()
-  }
+    setDateInUrl(null)
+  }, [onDateChange])
 
   // Handle keyboard navigation
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -176,6 +187,28 @@ export function SearchBar({
     onValueChange(city)
     onSubmit()
   }
+
+  // Initialize date from URL on component mount
+  useEffect(() => {
+    const urlDate = getDateFromUrl()
+    if (urlDate && urlDate !== date) {
+      onDateChange(urlDate)
+    }
+  }, [])
+
+  // Listen for URL changes from other sources
+  useEffect(() => {
+    const handleUrlDateChange = (event: CustomEvent) => {
+      const { date: urlDate } = event.detail
+      const dateValue = urlDate || ''
+      if (dateValue !== date) {
+        onDateChange(dateValue)
+      }
+    }
+
+    window.addEventListener('dateUrlChanged', handleUrlDateChange as EventListener)
+    return () => window.removeEventListener('dateUrlChanged', handleUrlDateChange as EventListener)
+  }, [date, onDateChange])
 
   // Close suggestions when clicking outside
   useEffect(() => {
@@ -312,61 +345,18 @@ export function SearchBar({
                 </AnimatePresence>
               </motion.div>
 
-              {/* Date Input */}
+              {/* Date Picker */}
               <motion.div
                 className="relative min-w-[180px]"
                 whileHover={{ scale: 1.02 }}
               >
-                <div className="relative">
-                  <div
-                    className={clsx(
-                      'absolute left-4 top-1/2 transform -translate-y-1/2',
-                      activeField === 'date' ? 'text-[#FF4D6D]' : 'text-gray-400'
-                    )}
-                  >
-                    <CalendarIcon className="w-5 h-5" />
-                  </div>
-
-                  <input
-                    ref={dateInputRef}
-                    type="date"
-                    value={date}
-                    onChange={(e) => onDateChange(e.target.value)}
-                    onFocus={() => handleFieldFocus('date')}
-                    onBlur={handleInputBlur}
-                    className={clsx(
-                      'w-full pl-12 pr-10 py-4 bg-white border border-gray-300 rounded-2xl',
-                      'text-gray-900 font-medium text-base',
-                      'focus:outline-none focus:ring-2 focus:ring-[#FF4D6D]/50 focus:border-[#FF4D6D]/50',
-                      'transition-all duration-300',
-                      '[&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-inner-spin-button]:hidden',
-                      activeField === 'date' && 'ring-2 ring-[#FF4D6D]/50 border-[#FF4D6D]/50'
-                    )}
-                    aria-label="Event date"
-                    min={new Date().toISOString().split('T')[0]}
-                  />
-
-                  {activeField === 'date' && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      className="absolute inset-0 rounded-2xl bg-gradient-to-r from-[#FF4D6D]/20 to-purple-500/20 -z-10 blur-xl"
-                    />
-                  )}
-
-                  {date && (
-                    <motion.button
-                      type="button"
-                      onClick={handleClearDate}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-full hover:bg-white/20"
-                      aria-label="Clear date"
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                    >
-                      <XIcon className="w-4 h-4" />
-                    </motion.button>
-                  )}
-                </div>
+                <DatePicker
+                  value={date}
+                  onChange={handleDatePickerChange}
+                  onClear={handleClearDate}
+                  placeholder="Select event date"
+                  className="w-full"
+                />
               </motion.div>
 
               {/* Enhanced Search Button */}
@@ -381,8 +371,7 @@ export function SearchBar({
                   'disabled:opacity-50 disabled:cursor-not-allowed'
                 )}
                 whileHover={{
-                  scale: isLoading ? 1 : 1.05,
-                  boxShadow: "0 20px 40px rgba(255, 77, 109, 0.3)"
+                  scale: isLoading ? 1 : 1.05
                 }}
                 whileTap={{ scale: isLoading ? 1 : 0.95 }}
                 aria-label="Search photographers"

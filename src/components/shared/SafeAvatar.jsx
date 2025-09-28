@@ -18,7 +18,7 @@ const sizes = {
 }
 
 // Debug flag - set to false to disable debug logging
-const DEBUG_AVATAR = process.env.NODE_ENV === 'development'
+const DEBUG_AVATAR = false
 
 // Debug logger
 const debugLog = (message, data = {}) => {

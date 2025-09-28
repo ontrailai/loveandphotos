@@ -3,6 +3,7 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 @import './styles/theme-overrides.css';
+@import 'react-day-picker/style.css';
 
 /* Design System: Primary Brand Colors */
 :root {

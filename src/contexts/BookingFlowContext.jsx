@@ -14,7 +14,9 @@ const BOOKING_STEPS = [
   { id: 'schedule', label: 'Schedule Details', order: 0 },
   { id: 'package', label: 'Package Details', order: 1 },
   { id: 'location', label: 'Locations', order: 2 },
-  { id: 'addons', label: 'Add-Ons', order: 3 }
+  { id: 'addons', label: 'Add-Ons', order: 3 },
+  { id: 'contract', label: 'Contract & Signature', order: 4 },
+  { id: 'payment', label: 'Payment', order: 5 }
 ]
 
 // Generate or retrieve a persistent session ID
@@ -70,11 +72,29 @@ export const BookingFlowProvider = ({ children }) => {
       selectedAt: null
     },
 
+    contractDetails: {
+      contractSigned: false,
+      contractSignatureId: null,
+      contractVersion: null,
+      signedAt: null,
+      selectedAt: null
+    },
+
+    paymentDetails: {
+      paymentCompleted: false,
+      paymentMethod: null,
+      paymentIntentId: null,
+      paidAt: null,
+      selectedAt: null
+    },
+
     validationState: {
       schedule: false,
       package: false,
       location: false,
-      addons: false
+      addons: false,
+      contract: false,
+      payment: false
     }
   })
 
@@ -162,11 +182,19 @@ export const BookingFlowProvider = ({ children }) => {
         totalAddonsPrice: 0,
         selectedAt: null
       },
+      contractDetails: {
+        contractSigned: false,
+        contractSignatureId: null,
+        contractVersion: null,
+        signedAt: null,
+        selectedAt: null
+      },
       validationState: {
         schedule: !!(initialData.date && initialData.timeOfDay),
         package: false,
         location: false,
-        addons: false
+        addons: false,
+        contract: false
       }
     }
 
@@ -271,9 +299,34 @@ export const BookingFlowProvider = ({ children }) => {
           selectedAt: new Date().toISOString()
         },
         completedSteps: newCompletedSteps,
+        currentStep: addonsValid ? 'contract' : 'addons',
         validationState: {
           ...prev.validationState,
           addons: addonsValid
+        }
+      }
+    })
+  }, [])
+
+  // Update contract details
+  const updateContractDetails = useCallback((contractData) => {
+    setBookingFlow(prev => {
+      const contractValid = !!(contractData && contractData.contractSigned)
+      const newCompletedSteps = contractValid
+        ? [...new Set([...prev.completedSteps, 'contract'])]
+        : prev.completedSteps.filter(step => step !== 'contract')
+
+      return {
+        ...prev,
+        contractDetails: {
+          ...contractData,
+          selectedAt: new Date().toISOString()
+        },
+        completedSteps: newCompletedSteps,
+        currentStep: contractValid ? 'payment' : 'contract',
+        validationState: {
+          ...prev.validationState,
+          contract: contractValid
         }
       }
     })
@@ -287,6 +340,19 @@ export const BookingFlowProvider = ({ children }) => {
     // First step (schedule) is always accessible
     if (step.order === 0) return true
 
+    // Special requirement for payment step: contract must be signed
+    if (stepName === 'payment') {
+      // Check all previous steps are completed
+      for (let i = 0; i < step.order; i++) {
+        const prevStep = BOOKING_STEPS[i]
+        if (!bookingFlow.completedSteps.includes(prevStep.id)) {
+          return false
+        }
+      }
+      // Additional requirement: contract must be signed
+      return bookingFlow.contractDetails.contractSigned === true
+    }
+
     // Check if all previous steps are completed
     for (let i = 0; i < step.order; i++) {
       const prevStep = BOOKING_STEPS[i]
@@ -296,7 +362,7 @@ export const BookingFlowProvider = ({ children }) => {
     }
 
     return true
-  }, [bookingFlow.completedSteps])
+  }, [bookingFlow.completedSteps, bookingFlow.contractDetails.contractSigned])
 
   // Navigate to a specific step (with validation)
   const goToStep = useCallback((stepName) => {
@@ -360,11 +426,19 @@ export const BookingFlowProvider = ({ children }) => {
         totalAddonsPrice: 0,
         selectedAt: null
       },
+      contractDetails: {
+        contractSigned: false,
+        contractSignatureId: null,
+        contractVersion: null,
+        signedAt: null,
+        selectedAt: null
+      },
       validationState: {
         schedule: false,
         package: false,
         location: false,
-        addons: false
+        addons: false,
+        contract: false
       }
     }
 
@@ -411,6 +485,7 @@ export const BookingFlowProvider = ({ children }) => {
     updatePackageDetails,
     updateLocationDetails,
     updateAddonsDetails,
+    updateContractDetails,
     goToStep,
     resetBookingFlow,
 
