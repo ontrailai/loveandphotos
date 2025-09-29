@@ -1,0 +1,236 @@
+import { Link } from 'react-router-dom'
+import { BookOpen, Video, FileText, Download, Users, TrendingUp } from 'lucide-react'
+import PageHero from '@/components/marketing/PageHero'
+
+const Resources = () => {
+  const resources = [
+    {
+      category: 'Getting Started',
+      icon: BookOpen,
+      items: [
+        {
+          title: 'Photographer Onboarding Guide',
+          description: 'Everything you need to know to get started on Love & Photos',
+          type: 'Guide',
+          link: '#'
+        },
+        {
+          title: 'Profile Optimization Tips',
+          description: 'How to create a profile that attracts more clients',
+          type: 'Article',
+          link: '#'
+        },
+        {
+          title: 'Platform Walkthrough Video',
+          description: '10-minute video tour of all platform features',
+          type: 'Video',
+          link: '#'
+        }
+      ]
+    },
+    {
+      category: 'Business Growth',
+      icon: TrendingUp,
+      items: [
+        {
+          title: 'Pricing Your Photography Services',
+          description: 'Strategic guide to setting competitive rates',
+          type: 'Guide',
+          link: '#'
+        },
+        {
+          title: 'Marketing Your Photography Business',
+          description: 'Proven strategies to attract more clients',
+          type: 'E-book',
+          link: '#'
+        },
+        {
+          title: 'Client Communication Templates',
+          description: 'Professional email templates for every situation',
+          type: 'Templates',
+          link: '#'
+        }
+      ]
+    },
+    {
+      category: 'Technical Resources',
+      icon: FileText,
+      items: [
+        {
+          title: 'Photography Contract Templates',
+          description: 'Legally vetted contracts for different event types',
+          type: 'Templates',
+          link: '#'
+        },
+        {
+          title: 'Model Release Forms',
+          description: 'Protect yourself with proper documentation',
+          type: 'Forms',
+          link: '#'
+        },
+        {
+          title: 'Tax Guide for Photographers',
+          description: 'Understanding taxes as a freelance photographer',
+          type: 'Guide',
+          link: '#'
+        }
+      ]
+    },
+    {
+      category: 'Skills Development',
+      icon: Video,
+      items: [
+        {
+          title: 'Mastering Event Photography',
+          description: 'Advanced techniques for capturing perfect moments',
+          type: 'Course',
+          link: '#'
+        },
+        {
+          title: 'Post-Processing Workflow',
+          description: 'Efficient editing techniques for batch processing',
+          type: 'Video Series',
+          link: '#'
+        },
+        {
+          title: 'Client Posing Guide',
+          description: 'Natural posing techniques for any body type',
+          type: 'Guide',
+          link: '#'
+        }
+      ]
+    }
+  ]
+
+  const quickLinks = [
+    { title: 'Platform Policies', description: 'Understanding our terms and guidelines' },
+    { title: 'Insurance Requirements', description: 'What coverage you need and why' },
+    { title: 'Payment Processing', description: 'How payments work on our platform' },
+    { title: 'Review Guidelines', description: 'Best practices for managing reviews' }
+  ]
+
+  return (
+    <div className="min-h-screen bg-background text-foreground">
+      <PageHero
+        title="Photographer Resources"
+        subtitle="Guides and tools to grow your craft and business."
+      />
+
+      {/* Resource Categories */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          {resources.map((category, categoryIndex) => {
+            const Icon = category.icon
+            return (
+              <div key={categoryIndex} className="mb-16">
+                <div className="flex items-center mb-8">
+                  <div className="flex items-center justify-center w-12 h-12 bg-primary-100 rounded-lg mr-4">
+                    <Icon className="h-6 w-6 text-primary-600" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-foreground">{category.category}</h2>
+                </div>
+                <div className="grid md:grid-cols-3 gap-6">
+                  {category.items.map((item, itemIndex) => (
+                    <div key={itemIndex} className="bg-card border border-border rounded-lg p-6 hover:shadow-lg transition">
+                      <div className="flex items-start justify-between mb-4">
+                        <span className="inline-block px-3 py-1 bg-muted text-muted-foreground text-xs font-semibold rounded-full">
+                          {item.type}
+                        </span>
+                        <Download className="h-5 w-5 text-muted-foreground" />
+                      </div>
+                      <h3 className="text-lg font-semibold text-foreground mb-2">
+                        {item.title}
+                      </h3>
+                      <p className="text-muted-foreground mb-4">
+                        {item.description}
+                      </p>
+                      <a 
+                        href={item.link} 
+                        className="text-primary-600 font-semibold hover:text-primary-700"
+                      >
+                        Access Resource →
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </section>
+
+      {/* Quick Links */}
+      <section className="py-16 bg-muted">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-2xl font-bold text-foreground mb-8">Quick Links</h2>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {quickLinks.map((link, index) => (
+              <div key={index} className="bg-card rounded-lg p-6">
+                <h3 className="font-semibold text-foreground mb-2">{link.title}</h3>
+                <p className="text-sm text-muted-foreground mb-3">{link.description}</p>
+                <a href="#" className="text-sm text-primary-600 font-semibold hover:text-primary-700">
+                  Learn more →
+                </a>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Community Section */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto text-center">
+          <Users className="h-12 w-12 text-primary-600 mx-auto mb-6" />
+          <h2 className="text-3xl font-bold text-foreground mb-6">
+            Join Our Photographer Community
+          </h2>
+          <p className="text-muted-foreground mb-8">
+            Connect with fellow photographers, share experiences, get advice, and grow together. 
+            Our community forum is a supportive space for professional development.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <a 
+              href="#" 
+              className="px-6 py-3 bg-primary-600 text-white font-semibold rounded-lg hover:bg-primary-700 transition"
+            >
+              Join Community Forum
+            </a>
+            <a 
+              href="#" 
+              className="px-6 py-3 bg-card text-muted-foreground font-semibold rounded-lg hover:bg-muted transition border border-border"
+            >
+              View Success Stories
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* Newsletter Section */}
+      <section className="py-16 bg-primary-600">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl font-bold text-white mb-6">
+            Stay Updated with Photography Tips
+          </h2>
+          <p className="text-primary-100 mb-8">
+            Get weekly tips, industry insights, and platform updates delivered to your inbox.
+          </p>
+          <form className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+            <input
+              type="email"
+              placeholder="Enter your email"
+              className="flex-1 px-4 py-3 rounded-lg text-foreground bg-card"
+            />
+            <button
+              type="submit"
+              className="px-6 py-3 bg-card text-primary-600 font-semibold rounded-lg hover:bg-muted transition"
+            >
+              Subscribe
+            </button>
+          </form>
+        </div>
+      </section>
+    </div>
+  )
+}
+
+export default Resources

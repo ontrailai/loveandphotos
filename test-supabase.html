@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Supabase Connection</title>
+</head>
+<body>
+    <h1>Testing Supabase Connection</h1>
+    <div id="status">Testing...</div>
+    <div id="result"></div>
+
+    <script type="module">
+        const SUPABASE_URL = 'https://ldxscjxoakqrmkgqwwhr.supabase.co'
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxkeHNjanhvYWtxcm1rZ3F3d2hyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc0Njc3NDgsImV4cCI6MjA3MzA0Mzc0OH0.xhzExeleSQyVhim4v-w-gyJHC9hffCinlPC3CYVDNAQ'
+
+        const statusEl = document.getElementById('status')
+        const resultEl = document.getElementById('result')
+
+        // Test 1: Basic connection
+        statusEl.textContent = 'Testing basic connection...'
+        
+        try {
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/`, {
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                }
+            })
+            
+            resultEl.innerHTML += `<p>✅ Connection test: ${response.status} ${response.statusText}</p>`
+            
+            // Test 2: Auth endpoint
+            statusEl.textContent = 'Testing auth endpoint...'
+            
+            const authResponse = await fetch(`${SUPABASE_URL}/auth/v1/health`, {
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY
+                }
+            })
+            
+            const authData = await authResponse.json()
+            resultEl.innerHTML += `<p>✅ Auth health check: ${JSON.stringify(authData)}</p>`
+            
+            statusEl.textContent = '✅ All tests passed!'
+            
+        } catch (error) {
+            statusEl.textContent = '❌ Connection failed!'
+            resultEl.innerHTML += `<p style="color: red;">Error: ${error.message}</p>`
+            console.error('Test failed:', error)
+        }
+    </script>
+</body>
+</html>

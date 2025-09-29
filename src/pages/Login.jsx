@@ -1,0 +1,228 @@
+import { useState, useEffect } from 'react'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { useAuth } from '@contexts/AuthContext'
+import { useForm } from 'react-hook-form'
+import {
+  MailIcon,
+  LockIcon,
+  ArrowRightIcon,
+  EyeIcon,
+  EyeOffIcon
+} from 'lucide-react'
+import Button from '@components/ui/Button'
+import BrandLogo from '@components/BrandLogo'
+import Input from '@components/ui/Input'
+import Card from '@components/ui/Card'
+import toast from 'react-hot-toast'
+
+const Login = () => {
+  /**
+   * CRITICAL: React Hooks Order Guarantee
+   * All hooks MUST be called before any conditional returns to maintain consistent hook order.
+   * This prevents "Rendered fewer hooks than expected" errors.
+   * DO NOT add conditional returns or early exits before ALL hooks are initialized.
+   */
+
+  // 1. Call ALL hooks first - no conditionals allowed before this block
+  const { signIn, user, profile, loading: authLoading } = useAuth()
+  const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [rememberMe, setRememberMe] = useState(false)
+
+  // IMPORTANT: useForm() must be called BEFORE any conditional returns
+  const {
+    register,
+    handleSubmit,
+    formState: { errors }
+  } = useForm()
+
+  // 2. Now safe to have computed values and effects
+  const redirectTo = searchParams.get('redirect') || '/dashboard'
+
+  // Redirect if already logged in
+  useEffect(() => {
+    // Only redirect if we have a user AND profile loaded
+    if (user && profile) {
+      console.log('User is already logged in, redirecting...')
+      if (profile.role === 'photographer') {
+        navigate('/dashboard/photographer')
+      } else {
+        navigate('/dashboard')
+      }
+    }
+  }, [user, profile, navigate])
+
+  // 3. Conditional returns are now safe - all hooks have been called
+  // Show spinner only while checking auth AND user exists
+  // This prevents infinite spinner for non-logged-in users
+  if (authLoading && user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
+      </div>
+    )
+  }
+
+  const onSubmit = async (data) => {
+    setLoading(true)
+
+    try {
+      const result = await signIn(data.email, data.password)
+
+      // The signIn function handles navigation and returns result
+      if (!result.success) {
+        console.error('Login failed:', result.error)
+        // Only set loading to false if login failed
+        setLoading(false)
+      }
+      // If successful, don't set loading to false since we're navigating away
+    } catch (error) {
+      console.error('Login error:', error)
+      // Only set loading to false on error
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-background flex">
+      {/* Left Side - Form */}
+      <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
+        <div className="max-w-md w-full">
+          <div className="text-center mb-8">
+            <div className="flex justify-center mb-6">
+              <Link to="/">
+                <BrandLogo size="lg" variant="icon" showText={false} />
+              </Link>
+            </div>
+            <h2 className="text-3xl font-display font-bold text-foreground">
+              Welcome back
+            </h2>
+            <p className="mt-2 text-muted-foreground">
+              Sign in to continue to your account
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <div className="bg-card rounded-xl shadow-sm border border-border p-6 space-y-4">
+              <Input
+                label="Email Address"
+                type="email"
+                icon={<MailIcon className="w-5 h-5 text-muted-foreground" />}
+                {...register('email', {
+                  required: 'Email is required',
+                  pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                    message: 'Invalid email address'
+                  }
+                })}
+                error={errors.email?.message}
+                placeholder="you@example.com"
+              />
+
+              <div className="relative">
+                <Input
+                  label="Password"
+                  type={showPassword ? "text" : "password"}
+                  icon={<LockIcon className="w-5 h-5 text-muted-foreground" />}
+                  {...register('password', {
+                    required: 'Password is required',
+                    minLength: {
+                      value: 6,
+                      message: 'Password must be at least 6 characters'
+                    }
+                  })}
+                  error={errors.password?.message}
+                  placeholder="••••••••"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-[38px] text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {showPassword ? (
+                    <EyeOffIcon className="w-5 h-5" />
+                  ) : (
+                    <EyeIcon className="w-5 h-5" />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <input
+                  id="remember-me"
+                  name="remember-me"
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="h-4 w-4 text-primary focus:ring-primary border-border rounded"
+                />
+                <label htmlFor="remember-me" className="ml-2 block text-sm text-muted-foreground">
+                  Remember me
+                </label>
+              </div>
+
+              <Link
+                to="/forgot-password"
+                className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+              >
+                Forgot password?
+              </Link>
+            </div>
+
+            <div className="space-y-4">
+              <Button
+                type="submit"
+                loading={loading}
+                className="w-full"
+                size="lg"
+              >
+                Sign In
+                <ArrowRightIcon className="w-5 h-5 ml-2" />
+              </Button>
+
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-border"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-background text-muted-foreground">
+                    New to Love & Photos?
+                  </span>
+                </div>
+              </div>
+
+              <Link to="/signup" className="block">
+                <Button
+                  variant="outline"
+                  className="w-full border-border text-foreground hover:bg-muted"
+                  size="lg"
+                  type="button"
+                >
+                  Create an account
+                </Button>
+              </Link>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      {/* Right Side - Visual */}
+      <div className="hidden lg:flex lg:flex-1 relative">
+        <div className="absolute inset-0">
+          <img
+            src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=1200"
+            alt="Wedding photography"
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-dusty-900/60 to-transparent" />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default Login

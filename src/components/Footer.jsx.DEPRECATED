@@ -1,0 +1,16 @@
+// DEPRECATED: This footer component has been consolidated into /src/components/ui/footer-section.jsx
+// Date deprecated: 2025-01-23
+// Reason: Consolidation of two footer implementations to maintain consistency
+// 
+// The unified footer now includes:
+// - React Router Link components for better SPA navigation
+// - All links from both footers
+// - Enhanced accessibility with ARIA labels
+// - Responsive design with mobile-first approach
+// - Animation support with reduced motion handling
+// - Contact information and social media links
+//
+// If you need to reference this old implementation, the backup is available at:
+// Footer.jsx.backup-[timestamp]
+//
+// All pages and layouts now use the unified footer from ./ui/footer-section.jsx

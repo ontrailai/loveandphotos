@@ -1,0 +1,4 @@
+)
+ON CONFLICT (contact_email) DO UPDATE SET
+  display_name = EXCLUDED.display_name,
+  updated_at = NOW();

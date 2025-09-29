@@ -1,0 +1,13 @@
+{
+  "name": "supabase-user-import",
+  "version": "1.0.0",
+  "description": "Bulk user import script for Supabase",
+  "main": "importUsers.js",
+  "scripts": {
+    "import": "node importUsers.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.3",
+    "csv-parse": "^5.5.3"
+  }
+}

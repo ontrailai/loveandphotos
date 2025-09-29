@@ -1,0 +1,20 @@
+{
+  "mcpServers": {
+    "render": {
+      "transport": "http",
+      "url": "https://mcp.render.com/mcp",
+      "headers": {
+        "Authorization": "rnd_QpL219HpqD1fYybJqkYQBZlAA02"
+      }
+    },
+    "openrouter": {
+      "transport": "http",
+      "url": "https://openrouter.ai/api/v1",
+      "headers": {
+        "Authorization": "Bearer sk-or-v1-b4e4d4f5130b3c05189609da59ec7a7043514e508ab8b41eb1cdef5cafda242",
+        "HTTP-Referer": "http://localhost:3000",
+        "X-Title": "Love & Photos Dev"
+      }
+    }
+  }
+}

@@ -1,0 +1,167 @@
+@import './styles/origin.css';
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+@import './styles/theme-overrides.css';
+@import 'react-day-picker/style.css';
+
+/* Design System: Primary Brand Colors */
+:root {
+  --primary: 348 99% 62%; /* #fe395f */
+  --primary-foreground: 0 0% 100%; /* white */
+  --primary-hover: 348 99% 56%; /* #e23354 */
+  --primary-focus: 348 99% 62%; /* #fe395f with opacity */
+}
+
+/* Custom global styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--background);
+  color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Mobile-specific optimizations and safe areas */
+@media (max-width: 768px) {
+  /* Disable any potential pink/gradient overlays on mobile */
+  .site-hero::before,
+  .site-header::before {
+    display: none !important;
+  }
+
+  /* Ensure safe area handling for mobile devices */
+  .mobile-safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  /* Mobile nav positioning fixes */
+  .mobile-nav-portal {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    z-index: 100 !important;
+  }
+}
+
+/* Custom animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.2s ease-out;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out;
+}
+
+/* Custom scrollbar - using theme tokens */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--muted);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--muted-foreground);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--foreground);
+}
+
+/* Loading spinner - using theme tokens */
+.spinner {
+  border: 2px solid var(--muted);
+  border-top: 2px solid var(--primary);
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Custom utility overrides for footer logo sizing - hard alignment fix */
+.w-28 {
+  width: 7rem !important;
+}
+
+/* Medium+ screen logo sizing */
+@media (min-width: 768px) {
+  .md\:w-32 {
+    width: 8rem !important;
+  }
+}
+
+/* Hero background override - use theme variables */
+.hero--landing {
+  background-color: var(--background);
+  background-image: none;
+}
+
+.hero--landing::before,
+.hero--landing::after {
+  display: none;
+  content: none;
+  background: none;
+}
+
+/* Love & Photos Typography System */
+@layer utilities {
+  .lp-h1 {
+    @apply text-4xl md:text-5xl lg:text-6xl font-display font-bold tracking-tight leading-tight text-foreground;
+  }
+  .lp-h2 {
+    @apply text-3xl md:text-4xl font-display font-semibold tracking-tight leading-tight text-foreground;
+  }
+  .lp-h3 {
+    @apply text-2xl md:text-3xl font-display font-semibold tracking-tight leading-snug text-foreground;
+  }
+  .lp-kicker {
+    @apply text-xs md:text-sm font-medium uppercase tracking-wider text-muted-foreground;
+  }
+}
+
+/* Copyright text sizing override */
+.text-xs {
+  font-size: 0.8rem;
+  line-height: 1rem;
+}

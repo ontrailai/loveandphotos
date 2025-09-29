@@ -1,0 +1,49 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//tmp/**)",
+      "Bash(git log:*)",
+      "Bash(git ls-tree:*)",
+      "Bash(npm run dev:direct:*)",
+      "mcp__render__list_services",
+      "WebFetch(domain:love-and-photos.onrender.com)",
+      "Bash(npm run lint)",
+      "Bash(npm run typecheck:*)",
+      "Bash(npm run build:*)",
+      "Bash(pkill:*)",
+      "Bash(npm test:*)",
+      "mcp__supabase__execute_sql",
+      "mcp__supabase__apply_migration",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_type",
+      "Bash(lsof:*)",
+      "Bash(xargs -r kill -9)",
+      "mcp__playwright__browser_take_screenshot",
+      "Bash(npx playwright test:*)",
+      "Bash(npm install:*)",
+      "Bash(chmod:*)",
+      "Read(//mnt/c/Users/riley/Desktop/**)",
+      "Bash(node:*)",
+      "Bash(curl:*)",
+      "Bash(npx supabase login:*)",
+      "Bash(npx supabase db shell:*)",
+      "Bash(/dev/null)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "mcp__render__deploy_service",
+      "Bash(render deploy:*)",
+      "Bash(render --help)",
+      "mcp__sequential-thinking__sequentialthinking",
+      "Bash(kill:*)",
+      "Bash(git rm:*)",
+      "Bash(npm run dev:api:*)"
+    ],
+    "deny": [],
+    "ask": []
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "supabase"
+  ]
+}
