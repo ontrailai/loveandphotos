@@ -316,6 +316,7 @@ app.post('/api/booking/create', async (req, res) => {
 
   try {
     console.log('📅 Creating new booking...')
+    console.log('📦 Request body:', JSON.stringify(req.body, null, 2))
 
     const {
       customerId,
@@ -329,14 +330,31 @@ app.post('/api/booking/create', async (req, res) => {
       eventType = 'photoshoot'
     } = req.body
 
-    // Validate required fields
-    if (!customerId || !photographerId || !scheduleDetails?.date || !totalAmount) {
+    // Comprehensive field validation with detailed error messages
+    const missingFields = []
+    if (!customerId) missingFields.push('customerId')
+    if (!photographerId) missingFields.push('photographerId')
+    if (!scheduleDetails?.date) missingFields.push('scheduleDetails.date')
+    if (!totalAmount && totalAmount !== 0) missingFields.push('totalAmount')
+
+    if (missingFields.length > 0) {
+      console.error('❌ Missing required fields:', missingFields)
       return res.status(400).json({
         success: false,
         message: 'Missing required booking fields',
-        code: 'MISSING_REQUIRED_FIELDS'
+        code: 'MISSING_REQUIRED_FIELDS',
+        missing: missingFields,
+        received: {
+          hasCustomerId: !!customerId,
+          hasPhotographerId: !!photographerId,
+          hasScheduleDate: !!scheduleDetails?.date,
+          hasTotalAmount: totalAmount !== undefined
+        }
       })
     }
+
+    console.log('✅ All required fields present')
+    console.log(`🔍 Looking up photographer with user_id: ${photographerId}`)
 
     // Import Supabase client
     const { createClient } = await import('@supabase/supabase-js')
@@ -358,16 +376,30 @@ app.post('/api/booking/create', async (req, res) => {
       .eq('user_id', photographerId)
       .single()
 
-    if (photographerError || !photographer) {
+    if (photographerError) {
+      console.error('❌ Photographer lookup error:', photographerError)
       return res.status(404).json({
         success: false,
         message: 'Photographer not found',
-        code: 'PHOTOGRAPHER_NOT_FOUND'
+        code: 'PHOTOGRAPHER_NOT_FOUND',
+        details: photographerError.message,
+        photographerUserId: photographerId
+      })
+    }
+
+    if (!photographer) {
+      console.error('❌ No photographer found with user_id:', photographerId)
+      return res.status(404).json({
+        success: false,
+        message: 'Photographer not found',
+        code: 'PHOTOGRAPHER_NOT_FOUND',
+        photographerUserId: photographerId
       })
     }
 
     // Use the actual photographer ID for the booking
     const actualPhotographerId = photographer.id
+    console.log(`✅ Found photographer: ${actualPhotographerId}`)
 
     // Convert amounts to cents for consistent storage
     const packagePriceCents = Math.round((packageDetails?.packagePrice || 0) * 100)
@@ -425,6 +457,13 @@ app.post('/api/booking/create', async (req, res) => {
       }
     }
 
+    console.log('💾 Attempting to insert booking with data:', {
+      customer_id: bookingData.customer_id,
+      photographer_id: bookingData.photographer_id,
+      event_date: bookingData.event_date,
+      total_amount: bookingData.total_amount
+    })
+
     const { data: booking, error } = await supabase
       .from('bookings')
       .insert(bookingData)
@@ -433,15 +472,33 @@ app.post('/api/booking/create', async (req, res) => {
 
     if (error) {
       console.error('❌ Booking creation failed:', error)
-      return res.status(500).json({
+      console.error('❌ Error code:', error.code)
+      console.error('❌ Error details:', error.details)
+      console.error('❌ Error hint:', error.hint)
+
+      // Return appropriate status codes based on error type
+      const statusCode = error.code === '23503' ? 400 : // Foreign key violation
+                        error.code === '23505' ? 409 : // Unique constraint violation
+                        error.code === '42501' ? 403 : // RLS policy violation
+                        500
+
+      return res.status(statusCode).json({
         success: false,
         message: 'Failed to create booking',
         code: 'BOOKING_CREATION_FAILED',
-        details: error.message
+        details: error.message,
+        hint: error.hint,
+        errorCode: error.code,
+        bookingData: {
+          customer_id: bookingData.customer_id,
+          photographer_id: bookingData.photographer_id,
+          event_date: bookingData.event_date
+        }
       })
     }
 
     console.log('✅ Booking created successfully:', booking.id)
+    console.log(`⏱️  Processing time: ${Date.now() - startTime}ms`)
 
     res.json({
       success: true,
@@ -452,10 +509,14 @@ app.post('/api/booking/create', async (req, res) => {
 
   } catch (error) {
     console.error('❌ Booking creation error:', error)
+    console.error('❌ Error stack:', error.stack)
+
     res.status(500).json({
       success: false,
       message: 'Internal server error during booking creation',
-      code: 'INTERNAL_ERROR'
+      code: 'INTERNAL_ERROR',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     })
   }
 })

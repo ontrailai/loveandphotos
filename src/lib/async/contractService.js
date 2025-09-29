@@ -6,6 +6,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { withTimeout, normalizeError } from './withTimeout.js'
 import { getCurrentContractHash } from '../contract/contractVersion.js'
+import { sanitizeIPForStorage } from './ipAddressParser.js'
 
 let supabaseClient = null
 
@@ -121,11 +122,19 @@ export async function verifyContractHash(providedHash, providedVersion, bookingD
 /**
  * Store contract signature in database with full audit trail
  * @param {Object} signatureData - Signature data to store
- * @param {string} clientIp - Client IP address for audit
+ * @param {string} clientIp - Client IP address for audit (may be comma-separated from CDN)
  * @returns {Promise<string>} Contract signature ID
  */
 export async function storeContractSignature(signatureData, clientIp) {
   const supabase = getSupabaseClient()
+
+  // Sanitize IP address for PostgreSQL inet column
+  // Handles comma-separated IPs from CDN/proxy headers
+  const sanitizedIP = sanitizeIPForStorage(clientIp)
+
+  if (!sanitizedIP) {
+    console.warn('⚠️ Invalid IP address provided, using safe default')
+  }
 
   const signatureRecord = {
     booking_id: signatureData.bookingId,
@@ -137,7 +146,7 @@ export async function storeContractSignature(signatureData, clientIp) {
     price: parseFloat(signatureData.price) || 0,
     signer_full_name: signatureData.signerFullName,
     signature_png_base64: signatureData.signaturePngBase64,
-    ip_address: clientIp,
+    ip_address: sanitizedIP || '0.0.0.0', // Safe fallback for inet column
     signed_at: signatureData.signedAtISO
   }
 
@@ -168,6 +177,21 @@ export async function storeContractSignature(signatureData, clientIp) {
         message: 'Invalid booking reference',
         status: 400,
         code: 'INVALID_BOOKING_ID'
+      }
+    }
+
+    if (error.code === '22P02') {
+      // Invalid input syntax for inet type
+      console.error('🚨 PostgreSQL inet error - IP address validation failed:', {
+        rawIP: clientIp,
+        sanitizedIP: sanitizedIP,
+        error: error.message
+      })
+      throw {
+        message: 'Invalid IP address format',
+        status: 400,
+        code: 'INVALID_IP_ADDRESS',
+        details: 'IP address could not be validated for storage'
       }
     }
 
