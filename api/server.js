@@ -5,6 +5,8 @@
 
 import express from 'express'
 import cors from 'cors'
+import path from 'path'
+import { fileURLToPath } from 'url'
 import { checkRateLimit, normalizeError, auditLog } from '../src/lib/async/withTimeout.js'
 import {
   verifyBookingOwnership,
@@ -13,14 +15,32 @@ import {
   contractServiceHealthCheck
 } from '../src/lib/async/contractService.js'
 
+// ES module compatibility for __dirname
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
 const app = express()
 const PORT = process.env.PORT || 3001
+const isProduction = process.env.NODE_ENV === 'production' || process.env.PORT
 
 // Middleware
-app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:3000'],
-  credentials: true
-}))
+if (!isProduction) {
+  app.use(cors({
+    origin: ['http://localhost:5173', 'http://localhost:3000'],
+    credentials: true
+  }))
+} else {
+  // Production CORS configuration
+  app.use(cors({
+    origin: true,
+    credentials: true
+  }))
+}
+
+// Serve static files in production
+if (isProduction) {
+  app.use(express.static(path.join(__dirname, '../dist')))
+}
 
 // 2MB payload limit for contract signatures
 app.use(express.json({ limit: '2mb' }))
@@ -506,8 +526,8 @@ app.get('/api/contract/status/:signatureId', async (req, res) => {
   }
 })
 
-// 404 handler
-app.use((req, res) => {
+// 404 handler for API routes
+app.use('/api/*', (req, res) => {
   res.status(404).json({ 
     error: 'Not Found',
     message: `Cannot ${req.method} ${req.path}`,
@@ -535,6 +555,13 @@ app.use((err, req, res, next) => {
   })
 })
 
+// Catch-all route for client-side routing in production
+if (isProduction) {
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../dist/index.html'))
+  })
+}
+
 // Start server
 app.listen(PORT, () => {
   console.log(`
@@ -543,7 +570,7 @@ app.listen(PORT, () => {
 ║   🚀 LoveP API Server Running                        ║
 ║                                                       ║
 ║   URL: http://localhost:${PORT}                       ║
-║   Mode: ${process.env.NODE_ENV || 'development'}                              ║
+║   Mode: ${isProduction ? 'production' : 'development'}                       ║
 ║                                                       ║
 ║   Endpoints:                                         ║
 ║   - GET  /api/health                                 ║

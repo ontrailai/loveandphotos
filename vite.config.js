@@ -62,6 +62,7 @@ export default defineConfig({
           ui: ['lucide-react', '@radix-ui/react-label', '@radix-ui/react-slot'],
           forms: ['react-hook-form'],
           notifications: ['react-hot-toast'],
+          stripe: ['@stripe/react-stripe-js', '@stripe/stripe-js'],
 
           // App chunks
           auth: ['@supabase/supabase-js'],
@@ -94,7 +95,9 @@ export default defineConfig({
       'clsx',
       'tailwind-merge',
       'swr',
-      'motion/react'
+      'motion/react',
+      '@stripe/react-stripe-js',
+      '@stripe/stripe-js'
     ],
     force: true // Force re-optimization on every start
   },
