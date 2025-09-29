@@ -38,3 +38,23 @@ export const getDayName = (date: Date | string) => {
   if (isTomorrow(dateObj)) return 'Tomorrow'
   return format(dateObj, 'EEEE')
 }
+
+export const setDateInUrl = (isoDate: string | null) => {
+  const url = new URL(window.location.href)
+
+  if (isoDate) {
+    url.searchParams.set('date', isoDate)
+  } else {
+    url.searchParams.delete('date')
+  }
+
+  window.history.pushState({}, '', url.toString())
+
+  // Dispatch custom event for other components
+  window.dispatchEvent(new CustomEvent('dateUrlChanged', { detail: { date: isoDate } }))
+}
+
+export const getDateFromUrl = () => {
+  const url = new URL(window.location.href)
+  return url.searchParams.get('date') || ''
+}

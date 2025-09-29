@@ -3,7 +3,7 @@
  * Handles contract versioning and hash generation for audit trail
  */
 
-import { getRawContractTemplate } from './contractText'
+import { getRawContractTemplate } from './contractText.js'
 
 /**
  * Current contract version identifier
