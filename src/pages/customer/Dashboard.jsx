@@ -189,6 +189,28 @@ const CustomerDashboard = () => {
         {/* Stats Cards */}
         <StatsCards stats={stats} />
 
+        {/* Universal Style Preferences Card */}
+        <motion.div variants={shouldAnimate ? itemVariants : {}}>
+          <div className="bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-lg p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-foreground mb-1">Style Preferences</h3>
+                <p className="text-sm text-muted-foreground">
+                  Set your photography style preferences once for all future bookings
+                </p>
+              </div>
+              <motion.button
+                whileHover={shouldAnimate ? { scale: 1.05 } : {}}
+                whileTap={shouldAnimate ? { scale: 0.95 } : {}}
+                onClick={() => setShowQuestionnaire(true)}
+                className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+              >
+                Manage Preferences
+              </motion.button>
+            </div>
+          </div>
+        </motion.div>
+
         {/* Bookings Section */}
         <motion.div variants={shouldAnimate ? itemVariants : {}} className="space-y-4">
           <div className="flex items-center justify-between">
