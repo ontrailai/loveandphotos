@@ -6,7 +6,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Feature } from '@components/ui/feature-with-advantages'
-import { FeaturedPhotographersSection } from '@components/ui/featured-photographers'
 import { TestimonialsColumn } from '@components/ui/testimonials-columns-1'
 import { motion } from 'motion/react'
 import HeroCTA from '../components/cta/HeroCTA'
@@ -277,67 +276,6 @@ const Home = () => {
     }
   }, [])
 
-  const loadFeaturedPhotographers = async () => {
-    try {
-      console.log('Loading featured photographers...')
-      setLoading(true)
-      
-      // Try to load real data from photographer_preview_profiles
-      console.log('Attempting to fetch featured photographers from database...')
-      
-      const { data: photographers, error } = await supabasePublic
-        .from('photographer_preview_profiles')
-        .select('id, display_name, portfolio_images, average_rating, hourly_rate, is_verified, specialties')
-        .eq('is_available', true)
-        .order('average_rating', { ascending: false })
-        .limit(3)
-      
-      console.log('Featured photographers query result:', { photographers, error })
-      
-      if (!error && photographers && photographers.length > 0) {
-        console.log(`Found ${photographers.length} real featured photographers`)
-        
-        // Fallback images for featured photographers
-        const fallbackImages = [
-          'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop&crop=face&auto=format&q=80',
-          'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face&auto=format&q=80',
-          'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop&crop=face&auto=format&q=80'
-        ]
-        
-        const transformed = photographers.map((profile, index) => ({
-          id: profile.id,
-          average_rating: profile.average_rating || 4.5,
-          users: {
-            full_name: profile.display_name || `Featured Photographer ${index + 1}`,
-            avatar_url: profile.portfolio_images && profile.portfolio_images.length > 0 ? profile.portfolio_images[0] : fallbackImages[index]
-          },
-          pay_tiers: {
-            name: profile.is_verified ? 'Professional' : 'Standard',
-            hourly_rate: profile.hourly_rate || 150,
-            badge_color: profile.is_verified ? 'bg-yellow-500' : 'bg-gray-500'
-          },
-          specialties: profile.specialties ? profile.specialties.split(',').map(s => s.trim()) : ['Wedding', 'Portrait']
-        }))
-        
-        console.log('Featured photographers transformed:', transformed)
-        setFeaturedPhotographers(transformed)
-        return
-      }
-      
-      console.log('Database query failed or no data, using fallback...')
-      throw new Error('No featured photographers found')
-      
-    } catch (error) {
-      console.error('Error loading featured photographers:', error)
-      
-      // PRODUCTION: No fallback mock data - show proper empty state
-      // The FeaturedPhotographers component will handle empty state gracefully
-      setFeaturedPhotographers([])
-    } finally {
-      setLoading(false)
-    }
-  }
-
   const handleSearch = (e) => {
     e.preventDefault()
     if (searchZip) {
@@ -597,9 +535,6 @@ const Home = () => {
 
       {/* Features Section */}
       <Feature />
-
-      {/* Featured Photographers */}
-      <FeaturedPhotographersSection />
 
       {/* Testimonials */}
       <Testimonials />

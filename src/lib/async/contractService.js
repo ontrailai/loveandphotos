@@ -212,6 +212,26 @@ export async function storeContractSignature(signatureData, clientIp) {
   // But let's verify it worked
   await verifyContractSigningComplete(signatureData.bookingId)
 
+  // Generate and upload PDF to storage
+  try {
+    const { generateContractPDF, uploadContractPDF, updateBookingWithContractUrl } = await import('../pdf/contractPdfGenerator.js')
+
+    // Generate PDF with signature
+    const pdfBuffer = await generateContractPDF(signatureData)
+
+    // Upload to Supabase Storage
+    const contractUrl = await uploadContractPDF(supabase, pdfBuffer, signatureData.bookingId)
+
+    // Update booking record with contract URL
+    await updateBookingWithContractUrl(supabase, signatureData.bookingId, contractUrl)
+
+    console.log('✅ Contract PDF generated and uploaded:', contractUrl)
+  } catch (pdfError) {
+    // Log error but don't fail the entire signing process
+    // The signature is already stored, PDF is a nice-to-have
+    console.warn('⚠️ Failed to generate/upload contract PDF:', pdfError)
+  }
+
   return signature.id
 }
 

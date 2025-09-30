@@ -19,7 +19,7 @@ const ClientLayout = ({ children }) => {
 
   // Block talent users from accessing client-only pages (unless admin)
   if (profile && profile.role === 'photographer') {
-    return <Navigate to="/dashboard/photographer" replace />
+    return <Navigate to="/talent/dashboard" replace />
   }
 
   return (

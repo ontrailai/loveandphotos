@@ -384,9 +384,9 @@ export function CleanNavbar({ className = '' }) {
             <div className="hidden sm:flex items-center gap-2">
               {user ? (
                 <>
-                  <Link to={profile?.role === 'photographer' ? '/dashboard/photographer' : profile?.role === 'admin' ? '/admin' : '/dashboard'}>
+                  <Link to={profile?.role === 'photographer' ? '/talent/dashboard' : profile?.role === 'admin' ? '/admin' : '/dashboard'}>
                     <Button variant="ghost" size="sm">
-                      {profile?.role === 'photographer' ? 'Photographer Dashboard' : profile?.role === 'admin' ? 'Admin Panel' : 'Dashboard'}
+                      {profile?.role === 'photographer' ? 'Talent Dashboard' : profile?.role === 'admin' ? 'Admin Panel' : 'Dashboard'}
                     </Button>
                   </Link>
                   <Link to="/profile">
@@ -485,9 +485,9 @@ export function CleanNavbar({ className = '' }) {
 
             {user ? (
               <>
-                <Link to={profile?.role === 'photographer' ? '/dashboard/photographer' : profile?.role === 'admin' ? '/admin' : '/dashboard'}>
+                <Link to={profile?.role === 'photographer' ? '/talent/dashboard' : profile?.role === 'admin' ? '/admin' : '/dashboard'}>
                   <Button variant="ghost" className="w-full justify-start">
-                    {profile?.role === 'photographer' ? 'Photographer Dashboard' : profile?.role === 'admin' ? 'Admin Panel' : 'Dashboard'}
+                    {profile?.role === 'photographer' ? 'Talent Dashboard' : profile?.role === 'admin' ? 'Admin Panel' : 'Dashboard'}
                   </Button>
                 </Link>
                 <Link to="/profile">

@@ -39,7 +39,7 @@ const SignupEnhanced = () => {
     if (user && profile) {
       console.log('User is already logged in, redirecting...')
       if (profile.role === 'photographer') {
-        navigate('/dashboard/photographer')
+        navigate('/talent/dashboard')
       } else {
         navigate('/dashboard')
       }

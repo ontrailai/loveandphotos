@@ -23,11 +23,15 @@ export const AuthProvider = ({ children }) => {
   // Fetch user profile and photographer data if applicable
   const fetchUserData = async (user) => {
     try {
+      console.log('[AuthContext] Fetching user data for:', user.id)
+
       // Get user profile - first try to fetch it
       let userProfile = await db.users.getProfile(user.id)
-      
+      console.log('[AuthContext] User profile:', userProfile)
+
       // If profile doesn't exist, create it
       if (!userProfile) {
+        console.log('[AuthContext] Creating new user profile')
         const { data, error } = await supabase
           .from('users')
           .upsert({
@@ -42,23 +46,29 @@ export const AuthProvider = ({ children }) => {
           })
           .select()
           .single()
-        
+
         if (!error && data) {
           userProfile = data
+          console.log('[AuthContext] Created user profile:', userProfile)
+        } else {
+          console.error('[AuthContext] Error creating profile:', error)
         }
       }
-      
+
       setProfile(userProfile)
 
       // If photographer, get photographer profile
       if (userProfile?.role === 'photographer') {
+        console.log('[AuthContext] Fetching photographer profile')
         const photographerData = await db.photographers.getProfile(user.id)
+        console.log('[AuthContext] Photographer profile:', photographerData)
         setPhotographerProfile(photographerData)
       }
 
+      console.log('[AuthContext] User data fetch complete')
       return userProfile
     } catch (error) {
-      console.error('Error fetching user data:', error)
+      console.error('[AuthContext] Error fetching user data:', error)
       // Don't show error toast on initial load
       return null
     }
@@ -68,15 +78,20 @@ export const AuthProvider = ({ children }) => {
     // Check active session
     const checkSession = async () => {
       try {
+        console.log('[AuthContext] Checking session...')
         const { data: { session } } = await supabase.auth.getSession()
-        
+
         if (session?.user) {
+          console.log('[AuthContext] Session found for user:', session.user.id)
           setUser(session.user)
           await fetchUserData(session.user)
+        } else {
+          console.log('[AuthContext] No active session')
         }
       } catch (error) {
-        console.error('Session check error:', error)
+        console.error('[AuthContext] Session check error:', error)
       } finally {
+        console.log('[AuthContext] Session check complete, setting loading to false')
         setLoading(false)
       }
     }
@@ -108,7 +123,7 @@ export const AuthProvider = ({ children }) => {
   // Sign up function
   const signUp = async (email, password, userData = {}) => {
     try {
-      const { role = 'customer', fullName, phone } = userData
+      const { role = 'customer', fullName, phone, isVideographer = false } = userData
 
       // First create the auth user without any metadata that might cause issues
       const { data, error } = await supabase.auth.signUp({
@@ -122,7 +137,7 @@ export const AuthProvider = ({ children }) => {
       if (!data?.user) {
         throw new Error('Failed to create user account')
       }
-      
+
       // If email confirmation is disabled, sign in automatically
       // If identities array exists and has length > 0, user is confirmed
       const isConfirmed = data.user.identities && data.user.identities.length > 0
@@ -143,17 +158,18 @@ export const AuthProvider = ({ children }) => {
           }, {
             onConflict: 'id'
           })
-        
+
         if (upsertError) {
           console.error('Error creating user profile:', upsertError)
         }
 
-        // If photographer, initialize photographer profile
+        // If photographer or videographer, initialize photographer profile with is_videographer flag
         if (role === 'photographer') {
           await supabase
             .from('photographers')
-            .upsert({ 
+            .upsert({
               user_id: data.user.id,
+              is_videographer: isVideographer,
               created_at: new Date().toISOString()
             }, {
               onConflict: 'user_id'
@@ -195,60 +211,116 @@ export const AuthProvider = ({ children }) => {
   // Sign in function
   const signIn = async (email, password) => {
     try {
+      console.log('[AuthContext] Starting sign in for:', email)
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
       })
 
       if (error) {
-        console.error('Auth error:', error)
+        console.error('[AuthContext] Auth error:', error)
         throw error
       }
 
-      if (data.user) {
-        // Set user immediately
-        setUser(data.user)
-        
-        // Fetch and set user profile data before navigation
-        try {
-          const userProfile = await fetchUserData(data.user)
-          
-          // Make sure profile is set
-          if (userProfile) {
-            setProfile(userProfile)
-            
-            // If photographer, set photographer profile too
-            if (userProfile.role === 'photographer') {
-              const photographerData = await db.photographers.getProfile(data.user.id)
-              setPhotographerProfile(photographerData)
-            }
-          }
-          
-          // Show success message
-          toast.success('Welcome back!')
-          
-          // Navigate based on role after everything is loaded
-          setTimeout(() => {
-            if (userProfile?.role === 'photographer') {
-              navigate('/dashboard/photographer')
-            } else {
-              navigate('/dashboard')
-            }
-          }, 100) // Small delay to ensure state updates
-        } catch (profileError) {
-          console.error('Error fetching profile:', profileError)
-          toast.success('Welcome back!')
-          // Still navigate to dashboard even if profile fetch fails
-          setTimeout(() => {
-            navigate('/dashboard')
-          }, 100)
-        }
+      if (!data.user) {
+        throw new Error('No user data returned from authentication')
       }
 
-      return { success: true, user: data.user }
+      console.log('[AuthContext] Auth successful, user ID:', data.user.id)
+
+      // Set user immediately
+      setUser(data.user)
+
+      // Fetch and set user profile data before navigation
+      try {
+        console.log('[AuthContext] Fetching user profile...')
+
+        // Add timeout to profile fetch (5 seconds max)
+        const fetchWithTimeout = Promise.race([
+          fetchUserData(data.user),
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Profile fetch timeout')), 5000)
+          )
+        ])
+
+        const userProfile = await fetchWithTimeout
+
+        console.log('[AuthContext] Profile fetched:', userProfile)
+
+        if (!userProfile) {
+          console.error('[AuthContext] No profile returned')
+          throw new Error('Failed to load user profile')
+        }
+
+        // Set profile state
+        setProfile(userProfile)
+
+        // If photographer, fetch photographer profile
+        if (userProfile.role === 'photographer') {
+          console.log('[AuthContext] Fetching photographer profile...')
+
+          const photoFetchWithTimeout = Promise.race([
+            db.photographers.getProfile(data.user.id),
+            new Promise((_, reject) =>
+              setTimeout(() => reject(new Error('Photographer profile timeout')), 3000)
+            )
+          ])
+
+          try {
+            const photographerData = await photoFetchWithTimeout
+            setPhotographerProfile(photographerData)
+            console.log('[AuthContext] Photographer profile loaded')
+          } catch (photoError) {
+            console.warn('[AuthContext] Photographer profile fetch failed:', photoError)
+            // Continue anyway - photographer profile is optional for initial login
+          }
+        }
+
+        // Show success message
+        toast.success('Welcome back!')
+
+        // Navigate based on role immediately (no setTimeout)
+        console.log('[AuthContext] Navigating to dashboard for role:', userProfile.role)
+
+        if (userProfile.role === 'photographer') {
+          navigate('/talent/dashboard', { replace: true })
+        } else if (userProfile.role === 'admin') {
+          navigate('/admin', { replace: true })
+        } else {
+          navigate('/dashboard', { replace: true })
+        }
+
+        return { success: true, user: data.user, profile: userProfile }
+      } catch (profileError) {
+        console.error('[AuthContext] Profile fetch error:', profileError)
+
+        // Show error but still try to navigate
+        toast.error('Welcome back! Loading profile...')
+
+        // Fallback navigation after short delay to allow error message to show
+        setTimeout(() => {
+          navigate('/dashboard', { replace: true })
+        }, 500)
+
+        return { success: true, user: data.user, profileError: profileError.message }
+      }
     } catch (error) {
-      console.error('Sign in error:', error)
-      const errorMessage = error.message || 'Invalid credentials'
+      console.error('[AuthContext] Sign in error:', error)
+
+      // Provide user-friendly error messages
+      let errorMessage = 'Invalid credentials'
+
+      if (error.message?.includes('Invalid login credentials')) {
+        errorMessage = 'Invalid email or password'
+      } else if (error.message?.includes('Email not confirmed')) {
+        errorMessage = 'Please confirm your email address before signing in'
+      } else if (error.message?.includes('timeout')) {
+        errorMessage = 'Connection timeout. Please try again.'
+      } else if (error.message) {
+        errorMessage = error.message
+      }
+
       toast.error(errorMessage)
       return { success: false, error: errorMessage }
     }
@@ -418,10 +490,13 @@ export const ProtectedRoute = ({ children, requireRole = null, requireOnboarding
   const navigate = useNavigate()
 
   useEffect(() => {
+    console.log('[ProtectedRoute] State:', { loading, hasUser: !!user, hasProfile: !!profile, role: profile?.role, requireRole })
+
     if (!loading) {
       // Check authentication - only check for user, not profile
       // Profile might still be loading
       if (!user) {
+        console.log('[ProtectedRoute] No user, redirecting to login')
         navigate('/login')
         return
       }
@@ -430,9 +505,11 @@ export const ProtectedRoute = ({ children, requireRole = null, requireOnboarding
       if (requireRole && profile && !hasRole(requireRole)) {
         // Admin can access everything
         if (profile.role === 'admin') {
+          console.log('[ProtectedRoute] Admin access granted')
           return
         }
         // Redirect to forbidden page for role mismatches
+        console.log('[ProtectedRoute] Role mismatch, redirecting to forbidden')
         navigate('/forbidden')
         return
       }
@@ -440,13 +517,17 @@ export const ProtectedRoute = ({ children, requireRole = null, requireOnboarding
       // Check onboarding requirement
       if (requireOnboarding && !checkOnboardingStatus()) {
         if (hasRole('photographer')) {
+          console.log('[ProtectedRoute] Photographer onboarding required')
           navigate('/onboarding/photographer')
         }
       }
+
+      console.log('[ProtectedRoute] Access granted, rendering children')
     }
   }, [user, profile, loading, requireRole, requireOnboarding])
 
   if (loading) {
+    console.log('[ProtectedRoute] Loading state active, showing spinner')
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-600"></div>
@@ -454,5 +535,6 @@ export const ProtectedRoute = ({ children, requireRole = null, requireOnboarding
     )
   }
 
+  console.log('[ProtectedRoute] Rendering children')
   return children
 }

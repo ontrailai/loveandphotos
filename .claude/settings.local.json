@@ -37,7 +37,8 @@
       "mcp__sequential-thinking__sequentialthinking",
       "Bash(kill:*)",
       "Bash(git rm:*)",
-      "Bash(npm run dev:api:*)"
+      "Bash(npm run dev:api:*)",
+      "Bash(mkdir:*)"
     ],
     "deny": [],
     "ask": []

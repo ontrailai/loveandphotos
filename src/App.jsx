@@ -90,6 +90,16 @@ const CustomerProfile = lazy(() =>
 const PhotographerJobQueue = lazy(() => import('@pages/photographer/JobQueue'))
 const PhotographerUploads = lazy(() => import('@pages/photographer/Uploads'))
 
+// Talent Dashboard Pages (lazy loaded)
+const TalentDashboardLayout = lazy(() => import('@components/talent/TalentDashboardLayout'))
+const TalentOverview = lazy(() => import('@pages/talent/dashboard/OverviewPage'))
+const TalentProfile = lazy(() => import('@pages/talent/dashboard/ProfilePage'))
+const TalentCalendar = lazy(() => import('@pages/talent/dashboard/CalendarPage'))
+const TalentContracts = lazy(() => import('@pages/talent/dashboard/ContractsPage'))
+const TalentMessages = lazy(() => import('@pages/talent/dashboard/MessagesPage'))
+const TalentBookings = lazy(() => import('@pages/talent/dashboard/BookingsPage'))
+const TalentSettings = lazy(() => import('@pages/talent/dashboard/SettingsPage'))
+
 // Lazy load photographer placeholders
 const PhotographerPlaceholders = lazy(() => import('@pages/placeholders'))
 const PhotographerDashboard = lazy(() =>
@@ -373,7 +383,12 @@ function App() {
             </Suspense>
           } />
 
-          {/* Photographer Routes - Lazy loaded */}
+          {/* Legacy Photographer Routes - Redirect to new Talent Dashboard */}
+          <Route path="/dashboard/photographer" element={<Navigate to="/talent/dashboard" replace />} />
+          <Route path="/dashboard/photographer/job-queue" element={<Navigate to="/talent/dashboard" replace />} />
+          <Route path="/dashboard/photographer/uploads" element={<Navigate to="/talent/dashboard" replace />} />
+
+          {/* Photographer Routes - Lazy loaded (Keep for backward compatibility) */}
           <Route path="/pricing/talent" element={
             <ProtectedRoute requireRole="photographer">
               <TalentLayout>
@@ -381,7 +396,7 @@ function App() {
               </TalentLayout>
             </ProtectedRoute>
           } />
-          <Route path="/dashboard/photographer" element={
+          <Route path="/dashboard/photographer-legacy" element={
             <ProtectedRoute requireRole="photographer">
               <TalentLayout>
                 <Suspense fallback={<PageLoader />}>
@@ -478,6 +493,51 @@ function App() {
               </TalentLayout>
             </ProtectedRoute>
           } />
+
+          {/* Talent Dashboard Routes - New Dashboard System */}
+          <Route path="/talent/dashboard" element={
+            <ProtectedRoute requireRole="photographer">
+              <Suspense fallback={<PageLoader />}>
+                <TalentDashboardLayout />
+              </Suspense>
+            </ProtectedRoute>
+          }>
+            <Route index element={
+              <Suspense fallback={<PageLoader />}>
+                <TalentOverview />
+              </Suspense>
+            } />
+            <Route path="profile" element={
+              <Suspense fallback={<PageLoader />}>
+                <TalentProfile />
+              </Suspense>
+            } />
+            <Route path="calendar" element={
+              <Suspense fallback={<PageLoader />}>
+                <TalentCalendar />
+              </Suspense>
+            } />
+            <Route path="contracts" element={
+              <Suspense fallback={<PageLoader />}>
+                <TalentContracts />
+              </Suspense>
+            } />
+            <Route path="messages" element={
+              <Suspense fallback={<PageLoader />}>
+                <TalentMessages />
+              </Suspense>
+            } />
+            <Route path="bookings" element={
+              <Suspense fallback={<PageLoader />}>
+                <TalentBookings />
+              </Suspense>
+            } />
+            <Route path="settings" element={
+              <Suspense fallback={<PageLoader />}>
+                <TalentSettings />
+              </Suspense>
+            } />
+          </Route>
 
           {/* Admin Routes - Lazy loaded */}
           <Route path="/admin" element={

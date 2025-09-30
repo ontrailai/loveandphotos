@@ -13,7 +13,7 @@ const Forbidden = () => {
     
     switch (profile.role) {
       case 'photographer':
-        return '/dashboard/photographer'
+        return '/talent/dashboard'
       case 'admin':
         return '/admin'
       case 'customer':
@@ -149,7 +149,7 @@ const Forbidden = () => {
               </>
             ) : profile?.role === 'photographer' ? (
               <>
-                <a href="/dashboard/photographer" className="text-sm text-primary-600 hover:text-primary-700 underline">
+                <a href="/talent/dashboard" className="text-sm text-primary-600 hover:text-primary-700 underline">
                   Dashboard
                 </a>
                 <span className="text-gray-400">•</span>

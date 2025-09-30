@@ -31,7 +31,8 @@ const SignUp = () => {
   const { signUp, user, profile, loading: authLoading } = useAuth()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const [selectedRole, setSelectedRole] = useState(searchParams.get('role') || 'customer')
+  const typeParam = searchParams.get('type') || searchParams.get('role') || 'photographer'
+  const [selectedType, setSelectedType] = useState(typeParam)
   const [loading, setLoading] = useState(false)
   const [step, setStep] = useState(1)
   const [showPassword, setShowPassword] = useState(false)
@@ -45,7 +46,9 @@ const SignUp = () => {
     if (user && profile) {
       console.log('User is already logged in, redirecting from signup...')
       if (profile.role === 'photographer') {
-        navigate('/dashboard/photographer')
+        navigate('/talent/dashboard')
+      } else if (profile.role === 'admin') {
+        navigate('/admin')
       } else {
         navigate('/dashboard')
       }
@@ -57,7 +60,7 @@ const SignUp = () => {
     const preselectedRole = searchParams.get('role')
     if (user && profile && isPhotographer && preselectedRole === 'photographer') {
       console.log('Photographer attempting to access photographer signup, redirecting to dashboard...')
-      navigate('/dashboard/photographer')
+      navigate('/talent/dashboard')
     }
   }, [user, profile, isPhotographer, searchParams, navigate])
 
@@ -88,16 +91,18 @@ const SignUp = () => {
       const phoneDigits = data.phone ? data.phone.replace(/\D/g, '') : '';
 
       const result = await signUp(data.email, data.password, {
-        role: selectedRole,
+        role: 'photographer', // Both photographer and videographer use photographer role
         fullName: data.fullName,
-        phone: phoneDigits
+        phone: phoneDigits,
+        isVideographer: selectedType === 'videographer' // Pass videographer flag
       })
 
       if (result.success) {
         if (result.requiresEmailConfirmation) {
           toast.success('Please check your email to confirm your account')
         } else {
-          navigate(selectedRole === 'photographer' ? '/onboarding/photographer' : '/dashboard')
+          // Navigate directly to talent dashboard for both photographers and videographers
+          navigate('/talent/dashboard')
         }
       }
     } catch (error) {
@@ -109,21 +114,23 @@ const SignUp = () => {
 
   const roleOptions = [
     {
-      id: 'customer',
-      title: 'I need a photographer',
-      description: 'Book talented photographers for your events',
-      icon: <SparklesIcon className="w-6 h-6" />,
+      id: 'photographer',
+      type: 'photographer',
+      title: 'I am a Photographer',
+      description: 'Join our network and grow your photography business',
+      icon: <CameraIcon className="w-6 h-6" />,
       benefits: [
-        'Browse verified photographers',
-        'Instant booking & scheduling',
-        'Secure payment protection',
-        'Satisfaction guarantee'
+        'Set your own rates',
+        'Flexible scheduling',
+        'Automated payments',
+        'Marketing support'
       ]
     },
     {
-      id: 'photographer',
-      title: 'I am a photographer',
-      description: 'Join our network and grow your business',
+      id: 'videographer',
+      type: 'videographer',
+      title: 'I am a Videographer',
+      description: 'Join our network and grow your videography business',
       icon: <CameraIcon className="w-6 h-6" />,
       benefits: [
         'Set your own rates',
@@ -161,16 +168,16 @@ const SignUp = () => {
                   key={option.id}
                   className={clsx(
                     'cursor-pointer transition-all duration-200',
-                    selectedRole === option.id
+                    selectedType === option.type
                       ? 'ring-2 ring-primary bg-primary/5'
                       : 'hover:shadow-md bg-card'
                   )}
-                  onClick={() => setSelectedRole(option.id)}
+                  onClick={() => setSelectedType(option.type)}
                 >
                   <div className="flex items-start space-x-4">
                     <div className={clsx(
                       'w-12 h-12 rounded-lg flex items-center justify-center',
-                      selectedRole === option.id
+                      selectedType === option.type
                         ? 'bg-primary text-primary-foreground'
                         : 'bg-muted text-muted-foreground'
                     )}>
@@ -192,7 +199,7 @@ const SignUp = () => {
                         ))}
                       </ul>
                     </div>
-                    {selectedRole === option.id && (
+                    {selectedType === option.type && (
                       <CheckIcon className="w-6 h-6 text-primary flex-shrink-0" />
                     )}
                   </div>
@@ -318,12 +325,12 @@ const SignUp = () => {
               <div className="bg-muted/50 rounded-lg p-4 flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <div className="w-10 h-10 bg-primary text-primary-foreground rounded-lg flex items-center justify-center">
-                    {selectedRole === 'photographer' ? <CameraIcon className="w-5 h-5" /> : <SparklesIcon className="w-5 h-5" />}
+                    <CameraIcon className="w-5 h-5" />
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Signing up as</p>
                     <p className="font-semibold text-foreground">
-                      {selectedRole === 'photographer' ? 'Photographer' : 'Customer'}
+                      {selectedType === 'videographer' ? 'Videographer' : 'Photographer'}
                     </p>
                   </div>
                 </div>
