@@ -34,7 +34,6 @@ const footerLinks = [
     links: [
       { title: 'Browse Photographers', href: '/photographers' },
       { title: 'How It Works', href: '/how-it-works' },
-      { title: 'Pricing', href: '/pricing' },
       { title: 'Video Specialists', href: '/photographers/video' }
     ]
   },

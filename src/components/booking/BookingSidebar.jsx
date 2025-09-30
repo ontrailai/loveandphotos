@@ -5,7 +5,7 @@
 
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CalendarIcon, SunIcon, MoonIcon } from 'lucide-react'
+import { CalendarIcon } from 'lucide-react'
 import { format } from 'date-fns'
 import { useBookingFlow } from '@contexts/BookingFlowContext'
 import Card from '@components/ui/Card'
@@ -33,38 +33,39 @@ const BookingSidebar = ({
   const { initializeBookingFlow, updateScheduleDetails } = useBookingFlow()
 
   const [selectedDate, setSelectedDate] = useState(() => normalizeDate(initialDate))
-  const [selectedTime, setSelectedTime] = useState(null) // 'morning' | 'afternoon' | null
 
   useEffect(() => {
     setSelectedDate(normalizeDate(initialDate))
   }, [initialDate])
-
-  const handleTimeSelection = (timeOfDay) => {
-    setSelectedTime(timeOfDay === selectedTime ? null : timeOfDay)
-  }
 
   const handleDateSelect = (day) => {
     setSelectedDate(day ? normalizeDate(day) : null)
   }
 
   const handleRequestToBook = () => {
-    if (!selectedDate || !selectedTime) return
+    if (!selectedDate) return
 
-    // Initialize the booking flow with schedule details
+    // Initialize the booking flow with schedule details AND default package
     initializeBookingFlow(photographer.id, {
       date: selectedDate,
-      timeOfDay: selectedTime
+      packageDetails: {
+        packageType: 'standard',
+        packagePrice: photographer.hourly_rate * 6, // Default 6-hour package
+        hoursBooked: 6,
+        isPhotoVideo: true,
+        packageTitle: '6-Hour Photography Package'
+      }
     })
 
     // Update schedule details in context
-    updateScheduleDetails(selectedDate, selectedTime)
+    updateScheduleDetails(selectedDate)
 
-    // Navigate to package selection step
-    navigate(`/booking/${photographer.id}/package`)
+    // Navigate to add-ons step (first step in booking flow after schedule)
+    navigate(`/booking/${photographer.id}/addons`)
   }
 
   const hasValidDate = selectedDate instanceof Date && !Number.isNaN(selectedDate?.getTime?.())
-  const isBookingReady = hasValidDate && Boolean(selectedTime)
+  const isBookingReady = hasValidDate
 
   return (
     <Card className={clsx('sticky top-8', className)}>
@@ -76,7 +77,7 @@ const BookingSidebar = ({
           </h3>
           <div className="flex items-center justify-center text-dusty-600">
             <CalendarIcon className="w-4 h-4 mr-2" />
-            <span className="text-sm">Select your preferred date and time</span>
+            <span className="text-sm">Select your preferred date</span>
           </div>
         </div>
 
@@ -88,42 +89,6 @@ const BookingSidebar = ({
             disablePastDates
             className="w-full"
           />
-        </div>
-
-        {/* Time of Day Selection */}
-        <div>
-          <h4 className="text-lg font-medium text-dusty-900 mb-3">
-            What time of day would you like?
-          </h4>
-          <div className="space-y-3">
-            {/* Morning Button */}
-            <Button
-              variant={selectedTime === 'morning' ? 'primary' : 'outline'}
-              size="lg"
-              onClick={() => handleTimeSelection('morning')}
-              className="w-full justify-start"
-            >
-              <SunIcon className="w-5 h-5 mr-3" />
-              <div className="text-left">
-                <div className="font-medium">Morning</div>
-                <div className="text-sm opacity-75">sunrise–11:59am</div>
-              </div>
-            </Button>
-
-            {/* Afternoon Button */}
-            <Button
-              variant={selectedTime === 'afternoon' ? 'primary' : 'outline'}
-              size="lg"
-              onClick={() => handleTimeSelection('afternoon')}
-              className="w-full justify-start"
-            >
-              <MoonIcon className="w-5 h-5 mr-3" />
-              <div className="text-left">
-                <div className="font-medium">Afternoon</div>
-                <div className="text-sm opacity-75">12pm–sunset</div>
-              </div>
-            </Button>
-          </div>
         </div>
 
         {/* Request to Book Button */}
@@ -139,7 +104,7 @@ const BookingSidebar = ({
 
           {!isBookingReady && (
             <p className="text-sm text-dusty-500 mt-2 text-center">
-              Please select both a date and time to continue
+              Please select a date to continue
             </p>
           )}
         </div>
@@ -152,16 +117,6 @@ const BookingSidebar = ({
               <div className="flex items-center">
                 <CalendarIcon className="w-4 h-4 mr-2" />
                 <span>{format(selectedDate, 'EEEE, MMMM d, yyyy')}</span>
-              </div>
-              <div className="flex items-center">
-                {selectedTime === 'morning' ? (
-                  <SunIcon className="w-4 h-4 mr-2" />
-                ) : (
-                  <MoonIcon className="w-4 h-4 mr-2" />
-                )}
-                <span>
-                  {selectedTime === 'morning' ? 'Morning (sunrise–11:59am)' : 'Afternoon (12pm–sunset)'}
-                </span>
               </div>
             </div>
           </div>

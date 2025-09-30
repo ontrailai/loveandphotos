@@ -5,7 +5,7 @@
 
 import express from 'express'
 import Stripe from 'stripe'
-import { computePayable, formatCurrency } from '../payments/compute.js'
+import { computePayable, formatCurrency, generatePaymentSchedule } from '../payments/compute.js'
 import {
   getBookingById,
   markBookingPaymentIntent,
@@ -303,6 +303,17 @@ router.post('/create-payment-intent', async (req, res) => {
     if (!paymentIntent) {
       console.log('🆕 Creating new payment intent with idempotency key')
 
+      // Generate payment schedule for metadata
+      const paymentSchedule = generatePaymentSchedule(booking, plan)
+
+      // Convert payment schedule to metadata (Stripe metadata must be strings)
+      const scheduleMetadata = {}
+      paymentSchedule.forEach((payment, index) => {
+        scheduleMetadata[`payment_${index + 1}_date`] = payment.date
+        scheduleMetadata[`payment_${index + 1}_amount`] = payment.amount_cents.toString()
+        scheduleMetadata[`payment_${index + 1}_description`] = payment.description
+      })
+
       paymentIntent = await stripe.paymentIntents.create({
         amount: paymentCalculation.amount_cents,
         currency: 'usd',
@@ -311,7 +322,12 @@ router.post('/create-payment-intent', async (req, res) => {
           payment_plan: paymentCalculation.planUsed,
           photographer_id: booking.photographer_id,
           base_amount: paymentCalculation.base_cents.toString(),
-          late_fee: paymentCalculation.late_fee_cents.toString()
+          late_fee: paymentCalculation.late_fee_cents.toString(),
+          processing_fee: paymentCalculation.processing_fee_cents.toString(),
+          months_until_cutoff: paymentCalculation.monthsUntilCutoff.toString(),
+          days_until_cutoff: paymentCalculation.daysUntilCutoff.toString(),
+          total_payments: paymentSchedule.length.toString(),
+          ...scheduleMetadata
         },
         description: `Photography service for event on ${new Date(booking.event_date).toLocaleDateString()}`,
         receipt_email: customerEmail,

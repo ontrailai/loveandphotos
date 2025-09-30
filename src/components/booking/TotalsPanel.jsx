@@ -176,7 +176,6 @@ const TotalsPanel = ({
           size="lg"
           onClick={onContinue}
           className="w-full"
-          disabled={!packagePrice}
         >
           Continue
         </Button>

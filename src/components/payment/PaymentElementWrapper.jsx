@@ -12,7 +12,7 @@ const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY || impor
  * Payment Element Wrapper Component
  * Handles fetching the clientSecret and wrapping the payment form in Stripe Elements
  */
-const PaymentElementWrapper = ({ onSuccess }) => {
+const PaymentElementWrapper = ({ onSuccess, paymentPlan = 'full' }) => {
   const { bookingFlow } = useBookingFlow()
   const [clientSecret, setClientSecret] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -36,7 +36,7 @@ const PaymentElementWrapper = ({ onSuccess }) => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             bookingId: bookingFlow.bookingId,
-            plan: bookingFlow.packageDetails?.packageType || 'full',
+            plan: paymentPlan,
             userEmail: bookingFlow.accountDetails?.email,
             userId: bookingFlow.accountDetails?.userId
           })
@@ -65,7 +65,7 @@ const PaymentElementWrapper = ({ onSuccess }) => {
     }
 
     fetchClientSecret()
-  }, [bookingFlow.bookingId, bookingFlow.packageDetails?.packageType, bookingFlow.accountDetails?.email, bookingFlow.accountDetails?.userId])
+  }, [bookingFlow.bookingId, paymentPlan, bookingFlow.accountDetails?.email, bookingFlow.accountDetails?.userId])
 
   // Loading state
   if (loading) {

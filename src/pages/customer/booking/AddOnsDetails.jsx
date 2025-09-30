@@ -41,10 +41,6 @@ const AddOnsDetails = () => {
       // Find the first incomplete step and redirect there
       if (!canAccessStep('schedule')) {
         navigate(`/booking/${photographerId}/schedule`, { replace: true })
-      } else if (!canAccessStep('package')) {
-        navigate(`/booking/${photographerId}/package`, { replace: true })
-      } else if (!canAccessStep('location')) {
-        navigate(`/booking/${photographerId}/location`, { replace: true })
       }
       return
     }
@@ -122,15 +118,11 @@ const AddOnsDetails = () => {
       {/* Progress Stepper */}
       <BookingStepper
         steps={steps}
-        currentStepIndex={3}
+        currentStepIndex={1}
         onStepClick={(stepIndex, step) => {
           if (step.status === 'completed') {
             const stepId = steps[stepIndex].id
-            if (stepId === 'location') {
-              navigate(`/booking/${photographerId}/location`)
-            } else if (stepId === 'package') {
-              navigate(`/booking/${photographerId}/package`)
-            } else if (stepId === 'schedule') {
+            if (stepId === 'schedule') {
               navigate(`/booking/${photographerId}/schedule`)
             }
           }
@@ -182,9 +174,9 @@ const AddOnsDetails = () => {
           <div className="flex justify-between items-center mb-4">
             <Button
               variant="outline"
-              onClick={() => navigate(`/booking/${photographerId}/location`)}
+              onClick={() => navigate(`/booking/${photographerId}/schedule`)}
             >
-              Back to Locations
+              Back to Schedule
             </Button>
 
             <div className="flex space-x-3">
@@ -201,7 +193,6 @@ const AddOnsDetails = () => {
                 size="lg"
                 onClick={handleContinue}
                 className="min-w-32"
-                disabled={!packagePrice}
               >
                 Continue
               </Button>
@@ -218,9 +209,9 @@ const AddOnsDetails = () => {
         <div className="hidden lg:flex justify-between items-center mt-8">
           <Button
             variant="outline"
-            onClick={() => navigate(`/booking/${photographerId}/location`)}
+            onClick={() => navigate(`/booking/${photographerId}/schedule`)}
           >
-            Back to Locations
+            Back to Schedule
           </Button>
 
           <p className="text-sm text-dusty-500">

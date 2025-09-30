@@ -8,6 +8,7 @@ import Button from '@components/ui/Button'
 import Card from '@components/ui/Card'
 import PaymentElementWrapper from '@components/payment/PaymentElementWrapper'
 import PaymentSuccessModal from '@components/payment/PaymentSuccessModal'
+import PaymentOptions from '@components/payment/PaymentOptions'
 import toast from 'react-hot-toast'
 
 const PaymentStep = () => {
@@ -18,40 +19,74 @@ const PaymentStep = () => {
     bookingFlow,
     canAccessStep,
     getStepsForStepper,
-    markPaymentComplete
+    markPaymentComplete,
+    updatePaymentPlan
   } = useBookingFlow()
 
   const [loading, setLoading] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [paymentIntentData, setPaymentIntentData] = useState(null)
+  const [selectedPaymentPlan, setSelectedPaymentPlan] = useState(
+    bookingFlow.paymentDetails?.paymentPlan || 'full'
+  )
 
-  // Calculate payment amount for display
+  // Handler for payment plan selection
+  const handlePaymentPlanChange = (plan) => {
+    setSelectedPaymentPlan(plan)
+    updatePaymentPlan(plan)
+  }
+
+  // Calculate payment amount for display based on selected payment plan
+  // This logic matches backend compute.js to ensure UI and Stripe amounts match exactly
   const calculatePaymentAmount = () => {
-    const { packageDetails, addonsDetails } = bookingFlow
+    const { packageDetails, addonsDetails, scheduleDetails } = bookingFlow
+    const packagePrice = packageDetails?.packagePrice || 0
+    const addonsPrice = addonsDetails?.totalAddonsPrice || 0
+    const baseTotal = packagePrice + addonsPrice
 
-    if (packageDetails?.packageType === 'monthly') {
-      // Monthly payment: (package price + addons) / 6
-      const packagePrice = packageDetails?.packagePrice || 0
-      const addonsPrice = addonsDetails?.totalAddonsPrice || 0
-      return Math.round((packagePrice + addonsPrice) / 6)
-    } else if (packageDetails?.packageType === 'deposit') {
-      // Deposit payment: flat $500
-      return 500
-    } else {
-      // Full payment: package price + addons
-      const packagePrice = packageDetails?.packagePrice || 0
-      const addonsPrice = addonsDetails?.totalAddonsPrice || 0
-      const baseAmount = packagePrice + addonsPrice
+    // Calculate days until event and 60-day cutoff
+    const eventDate = new Date(scheduleDetails?.date)
+    const daysUntilEvent = Math.ceil((eventDate - new Date()) / (1000 * 60 * 60 * 24))
 
-      // Add late fee if within 30 days
-      const eventDate = new Date(bookingFlow.scheduleDetails?.date)
-      const daysUntilEvent = Math.ceil((eventDate - new Date()) / (1000 * 60 * 60 * 24))
+    // Calculate 60-day cutoff date
+    const cutoffDate = new Date(eventDate)
+    cutoffDate.setDate(cutoffDate.getDate() - 60)
+    const daysUntilCutoff = Math.ceil((cutoffDate - new Date()) / (1000 * 60 * 60 * 24))
+    const monthsUntilCutoff = Math.max(1, Math.floor(daysUntilCutoff / 30))
 
-      if (daysUntilEvent <= 30) {
-        return baseAmount + 450 // Add $450 late fee
+    // Apply pricing rules matching backend compute.js
+    if (daysUntilEvent <= 60) {
+      // Within 60 days: $450 late fee applies, only full payment allowed
+      const lateFee = 450
+      return baseTotal + lateFee
+    } else if (daysUntilEvent < 90) {
+      // 61-89 days: Limited plans (full payment or $500 deposit only)
+      if (selectedPaymentPlan === 'deposit500') {
+        return 500 // $500 deposit
+      } else {
+        return baseTotal // Full payment
       }
-
-      return baseAmount
+    } else {
+      // 90+ days: All payment plans available
+      if (selectedPaymentPlan === 'deposit500') {
+        return 500 // $500 deposit
+      } else if (selectedPaymentPlan === 'monthly199') {
+        // Monthly plan: Fixed $199/month + $150 processing fee (first payment)
+        const processingFee = 150
+        const monthlyPayment = 199
+        return monthlyPayment + processingFee // $349 first payment
+      } else if (selectedPaymentPlan === 'deposit+3') {
+        // Legacy: map to deposit500
+        return 500
+      } else if (selectedPaymentPlan === 'installments') {
+        // Legacy: map to monthly199
+        const processingFee = 150
+        const monthlyPayment = Math.floor(baseTotal / monthsUntilCutoff)
+        return monthlyPayment + processingFee
+      } else {
+        // Full payment
+        return baseTotal
+      }
     }
   }
 
@@ -62,10 +97,6 @@ const PaymentStep = () => {
       // Redirect to the first incomplete step
       if (!bookingFlow.scheduleDetails?.date) {
         navigate(`/booking/${photographerId}/schedule`)
-      } else if (!bookingFlow.packageDetails?.packageId) {
-        navigate(`/booking/${photographerId}/package`)
-      } else if (!bookingFlow.locationDetails?.locationTitle) {
-        navigate(`/booking/${photographerId}/location`)
       } else if (!bookingFlow.contractDetails?.contractSigned) {
         navigate(`/booking/${photographerId}/contract`)
       }
@@ -108,38 +139,118 @@ const PaymentStep = () => {
 
   const paymentAmount = calculatePaymentAmount()
 
-  // Payment plan details
+  // Payment plan details - matches backend compute.js logic
   const getPaymentPlanDetails = () => {
-    const { packageDetails } = bookingFlow
+    const { packageDetails, addonsDetails, scheduleDetails } = bookingFlow
+    const packagePrice = packageDetails?.packagePrice || 0
+    const addonsPrice = addonsDetails?.totalAddonsPrice || 0
+    const baseTotal = packagePrice + addonsPrice
 
-    if (packageDetails?.packageType === 'monthly') {
+    // Calculate days until event and 60-day cutoff
+    const eventDate = new Date(scheduleDetails?.date)
+    const daysUntilEvent = Math.ceil((eventDate - new Date()) / (1000 * 60 * 60 * 24))
+
+    // Calculate cutoff date (60 days before event)
+    const cutoffDate = new Date(eventDate)
+    cutoffDate.setDate(cutoffDate.getDate() - 60)
+    const daysUntilCutoff = Math.ceil((cutoffDate - new Date()) / (1000 * 60 * 60 * 24))
+    const monthsUntilCutoff = Math.max(1, Math.floor(daysUntilCutoff / 30))
+
+    // Within 60 days: late fee applies, only full payment
+    if (daysUntilEvent <= 60) {
+      const lateFee = 450
+      const totalWithLateFee = baseTotal + lateFee
       return {
-        title: 'Monthly Payment Plan',
-        description: '6 equal monthly payments',
+        title: 'Full Payment (Late Booking)',
+        description: `$${totalWithLateFee.toLocaleString()} total including $${lateFee} late booking fee`,
         terms: [
-          'First payment due today',
-          'Automatic monthly billing',
-          'Cancel anytime with 30 days notice'
+          `Base total: $${baseTotal.toLocaleString()}`,
+          `Late booking fee (within 60 days): $${lateFee}`,
+          'Payment plans not available for bookings within 60 days',
+          'Full payment required to secure your date'
         ]
       }
-    } else if (packageDetails?.packageType === 'deposit') {
+    }
+
+    // 61-89 days: limited plans (full payment or $500 deposit only)
+    if (daysUntilEvent < 90) {
+      if (selectedPaymentPlan === 'deposit500') {
+        const remainingBalance = baseTotal - 500
+        const monthlyPayment = Math.round(remainingBalance / monthsUntilCutoff)
+        return {
+          title: '$500 Deposit + Monthly Payments',
+          description: `$500 deposit today, then ${monthsUntilCutoff} monthly payments of ~$${monthlyPayment.toLocaleString()}`,
+          terms: [
+            '$500 deposit due today',
+            `${monthsUntilCutoff} remaining payments of ~$${monthlyPayment.toLocaleString()} each`,
+            'All payments complete 60 days before event',
+            'Payments automatically charged monthly'
+          ]
+        }
+      } else {
+        return {
+          title: 'Full Payment',
+          description: `$${baseTotal.toLocaleString()} total`,
+          terms: [
+            'Full payment secures your date',
+            'Monthly payment plan requires 90+ days notice',
+            'Includes all package features',
+            'Service agreement begins upon payment'
+          ]
+        }
+      }
+    }
+
+    // 90+ days: all payment plans available
+    if (selectedPaymentPlan === 'deposit500' || selectedPaymentPlan === 'deposit+3') {
+      const remainingBalance = baseTotal - 500
+      const monthlyPayment = Math.round(remainingBalance / monthsUntilCutoff)
       return {
-        title: 'Deposit Payment',
-        description: '$500 deposit to secure your booking',
+        title: '$500 Deposit + Monthly Payments',
+        description: `$500 deposit today, then ${monthsUntilCutoff} monthly payments of ~$${monthlyPayment.toLocaleString()}`,
         terms: [
-          'Remaining balance due 30 days before event',
-          'Deposit is non-refundable',
-          'Date changes allowed with 60 days notice'
+          '$500 deposit due today',
+          `${monthsUntilCutoff} remaining payments of ~$${monthlyPayment.toLocaleString()} each`,
+          'All payments complete 60 days before event',
+          'No processing fee for this plan'
+        ]
+      }
+    } else if (selectedPaymentPlan === 'monthly199' || selectedPaymentPlan === 'installments') {
+      const processingFee = 150
+      const monthlyPayment = 199
+
+      // Calculate how many full months we have until the 60-day cutoff
+      const monthsAvailable = Math.max(1, Math.floor(daysUntilCutoff / 30))
+
+      // Calculate first payment ($199 + $150 processing fee)
+      const firstPayment = monthlyPayment + processingFee
+
+      // Calculate total paid through monthly payments
+      const totalMonthlyPayments = (monthsAvailable * monthlyPayment) + processingFee
+
+      // Calculate final lump sum
+      const finalLumpSum = baseTotal - totalMonthlyPayments
+
+      return {
+        title: 'Monthly Payment Plan',
+        description: `Fixed $${monthlyPayment}/month payments + final balance due 60 days before event`,
+        terms: [
+          `First payment: $${firstPayment.toLocaleString()} due today ($${monthlyPayment} + $${processingFee} processing fee)`,
+          `${monthsAvailable - 1} monthly payments of $${monthlyPayment} each`,
+          `Final balance: $${finalLumpSum.toLocaleString()} due 60 days before event`,
+          `Total payments: ${monthsAvailable + 1}`,
+          'Remaining balance paid as lump sum at 60-day cutoff'
         ]
       }
     } else {
       return {
         title: 'Full Payment',
-        description: 'Complete payment for your photography package',
+        description: `Complete payment of $${baseTotal.toLocaleString()} for your photography package`,
         terms: [
           'Full payment secures your date',
           'Includes all package features',
-          'Service agreement begins upon payment'
+          'Service agreement begins upon payment',
+          'No additional fees or charges'
         ]
       }
     }
@@ -151,7 +262,7 @@ const PaymentStep = () => {
     <div className="min-h-screen bg-dusty-50">
       <BookingStepper
         steps={steps}
-        currentStepIndex={6}
+        currentStepIndex={4}
       />
 
       <div className="max-w-4xl mx-auto px-4 py-12">
@@ -162,6 +273,16 @@ const PaymentStep = () => {
           <p className="text-dusty-600">
             Secure your photography session with a safe and encrypted payment
           </p>
+        </div>
+
+        {/* Payment Options Selection */}
+        <div className="mb-8">
+          <PaymentOptions
+            totalAmount={bookingFlow.packageDetails?.packagePrice + (bookingFlow.addonsDetails?.totalAddonsPrice || 0)}
+            eventDate={bookingFlow.scheduleDetails?.date}
+            selectedPlan={selectedPaymentPlan}
+            onSelectPlan={handlePaymentPlanChange}
+          />
         </div>
 
         <div className="grid md:grid-cols-3 gap-6">
@@ -257,7 +378,10 @@ const PaymentStep = () => {
               </div>
 
               {/* Stripe Payment Element */}
-              <PaymentElementWrapper onSuccess={handlePaymentSuccess} />
+              <PaymentElementWrapper
+                onSuccess={handlePaymentSuccess}
+                paymentPlan={selectedPaymentPlan}
+              />
             </Card>
           </div>
         </div>

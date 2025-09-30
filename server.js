@@ -160,12 +160,20 @@ app.post('/api/booking/create', async (req, res) => {
       eventType = 'photoshoot'
     } = req.body
 
-    // Validate required fields
-    if (!customerId || !photographerId || !scheduleDetails?.date || !totalAmount) {
+    // Validate required fields with detailed logging
+    const missingFields = []
+    if (!customerId) missingFields.push('customerId')
+    if (!photographerId) missingFields.push('photographerId')
+    if (!scheduleDetails?.date) missingFields.push('scheduleDetails.date')
+    if (!totalAmount && totalAmount !== 0) missingFields.push('totalAmount')
+
+    if (missingFields.length > 0) {
+      console.error('❌ Missing required fields:', missingFields)
       return res.status(400).json({
         success: false,
         message: 'Missing required booking fields',
-        code: 'MISSING_REQUIRED_FIELDS'
+        code: 'MISSING_REQUIRED_FIELDS',
+        missingFields
       })
     }
 
@@ -263,12 +271,19 @@ app.post('/api/booking/create', async (req, res) => {
       .single()
 
     if (error) {
-      console.error('❌ Booking creation failed:', error)
+      console.error('❌ Booking creation failed:', {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint,
+        payload: bookingData
+      })
       return res.status(500).json({
         success: false,
-        message: 'Failed to create booking',
+        message: 'Failed to create booking in database',
         code: 'BOOKING_CREATION_FAILED',
-        details: error.message
+        details: error.message,
+        hint: error.hint
       })
     }
 
@@ -282,11 +297,16 @@ app.post('/api/booking/create', async (req, res) => {
     })
 
   } catch (error) {
-    console.error('❌ Booking creation error:', error)
+    console.error('❌ Booking creation error:', {
+      error: error.message,
+      stack: error.stack,
+      body: req.body
+    })
     res.status(500).json({
       success: false,
       message: 'Internal server error during booking creation',
-      code: 'INTERNAL_ERROR'
+      code: 'INTERNAL_ERROR',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
     })
   }
 })

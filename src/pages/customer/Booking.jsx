@@ -17,25 +17,12 @@ const Booking = () => {
   const { savePendingBooking, saveBookingFormData, getPendingBookingForMigration } = useGuestBooking()
   const navigate = useNavigate()
 
-  // Get date and time from URL parameters
+  // Get date from URL parameters
   const urlDate = searchParams.get('date')
-  const urlTimeOfDay = searchParams.get('timeOfDay')
-
-  // Convert timeOfDay to specific time
-  const getTimeFromTimeOfDay = (timeOfDay) => {
-    switch (timeOfDay) {
-      case 'morning':
-        return '09:00'
-      case 'afternoon':
-        return '14:00'
-      default:
-        return '10:00'
-    }
-  }
 
   // Calculate default values
   const defaultEventDate = urlDate || format(addDays(new Date(), 60), 'yyyy-MM-dd')
-  const defaultEventTime = urlTimeOfDay ? getTimeFromTimeOfDay(urlTimeOfDay) : '10:00'
+  const defaultEventTime = '10:00'
   
   const [photographer, setPhotographer] = useState(null)
   const [packages, setPackages] = useState([])
@@ -139,13 +126,6 @@ const Booking = () => {
         event_date: data.eventDate,
         event_time: data.eventTime,
         event_type: data.eventType,
-        venue_name: data.venueName,
-        venue_address: {
-          street: data.venueStreet,
-          city: data.venueCity,
-          state: data.venueState,
-          zip: data.venueZip
-        },
         guest_count: data.guestCount,
         total_amount: pricing.finalPrice,
         special_requests: data.specialRequests,
@@ -180,13 +160,6 @@ const Booking = () => {
         event_date: data.eventDate,
         event_time: data.eventTime,
         event_type: data.eventType,
-        venue_name: data.venueName,
-        venue_address: {
-          street: data.venueStreet,
-          city: data.venueCity,
-          state: data.venueState,
-          zip: data.venueZip
-        },
         guest_count: data.guestCount,
         total_amount: pricing.finalPrice,
         special_requests: data.specialRequests,
@@ -424,80 +397,6 @@ const Booking = () => {
               {errors.eventTime && (
                 <p className="mt-1 text-sm text-red-600">{errors.eventTime.message}</p>
               )}
-            </div>
-          </div>
-        </div>
-
-        {/* Venue Information */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold mb-4">Venue Information</h2>
-          
-          <div className="space-y-4">
-            <div>
-              <label className="label">Venue Name</label>
-              <input
-                type="text"
-                {...register('venueName', { required: 'Venue name is required' })}
-                className="input"
-                placeholder="e.g., Grand Ballroom"
-              />
-              {errors.venueName && (
-                <p className="mt-1 text-sm text-red-600">{errors.venueName.message}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="label">Street Address</label>
-              <input
-                type="text"
-                {...register('venueStreet', { required: 'Street address is required' })}
-                className="input"
-                placeholder="123 Main St"
-              />
-              {errors.venueStreet && (
-                <p className="mt-1 text-sm text-red-600">{errors.venueStreet.message}</p>
-              )}
-            </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              <div>
-                <label className="label">City</label>
-                <input
-                  type="text"
-                  {...register('venueCity', { required: 'City is required' })}
-                  className="input"
-                />
-                {errors.venueCity && (
-                  <p className="mt-1 text-sm text-red-600">{errors.venueCity.message}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="label">State</label>
-                <input
-                  type="text"
-                  {...register('venueState', { required: 'State is required' })}
-                  className="input"
-                  maxLength={2}
-                  placeholder="NY"
-                />
-                {errors.venueState && (
-                  <p className="mt-1 text-sm text-red-600">{errors.venueState.message}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="label">ZIP Code</label>
-                <input
-                  type="text"
-                  {...register('venueZip', { required: 'ZIP code is required' })}
-                  className="input"
-                  placeholder="10001"
-                />
-                {errors.venueZip && (
-                  <p className="mt-1 text-sm text-red-600">{errors.venueZip.message}</p>
-                )}
-              </div>
             </div>
           </div>
         </div>

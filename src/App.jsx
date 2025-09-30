@@ -44,7 +44,6 @@ import Contact from '@pages/Contact'
 import TestSupabase from '@pages/TestSupabase'
 import About from '@pages/About'
 import HowItWorks from '@pages/HowItWorks'
-import Pricing from '@pages/Pricing'
 import ClientPricing from '@pages/ClientPricing'
 import TalentPricing from '@pages/pricing/TalentPricing'
 import FAQ from '@pages/FAQ'
@@ -69,8 +68,6 @@ const BookingPage = lazy(() =>
 )
 
 // Booking wizard pages
-const PackageDetails = lazy(() => import('@pages/customer/booking/PackageDetails'))
-const LocationDetails = lazy(() => import('@pages/customer/booking/LocationDetails'))
 const AddOnsDetails = lazy(() => import('@pages/customer/booking/AddOnsDetails'))
 const AccountSetup = lazy(() => import('@pages/customer/booking/AccountSetup'))
 const ContractStep = lazy(() => import('@pages/customer/booking/ContractStep'))
@@ -241,7 +238,6 @@ function App() {
             <Route path="/test-supabase" element={<TestSupabase />} />
             <Route path="/about" element={<About />} />
             <Route path="/how-it-works" element={<HowItWorks />} />
-            <Route path="/pricing" element={<Pricing />} />
             <Route path="/pricing/client" element={<ClientPricing />} />
             <Route path="/faq" element={<FAQ />} />
             <Route path="/resources" element={<Resources />} />
@@ -298,20 +294,6 @@ function App() {
             <Route path="/booking/:photographerId/schedule" element={
               <Suspense fallback={<PageLoader />}>
                 <ScheduleRedirect />
-              </Suspense>
-            } />
-            <Route path="/booking/:photographerId/package" element={
-              <Suspense fallback={<PageLoader />}>
-                <BookingFlowGuard requiredStep="package">
-                  <PackageDetails />
-                </BookingFlowGuard>
-              </Suspense>
-            } />
-            <Route path="/booking/:photographerId/location" element={
-              <Suspense fallback={<PageLoader />}>
-                <BookingFlowGuard requiredStep="location">
-                  <LocationDetails />
-                </BookingFlowGuard>
               </Suspense>
             } />
             <Route path="/booking/:photographerId/addons" element={

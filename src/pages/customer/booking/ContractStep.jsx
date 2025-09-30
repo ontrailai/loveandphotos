@@ -22,19 +22,18 @@ import {
   fetchMultipleAuxiliaryData
 } from '@utils/contractHelpers'
 import { withTimeoutAndRetry, normalizeError } from '@lib/async/withTimeout'
+import { supabase } from '@lib/supabase'
 import { ArrowLeft, FileText, AlertCircle, CheckCircle } from 'lucide-react'
 import { clsx } from 'clsx'
 import { z } from 'zod'
 
 // Zod schema for contract requirements validation
+// Package details are now optional as we support add-on-only bookings
 const ContractRequirementsSchema = z.object({
   eventDate: z.string().min(1, 'Event date is required'),
-  location: z.string().min(1, 'Location is required'),
-  packageName: z.string().min(1, 'Package name is required'),
-  price: z.union([z.string(), z.number()]).refine(
-    (val) => val !== null && val !== undefined && val !== '',
-    'Price is required'
-  )
+  location: z.string().optional(), // Optional - can be TBD
+  packageName: z.string().optional(), // Optional - fallback to "Custom Package"
+  price: z.union([z.string(), z.number()]).optional() // Optional - can be $0 base + addons
 })
 
 const ContractStep = () => {
@@ -99,22 +98,85 @@ const ContractStep = () => {
           // Redirect to first incomplete step
           if (!canAccessStep('schedule')) {
             navigate(`/booking/${photographerId}/schedule`, { replace: true })
-          } else if (!canAccessStep('package')) {
-            navigate(`/booking/${photographerId}/package`, { replace: true })
-          } else if (!canAccessStep('location')) {
-            navigate(`/booking/${photographerId}/location`, { replace: true })
           } else if (!canAccessStep('addons')) {
             navigate(`/booking/${photographerId}/addons`, { replace: true })
+          } else if (!canAccessStep('account')) {
+            navigate(`/booking/${photographerId}/account`, { replace: true })
           }
           return
         }
 
-        // Validate booking data with Zod schema for critical contract requirements
+        // Wait for bookingId to be available in context
+        if (!bookingFlow.bookingId) {
+          console.log('⏳ Waiting for booking ID to be set in context...')
+          setSubmitError('Finalizing your booking details. Please wait...')
+          // Keep loading state active - useEffect will retry when bookingFlow.bookingId changes
+          return
+        }
+
+        console.log('📋 Fetching booking from database:', bookingFlow.bookingId)
+
+        // Fetch complete booking data from Supabase
+        const { data: bookingFromDb, error: fetchError } = await supabase
+          .from('bookings')
+          .select(`
+            *,
+            packages:package_id (
+              id,
+              title,
+              base_price
+            )
+          `)
+          .eq('id', bookingFlow.bookingId)
+          .single()
+
+        if (fetchError || !bookingFromDb) {
+          console.error('Failed to fetch booking:', fetchError)
+          setSubmitError(
+            'Unable to load booking details from database. ' +
+            'Please return to account setup and try again, or contact support if this persists.'
+          )
+          setIsLoading(false)
+          return
+        }
+
+        console.log('✅ Booking fetched successfully from database')
+
+        // Merge database booking with context for complete validation
+        // Use database as source of truth, fallback to context
+        const mergedBookingData = {
+          ...bookingFlow,
+          bookingId: bookingFromDb.id,
+          scheduleDetails: {
+            date: bookingFromDb.event_date || bookingFlow.scheduleDetails?.date,
+            timeOfDay: bookingFlow.scheduleDetails?.timeOfDay,
+            selectedAt: bookingFlow.scheduleDetails?.selectedAt
+          },
+          locationDetails: {
+            address: bookingFromDb.venue_address || bookingFlow.locationDetails?.address,
+            locationTitle: bookingFromDb.venue_name || bookingFlow.locationDetails?.locationTitle || 'Venue Location'
+          },
+          packageDetails: {
+            packageTitle: bookingFromDb.packages?.title || bookingFlow.packageDetails?.packageTitle || 'Custom Package',
+            packagePrice: bookingFromDb.packages?.base_price || bookingFlow.packageDetails?.packagePrice || 0,
+            packageType: bookingFlow.packageDetails?.packageType || 'custom',
+            hoursBooked: bookingFlow.packageDetails?.hoursBooked || 6,
+            isPhotoVideo: bookingFlow.packageDetails?.isPhotoVideo || true
+          },
+          addonsDetails: {
+            selectedAddons: bookingFlow.addonsDetails?.selectedAddons || [],
+            totalAddonsPrice: bookingFlow.addonsDetails?.totalAddonsPrice || 0
+          }
+        }
+
+        // Validate booking data with Zod schema for critical contract requirements using merged data
         const contractRequirements = {
-          eventDate: formatDateForValidation(bookingFlow.scheduleDetails?.date),
-          location: bookingFlow.locationDetails?.locationTitle,
-          packageName: bookingFlow.packageDetails?.packageTitle,
-          price: bookingFlow.packageDetails?.packagePrice
+          eventDate: formatDateForValidation(mergedBookingData.scheduleDetails?.date),
+          location: mergedBookingData.locationDetails?.address || 'To Be Determined',
+          packageName: mergedBookingData.packageDetails?.packageTitle || 'Custom Package',
+          price: mergedBookingData.packageDetails?.packagePrice !== undefined
+            ? mergedBookingData.packageDetails.packagePrice
+            : 0
         }
 
         // Add detailed logging to understand validation failures
@@ -145,17 +207,17 @@ const ContractStep = () => {
           return
         }
 
-        // Validate booking data (legacy validation for backward compatibility)
-        const validation = validateBookingDataForContract(bookingFlow)
+        // Validate booking data (legacy validation for backward compatibility) using merged data
+        const validation = validateBookingDataForContract(mergedBookingData)
         if (!validation.isValid) {
           console.error('Booking data incomplete:', validation.missing)
           navigate(`/booking/${photographerId}/addons`, { replace: true })
           return
         }
 
-        // Generate contract with timeout and retry protection (10s timeout, 2 retries)
+        // Generate contract with timeout and retry protection (10s timeout, 2 retries) using merged data
         const contract = await withTimeoutAndRetry(
-          () => generateContractForBooking(bookingFlow),
+          () => generateContractForBooking(mergedBookingData),
           {
             timeout: 10000, // 10 second timeout
             retries: 2,     // 2 retry attempts
@@ -436,16 +498,14 @@ const ContractStep = () => {
         {/* Progress Stepper */}
         <BookingStepper
           steps={steps}
-          currentStepIndex={4} // Contract is step 5 (0-indexed: 4)
+          currentStepIndex={3} // Contract is step 4 (0-indexed: 3)
           onStepClick={(stepIndex, step) => {
             if (step.status === 'completed') {
               const stepId = steps[stepIndex].id
               if (stepId === 'addons') {
                 navigate(`/booking/${photographerId}/addons`)
-              } else if (stepId === 'location') {
-                navigate(`/booking/${photographerId}/location`)
-              } else if (stepId === 'package') {
-                navigate(`/booking/${photographerId}/package`)
+              } else if (stepId === 'account') {
+                navigate(`/booking/${photographerId}/account`)
               } else if (stepId === 'schedule') {
                 navigate(`/booking/${photographerId}/schedule`)
               }

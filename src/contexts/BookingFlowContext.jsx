@@ -12,12 +12,10 @@ const BookingFlowContext = createContext({})
 // Step configuration
 const BOOKING_STEPS = [
   { id: 'schedule', label: 'Schedule Details', order: 0 },
-  { id: 'package', label: 'Package Details', order: 1 },
-  { id: 'location', label: 'Locations', order: 2 },
-  { id: 'addons', label: 'Add-Ons', order: 3 },
-  { id: 'account', label: 'Account Setup', order: 4 },
-  { id: 'contract', label: 'Contract & Signature', order: 5 },
-  { id: 'payment', label: 'Payment', order: 6 }
+  { id: 'addons', label: 'Add-Ons', order: 1 },
+  { id: 'account', label: 'Account Setup', order: 2 },
+  { id: 'contract', label: 'Contract & Signature', order: 3 },
+  { id: 'payment', label: 'Payment', order: 4 }
 ]
 
 // Generate or retrieve a persistent session ID
@@ -61,13 +59,6 @@ export const BookingFlowProvider = ({ children }) => {
       selectedAt: null
     },
 
-    locationDetails: {
-      locationId: null,
-      locationTitle: null,
-      locationVibe: null,
-      selectedAt: null
-    },
-
     addonsDetails: {
       selectedAddons: [], // Array of {id, title, price, qty}
       totalAddonsPrice: 0, // Computed total of all add-ons
@@ -94,6 +85,7 @@ export const BookingFlowProvider = ({ children }) => {
     paymentDetails: {
       paymentCompleted: false,
       paymentMethod: null,
+      paymentPlan: 'full', // 'full', 'deposit+3', or 'installments'
       paymentIntentId: null,
       receiptUrl: null,
       paidAt: null,
@@ -103,7 +95,6 @@ export const BookingFlowProvider = ({ children }) => {
     validationState: {
       schedule: false,
       package: false,
-      location: false,
       addons: false,
       account: false,
       contract: false,
@@ -166,28 +157,28 @@ export const BookingFlowProvider = ({ children }) => {
       return existingFlow
     }
 
-    // Create new flow
+    // Create new flow with optional initial package details
+    const hasPackage = !!(initialData.packageDetails?.packagePrice)
+    const hasSchedule = !!initialData.date
+
     const newFlow = {
       photographerId,
-      currentStep: 'schedule',
-      completedSteps: [],
+      currentStep: hasSchedule ? (hasPackage ? 'addons' : 'schedule') : 'schedule',
+      completedSteps: hasSchedule ? ['schedule'] : [],
       scheduleDetails: {
         date: initialData.date || null,
-        timeOfDay: initialData.timeOfDay || null,
-        selectedAt: initialData.date || initialData.timeOfDay ? new Date().toISOString() : null
+        timeOfDay: null,
+        selectedAt: initialData.date ? new Date().toISOString() : null
       },
-      packageDetails: {
+      packageDetails: initialData.packageDetails ? {
+        ...initialData.packageDetails,
+        selectedAt: new Date().toISOString()
+      } : {
         packageType: null,
         packagePrice: null,
         hoursBooked: null,
         isPhotoVideo: false,
         packageTitle: null,
-        selectedAt: null
-      },
-      locationDetails: {
-        locationId: null,
-        locationTitle: null,
-        locationVibe: null,
         selectedAt: null
       },
       addonsDetails: {
@@ -211,19 +202,12 @@ export const BookingFlowProvider = ({ children }) => {
         selectedAt: null
       },
       validationState: {
-        schedule: !!(initialData.date && initialData.timeOfDay),
-        package: false,
-        location: false,
+        schedule: hasSchedule,
+        package: hasPackage,
         addons: false,
         account: false,
         contract: false
       }
-    }
-
-    // If we have initial schedule data, mark schedule as completed
-    if (newFlow.validationState.schedule) {
-      newFlow.completedSteps = ['schedule']
-      newFlow.currentStep = 'package'
     }
 
     setBookingFlow(newFlow)
@@ -231,9 +215,9 @@ export const BookingFlowProvider = ({ children }) => {
   }, [loadBookingFlow, sessionId])
 
   // Update schedule details
-  const updateScheduleDetails = useCallback((date, timeOfDay) => {
+  const updateScheduleDetails = useCallback((date) => {
     setBookingFlow(prev => {
-      const scheduleValid = !!(date && timeOfDay)
+      const scheduleValid = !!date
       const newCompletedSteps = scheduleValid
         ? [...new Set([...prev.completedSteps, 'schedule'])]
         : prev.completedSteps.filter(step => step !== 'schedule')
@@ -242,11 +226,11 @@ export const BookingFlowProvider = ({ children }) => {
         ...prev,
         scheduleDetails: {
           date,
-          timeOfDay,
+          timeOfDay: null,
           selectedAt: new Date().toISOString()
         },
         completedSteps: newCompletedSteps,
-        currentStep: scheduleValid ? 'package' : 'schedule',
+        currentStep: scheduleValid ? 'addons' : 'schedule',
         validationState: {
           ...prev.validationState,
           schedule: scheduleValid
@@ -255,49 +239,14 @@ export const BookingFlowProvider = ({ children }) => {
     })
   }, [])
 
-  // Update package details
+  // Update package details (legacy - no longer used but kept for backwards compatibility)
   const updatePackageDetails = useCallback((packageData) => {
     setBookingFlow(prev => {
-      const packageValid = !!(packageData && packageData.packageType)
-      const newCompletedSteps = packageValid
-        ? [...new Set([...prev.completedSteps, 'package'])]
-        : prev.completedSteps.filter(step => step !== 'package')
-
       return {
         ...prev,
         packageDetails: {
           ...packageData,
           selectedAt: new Date().toISOString()
-        },
-        completedSteps: newCompletedSteps,
-        currentStep: packageValid ? 'location' : 'package',
-        validationState: {
-          ...prev.validationState,
-          package: packageValid
-        }
-      }
-    })
-  }, [])
-
-  // Update location details
-  const updateLocationDetails = useCallback((locationData) => {
-    setBookingFlow(prev => {
-      const locationValid = !!(locationData && locationData.locationId)
-      const newCompletedSteps = locationValid
-        ? [...new Set([...prev.completedSteps, 'location'])]
-        : prev.completedSteps.filter(step => step !== 'location')
-
-      return {
-        ...prev,
-        locationDetails: {
-          ...locationData,
-          selectedAt: new Date().toISOString()
-        },
-        completedSteps: newCompletedSteps,
-        currentStep: locationValid ? 'addons' : 'location',
-        validationState: {
-          ...prev.validationState,
-          location: locationValid
         }
       }
     })
@@ -410,6 +359,18 @@ export const BookingFlowProvider = ({ children }) => {
     })
   }, [])
 
+  // Update payment plan selection
+  const updatePaymentPlan = useCallback((paymentPlan) => {
+    setBookingFlow(prev => ({
+      ...prev,
+      paymentDetails: {
+        ...prev.paymentDetails,
+        paymentPlan,
+        selectedAt: new Date().toISOString()
+      }
+    }))
+  }, [])
+
   // Mark payment as complete
   const markPaymentComplete = useCallback((paymentIntentId, receiptUrl) => {
     setBookingFlow(prev => {
@@ -418,6 +379,7 @@ export const BookingFlowProvider = ({ children }) => {
       return {
         ...prev,
         paymentDetails: {
+          ...prev.paymentDetails,
           paymentCompleted: true,
           paymentIntentId: paymentIntentId || prev.paymentDetails?.paymentIntentId || null,
           receiptUrl: receiptUrl || prev.paymentDetails?.receiptUrl || null,
@@ -517,12 +479,6 @@ export const BookingFlowProvider = ({ children }) => {
         packageTitle: null,
         selectedAt: null
       },
-      locationDetails: {
-        locationId: null,
-        locationTitle: null,
-        locationVibe: null,
-        selectedAt: null
-      },
       addonsDetails: {
         selectedAddons: [],
         totalAddonsPrice: 0,
@@ -594,12 +550,12 @@ export const BookingFlowProvider = ({ children }) => {
     initializeBookingFlow,
     updateScheduleDetails,
     updatePackageDetails,
-    updateLocationDetails,
     updateAddonsDetails,
     setBookingId,
     updateAccountDetails,
     updateContractDetails,
     updatePaymentDetails,
+    updatePaymentPlan,
     markPaymentComplete,
     goToStep,
     resetBookingFlow,

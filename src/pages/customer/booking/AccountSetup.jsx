@@ -54,12 +54,23 @@ const AccountSetup = () => {
 
     const { scheduleDetails, packageDetails, locationDetails, addonsDetails } = bookingFlow
 
-    if (!scheduleDetails?.date || !packageDetails?.packageType) {
-      throw new Error('Booking details are incomplete. Please review the earlier steps.')
+    if (!scheduleDetails?.date) {
+      throw new Error('Event date is required. Please complete the schedule step.')
     }
 
+    // Package is optional - fallback to "Custom Package" if not provided
+    const effectivePackageDetails = packageDetails && packageDetails.packagePrice
+      ? packageDetails
+      : {
+          packageType: 'custom',
+          packagePrice: 0,
+          hoursBooked: 6,
+          isPhotoVideo: true,
+          packageTitle: 'Custom Package'
+        }
+
     const selectedAddons = addonsDetails?.selectedAddons || []
-    const packagePrice = packageDetails?.packagePrice || 0
+    const packagePrice = effectivePackageDetails.packagePrice || 0
     const addonsPrice = selectedAddons.reduce(
       (sum, addon) => sum + (addon.price * (addon.qty || 1)),
       0
@@ -73,7 +84,7 @@ const AccountSetup = () => {
     const payload = {
       customerId,
       photographerId,
-      packageDetails,
+      packageDetails: effectivePackageDetails, // Use effective package with fallback
       scheduleDetails,
       locationDetails,
       addonsDetails: {
@@ -316,7 +327,7 @@ const AccountSetup = () => {
       <div className="min-h-screen bg-dusty-50">
         <BookingStepper
           steps={steps}
-          currentStepIndex={4}
+          currentStepIndex={2}
         />
 
         <div className="max-w-2xl mx-auto px-4 py-12">

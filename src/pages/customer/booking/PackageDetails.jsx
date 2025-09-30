@@ -55,7 +55,7 @@ const PackageDetails = () => {
   // Handle continue to next step
   const handleContinue = () => {
     if (selectedPackage) {
-      navigate(`/booking/${photographerId}/location`)
+      navigate(`/booking/${photographerId}/addons`)
     }
   }
 
