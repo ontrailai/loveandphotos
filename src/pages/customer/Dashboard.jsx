@@ -1,33 +1,25 @@
 /**
- * Customer Dashboard Component
- * Main dashboard for customers with bookings and activity
+ * Customer Dashboard - Exact Magic MCP Design
+ * Adapted from Magic MCP output with Supabase integration
  */
 
 import { useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@contexts/AuthContext'
-import {
-  CalendarIcon,
-  CameraIcon,
-  ClockIcon,
-  MapPinIcon,
-  StarIcon,
-  ChevronRightIcon,
-  PlusIcon,
-  CheckCircleIcon,
-  AlertCircleIcon,
-  ImageIcon,
-  MessageSquareIcon,
-  DownloadIcon
-} from 'lucide-react'
-import Button from '@components/ui/Button'
-import Card from '@components/ui/Card'
-import Badge from '@components/ui/Badge'
-import Avatar from '@components/shared/Avatar'
-import RatingStars from '@components/shared/RatingStars'
-import PageHero from '@components/marketing/PageHero'
+import { motion, useReducedMotion } from 'framer-motion'
+import { ChevronRight } from 'lucide-react'
+import StyleQuestionnaire from '@components/dashboard/StyleQuestionnaire'
+import LogisticsCard from '@components/dashboard/LogisticsCard'
+import ModifyBookingFlow from '@components/booking/ModifyBookingFlow'
+import ContractsCard from '@components/dashboard/ContractsCard'
+import QuestionnairesCard from '@components/dashboard/QuestionnairesCard'
+import AddOnsCard from '@components/dashboard/AddOnsCard'
+import StatsCards from '@components/dashboard/redesign/StatsCards'
+import UpcomingBookingCard from '@components/dashboard/redesign/UpcomingBookingCard'
+import EmptyState from '@components/dashboard/redesign/EmptyState'
+import SkeletonLoaders from '@components/dashboard/redesign/SkeletonLoaders'
 import { supabase } from '@lib/supabase'
-import { format, formatDistanceToNow, isPast, isFuture } from 'date-fns'
+import { isPast, isFuture, parseISO } from 'date-fns'
 import toast from 'react-hot-toast'
 
 const CustomerDashboard = () => {
@@ -40,10 +32,39 @@ const CustomerDashboard = () => {
   const [stats, setStats] = useState({
     totalBookings: 0,
     upcomingEvents: 0,
+    completedBookings: 0,
     photosReceived: 0,
     reviewsGiven: 0
   })
+  const [showQuestionnaire, setShowQuestionnaire] = useState(false)
+  const [modifyingBooking, setModifyingBooking] = useState(null)
 
+  const shouldReduceMotion = useReducedMotion()
+  const shouldAnimate = !shouldReduceMotion
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.1,
+      }
+    }
+  }
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        type: "spring",
+        stiffness: 400,
+        damping: 28,
+      },
+    },
+  }
 
   useEffect(() => {
     if (user) {
@@ -88,6 +109,11 @@ const CustomerDashboard = () => {
             id,
             rating,
             comment
+          ),
+          contract_signatures (
+            id,
+            signed_at,
+            signer_full_name
           )
         `)
         .eq('customer_id', user.id)
@@ -95,11 +121,11 @@ const CustomerDashboard = () => {
 
       if (!bookingsError && bookingsData) {
         setBookings(bookingsData)
-        
+
         // Separate upcoming and past bookings
-        const upcoming = bookingsData.filter(b => isFuture(new Date(b.event_date)))
-        const past = bookingsData.filter(b => isPast(new Date(b.event_date)))
-        
+        const upcoming = bookingsData.filter(b => isFuture(parseISO(b.event_date)))
+        const past = bookingsData.filter(b => isPast(parseISO(b.event_date)))
+
         setUpcomingBookings(upcoming)
         setPastBookings(past)
 
@@ -107,6 +133,7 @@ const CustomerDashboard = () => {
         setStats({
           totalBookings: bookingsData.length,
           upcomingEvents: upcoming.length,
+          completedBookings: past.length,
           photosReceived: bookingsData.filter(b => b.job_queue?.[0]?.upload_status === 'completed').length,
           reviewsGiven: bookingsData.filter(b => b.reviews?.[0]?.id).length
         })
@@ -119,14 +146,6 @@ const CustomerDashboard = () => {
     }
   }
 
-  const getBookingStatus = (booking) => {
-    if (booking.booking_status === 'cancelled') return { label: 'Cancelled', variant: 'danger' }
-    if (booking.job_queue?.[0]?.upload_status === 'completed') return { label: 'Delivered', variant: 'success' }
-    if (isPast(new Date(booking.event_date))) return { label: 'Completed', variant: 'secondary' }
-    if (booking.payment_status === 'paid') return { label: 'Confirmed', variant: 'primary' }
-    return { label: 'Pending', variant: 'warning' }
-  }
-
   const handleWriteReview = (booking) => {
     navigate(`/review/${booking.id}`)
   }
@@ -137,256 +156,133 @@ const CustomerDashboard = () => {
     }
   }
 
-  // Don't render early - this breaks hooks
-  // Instead, show loading or content conditionally
-  return loading ? (
-    <div className="min-h-screen bg-background flex items-center justify-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
-    </div>
-  ) : (
-    <div className="min-h-screen bg-background text-foreground">
-      {/* Header */}
-      <PageHero
-        title={`Welcome back${profile?.full_name ? `, ${profile.full_name.split(' ')[0]}` : ''}!`}
-        subtitle="Manage your bookings and discover new photographers."
-        align="left"
-        actions={
-          <Link to="/browse">
-            <Button>
-              <PlusIcon className="w-5 h-5 mr-2" />
-              Book Photographer
-            </Button>
-          </Link>
-        }
-      />
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-gradient-to-br from-primary-50 to-primary-100 border-primary-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-primary-600 text-sm font-medium">Total Bookings</p>
-                <p className="text-3xl font-bold text-primary-900">{stats.totalBookings}</p>
-              </div>
-              <div className="w-12 h-12 bg-primary-500 rounded-lg flex items-center justify-center">
-                <CameraIcon className="w-6 h-6 text-white" />
-              </div>
-            </div>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-sage-50 to-sage-100 border-sage-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sage-600 text-sm font-medium">Upcoming Events</p>
-                <p className="text-3xl font-bold text-sage-900">{stats.upcomingEvents}</p>
-              </div>
-              <div className="w-12 h-12 bg-sage-500 rounded-lg flex items-center justify-center">
-                <CalendarIcon className="w-6 h-6 text-white" />
-              </div>
-            </div>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-dusty-50 to-dusty-100 border-dusty-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-dusty-600 text-sm font-medium">Photos Received</p>
-                <p className="text-3xl font-bold text-dusty-900">{stats.photosReceived}</p>
-              </div>
-              <div className="w-12 h-12 bg-dusty-500 rounded-lg flex items-center justify-center">
-                <ImageIcon className="w-6 h-6 text-white" />
-              </div>
-            </div>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-yellow-600 text-sm font-medium">Reviews Given</p>
-                <p className="text-3xl font-bold text-yellow-900">{stats.reviewsGiven}</p>
-              </div>
-              <div className="w-12 h-12 bg-yellow-500 rounded-lg flex items-center justify-center">
-                <StarIcon className="w-6 h-6 text-white" />
-              </div>
-            </div>
-          </Card>
-        </div>
-
-        {/* Upcoming Bookings */}
-        {upcomingBookings.length > 0 && (
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold text-foreground mb-4">Upcoming Events</h2>
-            <div className="grid gap-4">
-              {upcomingBookings.map((booking) => (
-                <Card key={booking.id} className="overflow-hidden">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <Avatar
-                        src={booking.photographers?.users?.avatar_url}
-                        name={booking.photographers?.users?.full_name}
-                        size="lg"
-                      />
-                      <div>
-                        <div className="flex items-center space-x-2 mb-1">
-                          <h3 className="font-semibold text-foreground">
-                            {booking.photographers?.users?.full_name}
-                          </h3>
-                          <Badge 
-                            variant={booking.photographers?.pay_tiers?.name?.toLowerCase() || 'default'}
-                            size="sm"
-                          >
-                            {booking.photographers?.pay_tiers?.name}
-                          </Badge>
-                          <Badge variant={getBookingStatus(booking).variant} size="sm">
-                            {getBookingStatus(booking).label}
-                          </Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground mb-2">
-                          {booking.packages?.title} • {booking.packages?.duration_minutes} minutes
-                        </p>
-                        <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                          <span className="flex items-center">
-                            <CalendarIcon className="w-4 h-4 mr-1" />
-                            {format(new Date(booking.event_date), 'MMM dd, yyyy')}
-                          </span>
-                          <span className="flex items-center">
-                            <ClockIcon className="w-4 h-4 mr-1" />
-                            {booking.event_time}
-                          </span>
-                          <span className="flex items-center">
-                            <MapPinIcon className="w-4 h-4 mr-1" />
-                            {booking.venue_name}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center space-x-2">
-                      <Button variant="ghost" size="sm">
-                        <MessageSquareIcon className="w-4 h-4 mr-2" />
-                        Message
-                      </Button>
-                      <Link to={`/booking/${booking.id}`}>
-                        <Button variant="outline" size="sm">
-                          View Details
-                          <ChevronRightIcon className="w-4 h-4 ml-2" />
-                        </Button>
-                      </Link>
-                    </div>
-                  </div>
-
-                  {/* Event countdown */}
-                  <div className="mt-4 pt-4 border-t border-border">
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm text-muted-foreground">
-                        Event in {formatDistanceToNow(new Date(booking.event_date), { addSuffix: false })}
-                      </p>
-                      {booking.contract_signed_at ? (
-                        <span className="flex items-center text-sm text-green-600">
-                          <CheckCircleIcon className="w-4 h-4 mr-1" />
-                          Contract signed
-                        </span>
-                      ) : (
-                        <span className="flex items-center text-sm text-yellow-600">
-                          <AlertCircleIcon className="w-4 h-4 mr-1" />
-                          Contract pending
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Past Bookings */}
-        {pastBookings.length > 0 && (
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+        <div className="w-full max-w-7xl mx-auto p-6 space-y-8">
           <div>
-            <h2 className="text-xl font-semibold text-foreground mb-4">Past Events</h2>
-            <div className="grid gap-4">
-              {pastBookings.slice(0, 5).map((booking) => (
-                <Card key={booking.id} className="bg-background">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <Avatar
-                        src={booking.photographers?.users?.avatar_url}
-                        name={booking.photographers?.users?.full_name}
-                        size="md"
-                      />
-                      <div>
-                        <h3 className="font-semibold text-foreground">
-                          {booking.photographers?.users?.full_name}
-                        </h3>
-                        <p className="text-sm text-muted-foreground">
-                          {booking.event_type} • {format(new Date(booking.event_date), 'MMM dd, yyyy')}
-                        </p>
-                        {booking.reviews?.[0] ? (
-                          <div className="mt-1">
-                            <RatingStars rating={booking.reviews[0].rating} size="sm" />
-                          </div>
-                        ) : (
-                          <p className="text-sm text-primary-600 mt-1">Review pending</p>
-                        )}
+            <h1 className="text-3xl font-bold">Loading...</h1>
+            <p className="text-muted-foreground mt-1">Fetching your bookings</p>
+          </div>
+          <SkeletonLoaders />
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+      <motion.div
+        variants={shouldAnimate ? containerVariants : {}}
+        initial={shouldAnimate ? "hidden" : "visible"}
+        animate="visible"
+        className="w-full max-w-7xl mx-auto p-6 space-y-8"
+      >
+        {/* Header */}
+        <motion.div variants={shouldAnimate ? itemVariants : {}}>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+            My Dashboard
+          </h1>
+          <p className="text-muted-foreground mt-1">Manage your photography bookings</p>
+        </motion.div>
+
+        {/* Stats Cards */}
+        <StatsCards stats={stats} />
+
+        {/* Bookings Section */}
+        <motion.div variants={shouldAnimate ? itemVariants : {}} className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold">Upcoming Bookings</h2>
+            <motion.button
+              whileHover={shouldAnimate ? { scale: 1.05 } : {}}
+              whileTap={shouldAnimate ? { scale: 0.95 } : {}}
+              onClick={() => navigate('/browse')}
+              className="text-sm text-primary hover:underline flex items-center gap-1"
+            >
+              View All <ChevronRight className="w-4 h-4" />
+            </motion.button>
+          </div>
+
+          {upcomingBookings.length === 0 ? (
+            <EmptyState />
+          ) : (
+            <div className="space-y-4">
+              {upcomingBookings.map((booking) => (
+                <div key={booking.id}>
+                  <UpcomingBookingCard
+                    booking={booking}
+                    onModify={() => setModifyingBooking(booking)}
+                    onMessage={() => {/* TODO: Implement messaging */}}
+                    onViewDetails={() => navigate(`/booking/${booking.id}`)}
+                    onViewInvoice={async () => {
+                      try {
+                        const token = (await supabase.auth.getSession()).data.session?.access_token
+                        const url = `/api/contracts/${booking.id}/pdf`
+                        const response = await fetch(url, {
+                          headers: {
+                            'Authorization': `Bearer ${token}`
+                          }
+                        })
+
+                        if (!response.ok) {
+                          throw new Error('Failed to generate invoice PDF')
+                        }
+
+                        const blob = await response.blob()
+                        const pdfUrl = window.URL.createObjectURL(blob)
+                        window.open(pdfUrl, '_blank')
+                      } catch (error) {
+                        console.error('Error viewing invoice:', error)
+                        toast.error('Failed to view invoice')
+                      }
+                    }}
+                  />
+
+                  {/* Wedding Day Logistics (T-60) */}
+                  <div className="mt-4">
+                    <LogisticsCard booking={booking} />
+                  </div>
+
+                  {/* Client Dashboard Expansion Cards */}
+                  {import.meta.env.VITE_ENABLE_CLIENT_DASHBOARD_EXPANSION === 'true' && (
+                    <div className="mt-4 pt-4 border-t border-border">
+                      <h4 className="text-sm font-semibold text-foreground mb-3">Event Preparation</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <ContractsCard booking={booking} />
+                        <QuestionnairesCard booking={booking} />
+                        <AddOnsCard booking={booking} />
                       </div>
                     </div>
-
-                    <div className="flex items-center space-x-2">
-                      {booking.job_queue?.[0]?.upload_status === 'completed' && (
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => handleViewPhotos(booking)}
-                        >
-                          <DownloadIcon className="w-4 h-4 mr-2" />
-                          Photos
-                        </Button>
-                      )}
-                      {!booking.reviews?.[0] && isPast(new Date(booking.event_date)) && (
-                        <Button 
-                          size="sm"
-                          onClick={() => handleWriteReview(booking)}
-                        >
-                          <StarIcon className="w-4 h-4 mr-2" />
-                          Write Review
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                </Card>
+                  )}
+                </div>
               ))}
             </div>
+          )}
+        </motion.div>
+      </motion.div>
 
-            {pastBookings.length > 5 && (
-              <div className="text-center mt-6">
-                <Link to="/my-bookings">
-                  <Button variant="outline">
-                    View All Bookings
-                  </Button>
-                </Link>
-              </div>
-            )}
-          </div>
-        )}
+      {/* Style Questionnaire Modal */}
+      {showQuestionnaire && (
+        <StyleQuestionnaire
+          onClose={() => setShowQuestionnaire(false)}
+          onComplete={() => {
+            setShowQuestionnaire(false)
+            loadDashboardData()
+          }}
+        />
+      )}
 
-        {/* Empty State */}
-        {bookings.length === 0 && (
-          <Card className="text-center py-12">
-            <CameraIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-foreground mb-2">
-              No bookings yet
-            </h3>
-            <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-              Start your journey by finding the perfect photographer for your special moments
-            </p>
-            <Link to="/photographers">
-              <Button size="lg">
-                Browse Photographers
-              </Button>
-            </Link>
-          </Card>
-        )}
-      </div>
+      {/* Modify Booking Modal */}
+      {modifyingBooking && (
+        <ModifyBookingFlow
+          booking={modifyingBooking}
+          onClose={() => setModifyingBooking(null)}
+          onComplete={() => {
+            setModifyingBooking(null)
+            loadDashboardData()
+          }}
+        />
+      )}
     </div>
   )
 }
