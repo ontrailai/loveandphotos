@@ -114,6 +114,19 @@ const AccountSetup = () => {
       const errorData = await response.json().catch(() => ({}))
       const detail = errorData.details || errorData.detail || errorData.error
       const message = errorData.message || detail || `Failed to create booking: ${response.status}`
+
+      // Check if this is a foreign key error (user doesn't exist yet)
+      // This is expected on first attempt and will be retried automatically
+      const isForeignKeyError = errorData.code === 'BOOKING_CREATION_FAILED' &&
+                                errorData.errorCode === '23503' &&
+                                detail?.includes('bookings_customer_id_fkey')
+
+      if (isForeignKeyError) {
+        console.log('⏳ User record not ready yet, will retry automatically')
+        // Throw error silently - will be retried when AuthContext refetches user
+        throw new Error('USER_NOT_READY')
+      }
+
       throw new Error(detail ? `${message} (${detail})` : message)
     }
 
@@ -150,6 +163,13 @@ const AccountSetup = () => {
 
       navigate(`/booking/${photographerId}/contract`)
     } catch (error) {
+      // Suppress USER_NOT_READY errors - expected on first attempt
+      // Booking will retry automatically when user record is ready
+      if (error.message === 'USER_NOT_READY') {
+        console.log('⏳ Booking creation deferred, will retry when user is ready')
+        return // Don't show error toast
+      }
+
       console.error('❌ Failed to finalize account step:', error)
       toast.error(error.message || 'Unable to prepare your booking. Please try again.')
     } finally {
