@@ -474,48 +474,48 @@ const Home = () => {
           <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="col-span-1 space-y-4">
               <img 
-                src="/assets/hero/1.jpg" 
+                src="https://imagedelivery.net/d771a17227725e76e48d60846983a398/cfb6bab8-0fda-49cc-7e8e-c18159b01b00/public" 
                 alt="Wedding" 
                 className="rounded-2xl w-full h-48 object-cover hover:scale-105 transition-transform duration-300"
               />
               <img 
-                src="/assets/hero/2.jpg" 
+                src="https://imagedelivery.net/d771a17227725e76e48d60846983a398/071f78e7-c9e5-4c45-27df-76c8e99c8900/public" 
                 alt="Wedding couple" 
                 className="rounded-2xl w-full h-64 object-cover hover:scale-105 transition-transform duration-300"
               />
             </div>
             <div className="col-span-1 space-y-4 pt-8">
               <img 
-                src="/assets/hero/3.jpg" 
+                src="https://imagedelivery.net/d771a17227725e76e48d60846983a398/f9596bb2-b075-4cef-4891-f7a87685f200/public" 
                 alt="Portrait" 
                 className="rounded-2xl w-full h-64 object-cover hover:scale-105 transition-transform duration-300"
               />
               <img 
-                src="/assets/hero/4.jpg" 
+                src="https://imagedelivery.net/d771a17227725e76e48d60846983a398/c7ed3be9-7f76-4dee-19e0-d0dc95463f00/public" 
                 alt="Family" 
                 className="rounded-2xl w-full h-48 object-cover hover:scale-105 transition-transform duration-300"
               />
             </div>
             <div className="col-span-1 space-y-4">
               <img 
-                src="/assets/hero/5.jpg" 
+                src="https://imagedelivery.net/d771a17227725e76e48d60846983a398/329c267c-8f44-44d1-3c2c-7d8224d77f00/public" 
                 alt="Event" 
                 className="rounded-2xl w-full h-48 object-cover hover:scale-105 transition-transform duration-300"
               />
               <img 
-                src="/assets/hero/6.jpg" 
+                src="https://imagedelivery.net/d771a17227725e76e48d60846983a398/065eb3c0-5554-4377-c14b-d336b4a49900/public" 
                 alt="Newborn" 
                 className="rounded-2xl w-full h-64 object-cover hover:scale-105 transition-transform duration-300"
               />
             </div>
             <div className="col-span-1 space-y-4 pt-8">
               <img 
-                src="/assets/hero/7.jpg" 
+                src="https://imagedelivery.net/d771a17227725e76e48d60846983a398/e5ca4928-a9c7-46ee-d49d-90896eae7700/public" 
                 alt="Corporate" 
                 className="rounded-2xl w-full h-64 object-cover hover:scale-105 transition-transform duration-300"
               />
               <img 
-                src="/assets/hero/8.jpg" 
+                src="https://imagedelivery.net/d771a17227725e76e48d60846983a398/cec0e770-9046-4fe6-2d16-420c7baba200/public" 
                 alt="Birthday" 
                 className="rounded-2xl w-full h-48 object-cover hover:scale-105 transition-transform duration-300"
               />
