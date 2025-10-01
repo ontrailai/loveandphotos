@@ -474,48 +474,48 @@ const Home = () => {
           <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="col-span-1 space-y-4">
               <img 
-                src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=400" 
+                src="/assets/hero/1.jpg" 
                 alt="Wedding" 
                 className="rounded-2xl w-full h-48 object-cover hover:scale-105 transition-transform duration-300"
               />
               <img 
-                src="https://images.unsplash.com/photo-1519741497674-611481863552?w=400" 
+                src="/assets/hero/2.jpg" 
                 alt="Wedding couple" 
                 className="rounded-2xl w-full h-64 object-cover hover:scale-105 transition-transform duration-300"
               />
             </div>
             <div className="col-span-1 space-y-4 pt-8">
               <img 
-                src="https://images.unsplash.com/photo-1537633552985-df8429e8048b?w=400" 
+                src="/assets/hero/3.jpg" 
                 alt="Portrait" 
                 className="rounded-2xl w-full h-64 object-cover hover:scale-105 transition-transform duration-300"
               />
               <img 
-                src="https://images.unsplash.com/photo-1591604466107-ec97de577aff?w=400" 
+                src="/assets/hero/4.jpg" 
                 alt="Family" 
                 className="rounded-2xl w-full h-48 object-cover hover:scale-105 transition-transform duration-300"
               />
             </div>
             <div className="col-span-1 space-y-4">
               <img 
-                src="https://images.unsplash.com/photo-1527529482837-4698179dc6ce?w=400" 
+                src="/assets/hero/5.jpg" 
                 alt="Event" 
                 className="rounded-2xl w-full h-48 object-cover hover:scale-105 transition-transform duration-300"
               />
               <img 
-                src="https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=400" 
+                src="/assets/hero/6.jpg" 
                 alt="Newborn" 
                 className="rounded-2xl w-full h-64 object-cover hover:scale-105 transition-transform duration-300"
               />
             </div>
             <div className="col-span-1 space-y-4 pt-8">
               <img 
-                src="https://images.unsplash.com/photo-1549294413-26f195200c16?w=400" 
+                src="/assets/hero/7.jpg" 
                 alt="Corporate" 
                 className="rounded-2xl w-full h-64 object-cover hover:scale-105 transition-transform duration-300"
               />
               <img 
-                src="https://images.unsplash.com/photo-1529636798458-92182e662485?w=400" 
+                src="/assets/hero/8.jpg" 
                 alt="Birthday" 
                 className="rounded-2xl w-full h-48 object-cover hover:scale-105 transition-transform duration-300"
               />
