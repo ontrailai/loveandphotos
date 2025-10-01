@@ -38,7 +38,9 @@
       "Bash(kill:*)",
       "Bash(git rm:*)",
       "Bash(npm run dev:api:*)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(git checkout:*)",
+      "Bash(git stash:*)"
     ],
     "deny": [],
     "ask": []
