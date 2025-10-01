@@ -49,7 +49,7 @@ import TalentPricing from '@pages/pricing/TalentPricing'
 import FAQ from '@pages/FAQ'
 import Resources from '@pages/Resources'
 import Learn from '@pages/Learn'
-import Profile from '@pages/Profile'
+import ProfilePage from '@pages/customer/ProfilePage'
 import Demo from '@pages/Demo'
 
 // Customer Pages (lazy loaded)
@@ -96,6 +96,7 @@ const TalentContracts = lazy(() => import('@pages/talent/dashboard/ContractsPage
 const TalentMessages = lazy(() => import('@pages/talent/dashboard/MessagesPage'))
 const TalentBookings = lazy(() => import('@pages/talent/dashboard/BookingsPage'))
 const TalentSettings = lazy(() => import('@pages/talent/dashboard/SettingsPage'))
+const TalentAvailability = lazy(() => import('@pages/talent/dashboard/AvailabilityPage'))
 
 // Lazy load photographer placeholders
 const PhotographerPlaceholders = lazy(() => import('@pages/placeholders'))
@@ -353,7 +354,7 @@ function App() {
             } />
             <Route path="/profile" element={
               <ProtectedRoute>
-                <Profile />
+                <ProfilePage />
               </ProtectedRoute>
             } />
           </Route>
@@ -517,6 +518,11 @@ function App() {
             <Route path="settings" element={
               <Suspense fallback={<PageLoader />}>
                 <TalentSettings />
+              </Suspense>
+            } />
+            <Route path="availability" element={
+              <Suspense fallback={<PageLoader />}>
+                <TalentAvailability />
               </Suspense>
             } />
           </Route>

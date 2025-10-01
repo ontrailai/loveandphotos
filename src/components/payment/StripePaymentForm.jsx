@@ -119,10 +119,38 @@ const StripePaymentForm = ({ onSuccess, paymentPlan = 'full' }) => {
       })
 
       if (confirmError) {
-        // Handle error from Stripe
-        console.error('Payment confirmation error:', confirmError)
-        setError(confirmError.message)
-        toast.error(confirmError.message)
+        // Handle error from Stripe with detailed logging
+        console.error('❌ Payment confirmation error:', {
+          message: confirmError.message,
+          type: confirmError.type,
+          code: confirmError.code,
+          decline_code: confirmError.decline_code,
+          param: confirmError.param,
+          full_error: confirmError
+        })
+
+        // Construct user-friendly error message
+        let userMessage = confirmError.message || 'Payment failed. Please try again.'
+
+        // Add specific guidance based on error type
+        if (confirmError.type === 'card_error') {
+          if (confirmError.decline_code === 'insufficient_funds') {
+            userMessage = 'Your card has insufficient funds. Please use a different payment method.'
+          } else if (confirmError.decline_code === 'expired_card') {
+            userMessage = 'Your card has expired. Please use a different card.'
+          } else {
+            userMessage = confirmError.message + ' Please check your card details and try again.'
+          }
+        } else if (confirmError.type === 'validation_error') {
+          userMessage = confirmError.message + ' Please verify all required fields are filled correctly.'
+        } else if (confirmError.code === 'payment_intent_unexpected_state') {
+          userMessage = 'This payment may have already been processed. Please refresh the page or contact support.'
+        } else if (confirmError.type === 'api_error') {
+          userMessage = 'A payment processing error occurred. Please try again or contact support if the issue persists.'
+        }
+
+        setError(userMessage)
+        toast.error(userMessage, { duration: 6000 })
       } else if (paymentIntent) {
         if (paymentIntent.status === 'succeeded') {
           // Payment succeeded without redirect

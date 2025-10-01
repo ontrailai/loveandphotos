@@ -173,12 +173,39 @@ const Browse = () => {
         throw new Error('Database configuration error. Please check environment variables.')
       }
 
-      // Fetch photographers with proper error handling
-      const { data: photographers, error } = await supabaseClient
-        .from('photographer_preview_profiles')
-        .select('id, display_name, portfolio_images, bio, specialties, hourly_rate, location_city, location_state, average_rating, is_verified, is_available, is_love_and_photos_choice, user_id')
-        .eq('is_available', true)
-        .limit(1000)
+      // Build query with availability filtering if date is selected
+      let query = supabaseClient
+        .from('photographers')
+        .select(`
+          id,
+          user_id,
+          bio,
+          experience_years,
+          average_rating,
+          total_reviews,
+          is_verified,
+          is_public,
+          available_dates,
+          visible_in_search,
+          zip_code,
+          city,
+          state,
+          portfolio_images,
+          style_tags,
+          users!inner(full_name, avatar_url)
+        `)
+        .eq('visible_in_search', true)
+
+      // If date filter is selected, only show photographers available on that date
+      // Note: Supabase needs the date in YYYY-MM-DD format for the array contains check
+      if (filters.date) {
+        console.log('Filtering by date:', filters.date)
+        // Ensure date is in YYYY-MM-DD format for PostgreSQL DATE[] comparison
+        const filterDate = filters.date.split('T')[0] // Remove any time component
+        query = query.contains('available_dates', [filterDate])
+      }
+
+      const { data: photographers, error } = await query.limit(1000)
 
       console.log('Query result:', {
         success: !error,
@@ -241,31 +268,34 @@ const Browse = () => {
             id: profile.id,
             user_id: profile.user_id || profile.id,
             bio: profile.bio || `Professional photographer with years of experience`,
-            specialties: Array.isArray(profile.specialties) ? profile.specialties : ['Wedding', 'Portrait'],
+            specialties: Array.isArray(profile.style_tags) ? profile.style_tags : ['Wedding', 'Portrait'],
             languages: ['English'],
-            years_experience: 5 + (index % 10),
-            hourly_rate: profile.hourly_rate || (150 + (index * 25)),
-            location_city: profile.location_city || 'New York',
-            location_state: profile.location_state || 'NY',
-            is_available: profile.is_available !== false,
-            is_public: true,
+            years_experience: profile.experience_years || (5 + (index % 10)),
+            hourly_rate: 150 + (index * 25), // Remove if pricing should be hidden
+            location_city: profile.city || 'New York',
+            location_state: profile.state || 'NY',
+            is_available: profile.visible_in_search !== false,
+            is_public: profile.is_public !== false,
             average_rating: profile.average_rating || (4.2 + (index % 8) * 0.1),
-            total_reviews: 10 + (index * 3),
+            total_reviews: profile.total_reviews || (10 + (index * 3)),
             total_bookings: 5 + (index * 2),
-            users: {
-              full_name: profile.display_name || `Photographer ${index + 1}`,
+            available_dates: profile.available_dates || [],
+            users: profile.users || {
+              full_name: `Photographer ${index + 1}`,
               avatar_url: profile.portfolio_images && profile.portfolio_images.length > 0 ? profile.portfolio_images[0] : fallbackUrl
             },
             pay_tiers: {
               name: profile.is_verified ? 'Professional' : 'Standard',
-              hourly_rate: profile.hourly_rate || (150 + (index * 25)),
+              hourly_rate: 150 + (index * 25),
               badge_color: profile.is_verified ? 'gold' : 'silver'
             },
-            portfolio_items: [
-              { image_url: portfolioImages[index % portfolioImages.length] },
-              { image_url: portfolioImages[(index + 5) % portfolioImages.length] },
-              { image_url: portfolioImages[(index + 10) % portfolioImages.length] }
-            ],
+            portfolio_items: profile.portfolio_images ?
+              profile.portfolio_images.slice(0, 3).map(url => ({ image_url: url })) :
+              [
+                { image_url: portfolioImages[index % portfolioImages.length] },
+                { image_url: portfolioImages[(index + 5) % portfolioImages.length] },
+                { image_url: portfolioImages[(index + 10) % portfolioImages.length] }
+              ],
             // Trust metrics from photographers table
             acceptance_rate: metrics.acceptance_rate,
             avg_response_time_minutes: metrics.avg_response_time_minutes,
@@ -818,9 +848,11 @@ const Browse = () => {
                   No photographers found
                 </h3>
                 <p className="text-dusty-600 mb-4">
-                  {filters.femaleOnly && filters.photographyStyle !== 'all' 
+                  {filters.date
+                    ? `No photographers available on ${new Date(filters.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}. Try changing your date or location.`
+                    : filters.femaleOnly && filters.photographyStyle !== 'all'
                     ? `No female photographers found with ${filters.photographyStyle} style. Try adjusting your preferences.`
-                    : filters.femaleOnly 
+                    : filters.femaleOnly
                     ? 'No female photographers found in this area. Try expanding your search.'
                     : filters.photographyStyle !== 'all'
                     ? `No photographers found with ${filters.photographyStyle} style. Try selecting "Everything" to see all styles.`

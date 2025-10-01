@@ -182,22 +182,25 @@ export function computePayable(booking, plan) {
       // $500 deposit + remaining balance split into monthly payments
       amount_cents = 50000 // $500 deposit
     } else if (plan === 'monthly199') {
-      // Monthly plan: Fixed $199/month + $150 processing fee on first payment
+      // Monthly plan: Total balance (base + $150 fee) divided into monthly $199 payments
+      // First payment includes processing fee, remaining balance paid in subsequent months
       processing_fee_cents = 15000 // $150 processing fee
-      const monthlyPayment = 19900 // $199 fixed monthly payment
+      const totalWithFee = base_cents + processing_fee_cents
 
-      // Calculate how many payments needed
-      const remainingAfterFirst = base_cents - monthlyPayment
-      const paymentsNeeded = Math.ceil(remainingAfterFirst / monthlyPayment) + 1 // +1 for first payment
+      // Calculate monthly payment amount to spread total over available months
+      const monthlyPayment = Math.ceil(totalWithFee / monthsUntilCutoff)
 
-      // Check if we have enough months before 60-day cutoff
-      if (paymentsNeeded > monthsUntilCutoff) {
-        // Not enough time for monthly plan - return 0 to indicate unavailable
-        amount_cents = 0
-      } else {
-        // First payment: $199 + $150 processing fee = $349
-        amount_cents = monthlyPayment + processing_fee_cents
-      }
+      // First payment due today
+      amount_cents = monthlyPayment
+
+      console.log('💳 Monthly Plan Breakdown:', {
+        base_cents,
+        processing_fee_cents,
+        total_with_fee: totalWithFee,
+        months_available: monthsUntilCutoff,
+        monthly_payment: monthlyPayment,
+        first_payment_today: amount_cents
+      })
     } else if (plan === 'deposit+3' || plan === 'installments') {
       // Legacy support: map old plan names
       if (plan === 'deposit+3') {

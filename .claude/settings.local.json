@@ -38,7 +38,10 @@
       "Bash(kill:*)",
       "Bash(git rm:*)",
       "Bash(npm run dev:api:*)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "mcp__supabase__list_tables",
+      "Bash(xargs ls:*)",
+      "Bash(PORT=10000 node server.js)"
     ],
     "deny": [],
     "ask": []

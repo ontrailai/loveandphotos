@@ -1,6 +1,6 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '@contexts/AuthContext'
-import { Camera, Calendar, FileText, MessageCircle, User, LayoutDashboard, ArrowLeft, LogOut, Sparkles, Settings } from 'lucide-react'
+import { Camera, Calendar, FileText, MessageCircle, User, LayoutDashboard, ArrowLeft, LogOut, Sparkles, Settings, CalendarClock } from 'lucide-react'
 import { useEffect } from 'react'
 import toast from 'react-hot-toast'
 
@@ -76,6 +76,7 @@ const TalentDashboardLayout = () => {
   const navItems = [
     { path: '/talent/dashboard', label: 'Overview', icon: LayoutDashboard },
     { path: '/talent/dashboard/profile', label: 'Profile', icon: User },
+    { path: '/talent/dashboard/availability', label: 'Availability', icon: CalendarClock },
     { path: '/talent/dashboard/calendar', label: 'Calendar', icon: Calendar },
     { path: '/talent/dashboard/bookings', label: 'Bookings', icon: FileText },
     { path: '/talent/dashboard/contracts', label: 'Contracts', icon: FileText },

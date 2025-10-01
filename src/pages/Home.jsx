@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect, useRef } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Feature } from '@components/ui/feature-with-advantages'
 import { TestimonialsColumn } from '@components/ui/testimonials-columns-1'
 import { motion } from 'motion/react'
@@ -15,7 +15,6 @@ import {
   CalendarIcon,
   SparklesIcon,
   CheckCircleIcon,
-  ArrowRightIcon,
   StarIcon,
   HeartIcon,
   ShieldCheckIcon
@@ -453,26 +452,18 @@ const Home = () => {
               </div>
             </div>
 
-            {/* Pricing CTA */}
+            {/* Pricing Information */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.6 }}
               className="max-w-md mx-auto my-8"
             >
-              <div className="bg-gradient-to-r from-[#fe395f]/5 to-[#fe395f]/10 border border-[#fe395f]/20 rounded-2xl p-6 text-center">
-                <p className="text-lg font-semibold text-foreground mb-3">
-                  Packages start at $550 upfront or $199/month
+              <div className="bg-pink-50 rounded-xl px-6 py-5 text-center shadow-sm border border-pink-100">
+                <p className="text-lg font-medium text-gray-900">
+                  Packages start at <span className="font-semibold">$550 upfront</span> or <span className="font-semibold">$199/month</span>
                 </p>
-                <Link
-                  to="/pricing/client"
-                  className="inline-flex items-center justify-center bg-[#fe395f] hover:bg-[#fe395f]/90 text-white font-medium px-6 py-3 rounded-full transition-all duration-200 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#fe395f] focus:ring-offset-2 shadow-lg hover:shadow-xl"
-                  aria-label="View detailed pricing packages starting at $550 upfront or $199 per month"
-                >
-                  View Pricing
-                  <ArrowRightIcon className="w-4 h-4 ml-2" />
-                </Link>
-                <p className="text-sm text-muted-foreground mt-3">
+                <p className="text-sm text-gray-500 mt-1">
                   Transparent pricing. No hidden fees.
                 </p>
               </div>
