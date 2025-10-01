@@ -14,6 +14,7 @@ import ModifyBookingFlow from '@components/booking/ModifyBookingFlow'
 import ContractsCard from '@components/dashboard/ContractsCard'
 import QuestionnairesCard from '@components/dashboard/QuestionnairesCard'
 import AddOnsCard from '@components/dashboard/AddOnsCard'
+import PaymentCard from '@components/dashboard/PaymentCard'
 import StatsCards from '@components/dashboard/redesign/StatsCards'
 import UpcomingBookingCard from '@components/dashboard/redesign/UpcomingBookingCard'
 import EmptyState from '@components/dashboard/redesign/EmptyState'
@@ -259,6 +260,11 @@ const CustomerDashboard = () => {
                       }
                     }}
                   />
+
+                  {/* Payment Information */}
+                  <div className="mt-4">
+                    <PaymentCard booking={booking} />
+                  </div>
 
                   {/* Wedding Day Logistics (T-60) */}
                   <div className="mt-4">
