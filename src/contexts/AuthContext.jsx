@@ -53,6 +53,31 @@ export const AuthProvider = ({ children }) => {
         } else {
           console.error('[AuthContext] Error creating profile:', error)
         }
+      } else {
+        // Profile exists - check if email needs to be synced from auth.users
+        if (userProfile.email !== user.email) {
+          console.log('[AuthContext] Email mismatch detected, syncing:', {
+            profileEmail: userProfile.email,
+            authEmail: user.email
+          })
+
+          const { data: updatedProfile, error: syncError } = await supabase
+            .from('users')
+            .update({
+              email: user.email,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', user.id)
+            .select()
+            .single()
+
+          if (!syncError && updatedProfile) {
+            userProfile = updatedProfile
+            console.log('[AuthContext] ✅ Email synced successfully to users table')
+          } else {
+            console.error('[AuthContext] ❌ Failed to sync email:', syncError)
+          }
+        }
       }
 
       setProfile(userProfile)
