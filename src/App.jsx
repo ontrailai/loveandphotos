@@ -59,6 +59,7 @@ const VideoBrowse = lazy(() => import('@pages/customer/VideoBrowse'))
 const Guide = lazy(() => import('@pages/customer/Guide'))
 const BookingConfirmation = lazy(() => import('@pages/customer/BookingConfirmation'))
 const Quiz = lazy(() => import('@pages/customer/Quiz'))
+const BookingDetails = lazy(() => import('@pages/customer/BookingDetails'))
 
 // Lazy load placeholder pages
 const LazyPlaceholders = lazy(() => import('@pages/customer/placeholders'))
@@ -349,6 +350,13 @@ function App() {
               <ProtectedRoute>
                 <Suspense fallback={<PageLoader />}>
                   <CustomerBookings />
+                </Suspense>
+              </ProtectedRoute>
+            } />
+            <Route path="/booking/:bookingId" element={
+              <ProtectedRoute>
+                <Suspense fallback={<PageLoader />}>
+                  <BookingDetails />
                 </Suspense>
               </ProtectedRoute>
             } />
