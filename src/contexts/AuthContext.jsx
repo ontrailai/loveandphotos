@@ -53,6 +53,31 @@ export const AuthProvider = ({ children }) => {
         } else {
           console.error('[AuthContext] Error creating profile:', error)
         }
+      } else {
+        // Profile exists - check if email needs to be synced from auth.users
+        if (userProfile.email !== user.email) {
+          console.log('[AuthContext] Email mismatch detected, syncing:', {
+            profileEmail: userProfile.email,
+            authEmail: user.email
+          })
+
+          const { data: updatedProfile, error: syncError } = await supabase
+            .from('users')
+            .update({
+              email: user.email,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', user.id)
+            .select()
+            .single()
+
+          if (!syncError && updatedProfile) {
+            userProfile = updatedProfile
+            console.log('[AuthContext] ✅ Email synced successfully to users table')
+          } else {
+            console.error('[AuthContext] ❌ Failed to sync email:', syncError)
+          }
+        }
       }
 
       setProfile(userProfile)
@@ -163,17 +188,58 @@ export const AuthProvider = ({ children }) => {
           console.error('Error creating user profile:', upsertError)
         }
 
-        // If photographer or videographer, initialize photographer profile with is_videographer flag
+        // If photographer or videographer, initialize photographer profile with required fields
         if (role === 'photographer') {
-          await supabase
+          console.log('[AuthContext] 📸 Creating photographer profile for:', data.user.id)
+
+          // Create record in photographers table
+          const { data: photographerData, error: photographerError } = await supabase
             .from('photographers')
             .upsert({
               user_id: data.user.id,
               is_videographer: isVideographer,
-              created_at: new Date().toISOString()
+              is_public: true,  // CRITICAL: Must be true to appear in search
+              profile_complete: false,  // Will be set to true after profile completion
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
             }, {
               onConflict: 'user_id'
             })
+            .select()
+
+          if (photographerError) {
+            console.error('[AuthContext] ❌ Error creating photographer profile:', photographerError)
+          } else {
+            console.log('[AuthContext] ✅ Photographer profile created successfully:', photographerData)
+          }
+
+          // CRITICAL: Also create record in photographer_preview_profiles for search visibility
+          const { data: previewData, error: previewError } = await supabase
+            .from('photographer_preview_profiles')
+            .upsert({
+              user_id: data.user.id,
+              display_name: fullName || 'New Photographer',
+              contact_email: email,
+              contact_phone: phone || null,
+              bio: null,  // Will be filled during profile completion
+              specialties: [],  // Will be filled during profile completion
+              location_city: 'Unknown',  // Will be updated during profile completion
+              location_state: 'Unknown',  // Will be updated during profile completion
+              is_available: true,  // CRITICAL: Must be true to appear in search
+              is_verified: false,
+              portfolio_images: [],  // Will be filled during profile completion
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            }, {
+              onConflict: 'user_id'
+            })
+            .select()
+
+          if (previewError) {
+            console.error('[AuthContext] ❌ Error creating preview profile:', previewError)
+          } else {
+            console.log('[AuthContext] ✅ Preview profile created successfully:', previewData)
+          }
         }
       }
 

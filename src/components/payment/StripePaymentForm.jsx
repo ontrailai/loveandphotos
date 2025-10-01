@@ -9,7 +9,7 @@ import toast from 'react-hot-toast'
  * Uses Stripe Payment Element for secure card collection
  * Handles payment confirmation with Stripe
  */
-const StripePaymentForm = ({ onSuccess }) => {
+const StripePaymentForm = ({ onSuccess, paymentPlan = 'full' }) => {
   const stripe = useStripe()
   const elements = useElements()
   const { bookingFlow } = useBookingFlow()
@@ -17,33 +17,79 @@ const StripePaymentForm = ({ onSuccess }) => {
   const [isProcessing, setIsProcessing] = useState(false)
   const [error, setError] = useState(null)
 
-  // Calculate payment amount for display
+  // Calculate payment amount for display based on selected payment plan
+  // This logic MUST match PaymentStep.jsx and backend compute.js exactly
   const calculatePaymentAmount = () => {
-    const { packageDetails, addonsDetails } = bookingFlow
+    const { packageDetails, addonsDetails, scheduleDetails } = bookingFlow
+    const packagePrice = packageDetails?.packagePrice || 0
+    const addonsPrice = addonsDetails?.totalAddonsPrice || 0
+    const baseTotal = packagePrice + addonsPrice
 
-    if (packageDetails?.packageType === 'monthly') {
-      // Monthly payment: (package price + addons) / 6
-      const packagePrice = packageDetails?.packagePrice || 0
-      const addonsPrice = addonsDetails?.totalAddonsPrice || 0
-      return Math.round((packagePrice + addonsPrice) / 6)
-    } else if (packageDetails?.packageType === 'deposit') {
-      // Deposit payment: flat $500
-      return 500
-    } else {
-      // Full payment: package price + addons
-      const packagePrice = packageDetails?.packagePrice || 0
-      const addonsPrice = addonsDetails?.totalAddonsPrice || 0
-      const baseAmount = packagePrice + addonsPrice
+    // Calculate days until event and 60-day cutoff
+    const eventDate = new Date(scheduleDetails?.date)
+    const daysUntilEvent = Math.ceil((eventDate - new Date()) / (1000 * 60 * 60 * 24))
 
-      // Add late fee if within 30 days
-      const eventDate = new Date(bookingFlow.scheduleDetails?.date)
-      const daysUntilEvent = Math.ceil((eventDate - new Date()) / (1000 * 60 * 60 * 24))
+    // Calculate 60-day cutoff date
+    const cutoffDate = new Date(eventDate)
+    cutoffDate.setDate(cutoffDate.getDate() - 60)
+    const daysUntilCutoff = Math.ceil((cutoffDate - new Date()) / (1000 * 60 * 60 * 24))
+    const monthsUntilCutoff = Math.max(1, Math.floor(daysUntilCutoff / 30))
 
-      if (daysUntilEvent <= 30) {
-        return baseAmount + 450 // Add $450 late fee
+    // Log for debugging
+    console.log('💳 StripePaymentForm - Payment Calculation:', {
+      paymentPlan,
+      packagePrice,
+      addonsPrice,
+      baseTotal,
+      daysUntilEvent,
+      daysUntilCutoff,
+      monthsUntilCutoff
+    })
+
+    // Apply pricing rules matching backend compute.js
+    if (daysUntilEvent <= 60) {
+      // Within 60 days: $450 late fee applies, only full payment allowed
+      const lateFee = 450
+      const total = baseTotal + lateFee
+      console.log('💳 Late booking (within 60 days): $' + total + ' (includes $450 late fee)')
+      return total
+    } else if (daysUntilEvent < 90) {
+      // 61-89 days: Limited plans (full payment or $500 deposit only)
+      if (paymentPlan === 'deposit500') {
+        console.log('💳 Deposit plan (61-89 days): $500')
+        return 500 // $500 deposit
+      } else {
+        console.log('💳 Full payment (61-89 days): $' + baseTotal)
+        return baseTotal // Full payment
       }
-
-      return baseAmount
+    } else {
+      // 90+ days: All payment plans available
+      if (paymentPlan === 'deposit500') {
+        console.log('💳 Deposit plan (90+ days): $500')
+        return 500 // $500 deposit
+      } else if (paymentPlan === 'monthly199') {
+        // Monthly plan: Fixed $199/month + $150 processing fee (first payment)
+        const processingFee = 150
+        const monthlyPayment = 199
+        const firstPayment = monthlyPayment + processingFee
+        console.log('💳 Monthly plan first payment: $' + firstPayment + ' ($199 + $150 processing fee)')
+        return firstPayment // $349 first payment
+      } else if (paymentPlan === 'deposit+3') {
+        // Legacy: map to deposit500
+        console.log('💳 Legacy deposit+3 plan: $500')
+        return 500
+      } else if (paymentPlan === 'installments') {
+        // Legacy: map to monthly199
+        const processingFee = 150
+        const monthlyPayment = Math.floor(baseTotal / monthsUntilCutoff)
+        const firstPayment = monthlyPayment + processingFee
+        console.log('💳 Legacy installments plan: $' + firstPayment)
+        return firstPayment
+      } else {
+        // Full payment
+        console.log('💳 Full payment (90+ days): $' + baseTotal)
+        return baseTotal
+      }
     }
   }
 
@@ -73,10 +119,38 @@ const StripePaymentForm = ({ onSuccess }) => {
       })
 
       if (confirmError) {
-        // Handle error from Stripe
-        console.error('Payment confirmation error:', confirmError)
-        setError(confirmError.message)
-        toast.error(confirmError.message)
+        // Handle error from Stripe with detailed logging
+        console.error('❌ Payment confirmation error:', {
+          message: confirmError.message,
+          type: confirmError.type,
+          code: confirmError.code,
+          decline_code: confirmError.decline_code,
+          param: confirmError.param,
+          full_error: confirmError
+        })
+
+        // Construct user-friendly error message
+        let userMessage = confirmError.message || 'Payment failed. Please try again.'
+
+        // Add specific guidance based on error type
+        if (confirmError.type === 'card_error') {
+          if (confirmError.decline_code === 'insufficient_funds') {
+            userMessage = 'Your card has insufficient funds. Please use a different payment method.'
+          } else if (confirmError.decline_code === 'expired_card') {
+            userMessage = 'Your card has expired. Please use a different card.'
+          } else {
+            userMessage = confirmError.message + ' Please check your card details and try again.'
+          }
+        } else if (confirmError.type === 'validation_error') {
+          userMessage = confirmError.message + ' Please verify all required fields are filled correctly.'
+        } else if (confirmError.code === 'payment_intent_unexpected_state') {
+          userMessage = 'This payment may have already been processed. Please refresh the page or contact support.'
+        } else if (confirmError.type === 'api_error') {
+          userMessage = 'A payment processing error occurred. Please try again or contact support if the issue persists.'
+        }
+
+        setError(userMessage)
+        toast.error(userMessage, { duration: 6000 })
       } else if (paymentIntent) {
         if (paymentIntent.status === 'succeeded') {
           // Payment succeeded without redirect
@@ -129,26 +203,6 @@ const StripePaymentForm = ({ onSuccess }) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Payment Amount Display */}
-      <div className="bg-primary-50 border border-primary-200 rounded-lg p-4">
-        <div className="flex justify-between items-center">
-          <span className="text-dusty-700 font-medium">Amount Due Today:</span>
-          <span className="text-2xl font-bold text-dusty-900">
-            ${paymentAmount.toFixed(2)}
-          </span>
-        </div>
-        {bookingFlow.packageDetails?.packageType === 'monthly' && (
-          <p className="text-sm text-dusty-600 mt-2">
-            Monthly payment plan: 6 monthly payments
-          </p>
-        )}
-        {bookingFlow.packageDetails?.packageType === 'deposit' && (
-          <p className="text-sm text-dusty-600 mt-2">
-            Deposit payment: Remaining balance due before event
-          </p>
-        )}
-      </div>
-
       {/* Stripe Payment Element */}
       <div className="border border-dusty-200 rounded-lg p-4">
         <PaymentElement

@@ -91,7 +91,10 @@ const SettingsPage = () => {
     try {
       console.log('[SettingsPage] Updating email from', user.email, 'to:', emailData.newEmail)
 
-      // Step 1: Update email in Supabase Auth
+      // Update email in Supabase Auth
+      // NOTE: Supabase sends a confirmation email to the NEW address
+      // The email change only takes effect after the user confirms via the link
+      // Once confirmed, Supabase triggers a USER_UPDATED event which AuthContext handles
       const { data: authData, error: authError } = await supabase.auth.updateUser({
         email: emailData.newEmail
       })
@@ -100,46 +103,34 @@ const SettingsPage = () => {
         console.error('[SettingsPage] Auth update error:', authError)
 
         // Handle specific Supabase errors
-        if (authError.message?.includes('already registered')) {
+        if (authError.message?.includes('already registered') || authError.message?.includes('already been registered')) {
           throw new Error('This email is already in use by another account')
         }
-        if (authError.message?.includes('Email rate limit exceeded')) {
-          throw new Error('Too many email change attempts. Please try again later.')
+        if (authError.message?.includes('Email rate limit exceeded') || authError.message?.includes('rate limit')) {
+          throw new Error('Too many email change attempts. Please try again in a few minutes.')
+        }
+        if (authError.message?.includes('same email')) {
+          throw new Error('This is already your current email address')
         }
 
-        throw authError
+        throw new Error(authError.message || 'Failed to update email')
       }
 
-      console.log('[SettingsPage] Auth email update successful:', authData)
-
-      // Step 2: Update email in users table to keep in sync
-      // Note: Supabase sends a confirmation email. The email won't change until confirmed.
-      // We update the users table proactively, but auth.users.email is the source of truth
-      const { error: dbError } = await supabase
-        .from('users')
-        .update({
-          email: emailData.newEmail,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', user.id)
-
-      if (dbError) {
-        console.error('[SettingsPage] Users table update error:', dbError)
-        // Don't throw - auth update was successful, this is just for consistency
-        console.warn('[SettingsPage] Email updated in auth but not in users table')
-      } else {
-        console.log('[SettingsPage] Users table updated successfully')
-      }
+      console.log('[SettingsPage] ✅ Email change request successful:', {
+        newEmail: emailData.newEmail,
+        userId: user.id
+      })
 
       // Success! Supabase will send confirmation email to the new address
+      // The email won't change in auth.users or users table until confirmed
       toast.success(
-        'Email update initiated! Please check your new email address for a confirmation link. Your email will be updated once you confirm.',
-        { duration: 6000 }
+        '✅ Confirmation email sent! Check your new email address and click the confirmation link to complete the change.',
+        { duration: 8000 }
       )
 
       setEmailData({ newEmail: '', loading: false })
     } catch (error) {
-      console.error('[SettingsPage] Email update error:', error)
+      console.error('[SettingsPage] ❌ Email update error:', error)
 
       // Provide user-friendly error messages
       const errorMessage = error.message || 'Failed to update email. Please try again.'

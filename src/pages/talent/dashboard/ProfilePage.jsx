@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@contexts/AuthContext'
 import { supabase, db } from '@lib/supabase'
 import PhotoUploader from '@components/talent/PhotoUploader'
-import { Award, TrendingUp, Star, CheckCircle, AlertCircle, Trash2, AlertTriangle, ShieldAlert } from 'lucide-react'
+import { Award, TrendingUp, Star, CheckCircle, AlertCircle, Trash2, AlertTriangle, ShieldAlert, Eye, EyeOff } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const styleOptions = [
@@ -40,12 +40,15 @@ const ProfilePage = () => {
     gender: '',
     style_tags: [],
     is_videographer: false,
+    is_public: true, // Profile visibility toggle
     portfolio_images: [],
     address_line1: '',
     city: '',
     state: '',
     zip_code: '',
-    country: 'USA'
+    country: 'USA',
+    available_dates: [],
+    visible_in_search: false
   })
   const [stats, setStats] = useState({
     acceptance_rate: 87,
@@ -94,7 +97,10 @@ const ProfilePage = () => {
         gender: photographerProfile.gender || '',
         style_tags: photographerProfile.style_tags || [],
         is_videographer: photographerProfile.is_videographer || false,
+        is_public: photographerProfile.is_public !== undefined ? photographerProfile.is_public : true,
         portfolio_images: photographerProfile.portfolio_images || [],
+        available_dates: photographerProfile.available_dates || [],
+        visible_in_search: photographerProfile.visible_in_search || false,
         address_line1: photographerProfile.address_line1 || '',
         city: photographerProfile.city || '',
         state: photographerProfile.state || '',
@@ -145,7 +151,7 @@ const ProfilePage = () => {
           sanitizedUpdates[key] = Array.isArray(value) ? value : []
         }
         // Handle booleans
-        else if (key === 'is_videographer') {
+        else if (key === 'is_videographer' || key === 'is_public') {
           sanitizedUpdates[key] = Boolean(value)
         }
         // Handle numbers
@@ -171,6 +177,7 @@ const ProfilePage = () => {
 
       console.log('[ProfilePage] Auto-saving:', Object.keys(sanitizedUpdates))
 
+      // Update photographers table
       const { data, error } = await supabase
         .from('photographers')
         .upsert({
@@ -195,6 +202,48 @@ const ProfilePage = () => {
       if (!data || data.length === 0) {
         console.warn('[ProfilePage] ⚠️ Auto-save: No rows updated')
         throw new Error('Profile not found')
+      }
+
+      // CRITICAL: Also sync to photographer_preview_profiles for search visibility
+      const previewUpdates = {}
+      if (sanitizedUpdates.bio) previewUpdates.bio = sanitizedUpdates.bio
+      if (sanitizedUpdates.style_tags) previewUpdates.specialties = sanitizedUpdates.style_tags
+      if (sanitizedUpdates.portfolio_images) previewUpdates.portfolio_images = sanitizedUpdates.portfolio_images
+      if (sanitizedUpdates.city) previewUpdates.location_city = sanitizedUpdates.city
+      if (sanitizedUpdates.state) previewUpdates.location_state = sanitizedUpdates.state
+      if (sanitizedUpdates.zip_code) previewUpdates.location_zip = sanitizedUpdates.zip_code
+      if (sanitizedUpdates.experience_years) previewUpdates.years_experience = sanitizedUpdates.experience_years
+      if (sanitizedUpdates.is_public !== undefined) previewUpdates.is_available = sanitizedUpdates.is_public
+
+      // Only sync if we have updates for the preview table
+      if (Object.keys(previewUpdates).length > 0) {
+        try {
+          // Add 5-second timeout to prevent infinite hang
+          const syncWithTimeout = Promise.race([
+            supabase
+              .from('photographer_preview_profiles')
+              .update({
+                ...previewUpdates,
+                updated_at: new Date().toISOString()
+              })
+              .eq('user_id', user.id),
+            new Promise((_, reject) =>
+              setTimeout(() => reject(new Error('Preview sync timeout after 5s')), 5000)
+            )
+          ])
+
+          const { error: previewError } = await syncWithTimeout
+
+          if (previewError) {
+            console.warn('[ProfilePage] ⚠️ Preview profile sync error:', previewError)
+            // Don't throw - photographers table is primary source of truth
+          } else {
+            console.log('[ProfilePage] ✅ Synced to preview profile:', Object.keys(previewUpdates))
+          }
+        } catch (syncError) {
+          console.error('[ProfilePage] ❌ Preview sync failed (non-fatal):', syncError.message)
+          // Continue - don't block profile save for preview sync failure
+        }
       }
 
       const endTime = performance.now()
@@ -257,6 +306,27 @@ const ProfilePage = () => {
 
     // Auto-save photos immediately
     autoSaveProfile({ portfolio_images: newPhotos })
+  }
+
+  const handleVisibilityToggle = () => {
+    const newValue = !formData.is_public
+
+    console.log('[ProfilePage] 👁️ Visibility toggle:', newValue ? 'Public' : 'Private')
+
+    setFormData(prev => ({
+      ...prev,
+      is_public: newValue
+    }))
+
+    // Auto-save visibility immediately with toast confirmation
+    autoSaveProfile({ is_public: newValue }).then(() => {
+      toast.success(
+        newValue
+          ? '✅ Profile is now Public - visible in search results'
+          : '🔒 Profile is now Private - hidden from search results',
+        { duration: 3000 }
+      )
+    })
   }
 
   const validateZipCode = (zip) => {
@@ -587,7 +657,78 @@ const ProfilePage = () => {
 
       {/* Profile Form */}
       <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-6">
-        <h2 className="text-lg font-semibold text-gray-900">Profile Information</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-gray-900">Profile Information</h2>
+
+          {/* Profile Visibility Toggle */}
+          <div className="flex items-center gap-3">
+            <span className={`text-sm font-medium ${formData.is_public ? 'text-green-700' : 'text-gray-500'}`}>
+              {formData.is_public ? 'Public' : 'Private'}
+            </span>
+            <button
+              type="button"
+              onClick={handleVisibilityToggle}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${
+                formData.is_public ? 'bg-green-600' : 'bg-gray-300'
+              }`}
+              aria-label={formData.is_public ? 'Profile is public' : 'Profile is private'}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  formData.is_public ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              >
+                {formData.is_public ? (
+                  <Eye className="w-4 h-4 text-green-600" />
+                ) : (
+                  <EyeOff className="w-4 h-4 text-gray-400" />
+                )}
+              </span>
+            </button>
+          </div>
+        </div>
+
+        {/* Profile Visibility Explanation */}
+        <div className={`p-3 rounded-md text-sm ${
+          formData.visible_in_search
+            ? 'bg-green-50 border border-green-200'
+            : formData.is_public
+            ? 'bg-amber-50 border border-amber-200'
+            : 'bg-gray-50 border border-gray-200'
+        }`}>
+          {formData.visible_in_search ? (
+            <div className="flex items-start gap-2">
+              <Eye className="w-4 h-4 text-green-600 mt-0.5" />
+              <div>
+                <p className="font-medium text-green-900">✅ Visible in Client Search</p>
+                <p className="text-green-700 mt-1">
+                  Your profile is public and you have availability set. Clients can find you when searching for photographers.
+                </p>
+              </div>
+            </div>
+          ) : formData.is_public ? (
+            <div className="flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 text-amber-600 mt-0.5" />
+              <div>
+                <p className="font-medium text-amber-900">⚠️ Not Visible in Search</p>
+                <p className="text-amber-700 mt-1">
+                  Your profile is public, but you need to set your availability to appear in client searches.{' '}
+                  <a href="/talent/dashboard/availability" className="underline font-medium">
+                    Set availability now →
+                  </a>
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-start gap-2">
+              <EyeOff className="w-4 h-4 text-gray-600 mt-0.5" />
+              <div>
+                <p className="font-medium text-gray-900">Your profile is hidden from clients</p>
+                <p className="text-gray-700 mt-1">Your profile will not appear in search results. You cannot receive new bookings while private.</p>
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* Portfolio Photos */}
         <div ref={photoSectionRef}>

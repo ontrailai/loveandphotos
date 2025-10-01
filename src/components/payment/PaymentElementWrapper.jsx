@@ -49,11 +49,29 @@ const PaymentElementWrapper = ({ onSuccess, paymentPlan = 'full' }) => {
 
         const data = await response.json()
 
-        if (!data.clientSecret) {
-          throw new Error('Failed to get payment information')
+        console.log('💳 Payment Intent Response:', {
+          hasClientSecret: !!data.clientSecret,
+          amount: data.amount,
+          amountDollars: data.amount ? `$${(data.amount / 100).toFixed(2)}` : 'N/A',
+          breakdown: data.breakdown,
+          plan: paymentPlan
+        })
+
+        // Validate amount before proceeding
+        if (data.amount === 0 || data.amount === null || data.amount === undefined || !Number.isFinite(data.amount)) {
+          console.error('❌ Invalid payment amount received:', data.amount)
+          throw new Error(
+            `Invalid payment amount calculated: ${data.amount ? `$${(data.amount / 100).toFixed(2)}` : '$0.00'}. ` +
+            'Please return to the package selection step and ensure pricing is set, or contact support.'
+          )
         }
 
-        console.log('Payment intent created successfully')
+        if (!data.clientSecret) {
+          console.error('❌ No client secret in response')
+          throw new Error('Failed to get payment information from server. Please try again.')
+        }
+
+        console.log('✅ Payment intent created successfully')
         setClientSecret(data.clientSecret)
       } catch (err) {
         console.error('Error fetching payment intent:', err)
@@ -161,7 +179,7 @@ const PaymentElementWrapper = ({ onSuccess, paymentPlan = 'full' }) => {
 
   return (
     <Elements stripe={stripePromise} options={options}>
-      <StripePaymentForm onSuccess={onSuccess} />
+      <StripePaymentForm onSuccess={onSuccess} paymentPlan={paymentPlan} />
     </Elements>
   )
 }

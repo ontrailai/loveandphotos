@@ -442,6 +442,8 @@ app.post('/api/booking/create', async (req, res) => {
         vibe: locationDetails.locationVibe
       } : null,
       total_amount: totalAmountNumber,
+      package_total_cents: packagePriceCents, // Store package price in cents for compute.js
+      package_type: packageDetails?.packageType || null, // Store tier name (Bronze/Silver/Gold/Platinum)
       payment_status: 'pending',
       booking_status: 'pending',
       contract_signed: false,
