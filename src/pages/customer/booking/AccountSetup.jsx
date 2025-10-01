@@ -117,9 +117,11 @@ const AccountSetup = () => {
 
       // Check if this is a foreign key error (user doesn't exist yet)
       // This is expected on first attempt and will be retried automatically
-      const isForeignKeyError = errorData.code === 'BOOKING_CREATION_FAILED' &&
-                                errorData.errorCode === '23503' &&
-                                detail?.includes('bookings_customer_id_fkey')
+      const isForeignKeyError = (
+        (errorData.code === 'BOOKING_CREATION_FAILED' && errorData.errorCode === '23503') ||
+        (message && message.includes('bookings_customer_id_fkey')) ||
+        (detail && detail.includes('bookings_customer_id_fkey'))
+      )
 
       if (isForeignKeyError) {
         console.log('⏳ User record not ready yet, will retry automatically')
