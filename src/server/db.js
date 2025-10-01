@@ -286,8 +286,21 @@ export async function validateBookingAccess(bookingId, options = {}) {
   }
 
   // Check if booking is in a valid state for payment
+  // For installment plans, allow multiple payments until fully paid
   if (booking.payment_status === 'paid') {
-    return { valid: false, error: 'Booking already paid' }
+    // Calculate remaining balance from payment_schedule
+    const paymentSchedule = Array.isArray(booking.payment_schedule) ? booking.payment_schedule : []
+    const totalPaid = paymentSchedule
+      .filter(p => p.status === 'paid')
+      .reduce((sum, p) => sum + parseFloat(p.amount || 0), 0)
+
+    const totalDue = booking.final_amount || booking.calculated_amount || 0
+    const remainingBalance = totalDue - totalPaid
+
+    // Only block if fully paid (no remaining balance)
+    if (remainingBalance <= 0) {
+      return { valid: false, error: 'Booking already paid in full' }
+    }
   }
 
   return { valid: true, booking, email: storedEmail || (userEmail ? userEmail.trim() : null) }
