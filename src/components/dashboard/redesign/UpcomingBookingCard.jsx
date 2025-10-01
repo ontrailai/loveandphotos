@@ -76,7 +76,7 @@ const UpcomingBookingCard = ({
   const eventDate = parseISO(booking.event_date)
   const eventTime = booking.event_time || 'TBD'
   const eventLocation = booking.venue_name || 'TBD'
-  const price = booking.final_price || booking.base_price || 0
+  const price = parseFloat(booking.final_amount || booking.total_amount || 0)
 
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
