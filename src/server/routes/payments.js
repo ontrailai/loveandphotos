@@ -406,6 +406,7 @@ router.post('/create-payment-intent', async (req, res) => {
 
       // Store payment intent ID in booking for future reference
       const updateSuccess = await markBookingPaymentIntent(bookingId, {
+        payment_schedule: paymentSchedule,
         payment_intent_id: paymentIntent.id,
         payment_plan: paymentCalculation.planUsed,
         payment_status: 'pending'

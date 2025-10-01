@@ -63,6 +63,8 @@ export async function getBookingById(bookingId) {
       stripe_payment_intent_id,
       deposit_amount,
       final_amount,
+      payment_schedule,
+      payment_plan,
       created_at,
       updated_at
     `)
@@ -105,6 +107,11 @@ export async function markBookingPaymentIntent(bookingId, sessionData = {}) {
     }
   }
 
+  // Save payment_schedule if provided (from generatePaymentSchedule)
+  if (sessionData.payment_schedule) {
+    updatePayload.payment_schedule = sessionData.payment_schedule
+  }
+
   if (Object.keys(updatePayload).length === 1) {
     // Nothing to update besides timestamp
     return true
@@ -131,16 +138,43 @@ export async function markBookingPaymentIntent(bookingId, sessionData = {}) {
  * @returns Success boolean
  */
 export async function markBookingPaid(bookingId, paymentData) {
+  // First, fetch the current booking to get existing payment_schedule
+  const booking = await getBookingById(bookingId)
+  if (!booking) {
+    console.error('Booking not found:', bookingId)
+    return false
+  }
+
+  // Get current payment_schedule or initialize as empty array
+  const currentSchedule = Array.isArray(booking.payment_schedule) ? booking.payment_schedule : []
+
+  // Calculate the amount paid
+  const amountPaid = typeof paymentData.amount_paid_cents === 'number'
+    ? paymentData.amount_paid_cents / 100
+    : typeof paymentData.amount_cents === 'number'
+      ? paymentData.amount_cents / 100
+      : paymentData.final_amount ?? 0
+
+  // Create a new payment record to add to the schedule
+  const newPayment = {
+    amount: amountPaid.toString(),
+    status: 'paid',
+    due_date: new Date().toISOString(),
+    paid_at: new Date().toISOString(),
+    payment_intent_id: paymentData.payment_intent_id || paymentData.stripe_payment_intent_id || null,
+    description: paymentData.description || `Payment #${currentSchedule.filter(p => p.status === 'paid').length + 1}`
+  }
+
+  // Add the new payment to the schedule
+  const updatedSchedule = [...currentSchedule, newPayment]
+
   const updatePayload = {
     payment_status: paymentData.status || 'paid',
     stripe_payment_intent_id: paymentData.payment_intent_id || paymentData.stripe_payment_intent_id || null,
-    final_amount: typeof paymentData.amount_paid_cents === 'number'
-      ? paymentData.amount_paid_cents / 100
-      : typeof paymentData.amount_cents === 'number'
-        ? paymentData.amount_cents / 100
-        : paymentData.final_amount ?? null,
+    final_amount: amountPaid,
     paid_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
+    updated_at: new Date().toISOString(),
+    payment_schedule: updatedSchedule
   }
 
   const { error } = await supabase
@@ -153,6 +187,7 @@ export async function markBookingPaid(bookingId, paymentData) {
     return false
   }
 
+  console.log(`✅ Updated payment_schedule for booking ${bookingId}, added payment of ${amountPaid}`)
   return true
 }
 
