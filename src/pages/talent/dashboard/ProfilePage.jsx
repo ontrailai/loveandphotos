@@ -171,6 +171,7 @@ const ProfilePage = () => {
 
       console.log('[ProfilePage] Auto-saving:', Object.keys(sanitizedUpdates))
 
+      // Update photographers table
       const { data, error } = await supabase
         .from('photographers')
         .upsert({
@@ -195,6 +196,33 @@ const ProfilePage = () => {
       if (!data || data.length === 0) {
         console.warn('[ProfilePage] ⚠️ Auto-save: No rows updated')
         throw new Error('Profile not found')
+      }
+
+      // CRITICAL: Also sync to photographer_preview_profiles for search visibility
+      const previewUpdates = {}
+      if (sanitizedUpdates.bio) previewUpdates.bio = sanitizedUpdates.bio
+      if (sanitizedUpdates.style_tags) previewUpdates.specialties = sanitizedUpdates.style_tags
+      if (sanitizedUpdates.portfolio_images) previewUpdates.portfolio_images = sanitizedUpdates.portfolio_images
+      if (sanitizedUpdates.city) previewUpdates.location_city = sanitizedUpdates.city
+      if (sanitizedUpdates.state) previewUpdates.location_state = sanitizedUpdates.state
+      if (sanitizedUpdates.experience_years) previewUpdates.years_experience = sanitizedUpdates.experience_years
+
+      // Only sync if we have updates for the preview table
+      if (Object.keys(previewUpdates).length > 0) {
+        const { error: previewError } = await supabase
+          .from('photographer_preview_profiles')
+          .update({
+            ...previewUpdates,
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', user.id)
+
+        if (previewError) {
+          console.warn('[ProfilePage] ⚠️ Preview profile sync error:', previewError)
+          // Don't throw - photographers table is primary source of truth
+        } else {
+          console.log('[ProfilePage] ✅ Synced to preview profile:', Object.keys(previewUpdates))
+        }
       }
 
       const endTime = performance.now()

@@ -1,16 +1,15 @@
 /**
  * PackageDetails Page
- * Step 2 of booking flow - Package selection with payment options
+ * Step 2 of booking flow - Photography tier package selection
  */
 
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { CreditCardIcon, CheckIcon, StarIcon } from 'lucide-react'
+import { Camera, CheckIcon, StarIcon, Clock, Image } from 'lucide-react'
 import { useBookingFlow } from '@contexts/BookingFlowContext'
 import BookingStepper from '@components/booking/BookingStepper'
 import Button from '@components/ui/Button'
 import Card from '@components/ui/Card'
-import Badge from '@components/ui/Badge'
 import { clsx } from 'clsx'
 
 const PackageDetails = () => {
@@ -25,7 +24,7 @@ const PackageDetails = () => {
   } = useBookingFlow()
 
   const [selectedPackage, setSelectedPackage] = useState(
-    bookingFlow.packageDetails.packageType || null
+    bookingFlow.packageDetails?.packageType || null
   )
 
   // Check if user can access this step
@@ -44,11 +43,11 @@ const PackageDetails = () => {
   const handlePackageSelect = (packageData) => {
     setSelectedPackage(packageData.id)
     updatePackageDetails({
-      packageType: packageData.paymentType,
-      packagePrice: packageData.packagePrice, // Use the default package price for add-ons context
+      packageType: packageData.tier, // Store tier name (Bronze/Silver/Gold/Platinum)
+      packagePrice: packageData.packagePrice, // Store package price
       hoursBooked: packageData.hours,
       isPhotoVideo: packageData.includesVideo,
-      packageTitle: 'Photography Package' // Generic title since these are payment options
+      packageTitle: packageData.title // Store full package title
     })
   }
 
@@ -59,49 +58,93 @@ const PackageDetails = () => {
     }
   }
 
-  // Package configurations
+  // Photography tier packages with pricing
+  // Prices based on 6-hour wedding package (hours × hourly_rate from pay_tiers)
   const packages = [
     {
-      id: 'monthly',
-      title: '$199 Payment Plan',
-      price: '$199',
-      period: '/month',
-      badge: 'MOST POPULAR',
-      description: 'Flexible monthly payments',
-      // Add-ons context data (defaults for typical wedding package)
-      packagePrice: 2000,
+      id: 'bronze',
+      tier: 'Bronze',
+      title: 'Bronze Package',
+      price: '$900',
+      badge: 'BEST VALUE',
+      badgeColor: 'bg-amber-600',
+      description: '6 hours of professional photography',
+      packagePrice: 900, // 6 hours × $150/hour
       hours: 6,
       includesVideo: false,
-      paymentType: 'monthly',
       features: [
-        'Split payment into 6 monthly installments',
-        'No interest or hidden fees',
-        'Automatic payment processing',
-        'Full service access from day one',
-        'Cancel anytime before final payment'
+        '6 hours of coverage',
+        'Professional photographer',
+        '200+ edited high-resolution photos',
+        'Online gallery',
+        'Print release included'
       ],
-      buttonText: 'Monthly Plan',
+      popular: false
+    },
+    {
+      id: 'silver',
+      tier: 'Silver',
+      title: 'Silver Package',
+      price: '$1,350',
+      badge: 'MOST POPULAR',
+      badgeColor: 'bg-gray-400',
+      description: '6 hours with enhanced features',
+      packagePrice: 1350, // 6 hours × $225/hour
+      hours: 6,
+      includesVideo: false,
+      features: [
+        '6 hours of coverage',
+        'Experienced photographer',
+        '300+ edited high-resolution photos',
+        'Priority editing turnaround',
+        'Online gallery & print release',
+        'Engagement session included'
+      ],
       popular: true
     },
     {
-      id: 'deposit',
-      title: '$500 Deposit',
-      price: '$500',
-      period: 'upfront',
-      description: 'Single upfront deposit',
-      // Add-ons context data (defaults for typical wedding package)
-      packagePrice: 2000,
+      id: 'gold',
+      tier: 'Gold',
+      title: 'Gold Package',
+      price: '$2,100',
+      badge: 'PREMIUM',
+      badgeColor: 'bg-yellow-500',
+      description: '6 hours with premium service',
+      packagePrice: 2100, // 6 hours × $350/hour
       hours: 6,
       includesVideo: false,
-      paymentType: 'deposit',
       features: [
-        'Secure your photographer immediately',
-        'Remaining balance due 30 days before event',
-        'Preferred booking priority',
-        'Direct communication with photographer',
-        'Flexible rescheduling options'
+        '6 hours of coverage',
+        'Premium photographer',
+        '400+ edited high-resolution photos',
+        'Same-day sneak peek photos',
+        'Premium online gallery',
+        'Engagement + bridal session',
+        'Custom photo album'
       ],
-      buttonText: 'Deposit',
+      popular: false
+    },
+    {
+      id: 'platinum',
+      tier: 'Platinum',
+      title: 'Platinum Package',
+      price: '$3,000',
+      badge: 'LUXURY',
+      badgeColor: 'bg-slate-300',
+      description: '6 hours with luxury service',
+      packagePrice: 3000, // 6 hours × $500/hour
+      hours: 6,
+      includesVideo: false,
+      features: [
+        '6 hours of coverage',
+        'Elite photographer',
+        '500+ edited high-resolution photos',
+        'Same-day highlights reel',
+        'Luxury online gallery',
+        'Full engagement + bridal sessions',
+        'Premium custom album',
+        'Second shooter included'
+      ],
       popular: false
     }
   ]
@@ -123,19 +166,22 @@ const PackageDetails = () => {
       />
 
       {/* Main Content */}
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-dusty-900 mb-2">
-            Choose Your Package
+            Choose Your Photography Package
           </h1>
           <p className="text-lg text-dusty-600">
-            Select the payment option that works best for you
+            Select the tier that best fits your needs and budget
+          </p>
+          <p className="text-sm text-dusty-500 mt-2">
+            Payment plans available at checkout • All packages include 6 hours of coverage
           </p>
         </div>
 
         {/* Package Cards */}
-        <div className="grid md:grid-cols-2 gap-6 mb-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {packages.map((pkg) => (
             <Card
               key={pkg.id}
@@ -158,41 +204,49 @@ const PackageDetails = () => {
               aria-label={`Select ${pkg.title} package`}
               aria-pressed={selectedPackage === pkg.id}
             >
-              {/* Popular Badge */}
-              {pkg.popular && (
-                <div className="absolute top-0 left-0 right-0">
-                  <div className="bg-primary-500 text-white text-xs font-medium text-center py-2">
-                    <StarIcon className="w-3 h-3 inline mr-1" />
-                    {pkg.badge}
-                  </div>
+              {/* Badge */}
+              <div className="absolute top-0 left-0 right-0">
+                <div className={clsx(
+                  'text-white text-xs font-medium text-center py-2',
+                  pkg.badgeColor
+                )}>
+                  {pkg.popular && <StarIcon className="w-3 h-3 inline mr-1" />}
+                  {pkg.badge}
                 </div>
-              )}
+              </div>
 
-              <div className={clsx('p-6', { 'pt-12': pkg.popular })}>
+              <div className="p-6 pt-12">
                 {/* Package Header */}
                 <div className="text-center mb-6">
                   <h3 className="text-xl font-semibold text-dusty-900 mb-2">
-                    {pkg.title}
+                    {pkg.tier}
                   </h3>
-                  <div className="flex items-baseline justify-center">
+                  <div className="flex items-baseline justify-center mb-2">
                     <span className="text-3xl font-bold text-dusty-900">
                       {pkg.price}
                     </span>
-                    <span className="text-dusty-600 ml-1">
-                      {pkg.period}
-                    </span>
                   </div>
-                  <p className="text-sm text-dusty-600 mt-2">
+                  <p className="text-xs text-dusty-600 mb-3">
                     {pkg.description}
                   </p>
+                  <div className="flex items-center justify-center space-x-4 text-xs text-dusty-500">
+                    <div className="flex items-center">
+                      <Clock className="w-3 h-3 mr-1" />
+                      {pkg.hours}h
+                    </div>
+                    <div className="flex items-center">
+                      <Image className="w-3 h-3 mr-1" />
+                      {pkg.features[2]?.match(/\d+/)?.[0] || '200'}+ photos
+                    </div>
+                  </div>
                 </div>
 
                 {/* Features List */}
-                <ul className="space-y-3 mb-6">
+                <ul className="space-y-2 mb-6">
                   {pkg.features.map((feature, index) => (
                     <li key={index} className="flex items-start">
-                      <CheckIcon className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                      <span className="text-sm text-dusty-700">{feature}</span>
+                      <CheckIcon className="w-4 h-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                      <span className="text-xs text-dusty-700">{feature}</span>
                     </li>
                   ))}
                 </ul>
@@ -200,27 +254,19 @@ const PackageDetails = () => {
                 {/* Action Button */}
                 <Button
                   variant={selectedPackage === pkg.id ? 'primary' : 'outline'}
-                  size="lg"
-                  className="w-full mb-4"
+                  size="sm"
+                  className="w-full"
                   onClick={(e) => {
                     e.stopPropagation()
                     handlePackageSelect(pkg)
                   }}
                 >
-                  {pkg.buttonText}
+                  {selectedPackage === pkg.id ? 'Selected' : 'Select'}
                 </Button>
-
-                {/* Accepted Cards */}
-                <div className="flex items-center justify-center space-x-2 text-dusty-400">
-                  <CreditCardIcon className="w-4 h-4" />
-                  <span className="text-xs">
-                    Visa, Mastercard, Amex, Discover
-                  </span>
-                </div>
 
                 {/* Selection Indicator */}
                 {selectedPackage === pkg.id && (
-                  <div className="absolute top-4 right-4">
+                  <div className="absolute top-14 right-4">
                     <div className="w-6 h-6 bg-primary-500 rounded-full flex items-center justify-center">
                       <CheckIcon className="w-4 h-4 text-white" />
                     </div>
@@ -238,10 +284,10 @@ const PackageDetails = () => {
               <CheckIcon className="w-5 h-5 text-primary-600 mr-3" />
               <div>
                 <p className="text-sm font-medium text-primary-900">
-                  Package Selected
+                  Package Selected: {packages.find(p => p.id === selectedPackage)?.title}
                 </p>
                 <p className="text-sm text-primary-700">
-                  {packages.find(p => p.id === selectedPackage)?.title} - Ready to continue
+                  Base price: {packages.find(p => p.id === selectedPackage)?.price} • Payment plans available at checkout
                 </p>
               </div>
             </div>

@@ -134,6 +134,13 @@ export function computePayable(booking, plan) {
 
   // Ensure we never return a negative or NaN base
   if (!Number.isFinite(base_cents) || base_cents <= 0) {
+    console.warn('⚠️ WARNING: No valid pricing found for booking:', {
+      bookingId: booking.id,
+      package_total_cents: booking.package_total_cents,
+      package_type: booking.package_type,
+      pricing_summary: pricingSummary,
+      personalization_package: booking.personalization_data?.package
+    })
     base_cents = 0
   }
 
@@ -206,6 +213,18 @@ export function computePayable(booking, plan) {
       amount_cents = base_cents
     }
   }
+
+  // Log calculation for debugging
+  console.log('📊 Payment Calculation (compute.js):', {
+    booking_id: booking.id,
+    plan: planUsed,
+    amount_due_today: (amount_cents / 100).toFixed(2),
+    base_amount: (base_cents / 100).toFixed(2),
+    late_fee: (late_fee_cents / 100).toFixed(2),
+    processing_fee: (processing_fee_cents / 100).toFixed(2),
+    months_until_cutoff: monthsUntilCutoff,
+    days_until_cutoff: daysUntilCutoff
+  })
 
   return {
     amount_cents,
