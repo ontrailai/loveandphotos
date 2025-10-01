@@ -160,7 +160,7 @@ const PaymentElementWrapper = ({ onSuccess, paymentPlan = 'full' }) => {
   }
 
   return (
-    <Elements stripe={stripePromise} options={options}>
+    <Elements key={clientSecret} stripe={stripePromise} options={options}>
       <StripePaymentForm onSuccess={onSuccess} paymentPlan={paymentPlan} />
     </Elements>
   )
