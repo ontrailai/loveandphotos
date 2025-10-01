@@ -39,9 +39,8 @@
       "Bash(git rm:*)",
       "Bash(npm run dev:api:*)",
       "Bash(mkdir:*)",
-      "mcp__supabase__list_tables",
-      "Bash(xargs ls:*)",
-      "Bash(PORT=10000 node server.js)"
+      "Bash(git checkout:*)",
+      "Bash(git stash:*)"
     ],
     "deny": [],
     "ask": []
