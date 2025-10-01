@@ -401,6 +401,46 @@ app.post('/api/booking/create', async (req, res) => {
     const actualPhotographerId = photographer.id
     console.log(`✅ Found photographer: ${actualPhotographerId}`)
 
+    // Ensure customer exists in users table (auth.users → public.users)
+    console.log(`🔍 Checking if customer exists in users table: ${customerId}`)
+    const { data: existingUser, error: userCheckError } = await supabase
+      .from('users')
+      .select('id')
+      .eq('id', customerId)
+      .single()
+
+    if (userCheckError && userCheckError.code !== 'PGRST116') {
+      // Error other than "not found"
+      console.error('❌ Error checking user existence:', userCheckError)
+    }
+
+    if (!existingUser) {
+      console.log('⚠️  Customer not found in users table, creating user record...')
+      const { error: insertUserError } = await supabase
+        .from('users')
+        .insert({
+          id: customerId,
+          email: accountDetails?.email || null,
+          full_name: accountDetails?.fullName || null,
+          phone: accountDetails?.phone || null,
+          role: 'customer',
+          created_at: new Date().toISOString()
+        })
+
+      if (insertUserError) {
+        console.error('❌ Failed to create user record:', insertUserError)
+        return res.status(500).json({
+          success: false,
+          message: 'Failed to create user record in database',
+          code: 'USER_CREATION_FAILED',
+          details: insertUserError.message
+        })
+      }
+      console.log('✅ User record created successfully')
+    } else {
+      console.log('✅ Customer already exists in users table')
+    }
+
     // Convert amounts to cents for consistent storage
     const packagePriceCents = Math.round((packageDetails?.packagePrice || 0) * 100)
     const addonsTotalCents = Math.round((addonsDetails?.totalAddonsPrice || 0) * 100)
