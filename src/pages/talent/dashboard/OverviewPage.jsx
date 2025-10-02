@@ -489,8 +489,8 @@ const OverviewPage = () => {
                   <CheckCircle2 className="w-4 h-4 text-white" />
                 )}
               </div>
-              <span className={photographerProfile?.portfolio_images?.length >= 3 ? 'font-medium' : ''}>
-                Upload at least 3 portfolio photos {photographerProfile?.portfolio_images?.length > 0 && `(${photographerProfile.portfolio_images.length}/3)`}
+              <span className={photographerProfile?.portfolio_images?.length >= 10 ? 'font-medium' : ''}>
+                Upload at least 10 portfolio photos {photographerProfile?.portfolio_images?.length > 0 && `(${photographerProfile.portfolio_images.length}/10)`}
               </span>
             </div>
             <div className="flex items-center text-primary-900">

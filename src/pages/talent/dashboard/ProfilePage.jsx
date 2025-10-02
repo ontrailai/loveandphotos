@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@contexts/AuthContext'
 import { supabase, db } from '@lib/supabase'
 import PhotoUploader from '@components/talent/PhotoUploader'
+import ProfilePictureUpload from '@components/talent/ProfilePictureUpload'
 import { Award, TrendingUp, Star, CheckCircle, AlertCircle, Trash2, AlertTriangle, ShieldAlert, Eye, EyeOff } from 'lucide-react'
 import toast from 'react-hot-toast'
 
@@ -28,7 +29,7 @@ const US_STATES = [
 ]
 
 const ProfilePage = () => {
-  const { user, photographerProfile, fetchUserData } = useAuth()
+  const { user, profile, photographerProfile, fetchUserData } = useAuth()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [loading, setLoading] = useState(true)
@@ -171,7 +172,7 @@ const ProfilePage = () => {
         updatedFormData.gender?.length > 0 &&
         updatedFormData.experience_years > 0 &&
         Array.isArray(updatedFormData.style_tags) && updatedFormData.style_tags.length > 0 &&
-        Array.isArray(updatedFormData.portfolio_images) && updatedFormData.portfolio_images.length >= 3
+        Array.isArray(updatedFormData.portfolio_images) && updatedFormData.portfolio_images.length >= 10
 
       sanitizedUpdates.profile_complete = willBeComplete
 
@@ -353,7 +354,7 @@ const ProfilePage = () => {
         formData.gender?.length > 0 &&
         formData.experience_years > 0 &&
         Array.isArray(formData.style_tags) && formData.style_tags.length > 0 &&
-        Array.isArray(formData.portfolio_images) && formData.portfolio_images.length >= 3
+        Array.isArray(formData.portfolio_images) && formData.portfolio_images.length >= 10
 
       // Prepare update data with type validation
       const updateData = {
@@ -445,6 +446,14 @@ const ProfilePage = () => {
     }
   }
 
+  const handleAvatarUploadSuccess = async (avatarUrl) => {
+    console.log('[ProfilePage] Avatar upload successful:', avatarUrl)
+    // Refresh user data to get updated avatar_url
+    if (user) {
+      await fetchUserData(user)
+    }
+  }
+
   const handleDeleteProfile = async () => {
     if (!user?.id) {
       toast.error('User not found')
@@ -492,7 +501,7 @@ const ProfilePage = () => {
     gender: formData.gender?.length > 0,
     experience_years: formData.experience_years > 0,
     style_tags: Array.isArray(formData.style_tags) && formData.style_tags.length > 0,
-    portfolio_images: Array.isArray(formData.portfolio_images) && formData.portfolio_images.length >= 3
+    portfolio_images: Array.isArray(formData.portfolio_images) && formData.portfolio_images.length >= 10
   }
 
   const completedFields = Object.values(profileCompletion).filter(Boolean).length
@@ -601,7 +610,7 @@ const ProfilePage = () => {
                   <span>
                     {profileCompletion.portfolio_images
                       ? `${formData.portfolio_images?.length} portfolio photos uploaded`
-                      : `Upload at least 3 portfolio photos${formData.portfolio_images?.length ? ` (currently ${formData.portfolio_images.length})` : ''}`
+                      : `Upload at least 10 portfolio photos${formData.portfolio_images?.length ? ` (currently ${formData.portfolio_images.length})` : ''}`
                     }
                   </span>
                 </li>
@@ -730,13 +739,25 @@ const ProfilePage = () => {
           )}
         </div>
 
+        {/* Profile Picture Upload */}
+        {user && (
+          <div className="border-t pt-6 mt-6">
+            <ProfilePictureUpload
+              userId={user.id}
+              currentAvatarUrl={profile?.avatar_url}
+              onUploadSuccess={handleAvatarUploadSuccess}
+            />
+          </div>
+        )}
+
         {/* Portfolio Photos */}
         <div ref={photoSectionRef}>
           <PhotoUploader
             userId={user.id}
             existingPhotos={formData.portfolio_images}
             onPhotosChange={handlePhotosChange}
-            maxPhotos={5}
+            maxPhotos={50}
+            minPhotos={10}
           />
         </div>
 

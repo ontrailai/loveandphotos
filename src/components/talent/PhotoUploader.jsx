@@ -3,13 +3,17 @@ import { supabase } from '@lib/supabase'
 import { Upload, X, Image as ImageIcon, AlertCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
 
-const PhotoUploader = ({ userId, existingPhotos = [], onPhotosChange, maxPhotos = 5 }) => {
+const PhotoUploader = ({ userId, existingPhotos = [], onPhotosChange, maxPhotos = 50, minPhotos = 10 }) => {
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState([])
   const [photos, setPhotos] = useState(existingPhotos)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [photoToDelete, setPhotoToDelete] = useState(null)
   const fileInputRef = useRef(null)
+
+  // Calculate if requirements are met
+  const hasMinPhotos = photos.length >= minPhotos
+  const hasMaxPhotos = photos.length >= maxPhotos
 
   const uploadPhoto = async (file, retryCount = 0) => {
     const maxRetries = 3
@@ -179,7 +183,7 @@ const PhotoUploader = ({ userId, existingPhotos = [], onPhotosChange, maxPhotos 
         <label className="block text-sm font-medium text-gray-700">
           Portfolio Photos ({photos.length}/{maxPhotos})
         </label>
-        {photos.length < maxPhotos && (
+        {!hasMaxPhotos && (
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
@@ -188,7 +192,7 @@ const PhotoUploader = ({ userId, existingPhotos = [], onPhotosChange, maxPhotos 
             aria-label="Upload photos"
           >
             <Upload className="w-4 h-4 mr-2" aria-hidden="true" />
-            {uploading ? 'Uploading...' : 'Upload Photos'}
+            {uploading ? 'Uploading...' : 'Upload More Photos'}
           </button>
         )}
       </div>
@@ -203,40 +207,72 @@ const PhotoUploader = ({ userId, existingPhotos = [], onPhotosChange, maxPhotos 
         aria-label="Select photo files"
       />
 
-      {/* Photo Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-        {photos.map((photo, index) => (
-          <div key={photo} className="relative group aspect-square bg-gray-100 rounded-lg overflow-hidden">
-            <img
-              src={photo}
-              alt={`Portfolio photo ${index + 1}`}
-              className="w-full h-full object-cover"
-            />
-            <button
-              type="button"
-              onClick={() => handleDeleteClick(photo)}
-              className="absolute top-2 right-2 p-1 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity focus:opacity-100 hover:bg-red-700"
-              aria-label={`Remove photo ${index + 1}`}
-            >
-              <X className="w-4 h-4" aria-hidden="true" />
-            </button>
+      {/* Validation Messages */}
+      {!hasMinPhotos && (
+        <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+          <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+          <div className="text-sm text-amber-800">
+            <p className="font-medium">Minimum {minPhotos} photos required</p>
+            <p>You need at least {minPhotos} photos to publish your portfolio. Currently have {photos.length}.</p>
           </div>
-        ))}
+        </div>
+      )}
 
-        {/* Empty slots */}
-        {Array.from({ length: maxPhotos - photos.length }).map((_, index) => (
-          <div
-            key={`empty-${index}`}
-            className="aspect-square bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center"
+      {hasMaxPhotos && (
+        <div className="flex items-start gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+          <div className="text-sm text-blue-800">
+            <p className="font-medium">Portfolio limit reached</p>
+            <p>You've reached the maximum of {maxPhotos} photos. Delete existing photos to upload new ones.</p>
+          </div>
+        </div>
+      )}
+
+      {/* Photo Grid - Only show uploaded photos, no empty slots */}
+      {photos.length > 0 ? (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+          {photos.map((photo, index) => (
+            <div key={photo} className="relative group aspect-square bg-gray-100 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+              <img
+                src={photo}
+                alt={`Portfolio photo ${index + 1}`}
+                className="w-full h-full object-cover"
+              />
+              <button
+                type="button"
+                onClick={() => handleDeleteClick(photo)}
+                className="absolute top-2 right-2 p-1.5 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity focus:opacity-100 hover:bg-red-700 shadow-lg"
+                aria-label={`Remove photo ${index + 1}`}
+              >
+                <X className="w-4 h-4" aria-hidden="true" />
+              </button>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center">
+          <ImageIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+          <p className="text-gray-600 font-medium mb-2">No portfolio photos yet</p>
+          <p className="text-sm text-gray-500 mb-4">
+            Upload {minPhotos}-{maxPhotos} high-quality photos showcasing your best work
+          </p>
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50"
           >
-            <ImageIcon className="w-8 h-8 text-gray-400" aria-hidden="true" />
-          </div>
-        ))}
-      </div>
+            <Upload className="w-4 h-4 mr-2" />
+            {uploading ? 'Uploading...' : 'Upload Your First Photos'}
+          </button>
+        </div>
+      )}
 
-      <p className="text-xs text-gray-500">
-        Upload up to {maxPhotos} photos. JPEG or PNG format, max 10MB each.
-      </p>
+      <div className="text-xs text-gray-500 space-y-1">
+        <p>• Upload {minPhotos}-{maxPhotos} photos (JPEG or PNG, max 10MB each)</p>
+        <p>• Choose your best work that showcases your photography style</p>
+        {hasMinPhotos && <p className="text-green-600 font-medium">✓ Minimum requirement met ({photos.length} photos)</p>}
+      </div>
 
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (

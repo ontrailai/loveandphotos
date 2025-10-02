@@ -18,8 +18,7 @@ const navItems = [
     submenu: [
       { name: 'Find Photographers', href: '/photographers', description: 'Search by ZIP, style, or date' },
       { name: 'Video Only', href: '/photographers/video', description: 'Professional videographers only', icon: <Video size={16} /> },
-      { name: 'How to Book', href: '/guide', description: '3 simple steps to book', icon: <Book size={16} /> },
-      { name: 'Guide', href: '/how-it-works', description: 'Booking, payment & timelines' }
+      { name: 'How to Book', href: '/how-to-book', description: '3 simple steps to book', icon: <Book size={16} /> }
     ]
   },
   {

@@ -93,7 +93,7 @@ const TalentDashboardLayout = lazy(() => import('@components/talent/TalentDashbo
 const TalentOverview = lazy(() => import('@pages/talent/dashboard/OverviewPage'))
 const TalentProfile = lazy(() => import('@pages/talent/dashboard/ProfilePage'))
 const TalentCalendar = lazy(() => import('@pages/talent/dashboard/CalendarPage'))
-const TalentContracts = lazy(() => import('@pages/talent/dashboard/ContractsPage'))
+const TalentResources = lazy(() => import('@pages/talent/dashboard/ResourcesPage'))
 const TalentMessages = lazy(() => import('@pages/talent/dashboard/MessagesPage'))
 const TalentBookings = lazy(() => import('@pages/talent/dashboard/BookingsPage'))
 const TalentSettings = lazy(() => import('@pages/talent/dashboard/SettingsPage'))
@@ -261,6 +261,11 @@ function App() {
               </Suspense>
             } />
             <Route path="/guide" element={
+              <Suspense fallback={<PageLoader />}>
+                <Guide />
+              </Suspense>
+            } />
+            <Route path="/how-to-book" element={
               <Suspense fallback={<PageLoader />}>
                 <Guide />
               </Suspense>
@@ -508,9 +513,9 @@ function App() {
                 <TalentCalendar />
               </Suspense>
             } />
-            <Route path="contracts" element={
+            <Route path="resources" element={
               <Suspense fallback={<PageLoader />}>
-                <TalentContracts />
+                <TalentResources />
               </Suspense>
             } />
             <Route path="messages" element={

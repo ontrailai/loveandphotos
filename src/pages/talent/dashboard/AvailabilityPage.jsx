@@ -23,7 +23,7 @@ const AvailabilityPage = () => {
 
   useEffect(() => {
     loadAvailability()
-  }, [photographerProfile])
+  }, [photographerProfile?.user_id]) // Only depend on stable ID to prevent infinite loop
 
   const loadAvailability = async () => {
     if (!photographerProfile) {
@@ -76,9 +76,10 @@ const AvailabilityPage = () => {
 
       toast.success('Availability updated successfully!')
 
-      // Reload to get updated visible_in_search status
-      await loadAvailability()
-      await fetchUserData()
+      // Refresh user data which will trigger loadAvailability via useEffect
+      if (user) {
+        await fetchUserData(user)
+      }
     } catch (error) {
       console.error('Error saving availability:', error)
       toast.error('Failed to save availability')
@@ -114,9 +115,10 @@ const AvailabilityPage = () => {
       setIsPublic(newVisibility)
       toast.success(`Profile ${newVisibility ? 'visible' : 'hidden'} in search`)
 
-      // Reload to update visible_in_search status
-      await loadAvailability()
-      await fetchUserData()
+      // Refresh user data which will trigger loadAvailability via useEffect
+      if (user) {
+        await fetchUserData(user)
+      }
     } catch (error) {
       console.error('Error toggling visibility:', error)
       toast.error('Failed to update visibility')

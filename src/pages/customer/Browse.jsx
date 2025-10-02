@@ -196,6 +196,15 @@ const Browse = () => {
         `)
         .eq('visible_in_search', true)
 
+      // If ZIP filter is selected, filter by zip_code field directly
+      if (filters.zip) {
+        const normalized = normalizeLocationQuery(filters.zip)
+        if (normalized.kind === 'zip' && normalized.zip) {
+          console.log('Filtering by ZIP code in database:', normalized.zip)
+          query = query.eq('zip_code', normalized.zip)
+        }
+      }
+
       // If date filter is selected, only show photographers available on that date
       // Note: Supabase needs the date in YYYY-MM-DD format for the array contains check
       if (filters.date) {
@@ -348,28 +357,15 @@ const Browse = () => {
         if (filters.zip) {
           const rawQ = filters.zip
           const normalized = normalizeLocationQuery(rawQ)
-          let cityKey = ''
 
           if (normalized.kind === 'zip' && normalized.zip) {
-            // Try to resolve ZIP to city
-            const resolved = await resolveZipToCity(supabaseClient, normalized.zip)
-            if (resolved) {
-              cityKey = resolved.city.toLowerCase()
-            } else {
-              // Unknown ZIP - show empty results with friendly message
-              console.log(`Unknown ZIP: ${normalized.zip}`)
-              filtered = []
-              setError(`We don't recognize that ZIP code yet. Please try entering the city name instead.`)
-              setAllPhotographers([])
-              setPhotographers([])
-              setLoading(false)
-              return
-            }
+            // ZIP filtering already done at database level via .eq('zip_code', normalized.zip)
+            // Add fallback filter for any edge cases where database filter didn't catch
+            console.log(`Client-side ZIP fallback filter: ${normalized.zip}`)
+            filtered = filtered.filter(p => p.zip_code === normalized.zip)
           } else if (normalized.kind === 'city' && normalized.city) {
-            cityKey = normalized.city.toLowerCase()
-          }
-
-          if (cityKey) {
+            // City-based filtering still uses location fields
+            const cityKey = normalized.city.toLowerCase()
             console.log(`Filtering by city: ${cityKey}`)
             filtered = filtered.filter(p =>
               p.location_city?.toLowerCase().includes(cityKey) ||
@@ -382,7 +378,6 @@ const Browse = () => {
             console.log('Search normalization:', {
               rawQ,
               normalized,
-              resolvedCity: cityKey,
               returned: filtered.length
             })
           }
