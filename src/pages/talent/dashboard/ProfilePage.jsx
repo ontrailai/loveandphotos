@@ -63,7 +63,7 @@ const ProfilePage = () => {
 
   useEffect(() => {
     loadProfileData()
-  }, [photographerProfile])
+  }, [photographerProfile?.id]) // Only depend on ID to prevent infinite loop from object recreation
 
   // Redirect if not a photographer
   useEffect(() => {

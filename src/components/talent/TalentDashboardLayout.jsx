@@ -54,7 +54,7 @@ const TalentDashboardLayout = () => {
     }
 
     ensurePhotographerProfile()
-  }, [user?.id, profile?.role]) // Only depend on user ID and role to prevent infinite loops
+  }, [user?.id, profile?.role, photographerProfile]) // Include photographerProfile to prevent re-running after creation
 
   // Show loading spinner while auth is loading
   if (loading || !profile) {

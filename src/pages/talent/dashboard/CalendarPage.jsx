@@ -17,16 +17,16 @@ const CalendarPage = () => {
 
   // Load bookings when component mounts or route changes
   useEffect(() => {
-    if (photographerProfile && !authLoading) {
+    if (photographerProfile?.id && !authLoading) {
       console.log('[CalendarPage] Route or profile changed, loading bookings')
       setLoading(true)
       loadBookingsData()
     }
-  }, [photographerProfile, authLoading, location.pathname])
+  }, [photographerProfile?.id, authLoading, location.pathname]) // Only depend on ID to prevent infinite loop
 
   // Setup realtime subscription for new bookings
   useEffect(() => {
-    if (!photographerProfile) return
+    if (!photographerProfile?.id) return
 
     console.log('[CalendarPage] Setting up realtime subscription for photographer:', photographerProfile.id)
 
@@ -81,7 +81,7 @@ const CalendarPage = () => {
       console.log('[CalendarPage] Cleaning up realtime subscription')
       subscription.unsubscribe()
     }
-  }, [photographerProfile])
+  }, [photographerProfile?.id]) // Only depend on ID to prevent infinite loop from object recreation
 
   const loadBookingsData = async () => {
     if (!photographerProfile) return

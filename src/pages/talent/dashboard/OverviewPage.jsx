@@ -137,14 +137,19 @@ const OverviewPage = () => {
         error: err.message || 'Failed to load stats'
       }))
     }
-  }, [photographerProfile?.id, photographerProfile?.rating, photographerProfile?.lnp_choice, photographerProfile?.style_tags])
+  }, [photographerProfile]) // Only depend on entire object, not individual properties
 
-  // Initial data fetch
+  // Initial data fetch - only run once when photographer profile loads
   useEffect(() => {
-    if (photographerProfile && !loading) {
-      fetchStats()
+    // Guard: Only fetch if we have profile, auth is loaded, and profile ID exists
+    if (!photographerProfile?.id || loading) {
+      console.log('[OverviewPage] Skipping fetchStats - missing profile or still loading')
+      return
     }
-  }, [photographerProfile, loading, fetchStats])
+
+    console.log('[OverviewPage] Running initial fetchStats')
+    fetchStats()
+  }, [photographerProfile?.id, loading]) // Only depend on ID and loading state
 
   // Set up real-time subscription for bookings changes
   useEffect(() => {
@@ -178,7 +183,7 @@ const OverviewPage = () => {
       console.log('[OverviewPage] Cleaning up real-time subscription')
       supabase.removeChannel(channel)
     }
-  }, [photographerProfile?.id, fetchStats])
+  }, [photographerProfile?.id]) // Remove fetchStats from dependencies - it's stable via useCallback
 
   // Show loading spinner while auth is loading
   if (loading) {
