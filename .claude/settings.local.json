@@ -40,7 +40,19 @@
       "Bash(npm run dev:api:*)",
       "Bash(mkdir:*)",
       "Bash(git checkout:*)",
-      "Bash(git stash:*)"
+      "Bash(git stash:*)",
+      "Bash(git cherry-pick:*)",
+      "Bash(render services list)",
+      "Bash(echo $RENDER_API_KEY:0:10...)",
+      "Bash(test:*)",
+      "Bash(tasklist)",
+      "Bash(python:*)",
+      "Read(//c/Users/riley/Desktop/**)",
+      "Bash(PORT=10001 node api/server.js)",
+      "Bash(findstr:*)",
+      "Bash(taskkill:*)",
+      "Bash(netstat:*)",
+      "Bash(git restore:*)"
     ],
     "deny": [],
     "ask": []

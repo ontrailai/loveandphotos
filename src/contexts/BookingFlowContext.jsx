@@ -46,7 +46,8 @@ export const BookingFlowProvider = ({ children }) => {
 
     scheduleDetails: {
       date: null,
-      timeOfDay: null,
+      startTime: null,
+      endTime: null,
       selectedAt: null
     },
 
@@ -167,7 +168,8 @@ export const BookingFlowProvider = ({ children }) => {
       completedSteps: hasSchedule ? ['schedule'] : [],
       scheduleDetails: {
         date: initialData.date || null,
-        timeOfDay: null,
+        startTime: initialData.startTime || null,
+        endTime: initialData.endTime || null,
         selectedAt: initialData.date ? new Date().toISOString() : null
       },
       packageDetails: initialData.packageDetails ? {
@@ -215,19 +217,36 @@ export const BookingFlowProvider = ({ children }) => {
   }, [loadBookingFlow, sessionId])
 
   // Update schedule details
-  const updateScheduleDetails = useCallback((date) => {
+  const updateScheduleDetails = useCallback((date, startTime = null, endTime = null) => {
     setBookingFlow(prev => {
-      const scheduleValid = !!date
+      const scheduleValid = !!date && !!startTime && !!endTime
       const newCompletedSteps = scheduleValid
         ? [...new Set([...prev.completedSteps, 'schedule'])]
         : prev.completedSteps.filter(step => step !== 'schedule')
+
+      // Calculate package price from hours (startTime and endTime)
+      let packagePrice = 0
+      let hoursBooked = 0
+      if (startTime && endTime) {
+        const [startHour] = startTime.split(':').map(Number)
+        const [endHour] = endTime.split(':').map(Number)
+        hoursBooked = endHour - startHour
+        packagePrice = hoursBooked * 200 // $200 per hour
+      }
 
       return {
         ...prev,
         scheduleDetails: {
           date,
-          timeOfDay: null,
+          startTime,
+          endTime,
           selectedAt: new Date().toISOString()
+        },
+        packageDetails: {
+          ...prev.packageDetails,
+          packagePrice, // Update package price based on hours
+          hoursBooked, // Store hours booked
+          packageTitle: scheduleValid ? `${hoursBooked} Hour Photoshoot` : null
         },
         completedSteps: newCompletedSteps,
         currentStep: scheduleValid ? 'addons' : 'schedule',
@@ -468,7 +487,8 @@ export const BookingFlowProvider = ({ children }) => {
       completedSteps: [],
       scheduleDetails: {
         date: null,
-        timeOfDay: null,
+        startTime: null,
+        endTime: null,
         selectedAt: null
       },
       packageDetails: {

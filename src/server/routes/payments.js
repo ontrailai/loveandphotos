@@ -11,6 +11,8 @@ import {
   markBookingPaymentIntent,
   validateBookingAccess,
   createPaymentRecord
+,
+  supabase
 } from '../db.js'
 import { sendPaymentConfirmationEmail } from '../services/emailService.js'
 
@@ -544,6 +546,140 @@ router.post('/confirm-payment', async (req, res) => {
 
     res.status(500).json({
       error: 'Failed to confirm payment'
+    })
+  }
+})
+
+/**
+ * POST /api/payments/create-addon-payment
+ * Creates a Payment Intent for add-on purchases on existing bookings
+ */
+router.post('/create-addon-payment', async (req, res) => {
+  try {
+    const { bookingId, addons, totalAmount, userEmail, userId } = req.body
+
+    console.log('🛒 Creating add-on payment intent for booking:', bookingId)
+    console.log('Add-ons:', addons)
+    console.log('Total amount (cents):', totalAmount)
+
+    // Validate required fields
+    if (!bookingId || !addons || addons.length === 0) {
+      return res.status(400).json({
+        error: 'Missing required fields: bookingId and addons'
+      })
+    }
+
+    // Validate booking access
+    const validation = await validateBookingAccess(bookingId, { userEmail, userId })
+    if (!validation.valid) {
+      console.error('❌ Booking validation failed:', validation.error)
+      return res.status(validation.error === 'Booking not found' ? 404 : 403).json({
+        error: validation.error
+      })
+    }
+
+    const booking = validation.booking
+    const customerEmail = validation.email || userEmail || undefined
+
+    // Validate amount
+    if (!totalAmount || totalAmount <= 0) {
+      return res.status(400).json({
+        error: 'Invalid total amount'
+      })
+    }
+
+    // Create idempotency key
+    const addonIds = addons.map(a => a.id).sort().join('_')
+    const idempotencyKey = `addon_payment_${bookingId}_${addonIds}_${totalAmount}`
+
+    console.log('🔑 Idempotency key:', idempotencyKey)
+
+    // Create Payment Intent for add-ons
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: totalAmount,
+      currency: 'usd',
+      metadata: {
+        booking_id: bookingId,
+        payment_type: 'addons',
+        photographer_id: booking.photographer_id,
+        addon_count: addons.length.toString(),
+        addon_items: JSON.stringify(addons.map(a => ({ id: a.id, name: a.name, qty: a.qty || 1 })))
+      },
+      description: `Add-ons for booking ${bookingId}`,
+      receipt_email: customerEmail,
+      automatic_payment_methods: {
+        enabled: true,
+      }
+    }, {
+      idempotencyKey
+    })
+
+    console.log('✨ Add-on payment intent created:', paymentIntent.id, '| Amount: $' + (totalAmount / 100).toFixed(2))
+
+    // Look up addon UUIDs from codes and insert into booking_addons table
+    const addonInserts = []
+    for (const addon of addons) {
+      // Look up addon UUID from code
+      const { data: addonData, error: addonError } = await supabase
+        .from('addons')
+        .select('id, price_cents')
+        .eq('code', addon.id)
+        .single()
+
+      if (addonError || !addonData) {
+        console.error(`❌ Could not find addon with code: ${addon.id}`, addonError)
+        continue
+      }
+
+      // Insert into booking_addons
+      const quantity = addon.qty || 1
+      const unitPrice = addon.price
+      const totalPrice = unitPrice * quantity
+
+      addonInserts.push({
+        booking_id: bookingId,
+        addon_id: addonData.id,
+        quantity: quantity,
+        unit_price_cents: unitPrice,
+        total_price_cents: totalPrice,
+        stripe_payment_intent_id: paymentIntent.id,
+        payment_status: 'pending',
+      })
+    }
+
+    // Batch insert all add-ons
+    if (addonInserts.length > 0) {
+      const { error: insertError } = await supabase
+        .from('booking_addons')
+        .insert(addonInserts)
+
+      if (insertError) {
+        console.error('❌ Error inserting booking add-ons:', insertError)
+        // Continue anyway - payment intent was created
+      } else {
+        console.log(`✅ Inserted ${addonInserts.length} add-ons into booking_addons table`)
+      }
+    }
+
+    // Return client secret to frontend
+    res.json({
+      clientSecret: paymentIntent.client_secret,
+      paymentIntentId: paymentIntent.id,
+      amount: totalAmount
+    })
+
+  } catch (error) {
+    console.error('Error creating add-on payment intent:', error)
+
+    if (error instanceof Stripe.errors.StripeError) {
+      return res.status(400).json({
+        error: 'Payment processing error',
+        details: error.message
+      })
+    }
+
+    res.status(500).json({
+      error: 'Internal server error during payment setup'
     })
   }
 })

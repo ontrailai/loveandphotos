@@ -302,6 +302,45 @@ const PaymentStep = () => {
                   </p>
                 </div>
 
+                {/* Hours Breakdown - Only show if we have schedule times */}
+                {bookingFlow.scheduleDetails?.startTime && bookingFlow.scheduleDetails?.endTime && (
+                  <div className="bg-primary-50 border border-primary-200 rounded-lg p-3">
+                    <p className="text-dusty-600 mb-1">Photoshoot Duration</p>
+                    <div className="space-y-1">
+                      <div className="flex justify-between items-center">
+                        <span className="text-dusty-700">Hours:</span>
+                        <span className="font-semibold text-dusty-900">
+                          {(() => {
+                            const start = bookingFlow.scheduleDetails.startTime
+                            const end = bookingFlow.scheduleDetails.endTime
+                            const [startHour] = start.split(':').map(Number)
+                            const [endHour] = end.split(':').map(Number)
+                            const hours = endHour - startHour
+                            return `${hours} hour${hours !== 1 ? 's' : ''}`
+                          })()}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-dusty-700">Rate:</span>
+                        <span className="font-semibold text-dusty-900">$200/hour</span>
+                      </div>
+                      <div className="flex justify-between items-center pt-1 border-t border-primary-300">
+                        <span className="text-dusty-700 font-medium">Subtotal:</span>
+                        <span className="font-bold text-primary-600">
+                          ${(() => {
+                            const start = bookingFlow.scheduleDetails.startTime
+                            const end = bookingFlow.scheduleDetails.endTime
+                            const [startHour] = start.split(':').map(Number)
+                            const [endHour] = end.split(':').map(Number)
+                            const hours = endHour - startHour
+                            return (hours * 200).toFixed(2)
+                          })()}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Event Date */}
                 <div>
                   <p className="text-dusty-600">Event Date</p>

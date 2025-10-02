@@ -49,12 +49,30 @@ const AddOnsDetails = () => {
     goToStep('addons')
   }, [photographerId, canAccessStep, goToStep, navigate])
 
+  // Calculate hours from schedule details
+  const calculateHours = () => {
+    const { startTime, endTime } = bookingFlow.scheduleDetails || {}
+    if (!startTime || !endTime) return 0
+
+    const [startHour, startMin] = startTime.split(':').map(Number)
+    const [endHour, endMin] = endTime.split(':').map(Number)
+
+    const startTotalMin = startHour * 60 + startMin
+    const endTotalMin = endHour * 60 + endMin
+
+    const diffMinutes = endTotalMin - startTotalMin
+    return diffMinutes / 60
+  }
+
+  const hoursBooked = calculateHours()
+  const calculatedPackagePrice = hoursBooked * 200 // $200 per hour
+
   // Build package context for pricing and validation
   const packageContext = {
     selectedDate: bookingFlow.scheduleDetails?.date,
     packageType: bookingFlow.packageDetails?.packageType === 'monthly' ? 'photoOnly' : 'photoVideo',
-    packagePrice: bookingFlow.packageDetails?.packagePrice || 0,
-    hoursBooked: bookingFlow.packageDetails?.hoursBooked || 6,
+    packagePrice: calculatedPackagePrice,
+    hoursBooked: hoursBooked,
     isPhotoVideo: bookingFlow.packageDetails?.isPhotoVideo || false
   }
 
@@ -110,8 +128,8 @@ const AddOnsDetails = () => {
   }
 
   const steps = getStepsForStepper()
-  const packagePrice = bookingFlow.packageDetails?.packagePrice || 0
-  const packageTitle = bookingFlow.packageDetails?.packageTitle || 'Package'
+  const packagePrice = calculatedPackagePrice
+  const packageTitle = `${hoursBooked.toFixed(1)} Hour${hoursBooked !== 1 ? 's' : ''} Photography Session`
 
   return (
     <div className="min-h-screen bg-gray-50">

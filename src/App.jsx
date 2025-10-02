@@ -75,6 +75,7 @@ const ContractStep = lazy(() => import('@pages/customer/booking/ContractStep'))
 const PaymentStep = lazy(() => import('@pages/customer/booking/PaymentStep'))
 const PaymentSuccess = lazy(() => import('@pages/customer/booking/PaymentSuccess'))
 const CheckoutComplete = lazy(() => import('./pages/customer/booking/CheckoutComplete'))
+const ManageAddOns = lazy(() => import('@pages/customer/booking/ManageAddOns'))
 const BookingFlowGuard = lazy(() => import('@components/booking/BookingFlowGuard'))
 const ScheduleRedirect = lazy(() => import('@components/booking/ScheduleRedirect'))
 const CustomerBookings = lazy(() =>
@@ -356,6 +357,13 @@ function App() {
               <ProtectedRoute>
                 <Suspense fallback={<PageLoader />}>
                   <BookingDetails />
+                </Suspense>
+              </ProtectedRoute>
+            } />
+            <Route path="/my-bookings/:bookingId/manage-addons" element={
+              <ProtectedRoute>
+                <Suspense fallback={<PageLoader />}>
+                  <ManageAddOns />
                 </Suspense>
               </ProtectedRoute>
             } />

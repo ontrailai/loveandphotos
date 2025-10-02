@@ -4,7 +4,7 @@
  */
 
 import { motion, useReducedMotion } from 'framer-motion'
-import { Package, Calendar, CheckCircle2, Star } from 'lucide-react'
+import { Calendar, CheckCircle2, Star } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import Progress from '@components/ui/Progress'
 import Card from '@components/ui/Card'
@@ -27,13 +27,6 @@ const StatsCards = ({ stats = {} }) => {
   }
 
   const statsData = [
-    {
-      name: "Total Bookings",
-      stat: stats.totalBookings || 0,
-      percentage: ((stats.totalBookings || 0) / 15) * 100,
-      icon: Package,
-      color: "text-blue-500"
-    },
     {
       name: "Upcoming",
       stat: stats.upcomingEvents || 0,
@@ -64,7 +57,7 @@ const StatsCards = ({ stats = {} }) => {
   ]
 
   return (
-    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
       {statsData.map((item) => {
         const Icon = item.icon
         return (

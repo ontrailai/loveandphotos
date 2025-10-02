@@ -138,3 +138,20 @@ NEVER create files unless they're absolutely necessary for achieving your goal.
 ALWAYS prefer editing an existing file to creating a new one.
 NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.
 NEVER save files directly on the desktop - always use project directories.
+## 🔴 CRITICAL PROCESS SAFETY RULES 🔴
+**ABSOLUTELY FORBIDDEN - WILL KILL CLAUDE CODE SESSION**:
+- ❌ `pkill node` 
+- ❌ `taskkill /F /IM node.exe`
+- ❌ ANY command that kills all node processes system-wide
+
+**WHY**: Claude Code itself runs as node process. Killing all node = session suicide + destroying user's other Claude sessions.
+
+**ONLY ALLOWED**:
+- ✅ Kill SPECIFIC processes YOU started using `KillShell` tool with shell ID
+- ✅ Track shell IDs of processes you start (e.g., e04cf2, 87a5d4)
+- ✅ ONLY kill processes from YOUR current session
+- ✅ For port conflicts: Just start new server, Vite auto-increments ports
+
+**GOLDEN RULE**: Only kill what you personally started. NEVER system-wide process kills.
+
+Last Updated: 2025-10-02 (Added critical process safety rules)

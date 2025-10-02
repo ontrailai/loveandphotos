@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { loadStripe } from '@stripe/stripe-js'
 import { Elements } from '@stripe/react-stripe-js'
 import StripePaymentForm from './StripePaymentForm'
@@ -17,8 +17,13 @@ const PaymentElementWrapper = ({ onSuccess, paymentPlan = 'full' }) => {
   const [clientSecret, setClientSecret] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const fetchedRef = useRef(false)
 
   useEffect(() => {
+    // Prevent duplicate fetches (React strict mode causes double mounting)
+    if (fetchedRef.current) return
+    fetchedRef.current = true
+
     // Fetch clientSecret when component mounts
     const fetchClientSecret = async () => {
       if (!bookingFlow.bookingId) {
@@ -58,7 +63,7 @@ const PaymentElementWrapper = ({ onSuccess, paymentPlan = 'full' }) => {
       } catch (err) {
         console.error('Error fetching payment intent:', err)
         setError(err.message || 'Failed to initialize payment. Please try again.')
-        toast.error('Failed to initialize payment. Please try again.')
+        // Removed toast.error() - don't show popup for duplicate request race conditions
       } finally {
         setLoading(false)
       }

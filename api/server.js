@@ -401,6 +401,46 @@ app.post('/api/booking/create', async (req, res) => {
     const actualPhotographerId = photographer.id
     console.log(`✅ Found photographer: ${actualPhotographerId}`)
 
+    // Ensure customer exists in users table (auth.users → public.users)
+    console.log(`🔍 Checking if customer exists in users table: ${customerId}`)
+    const { data: existingUser, error: userCheckError } = await supabase
+      .from('users')
+      .select('id')
+      .eq('id', customerId)
+      .single()
+
+    if (userCheckError && userCheckError.code !== 'PGRST116') {
+      // Error other than "not found"
+      console.error('❌ Error checking user existence:', userCheckError)
+    }
+
+    if (!existingUser) {
+      console.log('⚠️  Customer not found in users table, creating user record...')
+      const { error: insertUserError } = await supabase
+        .from('users')
+        .insert({
+          id: customerId,
+          email: accountDetails?.email || null,
+          full_name: accountDetails?.fullName || null,
+          phone: accountDetails?.phone || null,
+          role: 'customer',
+          created_at: new Date().toISOString()
+        })
+
+      if (insertUserError) {
+        console.error('❌ Failed to create user record:', insertUserError)
+        return res.status(500).json({
+          success: false,
+          message: 'Failed to create user record in database',
+          code: 'USER_CREATION_FAILED',
+          details: insertUserError.message
+        })
+      }
+      console.log('✅ User record created successfully')
+    } else {
+      console.log('✅ Customer already exists in users table')
+    }
+
     // Convert amounts to cents for consistent storage
     const packagePriceCents = Math.round((packageDetails?.packagePrice || 0) * 100)
     const addonsTotalCents = Math.round((addonsDetails?.totalAddonsPrice || 0) * 100)
@@ -420,21 +460,33 @@ app.post('/api/booking/create', async (req, res) => {
       captured_at: new Date().toISOString()
     }
 
+    // Calculate hours from start and end time
+    const calculateHours = (startTime, endTime) => {
+      if (!startTime || !endTime) return null
+
+      // Parse times (format: "HH:MM")
+      const [startHour, startMin] = startTime.split(':').map(Number)
+      const [endHour, endMin] = endTime.split(':').map(Number)
+
+      // Convert to total minutes
+      const startTotalMin = startHour * 60 + startMin
+      const endTotalMin = endHour * 60 + endMin
+
+      // Calculate difference in hours
+      const diffMinutes = endTotalMin - startTotalMin
+      return Number((diffMinutes / 60).toFixed(2))
+    }
+
+    const hoursBooked = calculateHours(scheduleDetails.startTime, scheduleDetails.endTime)
+
     // Create booking record
     const bookingData = {
       customer_id: customerId,
       photographer_id: actualPhotographerId,
       event_date: scheduleDetails.date,
-      event_time: (() => {
-        const timeOfDay = scheduleDetails.timeOfDay
-        if (!timeOfDay) return '10:00'
-        switch (timeOfDay) {
-          case 'morning': return '09:00'
-          case 'afternoon': return '14:00'
-          case 'evening': return '18:00'
-          default: return '10:00'
-        }
-      })(),
+      event_time: scheduleDetails.startTime || '10:00',
+      event_end_time: scheduleDetails.endTime || null,
+      hours_booked: hoursBooked,
       event_type: eventType,
       venue_name: locationDetails?.locationTitle || 'TBD',
       venue_address: locationDetails ? {
@@ -451,7 +503,7 @@ app.post('/api/booking/create', async (req, res) => {
         package: packageDetails,
         addons: addonsDetails?.selectedAddons || [],
         session_info: {
-          hours_booked: packageDetails?.hoursBooked || 2,
+          hours_booked: hoursBooked || packageDetails?.hoursBooked || 2,
           is_photo_video: packageDetails?.isPhotoVideo || false
         },
         pricing_summary: pricingSummary,

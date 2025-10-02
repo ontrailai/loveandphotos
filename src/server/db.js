@@ -9,7 +9,7 @@ dotenv.config()
 import { createClient } from '@supabase/supabase-js'
 
 // Server-side Supabase client with service role key
-const supabase = createClient(
+export const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_KEY,
   {

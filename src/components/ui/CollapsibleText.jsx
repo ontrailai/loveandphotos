@@ -43,7 +43,6 @@ const CollapsibleText = ({
     if (typeof children === 'string') {
       setShouldCollapse(children.length > maxLength)
     } else {
-      // For React elements, always allow collapsing
       setShouldCollapse(true)
     }
   }, [children, maxLength])

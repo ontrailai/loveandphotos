@@ -52,9 +52,9 @@ const PaymentSuccessModal = ({ isOpen, onClose, paymentIntent }) => {
   const handleViewBooking = () => {
     onClose()
     if (bookingFlow?.bookingId) {
-      navigate(`/my-bookings/${bookingFlow.bookingId}`)
+      navigate(`/booking/${bookingFlow.bookingId}`)
     } else {
-      navigate('/my-bookings')
+      navigate('/dashboard')
     }
   }
 

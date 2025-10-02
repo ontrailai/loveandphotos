@@ -28,7 +28,7 @@ export default defineConfig({
     proxy: {
       // Proxy API requests to backend server
       '/api': {
-        target: 'http://localhost:10000',
+        target: 'http://localhost:10001',
         changeOrigin: true,
         configure: (proxy, _options) => {
           proxy.on('error', (err, _req, _res) => {
