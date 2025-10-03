@@ -49,6 +49,12 @@ const OverviewPage = () => {
       setStats(prev => ({ ...prev, loading: true, error: null }))
       console.log('[OverviewPage] Fetching stats for photographer:', photographerProfile.id)
 
+      // Store photographer data in local variables to avoid dependency on entire object
+      const photographerId = photographerProfile.id
+      const profileRating = photographerProfile.rating || 0
+      const profileLnpChoice = photographerProfile.lnp_choice || false
+      const profileStyleTags = photographerProfile.style_tags || []
+
       // Batch all queries using Promise.all for optimal performance
       const [
         { count: totalShoots, error: shootsError },
@@ -59,21 +65,21 @@ const OverviewPage = () => {
         supabase
           .from('bookings')
           .select('*', { count: 'exact', head: true })
-          .eq('photographer_id', photographerProfile.id)
+          .eq('photographer_id', photographerId)
           .eq('booking_status', 'confirmed'),
 
         // Pending requests
         supabase
           .from('bookings')
           .select('*', { count: 'exact', head: true })
-          .eq('photographer_id', photographerProfile.id)
+          .eq('photographer_id', photographerId)
           .eq('booking_status', 'pending'),
 
         // Completed bookings with ratings for average calculation
         supabase
           .from('bookings')
           .select('rating')
-          .eq('photographer_id', photographerProfile.id)
+          .eq('photographer_id', photographerId)
           .eq('booking_status', 'completed')
           .not('rating', 'is', null)
       ])
@@ -97,17 +103,17 @@ const OverviewPage = () => {
         console.log('[OverviewPage] Calculated average rating:', averageRating, 'from', completedBookings.length, 'bookings')
       } else {
         // Fallback to photographer profile rating if no booking ratings exist
-        averageRating = photographerProfile.rating || 0
+        averageRating = profileRating
         console.log('[OverviewPage] Using profile rating as fallback:', averageRating)
       }
 
       // Extract photographer profile data
-      const isLnpChoice = photographerProfile.lnp_choice || false
+      const isLnpChoice = profileLnpChoice
 
       // Get top style tag (first from array, could be enhanced to find most common)
       let topStyleTag = null
-      if (photographerProfile.style_tags && photographerProfile.style_tags.length > 0) {
-        topStyleTag = photographerProfile.style_tags[0]
+      if (profileStyleTags && profileStyleTags.length > 0) {
+        topStyleTag = profileStyleTags[0]
       }
 
       console.log('[OverviewPage] Stats fetched successfully:', {
@@ -137,7 +143,7 @@ const OverviewPage = () => {
         error: err.message || 'Failed to load stats'
       }))
     }
-  }, [photographerProfile]) // Only depend on entire object, not individual properties
+  }, [photographerProfile?.id]) // Only depend on ID to prevent infinite loops
 
   // Initial data fetch - only run once when photographer profile loads
   useEffect(() => {
@@ -149,7 +155,7 @@ const OverviewPage = () => {
 
     console.log('[OverviewPage] Running initial fetchStats')
     fetchStats()
-  }, [photographerProfile?.id, loading]) // Only depend on ID and loading state
+  }, [photographerProfile?.id, loading, fetchStats]) // Include fetchStats since it's memoized
 
   // Set up real-time subscription for bookings changes
   useEffect(() => {
@@ -183,7 +189,7 @@ const OverviewPage = () => {
       console.log('[OverviewPage] Cleaning up real-time subscription')
       supabase.removeChannel(channel)
     }
-  }, [photographerProfile?.id]) // Remove fetchStats from dependencies - it's stable via useCallback
+  }, [photographerProfile?.id, fetchStats]) // Include fetchStats in dependencies since it's memoized and stable
 
   // Show loading spinner while auth is loading
   if (loading) {

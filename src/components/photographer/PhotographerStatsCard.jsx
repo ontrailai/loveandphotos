@@ -3,17 +3,18 @@ import { CheckCircle, Clock, TrendingUp, AlertCircle } from 'lucide-react'
 import Card from '@components/ui/Card'
 import { supabasePublic } from '@lib/supabase'
 
-const PhotographerStatsCard = ({ photographerId }) => {
+const PhotographerStatsCard = ({ photographerUserId }) => {
   const [stats, setStats] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
   useEffect(() => {
     loadStats()
-  }, [photographerId])
+  }, [photographerUserId])
 
   const loadStats = async () => {
-    if (!photographerId) {
+    if (!photographerUserId) {
+      console.log('PhotographerStatsCard: No user ID provided, skipping stats load')
       setLoading(false)
       return
     }
@@ -22,9 +23,11 @@ const PhotographerStatsCard = ({ photographerId }) => {
       setLoading(true)
       setError(null)
 
+      console.log('PhotographerStatsCard: Loading stats for user_id:', photographerUserId)
+
       // Call the Supabase function to get stats
       const { data, error: statsError } = await supabasePublic
-        .rpc('get_photographer_stats', { photographer_user_id: photographerId })
+        .rpc('get_photographer_stats', { photographer_user_id: photographerUserId })
         .single()
 
       if (statsError) {

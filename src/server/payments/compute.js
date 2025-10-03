@@ -8,19 +8,19 @@
  *
  * PAYMENT RULES BY DAYS UNTIL EVENT:
  *
- * 1. Within 60 Days (0-60 days):
+ * 1. Within 30 Days (0-30 days):
  *    - Late booking fee: $450
  *    - Payment plans: NOT AVAILABLE (full payment only)
  *    - Total charged: base_amount + $450 late fee
+ *    - Reason: Too close to event date for installment plans
+ *
+ * 2. Medium Notice (31-59 days):
+ *    - Late booking fee: $0
+ *    - Payment plans: LIMITED (full payment only)
+ *    - Deposit and monthly plans NOT available
  *    - Reason: Not enough time for installment payments before 60-day cutoff
  *
- * 2. Medium Notice (61-89 days):
- *    - Late booking fee: $0
- *    - Payment plans: LIMITED (full payment or $500 deposit only)
- *    - Not enough months for $199/month plan
- *    - Reason: Need at least 90 days for monthly payment plan
- *
- * 3. Advance Booking (90+ days):
+ * 3. Advance Booking (60+ days):
  *    - Late booking fee: $0
  *    - Payment plans: ALL AVAILABLE (full, $500 deposit, $199/month)
  *    - Full payment: base_amount
@@ -31,7 +31,7 @@
  *
  * A. Full Payment ('full'):
  *    - One-time payment of entire balance
- *    - Late fee ($450) applies if booked within 60 days
+ *    - Late fee ($450) applies if booked within 30 days
  *
  * B. $500 Deposit ('deposit500'):
  *    - $500 due today
@@ -162,44 +162,41 @@ export function computePayable(booking, plan) {
   const planUsed = plan ?? 'full'
 
   // Apply pricing rules based on days until event
-  if (daysOut <= 60) {
-    // Within 60 days: Late booking fee applies, only full payment available
+  if (daysOut <= 30) {
+    // Within 30 days: Late booking fee applies, only full payment available
     late_fee_cents = 45000 // $450 late fee
     amount_cents = base_cents + late_fee_cents
-  } else if (daysOut < 90) {
-    // 61-89 days: No late fee, limited payment plans
-    // Only full payment or $500 deposit available (not enough time for $199/month)
-    if (plan === 'deposit500') {
-      // $500 deposit + remaining balance split into monthly payments
-      amount_cents = 50000 // $500 deposit
-    } else {
-      // Full payment (default)
-      amount_cents = base_cents
-    }
+  } else if (daysOut < 60) {
+    // 31-59 days: No late fee, but only full payment available (not enough time for installment plans before 60-day cutoff)
+    amount_cents = base_cents
   } else {
-    // 90+ days: All payment plans available
+    // 60+ days: All payment plans available
     if (plan === 'deposit500') {
       // $500 deposit + remaining balance split into monthly payments
       amount_cents = 50000 // $500 deposit
     } else if (plan === 'monthly199') {
-      // Monthly plan: Total balance (base + $150 fee) divided into monthly $199 payments
-      // First payment includes processing fee, remaining balance paid in subsequent months
+      // Monthly plan: Fixed $199/month payments + $150 processing fee (first payment only)
+      // First payment: $199 + $150 processing fee = $349
+      // Subsequent payments: $199/month
+      // Final payment at 60-day cutoff: Remaining balance
       processing_fee_cents = 15000 // $150 processing fee
-      const totalWithFee = base_cents + processing_fee_cents
+      const monthlyPayment = 19900 // Fixed $199/month
 
-      // Calculate monthly payment amount to spread total over available months
-      const monthlyPayment = Math.ceil(totalWithFee / monthsUntilCutoff)
+      // First payment due today: $199 + $150 processing fee
+      amount_cents = monthlyPayment + processing_fee_cents
 
-      // First payment due today
-      amount_cents = monthlyPayment
+      // Calculate total paid after monthly installments
+      const totalMonthlyPayments = monthlyPayment * monthsUntilCutoff
+      const finalBalance = base_cents - totalMonthlyPayments
 
       console.log('💳 Monthly Plan Breakdown:', {
-        base_cents,
-        processing_fee_cents,
-        total_with_fee: totalWithFee,
+        base_cents: `$${(base_cents / 100).toFixed(2)}`,
+        processing_fee_cents: `$${(processing_fee_cents / 100).toFixed(2)}`,
+        monthly_payment: `$${(monthlyPayment / 100).toFixed(2)}`,
         months_available: monthsUntilCutoff,
-        monthly_payment: monthlyPayment,
-        first_payment_today: amount_cents
+        total_monthly_payments: `$${(totalMonthlyPayments / 100).toFixed(2)}`,
+        final_balance: `$${(finalBalance / 100).toFixed(2)}`,
+        first_payment_today: `$${(amount_cents / 100).toFixed(2)}`
       })
     } else if (plan === 'deposit+3' || plan === 'installments') {
       // Legacy support: map old plan names
@@ -236,7 +233,8 @@ export function computePayable(booking, plan) {
     processing_fee_cents,
     planUsed,
     monthsUntilCutoff,
-    daysUntilCutoff
+    daysUntilCutoff,
+    daysOut
   }
 }
 
@@ -251,14 +249,14 @@ export function getAvailablePaymentPlans(eventDate) {
   const event = new Date(eventDate)
   const daysOut = Math.ceil((event.getTime() - today.getTime()) / (1000 * 3600 * 24))
 
-  if (daysOut <= 60) {
-    // Within 60 days: Only full payment available (late fee applies)
+  if (daysOut <= 30) {
+    // Within 30 days: Only full payment available (late fee applies)
     return ['full']
-  } else if (daysOut < 90) {
-    // 61-89 days: Limited plans (full payment or $500 deposit only)
-    return ['full', 'deposit500']
+  } else if (daysOut < 60) {
+    // 31-59 days: Only full payment available (no time for installment plans before 60-day cutoff)
+    return ['full']
   } else {
-    // 90+ days: All payment plans available
+    // 60+ days: All payment plans available
     return ['full', 'deposit500', 'monthly199']
   }
 }

@@ -3,7 +3,7 @@
  * Search and filter photographers
  */
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { 
   SearchIcon, 
@@ -147,18 +147,22 @@ const Browse = () => {
     { value: 'available', label: 'Available Soon' }
   ]
 
-  useEffect(() => {
-    loadPhotographers()
-  }, [filters, sortBy])
+  // Memoize filter values to prevent unnecessary rerenders
+  const filterKey = useMemo(() =>
+    JSON.stringify({
+      zip: filters.zip,
+      date: filters.date,
+      rating: filters.rating,
+      tier: filters.tier,
+      specialties: filters.specialties,
+      languages: filters.languages,
+      photographyStyle: filters.photographyStyle,
+      femaleOnly: filters.femaleOnly
+    }),
+    [filters.zip, filters.date, filters.rating, filters.tier, filters.specialties, filters.languages, filters.photographyStyle, filters.femaleOnly]
+  )
 
-  useEffect(() => {
-    // When display count changes, update displayed photographers
-    if (allPhotographers.length > 0) {
-      setPhotographers(allPhotographers.slice(0, displayCount))
-    }
-  }, [displayCount, allPhotographers])
-
-  const loadPhotographers = async () => {
+  const loadPhotographers = useCallback(async () => {
     setLoading(true)
     setError(null)
 
@@ -422,7 +426,18 @@ const Browse = () => {
       // CRITICAL: Always set loading to false
       setLoading(false)
     }
-  }
+  }, [filters.zip, filters.date, sortBy]) // Only depend on values that affect the Supabase query
+
+  useEffect(() => {
+    loadPhotographers()
+  }, [filterKey, sortBy, loadPhotographers])
+
+  useEffect(() => {
+    // When display count changes, update displayed photographers
+    if (allPhotographers.length > 0) {
+      setPhotographers(allPhotographers.slice(0, displayCount))
+    }
+  }, [displayCount, allPhotographers])
 
   const handleFilterChange = (key, value) => {
     setFilters(prev => ({

@@ -61,6 +61,7 @@ const PhotographerProfile = () => {
         // Transform preview profile to match expected format
         const transformed = {
           id: preview.id,
+          user_id: preview.user_id, // CRITICAL: Store user_id for stats lookup
           bio: preview.bio || 'Professional photographer specializing in capturing your special moments.',
           specialties: preview.specialties || ['Wedding', 'Portrait', 'Event'],
           languages: preview.languages || ['English'],
@@ -350,8 +351,8 @@ const PhotographerProfile = () => {
             </Card>
 
             {/* Performance Stats - Only show for claimed photographers with a user_id */}
-            {photographer.users ? (
-              <PhotographerStatsCard photographerId={photographer.id} />
+            {photographer.user_id ? (
+              <PhotographerStatsCard photographerUserId={photographer.user_id} />
             ) : null}
 
             {/* Booking Sidebar */}

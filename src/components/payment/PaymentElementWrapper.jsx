@@ -19,32 +19,42 @@ const PaymentElementWrapper = ({ onSuccess, paymentPlan = 'full' }) => {
   const [error, setError] = useState(null)
 
   useEffect(() => {
+    let isMounted = true
+
     // Fetch clientSecret when component mounts
     const fetchClientSecret = async () => {
       if (!bookingFlow.bookingId) {
         console.error('No booking ID available')
-        setError('Booking information is missing. Please restart the booking process.')
-        setLoading(false)
+        if (isMounted) {
+          setError('Booking information is missing. Please restart the booking process.')
+          setLoading(false)
+        }
         return
       }
 
+      // Get stable references to avoid dependency issues
+      const bookingId = bookingFlow.bookingId
+      const userEmail = bookingFlow.accountDetails?.email
+      const userId = bookingFlow.accountDetails?.userId
+
       try {
-        console.log('Fetching payment intent for booking:', bookingFlow.bookingId)
+        console.log('Fetching payment intent for booking:', bookingId)
 
         const response = await fetch('/api/payments/create-payment-intent', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            bookingId: bookingFlow.bookingId,
+            bookingId,
             plan: paymentPlan,
-            userEmail: bookingFlow.accountDetails?.email,
-            userId: bookingFlow.accountDetails?.userId
+            userEmail,
+            userId
           })
         })
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}))
-          throw new Error(errorData.error || 'Failed to initialize payment')
+          console.error('❌ Payment intent creation failed:', errorData)
+          throw new Error(errorData.error || errorData.details || 'Failed to initialize payment')
         }
 
         const data = await response.json()
@@ -72,18 +82,32 @@ const PaymentElementWrapper = ({ onSuccess, paymentPlan = 'full' }) => {
         }
 
         console.log('✅ Payment intent created successfully')
-        setClientSecret(data.clientSecret)
+
+        if (isMounted) {
+          setClientSecret(data.clientSecret)
+        }
       } catch (err) {
         console.error('Error fetching payment intent:', err)
-        setError(err.message || 'Failed to initialize payment. Please try again.')
-        toast.error('Failed to initialize payment. Please try again.')
+        if (isMounted) {
+          setError(err.message || 'Failed to initialize payment. Please try again.')
+          toast.error('Failed to initialize payment. Please try again.')
+        }
       } finally {
-        setLoading(false)
+        if (isMounted) {
+          setLoading(false)
+        }
       }
     }
 
     fetchClientSecret()
-  }, [bookingFlow.bookingId, paymentPlan, bookingFlow.accountDetails?.email, bookingFlow.accountDetails?.userId])
+
+    // Cleanup function to prevent state updates after unmount
+    return () => {
+      isMounted = false
+    }
+    // Only re-run if bookingId or paymentPlan changes (not email/userId)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bookingFlow.bookingId, paymentPlan])
 
   // Loading state
   if (loading) {

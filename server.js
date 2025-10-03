@@ -19,9 +19,10 @@ import {
   contractServiceHealthCheck
 } from './src/lib/async/contractService.js'
 
-// Import payment routes
+// Import payment and date change routes
 import paymentsRouter from './src/server/routes/payments.js'
 import stripeWebhookRouter from './src/server/routes/stripe-webhook.js'
+import dateChangeRouter from './src/server/routes/date-change.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -44,8 +45,9 @@ app.use('/api/stripe', stripeWebhookRouter)
 app.use(express.json({ limit: '2mb' }))
 app.use(express.urlencoded({ extended: true, limit: '2mb' }))
 
-// Mount payment routes
+// Mount payment and date change routes
 app.use('/api/payments', paymentsRouter)
+app.use('/api/bookings', dateChangeRouter)
 
 // Authentication endpoints
 app.post('/api/auth/check-email', async (req, res) => {
@@ -227,6 +229,14 @@ app.post('/api/booking/create', async (req, res) => {
       captured_at: new Date().toISOString()
     }
 
+    // Check if date change flexibility add-on was purchased
+    const selectedAddons = addonsDetails?.selectedAddons || []
+    const hasDateChangeFlexibility = selectedAddons.some(addon => addon.id === 'date-change-flexibility')
+
+    if (hasDateChangeFlexibility) {
+      console.log('✅ Date change flexibility add-on detected - enabling date change permission')
+    }
+
     // Create booking record
     const bookingData = {
       customer_id: customerId,
@@ -249,6 +259,7 @@ app.post('/api/booking/create', async (req, res) => {
         vibe: locationDetails.locationVibe
       } : null,
       total_amount: totalAmountNumber,
+      package_total_cents: packagePriceCents, // For payment calculations
       payment_status: 'pending',
       booking_status: 'pending',
       contract_signed: false,
@@ -261,7 +272,11 @@ app.post('/api/booking/create', async (req, res) => {
         },
         pricing_summary: pricingSummary,
         account: accountSnapshot
-      }
+      },
+      // Date change flexibility fields (if $50 add-on was purchased)
+      can_change_date: hasDateChangeFlexibility,
+      date_change_used: false,
+      date_change_method: hasDateChangeFlexibility ? 'included' : null
     }
 
     const { data: booking, error } = await supabase

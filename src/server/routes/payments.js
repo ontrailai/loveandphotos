@@ -11,6 +11,8 @@ import {
   markBookingPaymentIntent,
   validateBookingAccess,
   createPaymentRecord
+,
+  supabase
 } from '../db.js'
 import { sendPaymentConfirmationEmail } from '../services/emailService.js'
 
@@ -112,12 +114,18 @@ router.post('/checkout-session', async (req, res) => {
         bookingId,
         plan,
         amount_base_cents: paymentCalculation.base_cents.toString(),
-        late_fee_cents: paymentCalculation.late_fee_cents.toString()
+        late_fee_cents: paymentCalculation.late_fee_cents.toString(),
+        late_fee_applied: (paymentCalculation.late_fee_cents > 0).toString(),
+        wedding_date: booking.event_date,
+        days_until_event: paymentCalculation.daysOut?.toString() || '0'
       },
       payment_intent_data: {
         metadata: {
           booking_id: bookingId,
-          payment_plan: plan
+          payment_plan: plan,
+          late_fee_applied: (paymentCalculation.late_fee_cents > 0).toString(),
+          wedding_date: booking.event_date,
+          days_until_event: paymentCalculation.daysOut?.toString() || '0'
         }
       },
       expires_at: Math.floor(Date.now() / 1000) + (30 * 60) // 30 minutes
@@ -125,10 +133,12 @@ router.post('/checkout-session', async (req, res) => {
       idempotencyKey
     })
 
-    // Store checkout session ID in booking for audit trail
+    // Store checkout session ID and late fee tracking data in booking for audit trail
     const updateSuccess = await markBookingPaymentIntent(bookingId, {
       checkout_session_id: session.id,
-      payment_plan: paymentCalculation.planUsed
+      payment_plan: paymentCalculation.planUsed,
+      late_fee_applied: paymentCalculation.late_fee_cents > 0,
+      days_until_event: paymentCalculation.daysOut
     })
 
     if (!updateSuccess) {
@@ -246,17 +256,39 @@ router.post('/create-payment-intent', async (req, res) => {
     // Calculate payment amount using compute logic
     const paymentCalculation = computePayable(booking, plan)
 
+    console.log('💰 Payment calculation result:', {
+      amount_cents: paymentCalculation.amount_cents,
+      base_cents: paymentCalculation.base_cents,
+      late_fee_cents: paymentCalculation.late_fee_cents,
+      processing_fee_cents: paymentCalculation.processing_fee_cents,
+      plan_used: paymentCalculation.planUsed,
+      package_total_cents: booking.package_total_cents
+    })
+
     if (!Number.isFinite(paymentCalculation.amount_cents) || paymentCalculation.amount_cents <= 0) {
+      console.error('❌ CRITICAL: Invalid payment calculation:', {
+        paymentCalculation,
+        booking: {
+          id: booking.id,
+          package_total_cents: booking.package_total_cents,
+          package_type: booking.package_type,
+          event_date: booking.event_date
+        }
+      })
       return res.status(400).json({
-        error: 'Invalid payment amount calculated for booking'
+        error: 'Invalid payment amount calculated for booking',
+        details: booking.package_total_cents ?
+          'Payment calculation resulted in invalid amount. Please contact support.' :
+          'Package pricing is missing. Please restart your booking from the schedule step.'
       })
     }
 
-    // Create idempotency key based on booking ID, plan, and pricing
-    // This ensures we don't create duplicate PaymentIntents for the same booking/pricing combination
-    // Include the actual amount to be charged to differentiate between different payment plans
-    const pricingHash = `${paymentCalculation.amount_cents}_${plan}`
-    const idempotencyKey = `payment_intent_${bookingId}_${pricingHash}`
+    // Create idempotency key based on booking ID, plan, pricing, and timestamp
+    // This ensures each payment intent creation is unique when users switch between plans
+    // v3: adds timestamp to avoid idempotency conflicts when switching payment options
+    const pricingHash = `${paymentCalculation.base_cents}_${paymentCalculation.late_fee_cents}`
+    const timestamp = Date.now()
+    const idempotencyKey = `payment_intent_${bookingId}_${plan}_${pricingHash}_${timestamp}_v3`
 
     console.log('🔑 Idempotency key:', idempotencyKey)
 
@@ -272,14 +304,32 @@ router.post('/create-payment-intent', async (req, res) => {
         const existingIntent = await stripe.paymentIntents.retrieve(booking.stripe_payment_intent_id)
 
         // Check if the existing intent is still valid and matches our requirements
+        const hasMatchingMetadata = existingIntent.metadata.late_fee_applied !== undefined &&
+                                    existingIntent.metadata.wedding_date !== undefined &&
+                                    existingIntent.metadata.days_until_event !== undefined
+
         if (existingIntent &&
             existingIntent.status !== 'canceled' &&
             existingIntent.status !== 'succeeded' &&
             existingIntent.amount === paymentCalculation.amount_cents &&
             existingIntent.metadata.payment_plan === paymentCalculation.planUsed) {
 
-          console.log('✅ Reusing existing valid payment intent:', existingIntent.id)
-          paymentIntent = existingIntent
+          // Update metadata if it's missing the new fields
+          if (!hasMatchingMetadata) {
+            console.log('🔄 Updating payment intent metadata with late fee tracking fields')
+            paymentIntent = await stripe.paymentIntents.update(existingIntent.id, {
+              metadata: {
+                ...existingIntent.metadata,
+                late_fee_applied: (paymentCalculation.late_fee_cents > 0).toString(),
+                wedding_date: booking.event_date,
+                days_until_event: paymentCalculation.daysOut?.toString() || '0'
+              }
+            })
+            console.log('✅ Updated existing payment intent:', paymentIntent.id)
+          } else {
+            console.log('✅ Reusing existing valid payment intent:', existingIntent.id)
+            paymentIntent = existingIntent
+          }
         } else {
           console.log('⚠️ Existing payment intent is invalid or doesn\'t match requirements')
           console.log('Intent status:', existingIntent.status)
@@ -306,48 +356,16 @@ router.post('/create-payment-intent', async (req, res) => {
       console.log('🆕 Creating new payment intent with idempotency key')
 
       // Validate amount before creating payment intent
-      if (!Number.isFinite(paymentCalculation.amount_cents) || paymentCalculation.amount_cents <= 0) {
+      if (!paymentCalculation.amount_cents || paymentCalculation.amount_cents <= 0) {
         console.error('❌ CRITICAL: Cannot create payment intent with invalid amount:', {
           amount_cents: paymentCalculation.amount_cents,
           bookingId,
-          personalization_pricing: booking.personalization_data?.pricing_summary,
-          plan: plan,
-          base_cents: paymentCalculation.base_cents,
-          late_fee_cents: paymentCalculation.late_fee_cents,
-          processing_fee_cents: paymentCalculation.processing_fee_cents,
-          event_date: booking.event_date,
-          total_amount: booking.total_amount,
-          months_until_cutoff: paymentCalculation.monthsUntilCutoff,
-          days_until_cutoff: paymentCalculation.daysUntilCutoff
+          package_total_cents: booking.package_total_cents,
+          package_type: booking.package_type
         })
-
-        // Determine specific error message based on the issue
-        let errorMessage = 'Invalid payment amount calculated for booking'
-        let errorDetails = 'An error occurred while calculating your payment amount.'
-
-        if (paymentCalculation.base_cents === 0 || !paymentCalculation.base_cents) {
-          errorMessage = 'Missing package pricing information'
-          errorDetails = 'Your booking is missing pricing information. Please restart the booking process and ensure a package is selected.'
-        } else if (paymentCalculation.amount_cents === 0 && plan === 'monthly199') {
-          errorMessage = 'Monthly payment plan not available for your event date'
-          errorDetails = `Your event is too soon for the monthly payment plan. Please select either the full payment or $500 deposit option instead.`
-        } else if (paymentCalculation.amount_cents === 0) {
-          errorMessage = 'Payment plan unavailable for your event date'
-          errorDetails = 'The selected payment plan is not available for your event date. Please choose a different payment option.'
-        }
-
         return res.status(400).json({
-          error: errorMessage,
-          details: errorDetails,
-          debugInfo: {
-            bookingId,
-            hasPricingSummary: !!booking.personalization_data?.pricing_summary,
-            plan: plan,
-            amount_calculated: paymentCalculation.amount_cents,
-            base_amount: paymentCalculation.base_cents,
-            event_date: booking.event_date,
-            months_until_cutoff: paymentCalculation.monthsUntilCutoff
-          }
+          error: 'Invalid payment amount',
+          details: 'Package pricing is missing or invalid. Please contact support.'
         })
       }
 
@@ -406,7 +424,6 @@ router.post('/create-payment-intent', async (req, res) => {
 
       // Store payment intent ID in booking for future reference
       const updateSuccess = await markBookingPaymentIntent(bookingId, {
-        payment_schedule: paymentSchedule,
         payment_intent_id: paymentIntent.id,
         payment_plan: paymentCalculation.planUsed,
         payment_status: 'pending'
@@ -578,6 +595,140 @@ router.post('/confirm-payment', async (req, res) => {
 
     res.status(500).json({
       error: 'Failed to confirm payment'
+    })
+  }
+})
+
+/**
+ * POST /api/payments/create-addon-payment
+ * Creates a Payment Intent for add-on purchases on existing bookings
+ */
+router.post('/create-addon-payment', async (req, res) => {
+  try {
+    const { bookingId, addons, totalAmount, userEmail, userId } = req.body
+
+    console.log('🛒 Creating add-on payment intent for booking:', bookingId)
+    console.log('Add-ons:', addons)
+    console.log('Total amount (cents):', totalAmount)
+
+    // Validate required fields
+    if (!bookingId || !addons || addons.length === 0) {
+      return res.status(400).json({
+        error: 'Missing required fields: bookingId and addons'
+      })
+    }
+
+    // Validate booking access
+    const validation = await validateBookingAccess(bookingId, { userEmail, userId })
+    if (!validation.valid) {
+      console.error('❌ Booking validation failed:', validation.error)
+      return res.status(validation.error === 'Booking not found' ? 404 : 403).json({
+        error: validation.error
+      })
+    }
+
+    const booking = validation.booking
+    const customerEmail = validation.email || userEmail || undefined
+
+    // Validate amount
+    if (!totalAmount || totalAmount <= 0) {
+      return res.status(400).json({
+        error: 'Invalid total amount'
+      })
+    }
+
+    // Create idempotency key
+    const addonIds = addons.map(a => a.id).sort().join('_')
+    const idempotencyKey = `addon_payment_${bookingId}_${addonIds}_${totalAmount}`
+
+    console.log('🔑 Idempotency key:', idempotencyKey)
+
+    // Create Payment Intent for add-ons
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: totalAmount,
+      currency: 'usd',
+      metadata: {
+        booking_id: bookingId,
+        payment_type: 'addons',
+        photographer_id: booking.photographer_id,
+        addon_count: addons.length.toString(),
+        addon_items: JSON.stringify(addons.map(a => ({ id: a.id, name: a.name, qty: a.qty || 1 })))
+      },
+      description: `Add-ons for booking ${bookingId}`,
+      receipt_email: customerEmail,
+      automatic_payment_methods: {
+        enabled: true,
+      }
+    }, {
+      idempotencyKey
+    })
+
+    console.log('✨ Add-on payment intent created:', paymentIntent.id, '| Amount: $' + (totalAmount / 100).toFixed(2))
+
+    // Look up addon UUIDs from codes and insert into booking_addons table
+    const addonInserts = []
+    for (const addon of addons) {
+      // Look up addon UUID from code
+      const { data: addonData, error: addonError } = await supabase
+        .from('addons')
+        .select('id, price_cents')
+        .eq('code', addon.id)
+        .single()
+
+      if (addonError || !addonData) {
+        console.error(`❌ Could not find addon with code: ${addon.id}`, addonError)
+        continue
+      }
+
+      // Insert into booking_addons
+      const quantity = addon.qty || 1
+      const unitPrice = addon.price
+      const totalPrice = unitPrice * quantity
+
+      addonInserts.push({
+        booking_id: bookingId,
+        addon_id: addonData.id,
+        quantity: quantity,
+        unit_price_cents: unitPrice,
+        total_price_cents: totalPrice,
+        stripe_payment_intent_id: paymentIntent.id,
+        payment_status: 'pending',
+      })
+    }
+
+    // Batch insert all add-ons
+    if (addonInserts.length > 0) {
+      const { error: insertError } = await supabase
+        .from('booking_addons')
+        .insert(addonInserts)
+
+      if (insertError) {
+        console.error('❌ Error inserting booking add-ons:', insertError)
+        // Continue anyway - payment intent was created
+      } else {
+        console.log(`✅ Inserted ${addonInserts.length} add-ons into booking_addons table`)
+      }
+    }
+
+    // Return client secret to frontend
+    res.json({
+      clientSecret: paymentIntent.client_secret,
+      paymentIntentId: paymentIntent.id,
+      amount: totalAmount
+    })
+
+  } catch (error) {
+    console.error('Error creating add-on payment intent:', error)
+
+    if (error instanceof Stripe.errors.StripeError) {
+      return res.status(400).json({
+        error: 'Payment processing error',
+        details: error.message
+      })
+    }
+
+    res.status(500).json({
+      error: 'Internal server error during payment setup'
     })
   }
 })

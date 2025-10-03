@@ -70,12 +70,29 @@ const LogisticsCard = ({ booking }) => {
             .select()
             .single()
 
-          if (insertError) throw insertError
-          setLogistics(newData)
+          if (insertError) {
+            // If conflict (already exists), try to fetch it again
+            if (insertError.code === '23505' || insertError.message?.includes('duplicate')) {
+              const { data: existingData } = await supabase
+                .from('logistics_questionnaire')
+                .select('*')
+                .eq('booking_id', booking.id)
+                .maybeSingle()
+
+              if (existingData) {
+                setLogistics(existingData)
+                setFormData(existingData.answers || formData)
+              }
+            } else {
+              throw insertError
+            }
+          } else {
+            setLogistics(newData)
+          }
         }
       } catch (error) {
         console.error('Error loading logistics:', error)
-        toast.error('Failed to load logistics questionnaire')
+        // Don't show toast error - this is not critical for the user
       } finally {
         setLoading(false)
       }

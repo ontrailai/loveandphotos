@@ -70,10 +70,12 @@ const BookingPage = lazy(() =>
 
 // Booking wizard pages
 const AddOnsDetails = lazy(() => import('@pages/customer/booking/AddOnsDetails'))
+const ManageAddOns = lazy(() => import('@pages/customer/booking/ManageAddOns'))
 const AccountSetup = lazy(() => import('@pages/customer/booking/AccountSetup'))
 const ContractStep = lazy(() => import('@pages/customer/booking/ContractStep'))
 const PaymentStep = lazy(() => import('@pages/customer/booking/PaymentStep'))
 const PaymentSuccess = lazy(() => import('@pages/customer/booking/PaymentSuccess'))
+const ChangeDateSuccess = lazy(() => import('@pages/customer/booking/ChangeDateSuccess'))
 const CheckoutComplete = lazy(() => import('./pages/customer/booking/CheckoutComplete'))
 const BookingFlowGuard = lazy(() => import('@components/booking/BookingFlowGuard'))
 const ScheduleRedirect = lazy(() => import('@components/booking/ScheduleRedirect'))
@@ -336,6 +338,22 @@ function App() {
               <Suspense fallback={<PageLoader />}>
                 <PaymentSuccess />
               </Suspense>
+            } />
+            {/* Date Change Success Route */}
+            <Route path="/booking/:bookingId/change-date/success" element={
+              <ProtectedRoute>
+                <Suspense fallback={<PageLoader />}>
+                  <ChangeDateSuccess />
+                </Suspense>
+              </ProtectedRoute>
+            } />
+            {/* Manage Add-Ons Route */}
+            <Route path="/manage-addons/:bookingId" element={
+              <ProtectedRoute>
+                <Suspense fallback={<PageLoader />}>
+                  <ManageAddOns />
+                </Suspense>
+              </ProtectedRoute>
             } />
             <Route path="/booking/:photographerId/confirm" element={
               <ProtectedRoute>

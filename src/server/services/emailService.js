@@ -444,3 +444,485 @@ const queueEmailForRetry = async ({ bookingId, recipientEmail, emailContent }) =
     console.error('Error queuing email:', error)
   }
 }
+
+/**
+ * Send date change notification emails to customer and photographer
+ * @param {Object} params - Email parameters
+ * @param {string} params.bookingId - Booking ID
+ * @param {string} params.oldDate - Original event date (ISO format)
+ * @param {string} params.newDate - New event date (ISO format)
+ * @param {string} params.customerEmail - Customer email address
+ * @param {string} params.customerName - Customer full name
+ * @param {string} params.photographerEmail - Photographer email address
+ * @param {string} params.photographerName - Photographer full name
+ * @returns {Promise<Object>} - Email sending result
+ */
+export const sendDateChangeNotification = async ({
+  bookingId,
+  oldDate,
+  newDate,
+  customerEmail,
+  customerName,
+  photographerEmail,
+  photographerName
+}) => {
+  try {
+    console.log(`📧 Sending date change notifications for booking ${bookingId}`)
+
+    // Format dates for display
+    const formatDate = (dateString) => {
+      const date = new Date(dateString)
+      return date.toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      })
+    }
+
+    const formattedOldDate = formatDate(oldDate)
+    const formattedNewDate = formatDate(newDate)
+    const dashboardUrl = `${process.env.VITE_APP_URL || 'https://loveandphotos.onrender.com'}/dashboard`
+
+    // Send email to customer
+    const customerEmailContent = generateDateChangeCustomerEmail({
+      customerName,
+      photographerName,
+      oldDate: formattedOldDate,
+      newDate: formattedNewDate,
+      dashboardUrl,
+      bookingId
+    })
+
+    const { error: customerEmailError } = await supabase.functions.invoke('send-email', {
+      body: {
+        to: customerEmail,
+        from: 'Love & Photos <noreply@loveandphotos.com>',
+        subject: customerEmailContent.subject,
+        html: customerEmailContent.html,
+        text: customerEmailContent.text
+      }
+    })
+
+    if (customerEmailError) {
+      console.error('❌ Customer email send error:', customerEmailError)
+    } else {
+      console.log(`✅ Date change notification sent to customer: ${customerEmail}`)
+    }
+
+    // Send email to photographer
+    const photographerEmailContent = generateDateChangePhotographerEmail({
+      photographerName,
+      customerName,
+      oldDate: formattedOldDate,
+      newDate: formattedNewDate,
+      dashboardUrl,
+      bookingId
+    })
+
+    const { error: photographerEmailError } = await supabase.functions.invoke('send-email', {
+      body: {
+        to: photographerEmail,
+        from: 'Love & Photos <noreply@loveandphotos.com>',
+        subject: photographerEmailContent.subject,
+        html: photographerEmailContent.html,
+        text: photographerEmailContent.text
+      }
+    })
+
+    if (photographerEmailError) {
+      console.error('❌ Photographer email send error:', photographerEmailError)
+    } else {
+      console.log(`✅ Date change notification sent to photographer: ${photographerEmail}`)
+    }
+
+    return {
+      success: true,
+      customerEmailSent: !customerEmailError,
+      photographerEmailSent: !photographerEmailError
+    }
+  } catch (error) {
+    console.error('❌ Error sending date change notifications:', error)
+    return { success: false, error: error.message }
+  }
+}
+
+/**
+ * Generate customer email for date change
+ */
+const generateDateChangeCustomerEmail = ({
+  customerName,
+  photographerName,
+  oldDate,
+  newDate,
+  dashboardUrl,
+  bookingId
+}) => {
+  const subject = `📅 Your Shoot Date Has Been Updated - Love & Photos`
+
+  const html = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Date Change Confirmation - Love & Photos</title>
+      <style>
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          line-height: 1.6;
+          color: #333;
+          margin: 0;
+          padding: 0;
+          background-color: #f5f5f5;
+        }
+        .container {
+          max-width: 600px;
+          margin: 20px auto;
+          background: white;
+          border-radius: 12px;
+          overflow: hidden;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+          background: linear-gradient(135deg, #f5a3b5 0%, #a8c7aa 100%);
+          color: white;
+          padding: 40px 30px;
+          text-align: center;
+        }
+        .header h1 {
+          margin: 0;
+          font-size: 28px;
+          font-weight: 700;
+        }
+        .content {
+          padding: 40px 30px;
+        }
+        .date-change-box {
+          background: #f9f9f9;
+          border-left: 4px solid #f5a3b5;
+          padding: 20px;
+          margin: 25px 0;
+          border-radius: 8px;
+        }
+        .date-row {
+          margin: 15px 0;
+          padding: 10px;
+        }
+        .date-label {
+          font-size: 14px;
+          color: #666;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          margin-bottom: 5px;
+        }
+        .old-date {
+          text-decoration: line-through;
+          color: #999;
+          font-size: 16px;
+        }
+        .new-date {
+          color: #4CAF50;
+          font-size: 20px;
+          font-weight: 700;
+        }
+        .button {
+          display: inline-block;
+          padding: 14px 32px;
+          background: #f5a3b5;
+          color: white;
+          text-decoration: none;
+          border-radius: 8px;
+          font-weight: 600;
+          margin: 20px 0;
+        }
+        .footer {
+          background: #f9f9f9;
+          padding: 30px;
+          text-align: center;
+          color: #666;
+          font-size: 14px;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>📅 Shoot Date Updated</h1>
+        </div>
+
+        <div class="content">
+          <p style="font-size: 18px; margin-bottom: 20px;">
+            Hi ${customerName},
+          </p>
+
+          <p>
+            Your shoot date with <strong>${photographerName}</strong> has been successfully updated!
+          </p>
+
+          <div class="date-change-box">
+            <div class="date-row">
+              <div class="date-label">Previous Date:</div>
+              <div class="old-date">${oldDate}</div>
+            </div>
+            <div class="date-row">
+              <div class="date-label">New Date:</div>
+              <div class="new-date">${newDate}</div>
+            </div>
+          </div>
+
+          <p>
+            <strong>📋 What's Next?</strong>
+          </p>
+          <ul style="line-height: 2;">
+            <li>Your photographer has been notified of the change</li>
+            <li>The new date is now reflected in your dashboard</li>
+            <li>All other booking details remain the same</li>
+            <li>Your photographer will contact you closer to your new event date</li>
+          </ul>
+
+          <p style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 4px;">
+            <strong>⚠️ Important:</strong> This was your one-time date change. Additional date changes may incur extra fees.
+          </p>
+
+          <div style="text-align: center;">
+            <a href="${dashboardUrl}" class="button">View Your Dashboard →</a>
+          </div>
+
+          <p style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #f0f0f0; font-size: 14px; color: #666;">
+            <strong>Questions?</strong><br>
+            Contact us at <a href="mailto:support@loveandphotos.com" style="color: #f5a3b5;">support@loveandphotos.com</a>
+          </p>
+        </div>
+
+        <div class="footer">
+          <p><strong>Love & Photos</strong></p>
+          <p>Capturing your most precious moments</p>
+          <p style="margin-top: 15px; font-size: 12px; color: #999;">
+            © ${new Date().getFullYear()} Love & Photos. All rights reserved.
+          </p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `
+
+  const text = `
+SHOOT DATE UPDATED 📅
+
+Hi ${customerName},
+
+Your shoot date with ${photographerName} has been successfully updated!
+
+PREVIOUS DATE: ${oldDate}
+NEW DATE: ${newDate}
+
+WHAT'S NEXT:
+- Your photographer has been notified of the change
+- The new date is now reflected in your dashboard
+- All other booking details remain the same
+- Your photographer will contact you closer to your new event date
+
+⚠️ IMPORTANT: This was your one-time date change. Additional date changes may incur extra fees.
+
+VIEW YOUR DASHBOARD:
+${dashboardUrl}
+
+QUESTIONS?
+Contact us at support@loveandphotos.com
+
+---
+Love & Photos
+Capturing your most precious moments
+© ${new Date().getFullYear()} Love & Photos. All rights reserved.
+  `
+
+  return { subject, html, text }
+}
+
+/**
+ * Generate photographer email for date change
+ */
+const generateDateChangePhotographerEmail = ({
+  photographerName,
+  customerName,
+  oldDate,
+  newDate,
+  dashboardUrl,
+  bookingId
+}) => {
+  const subject = `📅 Booking Date Changed - ${customerName}`
+
+  const html = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Booking Date Changed - Love & Photos</title>
+      <style>
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          line-height: 1.6;
+          color: #333;
+          margin: 0;
+          padding: 0;
+          background-color: #f5f5f5;
+        }
+        .container {
+          max-width: 600px;
+          margin: 20px auto;
+          background: white;
+          border-radius: 12px;
+          overflow: hidden;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          padding: 40px 30px;
+          text-align: center;
+        }
+        .header h1 {
+          margin: 0;
+          font-size: 28px;
+          font-weight: 700;
+        }
+        .content {
+          padding: 40px 30px;
+        }
+        .date-change-box {
+          background: #f9f9f9;
+          border-left: 4px solid #667eea;
+          padding: 20px;
+          margin: 25px 0;
+          border-radius: 8px;
+        }
+        .date-row {
+          margin: 15px 0;
+          padding: 10px;
+        }
+        .date-label {
+          font-size: 14px;
+          color: #666;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          margin-bottom: 5px;
+        }
+        .old-date {
+          text-decoration: line-through;
+          color: #999;
+          font-size: 16px;
+        }
+        .new-date {
+          color: #667eea;
+          font-size: 20px;
+          font-weight: 700;
+        }
+        .button {
+          display: inline-block;
+          padding: 14px 32px;
+          background: #667eea;
+          color: white;
+          text-decoration: none;
+          border-radius: 8px;
+          font-weight: 600;
+          margin: 20px 0;
+        }
+        .footer {
+          background: #f9f9f9;
+          padding: 30px;
+          text-align: center;
+          color: #666;
+          font-size: 14px;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>📅 Booking Date Changed</h1>
+        </div>
+
+        <div class="content">
+          <p style="font-size: 18px; margin-bottom: 20px;">
+            Hi ${photographerName},
+          </p>
+
+          <p>
+            <strong>${customerName}</strong> has changed their shoot date using their date change flexibility add-on.
+          </p>
+
+          <div class="date-change-box">
+            <div class="date-row">
+              <div class="date-label">Previous Date:</div>
+              <div class="old-date">${oldDate}</div>
+            </div>
+            <div class="date-row">
+              <div class="date-label">New Date:</div>
+              <div class="new-date">${newDate}</div>
+            </div>
+          </div>
+
+          <p>
+            <strong>📋 Action Required:</strong>
+          </p>
+          <ul style="line-height: 2;">
+            <li>Update your calendar to reflect the new shoot date</li>
+            <li>Review your availability and confirm this date works for you</li>
+            <li>Contact the customer if there are any concerns</li>
+            <li>All other booking details remain unchanged</li>
+          </ul>
+
+          <div style="text-align: center;">
+            <a href="${dashboardUrl}" class="button">View Booking Details →</a>
+          </div>
+
+          <p style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #f0f0f0; font-size: 14px; color: #666;">
+            <strong>Need Help?</strong><br>
+            Contact support at <a href="mailto:support@loveandphotos.com" style="color: #667eea;">support@loveandphotos.com</a>
+          </p>
+        </div>
+
+        <div class="footer">
+          <p><strong>Love & Photos</strong></p>
+          <p>Professional Photography Platform</p>
+          <p style="margin-top: 15px; font-size: 12px; color: #999;">
+            © ${new Date().getFullYear()} Love & Photos. All rights reserved.
+          </p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `
+
+  const text = `
+BOOKING DATE CHANGED 📅
+
+Hi ${photographerName},
+
+${customerName} has changed their shoot date using their date change flexibility add-on.
+
+PREVIOUS DATE: ${oldDate}
+NEW DATE: ${newDate}
+
+ACTION REQUIRED:
+- Update your calendar to reflect the new shoot date
+- Review your availability and confirm this date works for you
+- Contact the customer if there are any concerns
+- All other booking details remain unchanged
+
+VIEW BOOKING DETAILS:
+${dashboardUrl}
+
+NEED HELP?
+Contact support at support@loveandphotos.com
+
+---
+Love & Photos
+Professional Photography Platform
+© ${new Date().getFullYear()} Love & Photos. All rights reserved.
+  `
+
+  return { subject, html, text }
+}

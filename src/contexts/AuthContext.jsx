@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react'
 import { supabase, db } from '@lib/supabase'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
@@ -19,14 +19,26 @@ export const AuthProvider = ({ children }) => {
   const [photographerProfile, setPhotographerProfile] = useState(null)
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
+  const isMountedRef = useRef(true)
 
   // Fetch user profile and photographer data if applicable
-  const fetchUserData = async (user) => {
+  const fetchUserData = useCallback(async (user) => {
+    // Check if component is still mounted before proceeding
+    if (!isMountedRef.current) {
+      console.log('[AuthContext] Component unmounted, skipping fetch')
+      return null
+    }
     try {
       console.log('[AuthContext] Fetching user data for:', user.id)
 
-      // Get user profile - first try to fetch it
-      let userProfile = await db.users.getProfile(user.id)
+      // Get user profile - first try to fetch it with timeout
+      console.log('[AuthContext] 🔍 Calling db.users.getProfile...')
+      const profilePromise = db.users.getProfile(user.id)
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Profile fetch timeout after 5s')), 5000)
+      )
+
+      let userProfile = await Promise.race([profilePromise, timeoutPromise])
       console.log('[AuthContext] User profile:', userProfile)
 
       // If profile doesn't exist, create it
@@ -97,9 +109,11 @@ export const AuthProvider = ({ children }) => {
       // Don't show error toast on initial load
       return null
     }
-  }
+  }, []) // Empty dependency array since it only uses parameters
 
   useEffect(() => {
+    // Set mounted ref
+    isMountedRef.current = true
     // Check active session
     const checkSession = async () => {
       try {
@@ -110,13 +124,14 @@ export const AuthProvider = ({ children }) => {
           console.log('[AuthContext] Session found for user:', session.user.id)
           setUser(session.user)
           await fetchUserData(session.user)
+          console.log('[AuthContext] ✅ User data fetch completed, profile should be set')
         } else {
           console.log('[AuthContext] No active session')
         }
       } catch (error) {
         console.error('[AuthContext] Session check error:', error)
       } finally {
-        console.log('[AuthContext] Session check complete, setting loading to false')
+        console.log('[AuthContext] 🏁 Setting loading to false')
         setLoading(false)
       }
     }
@@ -141,9 +156,10 @@ export const AuthProvider = ({ children }) => {
     )
 
     return () => {
+      isMountedRef.current = false
       subscription?.unsubscribe()
     }
-  }, [])
+  }, [fetchUserData])
 
   // Sign up function
   const signUp = async (email, password, userData = {}) => {
@@ -554,15 +570,22 @@ export const AuthProvider = ({ children }) => {
 export const ProtectedRoute = ({ children, requireRole = null, requireOnboarding = false }) => {
   const { user, profile, photographerProfile, loading, hasRole, checkOnboardingStatus } = useAuth()
   const navigate = useNavigate()
+  const hasNavigatedRef = useRef(false)
 
   useEffect(() => {
     console.log('[ProtectedRoute] State:', { loading, hasUser: !!user, hasProfile: !!profile, role: profile?.role, requireRole })
 
-    if (!loading) {
+    // Reset navigation flag when dependencies change
+    if (loading) {
+      hasNavigatedRef.current = false
+    }
+
+    if (!loading && !hasNavigatedRef.current) {
       // Check authentication - only check for user, not profile
       // Profile might still be loading
       if (!user) {
         console.log('[ProtectedRoute] No user, redirecting to login')
+        hasNavigatedRef.current = true
         navigate('/login')
         return
       }
@@ -576,6 +599,7 @@ export const ProtectedRoute = ({ children, requireRole = null, requireOnboarding
         }
         // Redirect to forbidden page for role mismatches
         console.log('[ProtectedRoute] Role mismatch, redirecting to forbidden')
+        hasNavigatedRef.current = true
         navigate('/forbidden')
         return
       }
@@ -584,13 +608,14 @@ export const ProtectedRoute = ({ children, requireRole = null, requireOnboarding
       if (requireOnboarding && !checkOnboardingStatus()) {
         if (hasRole('photographer')) {
           console.log('[ProtectedRoute] Photographer onboarding required')
+          hasNavigatedRef.current = true
           navigate('/onboarding/photographer')
         }
       }
 
       console.log('[ProtectedRoute] Access granted, rendering children')
     }
-  }, [user, profile, loading, requireRole, requireOnboarding])
+  }, [user, profile, loading, requireRole, requireOnboarding, navigate, hasRole, checkOnboardingStatus])
 
   if (loading) {
     console.log('[ProtectedRoute] Loading state active, showing spinner')

@@ -20,6 +20,8 @@ const AddOnsGrid = ({
   onInfoClick = null,
   context = {}, // Package context for pricing and validation
   className = '',
+  photographerId, // Destructure to prevent DOM warning
+  packageContext, // Destructure to prevent DOM warning
   ...props
 }) => {
   const [validationResults, setValidationResults] = useState({})
@@ -32,7 +34,11 @@ const AddOnsGrid = ({
   // Validate selections whenever they change
   useEffect(() => {
     const validation = validateAddOnSelections(selectedAddons, context)
-    setValidationResults(validation)
+    setValidationResults(prevResults => {
+      // Only update if validation actually changed to prevent infinite loops
+      const hasChanged = JSON.stringify(prevResults) !== JSON.stringify(validation)
+      return hasChanged ? validation : prevResults
+    })
   }, [selectedAddons, context])
 
   // Check if an add-on is selected

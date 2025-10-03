@@ -3,7 +3,7 @@
  * Adapted from Magic MCP output with Supabase integration
  */
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@contexts/AuthContext'
 import { motion, useReducedMotion } from 'framer-motion'
@@ -15,6 +15,7 @@ import ContractsCard from '@components/dashboard/ContractsCard'
 import QuestionnairesCard from '@components/dashboard/QuestionnairesCard'
 import AddOnsCard from '@components/dashboard/AddOnsCard'
 import PaymentCard from '@components/dashboard/PaymentCard'
+import DateChangeCard from '@components/dashboard/DateChangeCard'
 import StatsCards from '@components/dashboard/redesign/StatsCards'
 import UpcomingBookingCard from '@components/dashboard/redesign/UpcomingBookingCard'
 import EmptyState from '@components/dashboard/redesign/EmptyState'
@@ -67,13 +68,7 @@ const CustomerDashboard = () => {
     },
   }
 
-  useEffect(() => {
-    if (user) {
-      loadDashboardData()
-    }
-  }, [user])
-
-  const loadDashboardData = async () => {
+  const loadDashboardData = useCallback(async () => {
     try {
       setLoading(true)
 
@@ -145,7 +140,18 @@ const CustomerDashboard = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [user?.id]) // Only depend on user ID, not entire user object
+
+  useEffect(() => {
+    console.log('📊 Dashboard useEffect triggered:', { userId: user?.id, hasUser: !!user })
+    if (user?.id) {
+      loadDashboardData()
+    } else {
+      console.log('⚠️ No user ID available, setting loading to false')
+      setLoading(false)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]) // Only watch user?.id to prevent infinite loops on user object changes
 
   const handleWriteReview = (booking) => {
     navigate(`/review/${booking.id}`)
@@ -263,7 +269,22 @@ const CustomerDashboard = () => {
 
                   {/* Payment Information */}
                   <div className="mt-4">
-                    <PaymentCard booking={booking} />
+                    <PaymentCard
+                      booking={booking}
+                      onPaymentUpdate={loadDashboardData}
+                    />
+                  </div>
+
+                  {/* Date Change Flexibility Offer */}
+                  <div className="mt-4">
+                    <DateChangeCard
+                      booking={booking}
+                      onDateChanged={() => {
+                        // Refresh dashboard data after date change
+                        loadDashboardData()
+                        toast.success('Your booking has been updated!')
+                      }}
+                    />
                   </div>
 
                   {/* Wedding Day Logistics (T-60) */}

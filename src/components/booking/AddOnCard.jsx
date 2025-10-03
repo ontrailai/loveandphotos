@@ -208,13 +208,7 @@ const AddOnCard = ({
               <h4 className="text-sm font-medium text-gray-900 mb-2">
                 What's included:
               </h4>
-              <CollapsibleText
-                className="text-xs text-gray-600"
-                expandText="Show all features"
-                collapseText="Show less"
-                expandOnDesktop={false}
-              >
-                <ul className="space-y-2" role="list">
+              <ul className="space-y-2" role="list">
                   {addon.features.map((feature, index) => (
                     <li key={index} className="flex items-start gap-2" role="listitem">
                       <div className="mt-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-green-100 text-green-600 flex-shrink-0">
@@ -226,7 +220,6 @@ const AddOnCard = ({
                     </li>
                   ))}
                 </ul>
-              </CollapsibleText>
             </div>
           )}
         </div>

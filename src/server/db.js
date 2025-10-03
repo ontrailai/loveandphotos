@@ -112,6 +112,15 @@ export async function markBookingPaymentIntent(bookingId, sessionData = {}) {
     updatePayload.payment_schedule = sessionData.payment_schedule
   }
 
+  // Save late fee tracking data if provided
+  if (sessionData.late_fee_applied !== undefined) {
+    updatePayload.late_fee_applied = sessionData.late_fee_applied
+  }
+
+  if (sessionData.days_until_event !== undefined) {
+    updatePayload.days_until_event = sessionData.days_until_event
+  }
+
   if (Object.keys(updatePayload).length === 1) {
     // Nothing to update besides timestamp
     return true
@@ -362,3 +371,6 @@ export async function databaseHealthCheck() {
     }
   }
 }
+
+// Export supabase client for direct use in routes
+export { supabase }

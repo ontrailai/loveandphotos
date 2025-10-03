@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '@contexts/AuthContext'
 import { supabase } from '@lib/supabase'
 import {
@@ -24,13 +24,12 @@ const BookingsPage = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const [totalCount, setTotalCount] = useState(0)
 
-  useEffect(() => {
-    if (photographerProfile && !authLoading) {
-      fetchBookings()
+  const fetchBookings = useCallback(async () => {
+    if (!photographerProfile?.id) {
+      console.log('[BookingsPage] No photographer profile ID available')
+      return
     }
-  }, [photographerProfile, authLoading, currentPage])
 
-  const fetchBookings = async () => {
     try {
       setLoading(true)
       setError(null)
@@ -83,7 +82,13 @@ const BookingsPage = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [photographerProfile?.id, currentPage]) // Only depend on ID and currentPage
+
+  useEffect(() => {
+    if (photographerProfile?.id && !authLoading) {
+      fetchBookings()
+    }
+  }, [photographerProfile?.id, authLoading, fetchBookings]) // Include fetchBookings since it's memoized
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A'

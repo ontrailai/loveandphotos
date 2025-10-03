@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '@contexts/AuthContext'
 import { supabase } from '@lib/supabase'
 import { MessageSquare, AlertCircle, Calendar } from 'lucide-react'
@@ -10,18 +10,17 @@ const MessagesPage = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  useEffect(() => {
-    if (user && profile) {
-      fetchMessages()
+  const fetchMessages = useCallback(async () => {
+    if (!user?.id || !profile?.role) {
+      console.log('[MessagesPage] No user ID or profile role available')
+      return
     }
-  }, [user, profile])
 
-  const fetchMessages = async () => {
     try {
       setLoading(true)
       setError(null)
 
-      console.log('[MessagesPage] Fetching messages for user role:', profile?.role)
+      console.log('[MessagesPage] Fetching messages for user role:', profile.role)
 
       // Fetch all active company messages where user's role is in the audience array
       const { data, error: fetchError } = await supabase
@@ -46,7 +45,13 @@ const MessagesPage = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [user?.id, profile?.role]) // Only depend on ID and role
+
+  useEffect(() => {
+    if (user?.id && profile?.role) {
+      fetchMessages()
+    }
+  }, [user?.id, profile?.role, fetchMessages]) // Include fetchMessages since it's memoized
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A'

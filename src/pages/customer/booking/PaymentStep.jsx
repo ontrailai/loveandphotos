@@ -55,19 +55,15 @@ const PaymentStep = () => {
     const monthsUntilCutoff = Math.max(1, Math.floor(daysUntilCutoff / 30))
 
     // Apply pricing rules matching backend compute.js
-    if (daysUntilEvent <= 60) {
-      // Within 60 days: $450 late fee applies, only full payment allowed
+    if (daysUntilEvent <= 30) {
+      // Within 30 days: $450 late fee applies, only full payment allowed
       const lateFee = 450
       return baseTotal + lateFee
-    } else if (daysUntilEvent < 90) {
-      // 61-89 days: Limited plans (full payment or $500 deposit only)
-      if (selectedPaymentPlan === 'deposit500') {
-        return 500 // $500 deposit
-      } else {
-        return baseTotal // Full payment
-      }
+    } else if (daysUntilEvent < 60) {
+      // 31-59 days: Only full payment available (no time for installment plans before 60-day cutoff)
+      return baseTotal
     } else {
-      // 90+ days: All payment plans available
+      // 60+ days: All payment plans available
       if (selectedPaymentPlan === 'deposit500') {
         return 500 // $500 deposit
       } else if (selectedPaymentPlan === 'monthly199') {
@@ -90,18 +86,32 @@ const PaymentStep = () => {
     }
   }
 
-  // Check access to this step
+  // Check access to this step (only run once on mount)
   useEffect(() => {
-    if (!canAccessStep('payment')) {
+    const hasSchedule = !!bookingFlow.scheduleDetails?.date
+    const hasSignedContract = !!bookingFlow.contractDetails?.contractSigned
+    const hasBookingId = !!bookingFlow.bookingId
+
+    console.log('💳 Payment step mounted:', {
+      hasSchedule,
+      hasSignedContract,
+      hasBookingId,
+      bookingId: bookingFlow.bookingId
+    })
+
+    if (!hasBookingId || !hasSchedule || !hasSignedContract) {
       console.error('Cannot access payment step - missing required information')
+      toast.error('Please complete previous steps before payment')
+
       // Redirect to the first incomplete step
-      if (!bookingFlow.scheduleDetails?.date) {
+      if (!hasSchedule) {
         navigate(`/booking/${photographerId}/schedule`)
-      } else if (!bookingFlow.contractDetails?.contractSigned) {
+      } else if (!hasSignedContract) {
         navigate(`/booking/${photographerId}/contract`)
       }
     }
-  }, [canAccessStep, navigate, photographerId, bookingFlow])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // Only run once on mount to prevent infinite loops
 
   // Get steps for the booking stepper
   const steps = getStepsForStepper()
@@ -156,8 +166,8 @@ const PaymentStep = () => {
     const daysUntilCutoff = Math.ceil((cutoffDate - new Date()) / (1000 * 60 * 60 * 24))
     const monthsUntilCutoff = Math.max(1, Math.floor(daysUntilCutoff / 30))
 
-    // Within 60 days: late fee applies, only full payment
-    if (daysUntilEvent <= 60) {
+    // Within 30 days: late fee applies, only full payment
+    if (daysUntilEvent <= 30) {
       const lateFee = 450
       const totalWithLateFee = baseTotal + lateFee
       return {
@@ -165,43 +175,28 @@ const PaymentStep = () => {
         description: `$${totalWithLateFee.toLocaleString()} total including $${lateFee} late booking fee`,
         terms: [
           `Base total: $${baseTotal.toLocaleString()}`,
-          `Late booking fee (within 60 days): $${lateFee}`,
-          'Payment plans not available for bookings within 60 days',
+          `Late booking fee (within 30 days): $${lateFee}`,
+          'Payment plans not available for bookings within 30 days',
           'Full payment required to secure your date'
         ]
       }
     }
 
-    // 61-89 days: limited plans (full payment or $500 deposit only)
-    if (daysUntilEvent < 90) {
-      if (selectedPaymentPlan === 'deposit500') {
-        const remainingBalance = baseTotal - 500
-        const monthlyPayment = Math.round(remainingBalance / monthsUntilCutoff)
-        return {
-          title: '$500 Deposit + Monthly Payments',
-          description: `$500 deposit today, then ${monthsUntilCutoff} monthly payments of ~$${monthlyPayment.toLocaleString()}`,
-          terms: [
-            '$500 deposit due today',
-            `${monthsUntilCutoff} remaining payments of ~$${monthlyPayment.toLocaleString()} each`,
-            'All payments complete 60 days before event',
-            'Payments automatically charged monthly'
-          ]
-        }
-      } else {
-        return {
-          title: 'Full Payment',
-          description: `$${baseTotal.toLocaleString()} total`,
-          terms: [
-            'Full payment secures your date',
-            'Monthly payment plan requires 90+ days notice',
-            'Includes all package features',
-            'Service agreement begins upon payment'
-          ]
-        }
+    // 31-59 days: only full payment available (no time for installment plans before 60-day cutoff)
+    if (daysUntilEvent < 60) {
+      return {
+        title: 'Full Payment',
+        description: `$${baseTotal.toLocaleString()} total`,
+        terms: [
+          'Full payment secures your date',
+          'Payment plans require 60+ days notice',
+          'Not enough time for installment plans before 60-day payment cutoff',
+          `Your event is ${daysUntilEvent} days away (${daysUntilCutoff} days until cutoff)`
+        ]
       }
     }
 
-    // 90+ days: all payment plans available
+    // 60+ days: all payment plans available
     if (selectedPaymentPlan === 'deposit500' || selectedPaymentPlan === 'deposit+3') {
       const remainingBalance = baseTotal - 500
       const monthlyPayment = Math.round(remainingBalance / monthsUntilCutoff)
@@ -258,6 +253,32 @@ const PaymentStep = () => {
 
   const planDetails = getPaymentPlanDetails()
 
+  // Show fallback if booking data is incomplete
+  if (!bookingFlow.bookingId || !bookingFlow.scheduleDetails?.date || !bookingFlow.contractDetails?.contractSigned) {
+    return (
+      <div className="min-h-screen bg-dusty-50 flex items-center justify-center px-4">
+        <Card className="max-w-md w-full p-8 text-center">
+          <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Info className="w-8 h-8 text-yellow-600" />
+          </div>
+          <h2 className="text-2xl font-bold text-dusty-900 mb-2">
+            Session Expired or Incomplete
+          </h2>
+          <p className="text-dusty-600 mb-6">
+            Your booking session has expired or is missing required information.
+            Please restart your booking from the beginning.
+          </p>
+          <Button
+            onClick={() => navigate('/browse')}
+            className="w-full"
+          >
+            Return to Browse Photographers
+          </Button>
+        </Card>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-dusty-50">
       <BookingStepper
@@ -301,6 +322,45 @@ const PaymentStep = () => {
                     {bookingFlow.packageDetails?.packageTitle || 'Photography Package'}
                   </p>
                 </div>
+
+                {/* Hours Breakdown - Only show if we have schedule times */}
+                {bookingFlow.scheduleDetails?.startTime && bookingFlow.scheduleDetails?.endTime && (
+                  <div className="bg-primary-50 border border-primary-200 rounded-lg p-3">
+                    <p className="text-dusty-600 mb-1">Photoshoot Duration</p>
+                    <div className="space-y-1">
+                      <div className="flex justify-between items-center">
+                        <span className="text-dusty-700">Hours:</span>
+                        <span className="font-semibold text-dusty-900">
+                          {(() => {
+                            const start = bookingFlow.scheduleDetails.startTime
+                            const end = bookingFlow.scheduleDetails.endTime
+                            const [startHour] = start.split(':').map(Number)
+                            const [endHour] = end.split(':').map(Number)
+                            const hours = endHour - startHour
+                            return `${hours} hour${hours !== 1 ? 's' : ''}`
+                          })()}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-dusty-700">Rate:</span>
+                        <span className="font-semibold text-dusty-900">$200/hour</span>
+                      </div>
+                      <div className="flex justify-between items-center pt-1 border-t border-primary-300">
+                        <span className="text-dusty-700 font-medium">Subtotal:</span>
+                        <span className="font-bold text-primary-600">
+                          ${(() => {
+                            const start = bookingFlow.scheduleDetails.startTime
+                            const end = bookingFlow.scheduleDetails.endTime
+                            const [startHour] = start.split(':').map(Number)
+                            const [endHour] = end.split(':').map(Number)
+                            const hours = endHour - startHour
+                            return (hours * 200).toFixed(2)
+                          })()}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Event Date */}
                 <div>

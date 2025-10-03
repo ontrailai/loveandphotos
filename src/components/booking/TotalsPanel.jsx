@@ -19,6 +19,7 @@ const TotalsPanel = ({
   className = '',
   isSticky = true,
   position = 'right', // 'right', 'bottom'
+  packageContext, // Destructure to prevent DOM warning
   ...props
 }) => {
   const [isVisible, setIsVisible] = useState(false)
@@ -171,26 +172,30 @@ const TotalsPanel = ({
       </div>
 
       {/* Action buttons */}
-      <div className="flex flex-col space-y-2 mt-6">
-        <Button
-          size="lg"
-          onClick={onContinue}
-          className="w-full"
-        >
-          Continue
-        </Button>
+      {(onContinue || onSkip) && (
+        <div className="flex flex-col space-y-2 mt-6">
+          {onContinue && (
+            <Button
+              size="lg"
+              onClick={onContinue}
+              className="w-full"
+            >
+              Continue
+            </Button>
+          )}
 
-        {selectedAddons.length === 0 && onSkip && (
-          <Button
-            variant="outline"
-            size="lg"
-            onClick={onSkip}
-            className="w-full"
-          >
-            Skip Add-Ons
-          </Button>
-        )}
-      </div>
+          {selectedAddons.length === 0 && onSkip && (
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={onSkip}
+              className="w-full"
+            >
+              Skip Add-Ons
+            </Button>
+          )}
+        </div>
+      )}
 
       {/* Help text */}
       <p className="text-xs text-gray-500 text-center mt-4">

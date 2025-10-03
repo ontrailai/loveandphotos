@@ -25,22 +25,43 @@ const QuestionnaireTile = ({ booking, type, title, description, lockThreshold })
   const loadQuestionnaire = async () => {
     try {
       setLoading(true)
-      const { data, error } = await supabase
-        .from('questionnaires')
-        .select('*')
-        .eq('booking_id', booking.id)
-        .eq('type', type)
-        .maybeSingle()
 
-      if (error) {
-        // Silently handle if table doesn't exist yet (404/PGRST205) or no rows found
-        if (error.code === 'PGRST205' || error.code === 'PGRST116' || error.message?.includes('schema cache') || error.message?.includes('relation') || error.message?.includes('does not exist')) {
-          setQuestionnaire(null)
-          return
+      // Wedding Logistics uses a different table (logistics_questionnaire)
+      if (type === 'wedding_info') {
+        const { data, error } = await supabase
+          .from('logistics_questionnaire')
+          .select('*')
+          .eq('booking_id', booking.id)
+          .maybeSingle()
+
+        if (error) {
+          // Silently handle if table doesn't exist yet (404/PGRST205) or no rows found
+          if (error.code === 'PGRST205' || error.code === 'PGRST116' || error.message?.includes('schema cache') || error.message?.includes('relation') || error.message?.includes('does not exist')) {
+            setQuestionnaire(null)
+            return
+          }
+          throw error
         }
-        throw error
+        setQuestionnaire(data)
+      } else {
+        // Other questionnaires use the questionnaires table
+        const { data, error } = await supabase
+          .from('questionnaires')
+          .select('*')
+          .eq('booking_id', booking.id)
+          .eq('type', type)
+          .maybeSingle()
+
+        if (error) {
+          // Silently handle if table doesn't exist yet (404/PGRST205) or no rows found
+          if (error.code === 'PGRST205' || error.code === 'PGRST116' || error.message?.includes('schema cache') || error.message?.includes('relation') || error.message?.includes('does not exist')) {
+            setQuestionnaire(null)
+            return
+          }
+          throw error
+        }
+        setQuestionnaire(data)
       }
-      setQuestionnaire(data)
     } catch (error) {
       console.error('Error loading questionnaire:', error)
       toast.error(`Failed to load ${title}`)
@@ -55,8 +76,11 @@ const QuestionnaireTile = ({ booking, type, title, description, lockThreshold })
   const progress = questionnaire?.answered_questions || 0
   const totalQuestions = type === 'style' ? 8 : 9
 
+  // Check if questionnaire is completed (handles both 'completed' and 'submitted' statuses)
+  const isCompleted = status === 'completed' || status === 'submitted'
+
   const getStatusInfo = () => {
-    if (isLocked && status !== 'completed') {
+    if (isLocked && !isCompleted) {
       return {
         badge: <Badge variant="danger" size="sm">Locked</Badge>,
         icon: <LockIcon className="w-4 h-4 text-red-600" />,
@@ -64,13 +88,15 @@ const QuestionnaireTile = ({ booking, type, title, description, lockThreshold })
       }
     }
 
+    if (isCompleted) {
+      return {
+        badge: <Badge variant="success" size="sm">Complete</Badge>,
+        icon: <CheckCircleIcon className="w-4 h-4 text-green-600" />,
+        message: `All ${totalQuestions} questions answered`
+      }
+    }
+
     switch (status) {
-      case 'completed':
-        return {
-          badge: <Badge variant="success" size="sm">Complete</Badge>,
-          icon: <CheckCircleIcon className="w-4 h-4 text-green-600" />,
-          message: `All ${totalQuestions} questions answered`
-        }
       case 'in_progress':
         return {
           badge: <Badge variant="warning" size="sm">In Progress</Badge>,
@@ -88,7 +114,7 @@ const QuestionnaireTile = ({ booking, type, title, description, lockThreshold })
   }
 
   const handleClick = () => {
-    if (isLocked && status !== 'completed') {
+    if (isLocked && !isCompleted) {
       toast.error(`This questionnaire is locked. Less than ${lockThreshold} days until your event.`)
       return
     }
@@ -111,9 +137,9 @@ const QuestionnaireTile = ({ booking, type, title, description, lockThreshold })
   return (
     <div
       className={`p-4 bg-gray-50 rounded-lg border transition-all ${
-        isLocked && status !== 'completed'
+        isLocked && !isCompleted
           ? 'border-red-200 bg-red-50'
-          : status === 'completed'
+          : isCompleted
           ? 'border-green-200 bg-green-50'
           : 'border-gray-200 hover:border-primary-300 hover:bg-primary-50 cursor-pointer'
       }`}
@@ -133,7 +159,7 @@ const QuestionnaireTile = ({ booking, type, title, description, lockThreshold })
         <div className="text-xs text-muted-foreground">
           {statusInfo.message}
         </div>
-        {!isLocked && status !== 'completed' && (
+        {!isLocked && !isCompleted && (
           <ChevronRightIcon className="w-4 h-4 text-primary-600" />
         )}
       </div>
@@ -151,7 +177,7 @@ const QuestionnaireTile = ({ booking, type, title, description, lockThreshold })
       )}
 
       {/* Warning for approaching deadline */}
-      {!isLocked && status !== 'completed' && daysUntilEvent <= lockThreshold + 7 && (
+      {!isLocked && !isCompleted && daysUntilEvent <= lockThreshold + 7 && (
         <div className="mt-3 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-800">
           <AlertCircleIcon className="w-3 h-3 inline mr-1" />
           Complete within {daysUntilEvent} days or it will lock

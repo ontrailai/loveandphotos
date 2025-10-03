@@ -40,7 +40,8 @@
       "Bash(npm run dev:api:*)",
       "Bash(mkdir:*)",
       "Bash(git checkout:*)",
-      "Bash(git stash:*)"
+      "Bash(git stash:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []

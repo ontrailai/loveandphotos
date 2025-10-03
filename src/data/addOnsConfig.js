@@ -152,6 +152,31 @@ Example for 8 hours (second photographer only):
       discount: null,
       popularity: '36% of couples choose this'
     }
+  },
+  {
+    id: 'date-change-flexibility',
+    title: 'Change Date Flexibility',
+    basePrice: 50,
+    originalPrice: null,
+    discountPercent: 0,
+    popularity: null,
+    category: 'flexibility',
+    description: 'Life happens! This add-on allows you to reschedule your shoot date once at no additional cost. Perfect for peace of mind if your plans might change.',
+    features: [
+      'Reschedule your shoot date once',
+      'No additional fees when used',
+      'Valid for one date change',
+      'Peace of mind protection',
+      'Must be purchased at booking'
+    ],
+    validation: {
+      isAlwaysAvailable: true,
+      isBookingOnly: true // Can only be purchased during initial booking
+    },
+    badges: {
+      discount: null,
+      popularity: null
+    }
   }
 ]
 

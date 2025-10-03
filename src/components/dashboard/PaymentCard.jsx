@@ -13,7 +13,7 @@ import { supabase } from '@lib/supabase'
 import toast from 'react-hot-toast'
 import PaymentModal from './PaymentModal'
 
-const PaymentCard = ({ booking }) => {
+const PaymentCard = ({ booking, onPaymentUpdate }) => {
   const [loading, setLoading] = useState(false)
   const [showCustomAmount, setShowCustomAmount] = useState(false)
   const [customAmount, setCustomAmount] = useState('')
@@ -230,8 +230,11 @@ const PaymentCard = ({ booking }) => {
   }
 
   const handlePaymentSuccess = () => {
-    // Refresh the page to show updated payment status
-    window.location.reload()
+    // Refresh dashboard data instead of full page reload
+    if (onPaymentUpdate) {
+      onPaymentUpdate()
+    }
+    toast.success('Payment processed successfully!')
   }
 
   const getPaymentStatusBadge = () => {
@@ -314,13 +317,6 @@ const PaymentCard = ({ booking }) => {
             <span className="font-semibold text-green-600">-${paidAmount.toFixed(2)}</span>
           </div>
         )}
-        {console.log('🔍 Rendering check:', {
-          bookingId: booking.id,
-          paidAmount,
-          shouldShowPaid: paidAmount > 0,
-          nextPayment,
-          shouldShowNextPayment: !!nextPayment
-        })}
 
         {remainingAmount > 0 && (
           <>

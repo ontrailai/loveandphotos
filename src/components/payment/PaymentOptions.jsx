@@ -25,21 +25,21 @@ const PaymentOptions = ({
   const monthsUntilCutoff = Math.max(1, Math.floor(daysUntilCutoff / 30))
 
   // Determine available payment options based on days until event
-  const isDepositAvailable = daysOut > 60
-  // Monthly plan available if there's at least 1 month before 60-day cutoff
-  const isMonthlyAvailable = daysUntilCutoff >= 30
+  const isDepositAvailable = daysOut >= 60
+  // Monthly plan available if there's at least 60 days until event
+  const isMonthlyAvailable = daysOut >= 60
 
-  // Calculate late fee if within 60 days (matches backend compute.js)
-  const lateFee = daysOut <= 60 ? 450 : 0
+  // Calculate late fee if within 30 days (matches backend compute.js)
+  const lateFee = daysOut <= 30 ? 450 : 0
   const fullPaymentAmount = totalAmount + lateFee
 
   // Calculate payment amounts for each plan
   const paymentPlans = [
     {
       id: 'full',
-      name: daysOut <= 60 ? 'Pay in Full (Late Booking)' : 'Pay in Full',
+      name: daysOut <= 30 ? 'Pay in Full (Late Booking)' : 'Pay in Full',
       icon: DollarSign,
-      description: daysOut <= 60
+      description: daysOut <= 30
         ? `Complete payment today (includes $${lateFee} late booking fee)`
         : 'Complete payment today',
       amount: fullPaymentAmount,
@@ -48,11 +48,18 @@ const PaymentOptions = ({
       badge: 'Most Popular',
       badgeColor: 'bg-primary-100 text-primary-700',
       available: true,
-      features: daysOut <= 60
+      features: daysOut <= 30
         ? [
             `Base amount: $${totalAmount.toLocaleString()}`,
             `Late booking fee: $${lateFee}`,
-            'Payment plans not available within 60 days',
+            'Payment plans not available within 30 days',
+            'Immediate booking confirmation'
+          ]
+        : daysOut < 60
+        ? [
+            'Full payment secures your date',
+            'Payment plans require 60+ days notice',
+            'Not enough time for installment plans before 60-day cutoff',
             'Immediate booking confirmation'
           ]
         : [
@@ -277,19 +284,19 @@ const PaymentOptions = ({
       </div>
 
       {/* Helper text */}
-      {!isDepositAvailable && (
-        <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-          <p className="text-sm text-amber-800">
-            <strong>Note:</strong> Payment plans are only available for bookings more than 60 days in advance.
-            Your event is {daysOut} days away ({daysUntilCutoff} days until 60-day cutoff), so only full payment is available.
+      {daysOut <= 30 && (
+        <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-sm text-red-800">
+            <strong>⚠️ Late Booking Fee:</strong> Your event is {daysOut} days away.
+            A $450 late booking fee applies to all bookings within 30 days. Payment plans are not available.
           </p>
         </div>
       )}
-      {isDepositAvailable && !isMonthlyAvailable && (
-        <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <p className="text-sm text-blue-800">
-            <strong>Note:</strong> The Monthly Payment Plan requires at least 30 days before the 60-day payment cutoff.
-            Your event is {daysOut} days away ({daysUntilCutoff} days until cutoff), so the $500 deposit plan is available.
+      {daysOut > 30 && daysOut < 60 && (
+        <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+          <p className="text-sm text-amber-800">
+            <strong>Note:</strong> Your event is {daysOut} days away ({daysUntilCutoff} days until the 60-day payment cutoff).
+            This is not enough time for installment payment plans, so only full payment is available.
           </p>
         </div>
       )}
