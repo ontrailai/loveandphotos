@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom'
 import { useAuth } from '@contexts/AuthContext'
 import { supabase } from '@lib/supabase'
 import { CalendarView } from '@components/talent/CalendarView'
-import { Calendar as CalendarIcon, MapPin, Clock, User, Package, FileText, X } from 'lucide-react'
+import { Calendar as CalendarIcon, MapPin, Clock, User, Package, FileText, X, AlertTriangle } from 'lucide-react'
 import { format, isPast, parseISO } from 'date-fns'
 import toast from 'react-hot-toast'
 
@@ -14,6 +14,8 @@ const CalendarPage = () => {
   const [bookings, setBookings] = useState([])
   const [selectedBooking, setSelectedBooking] = useState(null)
   const [showModal, setShowModal] = useState(false)
+  const [showDeclineConfirm, setShowDeclineConfirm] = useState(false)
+  const [declining, setDeclining] = useState(false)
 
   // Load bookings when component mounts or route changes
   useEffect(() => {
@@ -90,8 +92,17 @@ const CalendarPage = () => {
     console.log('[CalendarPage] Starting bookings fetch for photographer:', photographerProfile.id)
 
     try {
-      // Batch all queries with Promise.allSettled for better performance
-      const bookingsQuery = supabase
+      // Step 1: Get declined booking IDs for this talent to exclude them
+      const { data: declinedBookings } = await supabase
+        .from('declined_jobs')
+        .select('booking_id')
+        .eq('talent_id', photographerProfile.id)
+
+      const declinedBookingIds = (declinedBookings || []).map(d => d.booking_id)
+      console.log('[CalendarPage] Filtering out declined bookings:', declinedBookingIds.length)
+
+      // Step 2: Batch all queries with Promise.allSettled for better performance
+      let bookingsQuery = supabase
         .from('bookings')
         .select(`
           id,
@@ -110,6 +121,11 @@ const CalendarPage = () => {
         .eq('photographer_id', photographerProfile.id)
         .neq('booking_status', 'cancelled')
         .order('event_date', { ascending: true })
+
+      // Filter out declined bookings if any exist
+      if (declinedBookingIds.length > 0) {
+        bookingsQuery = bookingsQuery.not('id', 'in', `(${declinedBookingIds.join(',')})`)
+      }
 
       const [bookingsResult, _customersResult, _packagesResult] = await Promise.allSettled([
         bookingsQuery,
@@ -204,6 +220,61 @@ const CalendarPage = () => {
   const closeModal = () => {
     setShowModal(false)
     setSelectedBooking(null)
+  }
+
+  const handleDeclineClick = () => {
+    setShowDeclineConfirm(true)
+  }
+
+  const cancelDecline = () => {
+    setShowDeclineConfirm(false)
+  }
+
+  const confirmDecline = async () => {
+    if (!selectedBooking || !photographerProfile) return
+
+    setDeclining(true)
+    const declineToast = toast.loading('Declining job...')
+
+    try {
+      const response = await fetch('/api/talent/decline-job', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          booking_id: selectedBooking.id,
+          talent_id: photographerProfile.id
+        })
+      })
+
+      const data = await response.json()
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || 'Failed to decline job')
+      }
+
+      // Success - remove from UI and close modals
+      toast.success('Job successfully declined. You will no longer be matched with this client.', {
+        id: declineToast,
+        duration: 5000
+      })
+
+      setShowDeclineConfirm(false)
+      setShowModal(false)
+      setSelectedBooking(null)
+
+      // Reload bookings to reflect the change
+      await loadBookingsData()
+
+    } catch (error) {
+      console.error('[CalendarPage] Error declining job:', error)
+      toast.error(error.message || 'Failed to decline job. Please try again.', {
+        id: declineToast
+      })
+    } finally {
+      setDeclining(false)
+    }
   }
 
   // Memoize expensive operations
@@ -467,12 +538,106 @@ const CalendarPage = () => {
             </div>
 
             {/* Modal Footer */}
-            <div className="sticky bottom-0 bg-gray-50 px-6 py-4 flex justify-end border-t border-gray-200">
+            <div className="sticky bottom-0 bg-gray-50 px-6 py-4 flex justify-between border-t border-gray-200">
+              <button
+                onClick={handleDeclineClick}
+                disabled={declining}
+                className="px-4 py-2 border-2 border-red-600 rounded-lg text-red-600 hover:bg-red-50 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                <AlertTriangle className="w-4 h-4" aria-hidden="true" />
+                Decline Job
+              </button>
               <button
                 onClick={closeModal}
                 className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors font-medium"
               >
                 Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Decline Job Confirmation Modal */}
+      {showDeclineConfirm && selectedBooking && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[60] p-4">
+          <div className="bg-white rounded-lg shadow-2xl max-w-md w-full animate-in fade-in zoom-in duration-200">
+            {/* Warning Header */}
+            <div className="bg-red-50 border-b-2 border-red-200 px-6 py-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                  <AlertTriangle className="w-6 h-6 text-red-600" aria-hidden="true" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-red-900">
+                    Decline Job Warning
+                  </h3>
+                  <p className="text-sm text-red-700">
+                    This action is permanent
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 space-y-4">
+              <div className="space-y-3">
+                <p className="text-gray-900 font-medium">
+                  Are you sure you want to decline this job?
+                </p>
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                  <p className="text-sm text-amber-900 font-semibold mb-2">
+                    ⚠️ Important Consequences:
+                  </p>
+                  <ul className="text-sm text-amber-800 space-y-2">
+                    <li className="flex items-start gap-2">
+                      <span className="text-amber-600 mt-0.5">•</span>
+                      <span>You will be <strong>permanently blacklisted</strong> from this job</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-amber-600 mt-0.5">•</span>
+                      <span>You will <strong>never be matched</strong> with this client again</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-amber-600 mt-0.5">•</span>
+                      <span>This action <strong>cannot be undone</strong></span>
+                    </li>
+                  </ul>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                  <p className="text-xs text-gray-600 mb-1 font-medium">Job Details:</p>
+                  <p className="text-sm text-gray-900">
+                    {selectedBooking.client_name} • {format(parseISO(selectedBooking.event_date), 'MMM d, yyyy')}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="bg-gray-50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200 rounded-b-lg">
+              <button
+                onClick={cancelDecline}
+                disabled={declining}
+                className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors font-medium disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDecline}
+                disabled={declining}
+                className="px-4 py-2 bg-red-600 rounded-lg text-white hover:bg-red-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {declining ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
+                    Declining...
+                  </>
+                ) : (
+                  <>
+                    <AlertTriangle className="w-4 h-4" aria-hidden="true" />
+                    Yes, Decline Job
+                  </>
+                )}
               </button>
             </div>
           </div>

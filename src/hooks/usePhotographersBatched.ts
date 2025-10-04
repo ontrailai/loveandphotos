@@ -45,9 +45,9 @@ function buildPhotographersQuery(
   const { filters, sortBy } = params
 
   let query = supabasePublic
-    .from('photographer_preview_profiles')
-    .select('id, display_name, portfolio_images, bio, specialties, hourly_rate, location_city, location_state, average_rating, total_reviews, total_bookings, is_verified, is_available, user_id, languages, years_experience, is_love_and_photos_choice', { count: 'exact' })
-    .eq('is_available', true)
+    .from('photographers')
+    .select('id, bio, portfolio_images, style_tags, experience_years, average_rating, total_reviews, is_verified, visible_in_search, user_id, city, state, zip_code, users!inner(full_name, avatar_url)', { count: 'exact' })
+    .eq('visible_in_search', true)
     .range(offset, offset + limit - 1)
 
   // Apply filters
@@ -57,7 +57,7 @@ function buildPhotographersQuery(
 
   // Apply location filtering
   if (locationCity) {
-    query = query.or(`location_city.ilike.%${locationCity}%,location_state.ilike.%${locationCity}%`)
+    query = query.or(`city.ilike.%${locationCity}%,state.ilike.%${locationCity}%,zip_code.ilike.%${locationCity}%`)
   }
 
   // Apply sorting
@@ -113,11 +113,11 @@ function transformPhotographerData(
     id: rawData.id,
     user_id: rawData.user_id || rawData.id,
     bio: rawData.bio || 'Professional photographer with years of experience',
-    specialties: Array.isArray(rawData.specialties) ? rawData.specialties : ['Wedding', 'Portrait'],
+    specialties: Array.isArray(rawData.style_tags) ? rawData.style_tags : ['Wedding', 'Portrait'],
     languages: Array.isArray(rawData.languages) ? rawData.languages : ['English'],
-    years_experience: rawData.years_experience || 5,
-    location_city: rawData.location_city || 'New York',
-    location_state: rawData.location_state || 'NY',
+    years_experience: rawData.experience_years || 5,
+    location_city: rawData.city || 'New York',
+    location_state: rawData.state || 'NY',
     is_available: rawData.is_available !== false,
     is_public: true,
     is_verified: rawData.is_verified || false,
@@ -126,8 +126,8 @@ function transformPhotographerData(
     total_reviews: rawData.total_reviews || 10,
     total_bookings: rawData.total_bookings || 5,
     users: {
-      full_name: rawData.display_name || 'Photographer',
-      avatar_url: rawData.portfolio_images?.[0] || fallbackImages[0]
+      full_name: rawData.users?.full_name || 'Photographer',
+      avatar_url: rawData.users?.avatar_url || rawData.portfolio_images?.[0] || fallbackImages[0]
     },
     pay_tiers: {
       name: rawData.is_verified ? 'Professional' : 'Standard',

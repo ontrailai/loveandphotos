@@ -189,7 +189,7 @@ const Browse = () => {
           total_reviews,
           is_verified,
           is_public,
-          available_dates,
+          unavailable_dates,
           visible_in_search,
           zip_code,
           city,
@@ -210,12 +210,14 @@ const Browse = () => {
       }
 
       // If date filter is selected, only show photographers available on that date
-      // Note: Supabase needs the date in YYYY-MM-DD format for the array contains check
+      // Inverse Model: Filter OUT photographers who have this date in unavailable_dates
+      // If unavailable_dates is empty or doesn't contain the date, photographer is available
       if (filters.date) {
         console.log('Filtering by date:', filters.date)
         // Ensure date is in YYYY-MM-DD format for PostgreSQL DATE[] comparison
         const filterDate = filters.date.split('T')[0] // Remove any time component
-        query = query.contains('available_dates', [filterDate])
+        // Use NOT contains to exclude photographers with this date blocked
+        query = query.not('unavailable_dates', 'cs', `{${filterDate}}`)
       }
 
       const { data: photographers, error } = await query.limit(1000)
@@ -292,10 +294,10 @@ const Browse = () => {
             average_rating: profile.average_rating || (4.2 + (index % 8) * 0.1),
             total_reviews: profile.total_reviews || (10 + (index * 3)),
             total_bookings: 5 + (index * 2),
-            available_dates: profile.available_dates || [],
-            users: profile.users || {
-              full_name: `Photographer ${index + 1}`,
-              avatar_url: profile.portfolio_images && profile.portfolio_images.length > 0 ? profile.portfolio_images[0] : fallbackUrl
+            unavailable_dates: profile.unavailable_dates || [],
+            users: {
+              full_name: profile.users?.full_name || `Photographer ${index + 1}`,
+              avatar_url: profile.users?.avatar_url || fallbackUrl
             },
             pay_tiers: {
               name: profile.is_verified ? 'Professional' : 'Standard',
@@ -319,12 +321,16 @@ const Browse = () => {
         })
         
         console.log('Data transformed, applying filters...')
-        
+        console.log('Transformed profiles:', transformedProfiles.length)
+        console.log('Current filters:', filters)
+
         // Apply filters to real data
         let filtered = transformedProfiles
-        
+
         if (filters.rating > 0) {
+          const beforeRating = filtered.length
           filtered = filtered.filter(p => p.average_rating >= filters.rating)
+          console.log(`Rating filter: ${beforeRating} → ${filtered.length}`)
         }
         
         // Price filtering removed - pricing no longer shown to public users
@@ -431,6 +437,41 @@ const Browse = () => {
   useEffect(() => {
     loadPhotographers()
   }, [filterKey, sortBy, loadPhotographers])
+
+  // Real-time subscription for new photographer profiles
+  useEffect(() => {
+    console.log('[Browse] Setting up real-time subscription for new photographers')
+
+    const channel = supabasePublic
+      .channel('photographers-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Listen to INSERT and UPDATE
+          schema: 'public',
+          table: 'photographers',
+          filter: 'visible_in_search=eq.true' // Only visible profiles
+        },
+        (payload) => {
+          console.log('[Browse] Real-time update received:', payload.eventType, payload.new?.id)
+
+          // Automatically refresh the photographer list when visibility changes
+          if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+            console.log('[Browse] New or updated photographer detected, refreshing list...')
+            loadPhotographers()
+          }
+        }
+      )
+      .subscribe((status) => {
+        console.log('[Browse] Subscription status:', status)
+      })
+
+    // Cleanup subscription on unmount
+    return () => {
+      console.log('[Browse] Cleaning up real-time subscription')
+      supabasePublic.removeChannel(channel)
+    }
+  }, [loadPhotographers])
 
   useEffect(() => {
     // When display count changes, update displayed photographers

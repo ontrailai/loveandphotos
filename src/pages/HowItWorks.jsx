@@ -137,11 +137,11 @@ const HowItWorks = () => {
                   </li>
                 ))}
               </ul>
-              <Link 
-                to="/signup?role=photographer" 
+              <Link
+                to="/talent/apply"
                 className="mt-6 inline-block bg-primary-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary-700 transition"
               >
-                Join as Photographer
+                Apply to Join
               </Link>
             </div>
           </div>

@@ -47,13 +47,6 @@ export function PhotographerCard({
   // Additional computed values not in memoized data
   const reviewCount = total_reviews || 0
 
-  // Format response time
-  const responseTime = avg_response_time_minutes
-    ? avg_response_time_minutes < 60
-      ? `${avg_response_time_minutes}min`
-      : `${Math.round(avg_response_time_minutes / 60)}hr`
-    : 'N/A'
-
 
   const handleMouseEnter = useCallback(() => {
     setIsHovered(true)
@@ -212,21 +205,17 @@ export function PhotographerCard({
             </div>
           </motion.div>
 
-          {/* Location and Response Time */}
+          {/* Location */}
           <motion.div
             variants={{
               hidden: { opacity: 0, y: 20 },
               visible: { opacity: 1, y: 0 }
             }}
-            className="space-y-2 mb-4"
+            className="mb-4"
           >
             <div className="flex items-center text-sm text-gray-600">
               <MapPinIcon className="w-4 h-4 mr-2 flex-shrink-0 text-[#FF4D6D]" />
               <span className="truncate font-medium">{computedData.location}</span>
-            </div>
-            <div className="flex items-center text-sm text-gray-600">
-              <MessageSquareIcon className="w-4 h-4 mr-2 flex-shrink-0 text-emerald-500" />
-              <span>Responds in {responseTime}</span>
             </div>
           </motion.div>
 

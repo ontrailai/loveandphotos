@@ -25,7 +25,7 @@ const navItems = [
     name: 'Join',
     // Remove href for dropdown-only items - NO MORE /talent!
     submenu: [
-      { name: 'Become a Photographer', href: '/signup?role=photographer', description: 'Apply & see pay tiers' },
+      { name: 'Apply to Join', href: '/talent/apply', description: 'Apply & see pay tiers' },
       { name: 'Learn', href: '/learn', description: 'Training guides & tutorials' },
       { name: 'Resources', href: '/resources', description: 'Training & guidelines' },
       { name: 'FAQ', href: '/faq', description: 'Frequently asked questions' }

@@ -1,17 +1,16 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '@contexts/AuthContext'
 import { Camera, Calendar, FileText, MessageCircle, User, LayoutDashboard, ArrowLeft, LogOut, Sparkles, Settings, CalendarClock, BookOpen } from 'lucide-react'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { supabase } from '@lib/supabase'
 import toast from 'react-hot-toast'
 
 const TalentDashboardLayout = () => {
   const { profile, photographerProfile, user, signOut, loading } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
-
-  // Determine if user is videographer
-  const isVideographer = photographerProfile?.is_videographer || false
-  const talentType = isVideographer ? 'Videographer' : 'Photographer'
+  const [applicationChecked, setApplicationChecked] = useState(false)
+  const [hasAcceptedApplication, setHasAcceptedApplication] = useState(false)
 
   console.log('[TalentDashboard] Render state:', {
     loading,
@@ -19,8 +18,67 @@ const TalentDashboardLayout = () => {
     hasProfile: !!profile,
     role: profile?.role,
     hasPhotographerProfile: !!photographerProfile,
-    isVideographer
+    applicationChecked,
+    hasAcceptedApplication
   })
+
+  // Check if user has an accepted application (ROUTE GUARD)
+  useEffect(() => {
+    const checkApplicationStatus = async () => {
+      if (!user || !profile || profile.role !== 'photographer') return
+
+      try {
+        console.log('[TalentDashboard] Checking application status for user:', user.id, 'email:', profile.email)
+
+        // Query by user_id OR email (for applications submitted before account was linked)
+        const { data, error } = await supabase
+          .from('talent_applications')
+          .select('id, is_accepted, user_id, email')
+          .eq('is_accepted', true)
+          .or(`user_id.eq.${user.id},email.eq.${profile.email}`)
+          .maybeSingle()
+
+        if (error) {
+          console.error('[TalentDashboard] Error checking application:', error)
+          toast.error('Failed to verify application status')
+          setApplicationChecked(true)
+          return
+        }
+
+        if (data && data.is_accepted) {
+          console.log('[TalentDashboard] User has accepted application:', data.id)
+
+          // If application exists but user_id is not linked, link it now
+          if (!data.user_id) {
+            console.log('[TalentDashboard] Linking application to user account...')
+            const { error: updateError } = await supabase
+              .from('talent_applications')
+              .update({ user_id: user.id })
+              .eq('id', data.id)
+
+            if (updateError) {
+              console.error('[TalentDashboard] Failed to link application:', updateError)
+            } else {
+              console.log('[TalentDashboard] Application successfully linked to user account')
+            }
+          }
+
+          setHasAcceptedApplication(true)
+        } else {
+          console.log('[TalentDashboard] No accepted application found, redirecting to application page')
+          toast.error('Please complete the talent application to access the dashboard')
+          navigate('/talent/apply')
+        }
+      } catch (err) {
+        console.error('[TalentDashboard] Failed to check application status:', err)
+        toast.error('An error occurred while checking application status')
+      } finally {
+        setApplicationChecked(true)
+      }
+    }
+
+    checkApplicationStatus()
+  }, [user, profile, navigate])
 
   // Ensure photographer profile exists, create if missing
   useEffect(() => {
@@ -56,14 +114,19 @@ const TalentDashboardLayout = () => {
     ensurePhotographerProfile()
   }, [user?.id, profile?.role, photographerProfile]) // Include photographerProfile to prevent re-running after creation
 
-  // Show loading spinner while auth is loading
-  if (loading || !profile) {
+  // Show loading spinner while auth or application is loading
+  if (loading || !profile || !applicationChecked) {
     console.log('[TalentDashboard] Loading state, showing spinner')
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
       </div>
     )
+  }
+
+  // If application check complete but no accepted application, don't render
+  if (applicationChecked && !hasAcceptedApplication) {
+    return null
   }
 
   // Verify user is a photographer
@@ -115,7 +178,7 @@ const TalentDashboardLayout = () => {
                 <Sparkles className="w-3 h-3 text-amber-400 absolute -top-1 -right-1" aria-hidden="true" />
               </div>
               <h1 className="text-xl font-bold bg-gradient-to-r from-[#fe395f] via-pink-600 to-rose-600 bg-clip-text text-transparent">
-                {talentType} Dashboard
+                Photographer Dashboard
               </h1>
             </div>
             <div className="flex items-center space-x-3">

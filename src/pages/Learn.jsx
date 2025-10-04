@@ -145,10 +145,10 @@ const Learn = () => {
             Join our community of professional photographers and start building your successful business today.
           </p>
           <Link
-            to="/signup?role=photographer"
+            to="/talent/apply"
             className="inline-flex items-center justify-center px-8 py-3 bg-background text-primary font-semibold rounded-lg hover:bg-muted transition"
           >
-            Become a Photographer
+            Apply to Join
             <ArrowRight className="ml-2 h-5 w-5" />
           </Link>
         </div>

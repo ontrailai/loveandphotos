@@ -31,14 +31,35 @@ export const AuthProvider = ({ children }) => {
     try {
       console.log('[AuthContext] Fetching user data for:', user.id)
 
-      // Get user profile - first try to fetch it with timeout
-      console.log('[AuthContext] 🔍 Calling db.users.getProfile...')
-      const profilePromise = db.users.getProfile(user.id)
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Profile fetch timeout after 5s')), 5000)
-      )
+      // Get user profile with timeout and fallback
+      console.log('[AuthContext] 🔍 Fetching user profile...')
+      let userProfile = null
 
-      let userProfile = await Promise.race([profilePromise, timeoutPromise])
+      try {
+        // Try db.users.getProfile with 10s timeout
+        const profilePromise = db.users.getProfile(user.id)
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Profile fetch timeout')), 10000)
+        )
+        userProfile = await Promise.race([profilePromise, timeoutPromise])
+      } catch (timeoutError) {
+        console.warn('[AuthContext] Profile fetch timed out, trying direct query')
+
+        // Fallback: Direct Supabase query
+        const { data, error } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', user.id)
+          .maybeSingle()
+
+        if (!error && data) {
+          userProfile = data
+          console.log('[AuthContext] ✅ Fetched profile via fallback query')
+        } else {
+          console.warn('[AuthContext] Fallback query also failed:', error)
+        }
+      }
+
       console.log('[AuthContext] User profile:', userProfile)
 
       // If profile doesn't exist, create it
@@ -164,7 +185,7 @@ export const AuthProvider = ({ children }) => {
   // Sign up function
   const signUp = async (email, password, userData = {}) => {
     try {
-      const { role = 'customer', fullName, phone, isVideographer = false } = userData
+      const { role = 'customer', fullName, phone } = userData
 
       // First create the auth user without any metadata that might cause issues
       const { data, error } = await supabase.auth.signUp({
@@ -213,7 +234,6 @@ export const AuthProvider = ({ children }) => {
             .from('photographers')
             .upsert({
               user_id: data.user.id,
-              is_videographer: isVideographer,
               is_public: true,  // CRITICAL: Must be true to appear in search
               profile_complete: false,  // Will be set to true after profile completion
               created_at: new Date().toISOString(),

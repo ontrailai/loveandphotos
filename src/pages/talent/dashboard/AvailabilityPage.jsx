@@ -1,6 +1,7 @@
 /**
  * AvailabilityPage - Photographer Availability Calendar Management
- * Allows photographers to set available booking dates via calendar interface
+ * Allows photographers to block out unavailable dates via calendar interface
+ * INVERSE MODEL: All future dates are AVAILABLE by default unless blocked
  */
 
 import { useState, useEffect } from 'react'
@@ -17,7 +18,7 @@ const AvailabilityPage = () => {
   const { user, photographerProfile, fetchUserData } = useAuth()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [selectedDates, setSelectedDates] = useState([])
+  const [blockedDates, setBlockedDates] = useState([]) // Renamed from selectedDates
   const [isPublic, setIsPublic] = useState(true)
   const [isVisibleInSearch, setIsVisibleInSearch] = useState(false)
 
@@ -34,15 +35,15 @@ const AvailabilityPage = () => {
     try {
       const { data, error } = await supabase
         .from('photographers')
-        .select('available_dates, is_public, visible_in_search')
+        .select('unavailable_dates, is_public, visible_in_search')
         .eq('user_id', user.id)
         .single()
 
       if (error) throw error
 
       // Convert date strings to Date objects
-      const dates = (data.available_dates || []).map(dateStr => new Date(dateStr))
-      setSelectedDates(dates)
+      const dates = (data.unavailable_dates || []).map(dateStr => new Date(dateStr))
+      setBlockedDates(dates)
       setIsPublic(data.is_public ?? true)
       setIsVisibleInSearch(data.visible_in_search ?? false)
     } catch (error) {
@@ -58,7 +59,7 @@ const AvailabilityPage = () => {
 
     try {
       // Convert Date objects to ISO date strings (YYYY-MM-DD)
-      const dateStrings = selectedDates.map(date => {
+      const dateStrings = blockedDates.map(date => {
         const d = new Date(date)
         return d.toISOString().split('T')[0]
       })
@@ -66,7 +67,7 @@ const AvailabilityPage = () => {
       const { error } = await supabase
         .from('photographers')
         .update({
-          available_dates: dateStrings,
+          unavailable_dates: dateStrings,
           is_public: isPublic,
           updated_at: new Date().toISOString()
         })
@@ -89,12 +90,12 @@ const AvailabilityPage = () => {
   }
 
   const handleDateSelect = (dates) => {
-    setSelectedDates(dates || [])
+    setBlockedDates(dates || [])
   }
 
   const handleClearAllDates = () => {
-    if (confirm('Are you sure you want to clear all available dates? This will make you invisible in search.')) {
-      setSelectedDates([])
+    if (confirm('Are you sure you want to clear all blocked dates? This will make your calendar fully available.')) {
+      setBlockedDates([])
     }
   }
 
@@ -128,8 +129,8 @@ const AvailabilityPage = () => {
   // Calculate future dates and stats
   const today = new Date()
   today.setHours(0, 0, 0, 0)
-  const futureDates = selectedDates.filter(date => date >= today)
-  const pastDates = selectedDates.filter(date => date < today)
+  const futureBlockedDates = blockedDates.filter(date => date >= today)
+  const pastBlockedDates = blockedDates.filter(date => date < today)
 
   if (loading) {
     return (
@@ -147,7 +148,7 @@ const AvailabilityPage = () => {
           Availability Calendar
         </h1>
         <p className="text-gray-600">
-          Select the dates when you're available for bookings. Only dates you select will be shown to clients.
+          <strong>All future dates are available by default.</strong> Select dates when you're <strong>NOT available</strong> to block them from client bookings.
         </p>
       </div>
 
@@ -167,14 +168,10 @@ const AvailabilityPage = () => {
             </h3>
             <p className="text-sm text-gray-600">
               {isVisibleInSearch ? (
-                'Your profile is visible to clients searching for photographers.'
+                'Your profile is visible to clients searching for photographers. Your calendar shows all future dates as available except those you\'ve blocked.'
               ) : (
                 <>
-                  To appear in search results, you must:
-                  <ul className="list-disc list-inside mt-1 ml-2">
-                    {!isPublic && <li>Enable profile visibility below</li>}
-                    {futureDates.length === 0 && <li>Select at least one future available date</li>}
-                  </ul>
+                  To appear in search results, you must enable profile visibility below.
                 </>
               )}
             </p>
@@ -195,17 +192,36 @@ const AvailabilityPage = () => {
         <Card className="md:col-span-2 p-6">
           <div className="flex items-center gap-2 mb-4">
             <Calendar className="w-5 h-5 text-pink-500" />
-            <h2 className="text-xl font-semibold">Select Available Dates</h2>
+            <h2 className="text-xl font-semibold">Block Unavailable Dates</h2>
+          </div>
+
+          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-start gap-2">
+              <Info className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+              <div className="text-sm text-blue-900">
+                <strong>Legend:</strong>
+                <div className="mt-1 space-y-1">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-3 h-3 text-green-600" />
+                    <span>✅ Available (default) - Clients can book these dates</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="inline-block w-6 h-6 bg-red-500 rounded text-white text-xs flex items-center justify-center">X</span>
+                    <span>❌ Unavailable (blocked) - You cannot be booked on these dates</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="flex justify-center">
             <DayPicker
               mode="multiple"
-              selected={selectedDates}
+              selected={blockedDates}
               onSelect={handleDateSelect}
               disabled={{ before: today }}
               modifiersClassNames={{
-                selected: 'bg-pink-500 text-white hover:bg-pink-600'
+                selected: 'bg-red-500 text-white hover:bg-red-600'
               }}
               className="availability-calendar"
             />
@@ -217,16 +233,16 @@ const AvailabilityPage = () => {
               disabled={saving}
               className="flex-1"
             >
-              {saving ? 'Saving...' : 'Save Availability'}
+              {saving ? 'Saving...' : 'Save Blocked Dates'}
             </Button>
             <Button
               variant="secondary"
               onClick={handleClearAllDates}
-              disabled={selectedDates.length === 0}
+              disabled={blockedDates.length === 0}
               className="flex items-center gap-2"
             >
               <Trash2 className="w-4 h-4" />
-              Clear All
+              Clear All Blocks
             </Button>
           </div>
         </Card>
@@ -238,57 +254,57 @@ const AvailabilityPage = () => {
             <h3 className="font-semibold text-gray-900 mb-4">Availability Stats</h3>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Future Dates</span>
-                <span className="font-semibold text-pink-600">{futureDates.length}</span>
+                <span className="text-sm text-gray-600">Future Blocked Dates</span>
+                <span className="font-semibold text-red-600">{futureBlockedDates.length}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Past Dates</span>
-                <span className="font-semibold text-gray-500">{pastDates.length}</span>
+                <span className="text-sm text-gray-600">Past Blocked Dates</span>
+                <span className="font-semibold text-gray-500">{pastBlockedDates.length}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Total Selected</span>
-                <span className="font-semibold text-gray-900">{selectedDates.length}</span>
+                <span className="text-sm text-gray-600">Total Blocked</span>
+                <span className="font-semibold text-gray-900">{blockedDates.length}</span>
               </div>
             </div>
           </Card>
 
           {/* How It Works */}
-          <Card className="p-6 bg-pink-50 border-pink-200">
+          <Card className="p-6 bg-green-50 border-green-200">
             <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-              <Clock className="w-4 h-4 text-pink-500" />
+              <Clock className="w-4 h-4 text-green-600" />
               How It Works
             </h3>
             <ul className="space-y-2 text-sm text-gray-700">
               <li className="flex gap-2">
-                <span className="text-pink-500 font-bold">1.</span>
-                <span>Select dates when you're available for bookings</span>
+                <span className="text-green-600 font-bold">1.</span>
+                <span><strong>All future dates are available by default</strong> - no need to select anything!</span>
               </li>
               <li className="flex gap-2">
-                <span className="text-pink-500 font-bold">2.</span>
-                <span>Clients searching for those dates will see your profile</span>
+                <span className="text-green-600 font-bold">2.</span>
+                <span>Click dates to <strong>block them</strong> when you're unavailable</span>
               </li>
               <li className="flex gap-2">
-                <span className="text-pink-500 font-bold">3.</span>
-                <span>You'll only appear if both visibility is ON and you have future dates</span>
+                <span className="text-green-600 font-bold">3.</span>
+                <span>Clients can book any date that's <strong>not blocked</strong></span>
               </li>
               <li className="flex gap-2">
-                <span className="text-pink-500 font-bold">4.</span>
-                <span>Update your calendar anytime to stay visible</span>
+                <span className="text-green-600 font-bold">4.</span>
+                <span>You appear in search as long as your profile is public</span>
               </li>
             </ul>
           </Card>
 
-          {/* Selected Dates Preview */}
-          {futureDates.length > 0 && (
+          {/* Blocked Dates Preview */}
+          {futureBlockedDates.length > 0 && (
             <Card className="p-6">
-              <h3 className="font-semibold text-gray-900 mb-3">Upcoming Available Dates</h3>
+              <h3 className="font-semibold text-gray-900 mb-3">Upcoming Blocked Dates</h3>
               <div className="space-y-1 max-h-48 overflow-y-auto">
-                {futureDates
+                {futureBlockedDates
                   .sort((a, b) => a - b)
                   .slice(0, 10)
                   .map((date, i) => (
                     <div key={i} className="text-sm text-gray-600 flex items-center gap-2">
-                      <CheckCircle className="w-3 h-3 text-green-500" />
+                      <XCircle className="w-3 h-3 text-red-500" />
                       {date.toLocaleDateString('en-US', {
                         weekday: 'short',
                         year: 'numeric',
@@ -297,11 +313,24 @@ const AvailabilityPage = () => {
                       })}
                     </div>
                   ))}
-                {futureDates.length > 10 && (
+                {futureBlockedDates.length > 10 && (
                   <p className="text-xs text-gray-500 mt-2">
-                    +{futureDates.length - 10} more dates
+                    +{futureBlockedDates.length - 10} more blocked dates
                   </p>
                 )}
+              </div>
+            </Card>
+          )}
+
+          {/* Fully Available Message */}
+          {futureBlockedDates.length === 0 && (
+            <Card className="p-6 bg-green-50 border-green-200">
+              <div className="text-center">
+                <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-3" />
+                <h3 className="font-semibold text-gray-900 mb-2">Fully Available!</h3>
+                <p className="text-sm text-gray-700">
+                  Your calendar is completely open. Clients can book you for any future date.
+                </p>
               </div>
             </Card>
           )}

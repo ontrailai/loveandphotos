@@ -13,7 +13,11 @@ export function formatDisplayDate(date: Date): string {
 
 export function parseISODate(isoString: string): Date | undefined {
   try {
-    const date = new Date(isoString + 'T00:00:00.000Z')
+    // Parse YYYY-MM-DD as local date (not UTC) to prevent timezone shifts
+    const [year, month, day] = isoString.split('-').map(Number)
+    if (!year || !month || !day) return undefined
+
+    const date = new Date(year, month - 1, day)
     return isNaN(date.getTime()) ? undefined : date
   } catch {
     return undefined

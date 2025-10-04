@@ -23,6 +23,7 @@ import {
 import paymentsRouter from './src/server/routes/payments.js'
 import stripeWebhookRouter from './src/server/routes/stripe-webhook.js'
 import dateChangeRouter from './src/server/routes/date-change.js'
+import talentRouter from './src/server/routes/talent.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -48,6 +49,7 @@ app.use(express.urlencoded({ extended: true, limit: '2mb' }))
 // Mount payment and date change routes
 app.use('/api/payments', paymentsRouter)
 app.use('/api/bookings', dateChangeRouter)
+app.use('/api/talent', talentRouter)
 
 // Authentication endpoints
 app.post('/api/auth/check-email', async (req, res) => {

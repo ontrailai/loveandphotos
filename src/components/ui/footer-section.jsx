@@ -40,7 +40,7 @@ const footerLinks = [
   {
     label: 'For Photographers',
     links: [
-      { title: 'Join Our Network', href: '/signup?role=photographer' },
+      { title: 'Apply to Join', href: '/talent/apply' },
       { title: 'Resources', href: '/resources' },
       { title: 'FAQ', href: '/faq' },
       { title: 'Learn', href: '/learn' }

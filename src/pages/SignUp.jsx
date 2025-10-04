@@ -87,22 +87,27 @@ const SignUp = () => {
     setLoading(true)
 
     try {
+      // Redirect talent signups to application page
+      if (selectedType === 'photographer' || selectedType === 'videographer') {
+        navigate('/talent/apply')
+        return
+      }
+
       // Extract raw digits from phone if it's formatted
       const phoneDigits = data.phone ? data.phone.replace(/\D/g, '') : '';
 
       const result = await signUp(data.email, data.password, {
-        role: 'photographer', // Both photographer and videographer use photographer role
+        role: 'customer', // Customer signups only
         fullName: data.fullName,
-        phone: phoneDigits,
-        isVideographer: selectedType === 'videographer' // Pass videographer flag
+        phone: phoneDigits
       })
 
       if (result.success) {
         if (result.requiresEmailConfirmation) {
           toast.success('Please check your email to confirm your account')
         } else {
-          // Navigate directly to talent dashboard for both photographers and videographers
-          navigate('/talent/dashboard')
+          // Navigate to customer dashboard
+          navigate('/dashboard')
         }
       }
     } catch (error) {

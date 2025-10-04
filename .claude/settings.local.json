@@ -41,7 +41,8 @@
       "Bash(mkdir:*)",
       "Bash(git checkout:*)",
       "Bash(git stash:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "mcp__supabase__list_tables"
     ],
     "deny": [],
     "ask": []

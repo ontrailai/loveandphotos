@@ -51,6 +51,7 @@ import Resources from '@pages/Resources'
 import Learn from '@pages/Learn'
 import ProfilePage from '@pages/customer/ProfilePage'
 import Demo from '@pages/Demo'
+import TalentApplication from '@pages/TalentApplication'
 
 // Customer Pages (lazy loaded)
 const CustomerDashboard = lazy(() => import('@pages/customer/Dashboard'))
@@ -232,6 +233,7 @@ function App() {
             <Route path="/get-started" element={<Navigate to="/signup" replace />} />
             <Route path="/signup-demo" element={<SignupDemo />} />
             <Route path="/signup-enhanced" element={<SignupEnhanced />} />
+            <Route path="/talent/apply" element={<TalentApplication />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
@@ -249,8 +251,8 @@ function App() {
             <Route path="/photographer-resources" element={<Resources />} />
             <Route path="/photographer-faq" element={<FAQ />} />
             <Route path="/join" element={<SignUp />} />
-            {/* Temporary redirect for debugging - /talent should redirect to signup with photographer role */}
-            <Route path="/talent" element={<Navigate to="/signup?role=photographer" replace />} />
+            {/* Redirect /talent to application gateway */}
+            <Route path="/talent" element={<Navigate to="/talent/apply" replace />} />
             <Route path="/demo" element={<Demo />} />
             <Route path="/photographers" element={
               <Suspense fallback={<PageLoader />}>

@@ -100,7 +100,6 @@ export function TrustBadges({
 }: TrustBadgesProps) {
   const badges = [
     { type: 'bookings' as const, value: totalBookings },
-    { type: 'response' as const, value: avgResponseTimeMinutes },
     { type: 'acceptance' as const, value: acceptanceRate }
   ].filter(badge => badge.value !== null && badge.value !== undefined)
 

@@ -40,7 +40,6 @@ const ProfilePage = () => {
     experience_years: 0,
     gender: '',
     style_tags: [],
-    is_videographer: false,
     is_public: true, // Profile visibility toggle
     portfolio_images: [],
     address_line1: '',
@@ -97,7 +96,6 @@ const ProfilePage = () => {
         experience_years: photographerProfile.experience_years || 0,
         gender: photographerProfile.gender || '',
         style_tags: photographerProfile.style_tags || [],
-        is_videographer: photographerProfile.is_videographer || false,
         is_public: photographerProfile.is_public !== undefined ? photographerProfile.is_public : true,
         portfolio_images: photographerProfile.portfolio_images || [],
         available_dates: photographerProfile.available_dates || [],
@@ -152,7 +150,7 @@ const ProfilePage = () => {
           sanitizedUpdates[key] = Array.isArray(value) ? value : []
         }
         // Handle booleans
-        else if (key === 'is_videographer' || key === 'is_public') {
+        else if (key === 'is_public') {
           sanitizedUpdates[key] = Boolean(value)
         }
         // Handle numbers
@@ -172,14 +170,19 @@ const ProfilePage = () => {
         updatedFormData.gender?.length > 0 &&
         updatedFormData.experience_years > 0 &&
         Array.isArray(updatedFormData.style_tags) && updatedFormData.style_tags.length > 0 &&
-        Array.isArray(updatedFormData.portfolio_images) && updatedFormData.portfolio_images.length >= 10
+        Array.isArray(updatedFormData.portfolio_images) && updatedFormData.portfolio_images.length >= 10 &&
+        updatedFormData.zip_code?.length === 5 &&
+        updatedFormData.city?.length > 0 &&
+        updatedFormData.state?.length > 0
 
       sanitizedUpdates.profile_complete = willBeComplete
+
+      // Note: visible_in_search is a generated column (= is_public), cannot be set manually
 
       console.log('[ProfilePage] Auto-saving:', Object.keys(sanitizedUpdates))
 
       // Update photographers table
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('photographers')
         .upsert({
           user_id: user.id,
@@ -189,7 +192,6 @@ const ProfilePage = () => {
           onConflict: 'user_id',
           ignoreDuplicates: false
         })
-        .select()
 
       if (error) {
         console.error('[ProfilePage] ❌ Auto-save Supabase error:', {
@@ -198,11 +200,6 @@ const ProfilePage = () => {
           details: error.details
         })
         throw error
-      }
-
-      if (!data || data.length === 0) {
-        console.warn('[ProfilePage] ⚠️ Auto-save: No rows updated')
-        throw new Error('Profile not found')
       }
 
       // CRITICAL: Also sync to photographer_preview_profiles for search visibility
@@ -348,13 +345,16 @@ const ProfilePage = () => {
     setSaving(true)
 
     try {
-      // Calculate if profile is complete
+      // Calculate if profile is complete (including location requirements)
       const isComplete =
         formData.bio?.length >= 50 &&
         formData.gender?.length > 0 &&
         formData.experience_years > 0 &&
         Array.isArray(formData.style_tags) && formData.style_tags.length > 0 &&
-        Array.isArray(formData.portfolio_images) && formData.portfolio_images.length >= 10
+        Array.isArray(formData.portfolio_images) && formData.portfolio_images.length >= 10 &&
+        formData.zip_code?.length === 5 &&
+        formData.city?.length > 0 &&
+        formData.state?.length > 0
 
       // Prepare update data with type validation
       const updateData = {
@@ -362,7 +362,6 @@ const ProfilePage = () => {
         experience_years: formData.experience_years ? parseInt(formData.experience_years) : 0,
         gender: formData.gender || null,
         style_tags: Array.isArray(formData.style_tags) ? formData.style_tags : [],
-        is_videographer: Boolean(formData.is_videographer),
         portfolio_images: Array.isArray(formData.portfolio_images) ? formData.portfolio_images : [],
         address_line1: formData.address_line1 || null,
         city: formData.city || null,
@@ -370,6 +369,7 @@ const ProfilePage = () => {
         zip_code: formData.zip_code || null,
         country: formData.country || 'USA',
         profile_complete: isComplete,
+        // Note: visible_in_search is a generated column (= is_public), cannot be set manually
         updated_at: new Date().toISOString()
       }
 
@@ -381,7 +381,7 @@ const ProfilePage = () => {
         profile_complete: isComplete
       })
 
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('photographers')
         .upsert({
           user_id: user.id,
@@ -390,7 +390,6 @@ const ProfilePage = () => {
           onConflict: 'user_id',
           ignoreDuplicates: false
         })
-        .select()
 
       if (error) {
         console.error('[ProfilePage] ❌ Supabase error details:', {
@@ -402,18 +401,25 @@ const ProfilePage = () => {
         throw error
       }
 
-      if (!data || data.length === 0) {
-        console.warn('[ProfilePage] ⚠️ No rows updated - user_id may not exist in photographers table')
-        throw new Error('Profile not found. Please contact support.')
-      }
-
       const endTime = performance.now()
       console.log(`[ProfilePage] ✅ Profile saved successfully in ${(endTime - startTime).toFixed(2)}ms`)
-      console.log('[ProfilePage] Updated data:', data[0])
 
       // Refresh AuthContext to load updated photographer profile
+      console.log('[ProfilePage] 🔄 Refreshing user data after save...')
       if (user) {
-        await fetchUserData(user)
+        try {
+          // Add timeout to prevent infinite loading if fetchUserData hangs
+          const fetchPromise = fetchUserData(user)
+          const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('fetchUserData timeout')), 8000)
+          )
+
+          await Promise.race([fetchPromise, timeoutPromise])
+          console.log('[ProfilePage] ✅ User data refreshed successfully')
+        } catch (fetchError) {
+          // Don't block the save success if refresh fails
+          console.warn('[ProfilePage] ⚠️ Failed to refresh user data, but save was successful:', fetchError.message)
+        }
       }
 
       // Show appropriate success message
@@ -495,13 +501,14 @@ const ProfilePage = () => {
     )
   }
 
-  // Calculate profile completion with detailed field tracking
+  // Calculate profile completion with detailed field tracking (includes location)
   const profileCompletion = {
     bio: formData.bio?.length >= 50,
     gender: formData.gender?.length > 0,
     experience_years: formData.experience_years > 0,
     style_tags: Array.isArray(formData.style_tags) && formData.style_tags.length > 0,
-    portfolio_images: Array.isArray(formData.portfolio_images) && formData.portfolio_images.length >= 10
+    portfolio_images: Array.isArray(formData.portfolio_images) && formData.portfolio_images.length >= 10,
+    location: formData.zip_code?.length === 5 && formData.city?.length > 0 && formData.state?.length > 0
   }
 
   const completedFields = Object.values(profileCompletion).filter(Boolean).length
@@ -611,6 +618,18 @@ const ProfilePage = () => {
                     {profileCompletion.portfolio_images
                       ? `${formData.portfolio_images?.length} portfolio photos uploaded`
                       : `Upload at least 10 portfolio photos${formData.portfolio_images?.length ? ` (currently ${formData.portfolio_images.length})` : ''}`
+                    }
+                  </span>
+                </li>
+
+                <li className={`flex items-start ${profileCompletion.location ? 'text-green-700' : 'text-yellow-800'}`}>
+                  <span className="mr-2 mt-0.5 flex-shrink-0">
+                    {profileCompletion.location ? '✅' : '⬜'}
+                  </span>
+                  <span>
+                    {profileCompletion.location
+                      ? `Location: ${formData.city}, ${formData.state} ${formData.zip_code}`
+                      : 'Complete location (city, state, ZIP code required for search)'
                     }
                   </span>
                 </li>
@@ -942,21 +961,6 @@ const ProfilePage = () => {
               </button>
             ))}
           </div>
-        </div>
-
-        {/* Videographer Toggle */}
-        <div className="flex items-center">
-          <input
-            type="checkbox"
-            id="is_videographer"
-            name="is_videographer"
-            checked={formData.is_videographer}
-            onChange={handleInputChange}
-            className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-          />
-          <label htmlFor="is_videographer" className="ml-2 block text-sm text-gray-700">
-            I am also a videographer
-          </label>
         </div>
 
         {/* Submit Button */}

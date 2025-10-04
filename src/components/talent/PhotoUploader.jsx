@@ -190,12 +190,18 @@ const PhotoUploader = ({ userId, existingPhotos = [], onPhotosChange, maxPhotos 
             disabled={uploading}
             className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50"
             aria-label="Upload photos"
+            aria-describedby="portfolio-upload-instruction"
           >
             <Upload className="w-4 h-4 mr-2" aria-hidden="true" />
             {uploading ? 'Uploading...' : 'Upload More Photos'}
           </button>
         )}
       </div>
+
+      {/* Portfolio Upload Instruction */}
+      <p id="portfolio-upload-instruction" className="text-sm text-gray-500 italic">
+        Please upload only wedding or portrait photos. Other images may result in profile rejection.
+      </p>
 
       <input
         ref={fileInputRef}
@@ -205,6 +211,7 @@ const PhotoUploader = ({ userId, existingPhotos = [], onPhotosChange, maxPhotos 
         onChange={handleFileSelect}
         className="hidden"
         aria-label="Select photo files"
+        aria-describedby="portfolio-upload-instruction"
       />
 
       {/* Validation Messages */}
@@ -261,6 +268,7 @@ const PhotoUploader = ({ userId, existingPhotos = [], onPhotosChange, maxPhotos 
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
             className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50"
+            aria-describedby="portfolio-upload-instruction"
           >
             <Upload className="w-4 h-4 mr-2" />
             {uploading ? 'Uploading...' : 'Upload Your First Photos'}

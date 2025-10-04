@@ -128,11 +128,11 @@ const About = () => {
               Find a Photographer
               <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
-            <Link 
-              to="/signup?role=photographer" 
+            <Link
+              to="/talent/apply"
               className="inline-flex items-center justify-center px-8 py-3 bg-primary-700 text-white font-semibold rounded-lg hover:bg-primary-800 transition"
             >
-              Join as Photographer
+              Apply to Join
               <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
           </div>

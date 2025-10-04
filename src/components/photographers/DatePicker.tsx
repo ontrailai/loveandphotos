@@ -20,6 +20,17 @@ import {
   formatDateForA11y
 } from './date-utils'
 
+/**
+ * Format a Date object to YYYY-MM-DD in local timezone
+ * This prevents timezone-related date shifts that occur with toISOString()
+ */
+function formatLocalDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 // Hook for click outside functionality
 function useClickOutside<T extends HTMLElement = HTMLElement>(
   ref: React.RefObject<T>,
@@ -127,7 +138,7 @@ function CalendarGrid() {
   const renderAvailabilityDot = (date: Date) => {
     if (!availability) return null;
 
-    const dateKey = date.toISOString().split('T')[0];
+    const dateKey = formatLocalDate(date);
     const level = availability[dateKey];
     if (!level) return null;
 
@@ -158,7 +169,7 @@ function CalendarGrid() {
     // Days of the month
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(year, month, day);
-      const dateString = date.toISOString().split('T')[0];
+      const dateString = formatLocalDate(date);
       const isSelected = selectedDate && isSameDay(selectedDate, date);
       const isToday = isSameDay(today, date);
       const hasAvailability = availability && availability[dateString];
@@ -380,7 +391,9 @@ export function DatePicker({
   const handleDateChange = (date: Date | null) => {
     setInternalSelectedDate(date);
     if (date) {
-      onChange(date.toISOString().split('T')[0]);
+      const localDateString = formatLocalDate(date);
+      console.log('📅 DatePicker: Selected date:', date, '→ Formatted:', localDateString);
+      onChange(localDateString);
     } else {
       onChange(null);
       onClear?.();
