@@ -32,6 +32,7 @@ const BookingFlowGuard = ({
     // Initialize booking flow if not already done for this photographer
     if (bookingFlow.photographerId !== photographerId) {
       initializeBookingFlow(photographerId)
+      return
     }
 
     // Check if user can access the required step

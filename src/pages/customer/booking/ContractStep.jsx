@@ -106,11 +106,12 @@ const ContractStep = () => {
           return
         }
 
-        // Wait for bookingId to be available in context
+        // Safety check: BookingId should be available (guard ensures this)
         if (!bookingFlow.bookingId) {
-          console.log('⏳ Waiting for booking ID to be set in context...')
-          setSubmitError('Finalizing your booking details. Please wait...')
-          // Keep loading state active - useEffect will retry when bookingFlow.bookingId changes
+          console.error('❌ Contract accessed without booking ID - this should not happen')
+          setSubmitError('Booking ID is missing. Redirecting to account setup...')
+          setIsLoading(false)
+          navigate(`/booking/${photographerId}/account`, { replace: true })
           return
         }
 
@@ -460,9 +461,14 @@ const ContractStep = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
+        <div className="text-center max-w-md mx-auto p-6">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500 mx-auto"></div>
-          <p className="mt-4 text-gray-600" aria-live="polite">Loading contract...</p>
+          <p className="mt-4 text-gray-900 font-medium" aria-live="polite">
+            Loading contract...
+          </p>
+          <p className="mt-2 text-gray-600 text-sm">
+            This will only take a moment.
+          </p>
         </div>
       </div>
     )
@@ -477,9 +483,19 @@ const ContractStep = () => {
           <p className="text-gray-600 mb-4">
             {submitError || 'Unable to load contract. Please try again.'}
           </p>
-          <Button onClick={() => window.location.reload()} aria-label="Retry loading contract">
-            Retry
-          </Button>
+          <div className="flex gap-3 justify-center">
+            <Button
+              variant="outline"
+              onClick={() => navigate(`/booking/${photographerId}/addons`)}
+              aria-label="Go back to add-ons"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Add-Ons
+            </Button>
+            <Button onClick={() => window.location.reload()} aria-label="Retry loading contract">
+              Retry
+            </Button>
+          </div>
         </div>
       </div>
     )
@@ -648,6 +664,7 @@ const ContractStep = () => {
             onClick={handleSubmit}
             disabled={
               !signatureData.signaturePngBase64 ||
+              !signatureData.signerFullName?.trim() ||
               !signatureData.consentAccepted ||
               isSubmitting
             }

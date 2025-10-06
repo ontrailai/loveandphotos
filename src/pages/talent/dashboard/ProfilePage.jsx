@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@contexts/AuthContext'
 import { supabase, db } from '@lib/supabase'
@@ -6,6 +6,7 @@ import PhotoUploader from '@components/talent/PhotoUploader'
 import ProfilePictureUpload from '@components/talent/ProfilePictureUpload'
 import { Award, TrendingUp, Star, CheckCircle, AlertCircle, Trash2, AlertTriangle, ShieldAlert, Eye, EyeOff } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { isProfileComplete, validateVisibilityToggle, getProfileCompletenessMessage } from '@utils/profileCompleteness'
 
 const styleOptions = [
   'Candid',
@@ -60,6 +61,14 @@ const ProfilePage = () => {
   const [deleting, setDeleting] = useState(false)
   const autoSaveTimeoutRef = useRef(null)
   const photoSectionRef = useRef(null)
+
+  // Helper function to validate bio meets minimum requirements (500 chars OR 100 words)
+  const isBioValid = (bio) => {
+    if (!bio) return false
+    const charCount = bio.length
+    const wordCount = bio.trim().split(/\s+/).filter(w => w.length > 0).length
+    return charCount >= 500 || wordCount >= 100
+  }
 
   useEffect(() => {
     loadProfileData()
@@ -132,9 +141,33 @@ const ProfilePage = () => {
     }
   }
 
+  // Calculate profile completeness using useMemo to prevent infinite loops
+  const profileCompletenessValue = useMemo(() => {
+    if (!user || !formData) return null
+    const completeness = isProfileComplete(formData, user)
+    console.log('[ProfilePage] Profile completeness:', completeness)
+    return completeness
+  }, [
+    formData.bio,
+    formData.gender,
+    formData.experience_years,
+    JSON.stringify(formData.style_tags),
+    JSON.stringify(formData.portfolio_images),
+    formData.zip_code,
+    formData.city,
+    formData.state,
+    user?.id
+  ])
+
   const autoSaveProfile = async (updates) => {
     if (!user) {
       console.warn('[ProfilePage] Auto-save skipped: No user logged in')
+      return
+    }
+
+    // Prevent concurrent auto-saves
+    if (autoSaving) {
+      console.warn('[ProfilePage] Auto-save skipped: Already saving')
       return
     }
 
@@ -166,7 +199,7 @@ const ProfilePage = () => {
       // Calculate if profile will be complete after this update
       const updatedFormData = { ...formData, ...updates }
       const willBeComplete =
-        updatedFormData.bio?.length >= 50 &&
+        isBioValid(updatedFormData.bio) &&
         updatedFormData.gender?.length > 0 &&
         updatedFormData.experience_years > 0 &&
         Array.isArray(updatedFormData.style_tags) && updatedFormData.style_tags.length > 0 &&
@@ -248,7 +281,8 @@ const ProfilePage = () => {
       console.log(`[ProfilePage] ✅ Auto-save completed in ${(endTime - startTime).toFixed(2)}ms`)
 
       // Show completion toast if profile just became complete
-      if (willBeComplete && !profileIsComplete) {
+      const wasComplete = profileCompletenessValue?.isComplete || false
+      if (willBeComplete && !wasComplete) {
         toast.success('🎉 Profile Complete! You can now receive bookings.', { duration: 5000, icon: '✅' })
       }
     } catch (error) {
@@ -309,6 +343,26 @@ const ProfilePage = () => {
   const handleVisibilityToggle = () => {
     const newValue = !formData.is_public
 
+    // If trying to make public, validate completeness
+    if (newValue === true) {
+      const validation = validateVisibilityToggle(formData, user)
+      if (!validation.canToggle) {
+        toast.error(validation.error, {
+          duration: 5000,
+          icon: '⚠️'
+        })
+        // Show what's missing in detail
+        if (validation.missingFields.length > 0) {
+          setTimeout(() => {
+            toast.error(`Missing: ${validation.missingFields.join(', ')}`, {
+              duration: 7000
+            })
+          }, 200)
+        }
+        return // Prevent toggle
+      }
+    }
+
     console.log('[ProfilePage] 👁️ Visibility toggle:', newValue ? 'Public' : 'Private')
 
     setFormData(prev => ({
@@ -347,7 +401,7 @@ const ProfilePage = () => {
     try {
       // Calculate if profile is complete (including location requirements)
       const isComplete =
-        formData.bio?.length >= 50 &&
+        isBioValid(formData.bio) &&
         formData.gender?.length > 0 &&
         formData.experience_years > 0 &&
         Array.isArray(formData.style_tags) && formData.style_tags.length > 0 &&
@@ -503,7 +557,7 @@ const ProfilePage = () => {
 
   // Calculate profile completion with detailed field tracking (includes location)
   const profileCompletion = {
-    bio: formData.bio?.length >= 50,
+    bio: isBioValid(formData.bio),
     gender: formData.gender?.length > 0,
     experience_years: formData.experience_years > 0,
     style_tags: Array.isArray(formData.style_tags) && formData.style_tags.length > 0,
@@ -571,8 +625,8 @@ const ProfilePage = () => {
                   </span>
                   <span>
                     {profileCompletion.bio
-                      ? `Bio complete (${formData.bio?.length} characters)`
-                      : `Write a bio (at least 50 characters${formData.bio?.length ? `, currently ${formData.bio.length}` : ''})`
+                      ? `Bio complete (${formData.bio?.length} characters, ${formData.bio?.trim().split(/\s+/).filter(w => w.length > 0).length} words)`
+                      : `Write a bio (at least 500 characters OR 100 words${formData.bio?.length ? `, currently ${formData.bio.length} characters, ${formData.bio.trim().split(/\s+/).filter(w => w.length > 0).length} words` : ''})`
                     }
                   </span>
                 </li>
@@ -716,6 +770,28 @@ const ProfilePage = () => {
           </div>
         </div>
 
+        {/* Profile Completeness Indicator */}
+        {profileCompletenessValue && !profileCompletenessValue.isComplete && (
+          <div className="p-4 rounded-md bg-amber-50 border border-amber-200">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="font-medium text-amber-900 mb-2">
+                  Complete your profile to appear in search ({profileCompletenessValue.completionPercentage}% complete)
+                </p>
+                <div className="space-y-1 text-sm text-amber-800">
+                  <p className="font-medium">Missing requirements:</p>
+                  <ul className="list-disc list-inside space-y-0.5 ml-2">
+                    {profileCompletenessValue.missingFields.map((field, idx) => (
+                      <li key={idx}>{field}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Profile Visibility Explanation */}
         <div className={`p-3 rounded-md text-sm ${
           formData.visible_in_search
@@ -783,18 +859,55 @@ const ProfilePage = () => {
         {/* Bio */}
         <div>
           <label htmlFor="bio" className="block text-sm font-medium text-gray-700 mb-2">
-            About / Bio
+            About / Bio <span className="text-red-500">*</span>
           </label>
           <textarea
             id="bio"
             name="bio"
-            rows={4}
+            rows={6}
             value={formData.bio}
             onChange={handleInputChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 ${
+              formData.bio && (formData.bio.length >= 500 || formData.bio.trim().split(/\s+/).filter(w => w.length > 0).length >= 100)
+                ? 'border-green-300 focus:ring-green-500 focus:border-green-500'
+                : formData.bio && formData.bio.length > 0
+                ? 'border-amber-300 focus:ring-amber-500 focus:border-amber-500'
+                : 'border-gray-300 focus:ring-primary-500 focus:border-primary-500'
+            }`}
             placeholder="Tell clients about yourself, your photography style, and what makes you unique..."
-            aria-describedby="bio-description"
+            aria-describedby="bio-description bio-validation"
           />
+
+          {/* Character and Word Count */}
+          <div className="mt-2 flex items-center justify-between text-sm">
+            <div className="flex gap-4">
+              <span className={`${
+                formData.bio?.length >= 500 ? 'text-green-600 font-medium' : 'text-gray-600'
+              }`}>
+                {formData.bio?.length || 0} / 500 characters
+              </span>
+              <span className={`${
+                formData.bio?.trim().split(/\s+/).filter(w => w.length > 0).length >= 100 ? 'text-green-600 font-medium' : 'text-gray-600'
+              }`}>
+                {formData.bio?.trim().split(/\s+/).filter(w => w.length > 0).length || 0} / 100 words
+              </span>
+            </div>
+            {formData.bio && (formData.bio.length >= 500 || formData.bio.trim().split(/\s+/).filter(w => w.length > 0).length >= 100) && (
+              <span className="text-green-600 text-xs font-medium flex items-center gap-1">
+                <CheckCircle className="w-4 h-4" />
+                Requirement met
+              </span>
+            )}
+          </div>
+
+          {/* Validation Message */}
+          {formData.bio && formData.bio.length > 0 && formData.bio.length < 500 && formData.bio.trim().split(/\s+/).filter(w => w.length > 0).length < 100 && (
+            <p id="bio-validation" className="mt-1 text-sm text-amber-600 flex items-start gap-1">
+              <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+              <span>Your bio must be at least 500 characters OR 100 words to complete your profile.</span>
+            </p>
+          )}
+
           <p id="bio-description" className="mt-1 text-xs text-gray-500">
             This will be shown on your public profile
           </p>

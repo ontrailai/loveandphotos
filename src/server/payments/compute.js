@@ -4,6 +4,9 @@
  * This is the authoritative source of truth for all payment calculations.
  * Frontend components (PaymentStep.jsx, PaymentOptions.jsx) must match this logic exactly.
  *
+ * IMPORTANT: Base photo pricing is imported from centralized pricing constants.
+ * DO NOT hardcode pricing values in this file.
+ *
  * 🎯 CRITICAL RULE: All payments must be COMPLETE 60 days before the event date.
  *
  * PAYMENT RULES BY DAYS UNTIL EVENT:

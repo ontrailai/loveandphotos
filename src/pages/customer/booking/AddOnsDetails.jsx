@@ -12,6 +12,7 @@ import AddOnsGrid from '@components/booking/AddOnsGrid'
 import TotalsPanel from '@components/booking/TotalsPanel'
 import Button from '@components/ui/Button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@components/ui/Dialog'
+import { getBasePhotoPrice } from '@/lib/constants/pricing'
 
 const AddOnsDetails = () => {
   const { photographerId } = useParams()
@@ -65,7 +66,7 @@ const AddOnsDetails = () => {
   }
 
   const hoursBooked = calculateHours()
-  const calculatedPackagePrice = hoursBooked * 200 // $200 per hour
+  const calculatedPackagePrice = getBasePhotoPrice(Math.round(hoursBooked)) || 0 // Use centralized pricing lookup
 
   // Build package context for pricing and validation
   const packageContext = {

@@ -38,9 +38,10 @@ const footerLinks = [
     ]
   },
   {
-    label: 'For Photographers',
+    label: 'For Talent',
     links: [
-      { title: 'Apply to Join', href: '/talent/apply' },
+      { title: 'Apply as Photographer', href: '/talent/apply' },
+      { title: 'Apply as Videographer', href: '/talent/apply' },
       { title: 'Resources', href: '/resources' },
       { title: 'FAQ', href: '/faq' },
       { title: 'Learn', href: '/learn' }

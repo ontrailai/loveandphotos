@@ -3,6 +3,8 @@
  * Authoritative data model for all available add-ons with pricing, validation, and display properties
  */
 
+import { getVideoAddonPrice, BASE_PHOTO_PRICES, PHOTO_VIDEO_PRICES } from '@/lib/constants/pricing'
+
 export const ADD_ONS_CONFIG = [
   {
     id: 'raw-footage',
@@ -177,6 +179,47 @@ Example for 8 hours (second photographer only):
       discount: null,
       popularity: null
     }
+  },
+  {
+    id: 'video-coverage',
+    title: 'Video Coverage',
+    basePrice: 700, // Base price for display, actual price is calculated dynamically
+    originalPrice: null,
+    discountPercent: 0,
+    popularity: null,
+    category: 'media',
+    description: `Professional video coverage for your wedding. Duration automatically matches your photo package for seamless coverage.
+
+We'll capture your ceremony, speeches, first dance, and all the special moments in beautiful cinematic video. The final product includes professionally edited highlight reels and full ceremony footage.
+
+Video coverage pricing is calculated as the difference between our Photo+Video package and Photo-Only package for your selected duration. This ensures you get the best value while upgrading your coverage.`,
+    features: [
+      'Professional video cinematography',
+      'Duration matches photo package',
+      'Cinematic highlight reel',
+      'Full ceremony footage',
+      'Professional editing included',
+      'Digital download delivery'
+    ],
+    pricing: {
+      isDynamic: true,
+      // Calculated from authoritative pricing tables (Photo+Video minus Photo-Only)
+      priceByHours: Object.keys(BASE_PHOTO_PRICES).reduce((acc, hours) => {
+        const h = Number(hours)
+        acc[h] = PHOTO_VIDEO_PRICES[h] - BASE_PHOTO_PRICES[h]
+        return acc
+      }, {})
+    },
+    validation: {
+      requiresPhotoPackage: true,
+      errorMessage: 'Video coverage requires a photo package to be selected',
+      durationSynced: true,
+      durationMessage: 'Video duration automatically matches your photo package duration'
+    },
+    badges: {
+      discount: null,
+      popularity: null
+    }
   }
 ]
 
@@ -252,6 +295,20 @@ export const getFormattedAddOn = (id, context = {}) => {
         displayPrice = Math.round(packagePrice * addon.pricing.photoVideoRate)
         priceCalculation = `50% of $${packagePrice} = $${displayPrice}`
       }
+    }
+  }
+
+  // Handle dynamic pricing for video coverage
+  if (addon.pricing?.isDynamic && id === 'video-coverage') {
+    const { hoursBooked } = context
+
+    if (hoursBooked) {
+      // Round to nearest whole hour for pricing lookup
+      const roundedHours = Math.round(hoursBooked)
+
+      // Get price from lookup table or use base price as fallback
+      displayPrice = addon.pricing.priceByHours[roundedHours] || addon.basePrice
+      priceCalculation = `${roundedHours} hour${roundedHours !== 1 ? 's' : ''} video coverage`
     }
   }
 

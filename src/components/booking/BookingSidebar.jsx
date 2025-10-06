@@ -12,6 +12,7 @@ import Card from '@components/ui/Card'
 import Button from '@components/ui/Button'
 import Calendar from '@components/ui/Calendar'
 import { clsx } from 'clsx'
+import toast from 'react-hot-toast'
 
 // Ensures dates coming from URLs or storage hydrate into Date objects
 const normalizeDate = (value) => {
@@ -40,12 +41,25 @@ const BookingSidebar = ({
     setSelectedDate(normalizeDate(initialDate))
   }, [initialDate])
 
+  // Convert unavailable_dates array to Date objects for Calendar component
+  const unavailableDates = (photographer?.unavailable_dates || []).map(dateStr => new Date(dateStr))
+
   const handleDateSelect = (day) => {
     setSelectedDate(day ? normalizeDate(day) : null)
   }
 
   const handleRequestToBook = () => {
     if (!selectedDate || !startTime || !endTime) return
+
+    // Validate selected date is not in photographer's unavailable dates
+    const selectedDateStr = format(selectedDate, 'yyyy-MM-dd')
+    if (unavailableDates.some(unavailableDate => {
+      const unavailableDateStr = format(unavailableDate, 'yyyy-MM-dd')
+      return selectedDateStr === unavailableDateStr
+    })) {
+      toast.error('This photographer is not available on the selected date. Please choose another date.')
+      return
+    }
 
     // Initialize the booking flow with schedule details AND default package
     initializeBookingFlow(photographer.id, {
@@ -108,6 +122,7 @@ const BookingSidebar = ({
             selected={selectedDate || undefined}
             onSelect={handleDateSelect}
             disablePastDates
+            disabledDates={unavailableDates}
             className="w-full"
           />
         </div>

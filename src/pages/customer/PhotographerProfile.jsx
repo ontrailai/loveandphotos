@@ -4,7 +4,6 @@ import {
   ArrowLeftIcon,
   CalendarIcon,
   CheckCircleIcon,
-  ClockIcon,
   DollarSignIcon,
   MapPinIcon,
   StarIcon,
@@ -18,7 +17,6 @@ import LNPChoiceBadge from '@components/ui/LNPChoiceBadge'
 import PhotographerMetricBadges from '@components/photographer/PhotographerMetricBadges'
 import Avatar from '@components/shared/Avatar'
 import RatingStars from '@components/shared/RatingStars'
-import PhotographerStatsCard from '@components/photographer/PhotographerStatsCard'
 import BookingSidebar from '@components/booking/BookingSidebar'
 import { supabasePublic } from '@lib/supabase'
 import { useAuth } from '@contexts/AuthContext'
@@ -59,7 +57,7 @@ const PhotographerProfile = () => {
 
       console.log('[PhotographerProfile] Loading photographer:', id)
 
-      // Query photographers table
+      // Query photographers table with unavailable_dates for blocking
       const { data, error } = await supabasePublic
         .from('photographers')
         .select(`
@@ -80,12 +78,8 @@ const PhotographerProfile = () => {
           total_reviews,
           portfolio_images,
           gender,
-          acceptance_rate,
-          avg_response_time_minutes,
-          has_minimum_data,
-          manual_override_acceptance_rate,
-          manual_override_response_time,
-          completed_jobs_count
+          completed_jobs_count,
+          unavailable_dates
         `)
         .eq('id', id)
         .single()
@@ -146,16 +140,8 @@ const PhotographerProfile = () => {
         total_reviews: data.total_reviews || 0,
         total_bookings: data.completed_jobs_count || 0,
         gender: data.gender || null,
-        // Response time from avg_response_time_minutes or default to 24 hours
-        response_time_hours: data.avg_response_time_minutes
-          ? Math.round(data.avg_response_time_minutes / 60)
-          : 24,
-        // Trust metrics
-        acceptance_rate: data.acceptance_rate,
-        avg_response_time_minutes: data.avg_response_time_minutes,
-        has_minimum_data: data.has_minimum_data || false,
-        manual_override_acceptance_rate: data.manual_override_acceptance_rate,
-        manual_override_response_time: data.manual_override_response_time,
+        // Unavailable dates for booking enforcement (inverse availability model)
+        unavailable_dates: Array.isArray(data.unavailable_dates) ? data.unavailable_dates : [],
         // User info with fallbacks
         users: {
           full_name: userData?.full_name || 'Photographer',
@@ -393,17 +379,6 @@ const PhotographerProfile = () => {
             <Card>
               <h3 className="font-semibold text-dusty-900 mb-4">Details</h3>
               <div className="space-y-3">
-                {/* Response Time */}
-                <div className="flex items-center justify-between">
-                  <span className="flex items-center text-dusty-600">
-                    <ClockIcon className="w-4 h-4 mr-2" />
-                    Response Time
-                  </span>
-                  <span className="text-dusty-900 font-medium">
-                    ~{photographer.response_time_hours || 24} {photographer.response_time_hours === 1 ? 'hour' : 'hours'}
-                  </span>
-                </div>
-
                 {/* Experience */}
                 <div className="flex items-center justify-between">
                   <span className="flex items-center text-dusty-600">
@@ -450,11 +425,6 @@ const PhotographerProfile = () => {
                 )}
               </div>
             </Card>
-
-            {/* Performance Stats - Only show for photographers with user_id and minimum data */}
-            {photographer.user_id && photographer.has_minimum_data && (
-              <PhotographerStatsCard photographerUserId={photographer.user_id} />
-            )}
 
             {/* Booking Sidebar */}
             <BookingSidebar

@@ -1,143 +1,52 @@
 import { useState, useRef } from 'react'
 import { supabase } from '@lib/supabase'
-import { Upload, X, Image as ImageIcon, AlertCircle } from 'lucide-react'
+import { Upload, X, Image as ImageIcon, AlertCircle, CheckCircle, Loader, XCircle, AlertTriangle } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { usePortfolioUpload } from '@hooks/usePortfolioUpload'
 
 const PhotoUploader = ({ userId, existingPhotos = [], onPhotosChange, maxPhotos = 50, minPhotos = 10 }) => {
-  const [uploading, setUploading] = useState(false)
-  const [uploadProgress, setUploadProgress] = useState([])
   const [photos, setPhotos] = useState(existingPhotos)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [photoToDelete, setPhotoToDelete] = useState(null)
   const fileInputRef = useRef(null)
 
+  // Use the portfolio upload hook
+  const {
+    uploading,
+    uploadProgress,
+    uploadFiles,
+    showLargeBatchWarning,
+    confirmLargeBatchUpload,
+    cancelLargeBatchUpload,
+    showResumeDialog,
+    pendingUploadSession,
+    resumeUpload,
+    discardUpload,
+    cancelUpload
+  } = usePortfolioUpload({
+    userId,
+    maxPhotos,
+    minPhotos,
+    onPhotosChange: (newPhotos) => {
+      setPhotos(newPhotos)
+      onPhotosChange(newPhotos)
+    }
+  })
+
   // Calculate if requirements are met
   const hasMinPhotos = photos.length >= minPhotos
   const hasMaxPhotos = photos.length >= maxPhotos
 
-  const uploadPhoto = async (file, retryCount = 0) => {
-    const maxRetries = 3
-    const fileExt = file.name.split('.').pop()
-    const fileName = `${userId}/${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`
-    const filePath = fileName
-
-    const startTime = performance.now()
-    console.log(`[PhotoUploader] Uploading ${file.name} (attempt ${retryCount + 1}/${maxRetries + 1})`)
-
-    try {
-      const { error: uploadError } = await supabase.storage
-        .from('photographer-portfolios')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false
-        })
-
-      if (uploadError) {
-        throw uploadError
-      }
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('photographer-portfolios')
-        .getPublicUrl(filePath)
-
-      const endTime = performance.now()
-      console.log(`[PhotoUploader] ✅ ${file.name} uploaded in ${(endTime - startTime).toFixed(2)}ms`)
-
-      return publicUrl
-    } catch (error) {
-      if (retryCount < maxRetries) {
-        console.warn(`[PhotoUploader] Retry ${retryCount + 1}/${maxRetries} for ${file.name}:`, error)
-        // Exponential backoff: wait 1s, 2s, 4s
-        await new Promise(resolve => setTimeout(resolve, Math.pow(2, retryCount) * 1000))
-        return uploadPhoto(file, retryCount + 1)
-      }
-      console.error(`[PhotoUploader] ❌ Failed to upload ${file.name} after ${maxRetries + 1} attempts:`, error)
-      throw error
-    }
-  }
-
   const handleFileSelect = async (e) => {
     const files = Array.from(e.target.files || [])
+    if (files.length === 0) return
 
-    if (photos.length + files.length > maxPhotos) {
-      toast.error(`Maximum ${maxPhotos} photos allowed`)
-      return
-    }
+    // Upload files using the hook
+    await uploadFiles(files, photos)
 
-    // Validate file types and sizes
-    const validFiles = files.filter(file => {
-      const validTypes = ['image/jpeg', 'image/png']
-      const maxSize = 10 * 1024 * 1024 // 10MB
-
-      if (!validTypes.includes(file.type)) {
-        toast.error(`${file.name}: Only JPEG and PNG files are allowed`)
-        return false
-      }
-
-      if (file.size > maxSize) {
-        toast.error(`${file.name}: File size must be less than 10MB`)
-        return false
-      }
-
-      return true
-    })
-
-    if (validFiles.length === 0) return
-
-    const uploadingToast = toast.loading(`Uploading ${validFiles.length} photo(s)...`)
-    setUploading(true)
-    setUploadProgress(validFiles.map((file, idx) => ({ name: file.name, status: 'uploading', progress: 0 })))
-
-    try {
-      // Upload files with Promise.allSettled for better error handling
-      const uploadPromises = validFiles.map((file, idx) =>
-        uploadPhoto(file)
-          .then(url => {
-            setUploadProgress(prev => {
-              const updated = [...prev]
-              updated[idx] = { ...updated[idx], status: 'success', progress: 100 }
-              return updated
-            })
-            return { success: true, url }
-          })
-          .catch(error => {
-            setUploadProgress(prev => {
-              const updated = [...prev]
-              updated[idx] = { ...updated[idx], status: 'error', progress: 0 }
-              return updated
-            })
-            return { success: false, error, fileName: file.name }
-          })
-      )
-
-      const results = await Promise.all(uploadPromises)
-      const successfulUploads = results.filter(r => r.success).map(r => r.url)
-      const failedUploads = results.filter(r => !r.success)
-
-      if (successfulUploads.length > 0) {
-        const newPhotos = [...photos, ...successfulUploads]
-        setPhotos(newPhotos)
-        onPhotosChange(newPhotos)
-        toast.success(`${successfulUploads.length} photo(s) uploaded successfully`, { id: uploadingToast })
-      }
-
-      if (failedUploads.length > 0) {
-        const failedNames = failedUploads.map(f => f.fileName).join(', ')
-        toast.error(`Failed to upload: ${failedNames}`, { id: uploadingToast, duration: 5000 })
-      }
-
-      if (successfulUploads.length === 0 && failedUploads.length > 0) {
-        toast.error('All uploads failed. Please check your connection and try again.', { id: uploadingToast })
-      }
-    } catch (error) {
-      console.error('[PhotoUploader] Upload error:', error)
-      toast.error('Failed to upload photos. Please try again.', { id: uploadingToast })
-    } finally {
-      setUploading(false)
-      setUploadProgress([])
-      if (fileInputRef.current) {
-        fileInputRef.current.value = ''
-      }
+    // Clear file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
     }
   }
 
@@ -281,6 +190,157 @@ const PhotoUploader = ({ userId, existingPhotos = [], onPhotosChange, maxPhotos 
         <p>• Choose your best work that showcases your photography style</p>
         {hasMinPhotos && <p className="text-green-600 font-medium">✓ Minimum requirement met ({photos.length} photos)</p>}
       </div>
+
+      {/* Upload Progress Indicator */}
+      {uploading && uploadProgress.length > 0 && (
+        <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="text-sm font-medium text-blue-900">
+              Uploading {uploadProgress.length} photo(s)...
+            </h4>
+            <button
+              type="button"
+              onClick={cancelUpload}
+              className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+            >
+              Cancel
+            </button>
+          </div>
+
+          <div className="space-y-2 max-h-60 overflow-y-auto">
+            {uploadProgress.map((file, idx) => (
+              <div key={idx} className="flex items-center space-x-3 p-2 bg-white rounded border border-blue-100">
+                <div className="flex-shrink-0">
+                  {file.status === 'uploading' && <Loader className="w-4 h-4 text-blue-500 animate-spin" />}
+                  {file.status === 'success' && <CheckCircle className="w-4 h-4 text-green-500" />}
+                  {file.status === 'error' && <XCircle className="w-4 h-4 text-red-500" />}
+                  {file.status === 'pending' && <div className="w-4 h-4 border-2 border-gray-300 rounded-full" />}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-gray-900 truncate">{file.name}</p>
+                  {file.status === 'uploading' && (
+                    <div className="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                      <div
+                        className="bg-blue-500 h-1.5 rounded-full transition-all duration-300"
+                        style={{ width: `${file.progress}%` }}
+                      />
+                    </div>
+                  )}
+                  {file.status === 'error' && (
+                    <p className="text-xs text-red-600 mt-0.5">{file.error || 'Upload failed'}</p>
+                  )}
+                </div>
+                <div className="flex-shrink-0 text-xs text-gray-500">
+                  {file.status === 'success' && '100%'}
+                  {file.status === 'uploading' && `${file.progress}%`}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <p className="text-xs text-blue-700 mt-3">
+            <AlertTriangle className="w-3 h-3 inline mr-1" />
+            Do not close or refresh this page until all uploads complete.
+          </p>
+        </div>
+      )}
+
+      {/* Large Batch Warning Modal */}
+      {showLargeBatchWarning && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <div className="flex items-start mb-4">
+              <div className="flex-shrink-0">
+                <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center">
+                  <AlertTriangle className="w-6 h-6 text-amber-600" />
+                </div>
+              </div>
+              <div className="ml-4">
+                <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                  Large Upload Detected
+                </h3>
+                <p className="text-sm text-gray-600">
+                  You're about to upload 25+ images. This may take a few minutes. Please stay on this page until the upload completes.
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
+              <p className="text-xs text-amber-800">
+                <strong>Tips for large uploads:</strong>
+              </p>
+              <ul className="text-xs text-amber-700 mt-1 ml-4 space-y-1 list-disc">
+                <li>Keep this browser tab active</li>
+                <li>Ensure stable internet connection</li>
+                <li>Do not navigate away or refresh</li>
+              </ul>
+            </div>
+
+            <div className="flex justify-end space-x-3">
+              <button
+                type="button"
+                onClick={cancelLargeBatchUpload}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => confirmLargeBatchUpload(photos)}
+                className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700"
+              >
+                Continue Upload
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Resume Upload Dialog */}
+      {showResumeDialog && pendingUploadSession && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <div className="flex items-start mb-4">
+              <div className="flex-shrink-0">
+                <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+                  <Upload className="w-6 h-6 text-blue-600" />
+                </div>
+              </div>
+              <div className="ml-4">
+                <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                  Resume Upload?
+                </h3>
+                <p className="text-sm text-gray-600">
+                  You had an upload in progress before refreshing. Would you like to resume or discard it?
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+              <p className="text-xs text-blue-800">
+                <strong>Note:</strong> You'll need to re-select your files to resume the upload.
+              </p>
+            </div>
+
+            <div className="flex justify-end space-x-3">
+              <button
+                type="button"
+                onClick={discardUpload}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
+                Discard
+              </button>
+              <button
+                type="button"
+                onClick={resumeUpload}
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+              >
+                Resume Upload
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (

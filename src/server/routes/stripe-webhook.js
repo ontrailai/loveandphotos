@@ -5,7 +5,8 @@
 
 import express from 'express'
 import Stripe from 'stripe'
-import { markBookingPaid, getBookingBySessionId } from '../db.js'
+import { markBookingPaid, getBookingBySessionId, supabase } from '../db.js'
+import { sendPhotographerBookingNotification } from '../services/emailService.js'
 
 const router = express.Router()
 
@@ -99,9 +100,69 @@ async function handleCheckoutSessionCompleted(session) {
   if (success) {
     console.log(`Booking ${bookingId} marked as paid successfully`)
 
-    // TODO: Send confirmation email to customer
-    // TODO: Send notification email to photographer
-    // TODO: Update calendar/scheduling system
+    // Send photographer notification email
+    try {
+      // Fetch booking details with photographer and customer info
+      const { data: booking, error: bookingError } = await supabase
+        .from('bookings')
+        .select(`
+          id,
+          event_date,
+          event_time,
+          venue_name,
+          venue_address,
+          package_type,
+          total_amount,
+          customer:users!bookings_customer_id_fkey (
+            id,
+            full_name,
+            email
+          ),
+          photographer:photographers!bookings_photographer_id_fkey (
+            id,
+            user_id,
+            users (
+              full_name,
+              email
+            )
+          )
+        `)
+        .eq('id', bookingId)
+        .single()
+
+      if (bookingError || !booking) {
+        console.error('Failed to fetch booking details for photographer notification:', bookingError)
+      } else if (booking.photographer?.users?.email) {
+        // Extract photographer details
+        const photographerFullName = booking.photographer.users.full_name || 'Photographer'
+        const photographerFirstName = photographerFullName.split(' ')[0]
+        const photographerEmail = booking.photographer.users.email
+
+        // Extract event location
+        let eventLocation = booking.venue_name || 'Location TBD'
+        if (!eventLocation && booking.venue_address) {
+          if (typeof booking.venue_address === 'object') {
+            eventLocation = booking.venue_address.address || booking.venue_address.city || 'Location TBD'
+          }
+        }
+
+        // Send photographer notification
+        await sendPhotographerBookingNotification({
+          bookingId,
+          photographerEmail,
+          photographerFirstName,
+          customerFullName: booking.customer?.full_name || 'Customer',
+          eventDate: booking.event_date,
+          eventTime: booking.event_time,
+          eventLocation,
+          packageType: booking.package_type || 'Photography Package',
+          packagePrice: Number(booking.total_amount) || 0
+        })
+      }
+    } catch (emailError) {
+      console.error('Error sending photographer notification:', emailError)
+      // Don't fail the webhook - email failures should not block payment processing
+    }
 
   } else {
     console.error(`Failed to mark booking ${bookingId} as paid`)

@@ -96,6 +96,14 @@ const AddOnsGrid = ({
       }
     }
 
+    // Video coverage validation
+    if (addonId === 'video-coverage') {
+      if (!context.hoursBooked || context.hoursBooked === 0) {
+        validationError = 'Video coverage requires a photo package to be selected'
+        isDisabled = true
+      }
+    }
+
     return {
       isValid: !validationError,
       validationError,

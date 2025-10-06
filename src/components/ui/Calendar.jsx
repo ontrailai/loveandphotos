@@ -85,6 +85,7 @@ function Calendar({
   showOutsideDays = true,
   mode = "single",
   disablePastDates = true,
+  disabledDates = [],
   selected,
   onSelect,
   ...props
@@ -92,7 +93,15 @@ function Calendar({
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 
-  const disabled = disablePastDates ? { before: today } : undefined
+  // Combine past dates and custom disabled dates
+  const disabled = []
+  if (disablePastDates) {
+    disabled.push({ before: today })
+  }
+  if (disabledDates && disabledDates.length > 0) {
+    // Add individual disabled dates (photographer unavailable dates)
+    disabled.push(...disabledDates)
+  }
 
   const mergedClassNames = {
     months: "relative flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",

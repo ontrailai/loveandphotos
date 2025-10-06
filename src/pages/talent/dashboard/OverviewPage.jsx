@@ -261,7 +261,7 @@ const OverviewPage = () => {
           <Camera className="w-12 h-12 text-primary-600 mr-4" aria-hidden="true" />
           <div>
             <h1 className="text-2xl font-bold text-gray-900">
-              Welcome back, {profile?.full_name || 'Photographer'}!
+              Welcome back, {profile?.full_name?.trim() || 'Photographer'}!
             </h1>
             <p className="mt-1 text-gray-600">
               Manage your profile and availability from your dashboard

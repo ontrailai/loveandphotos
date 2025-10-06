@@ -7,6 +7,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { useBookingFlow } from '@contexts/BookingFlowContext'
+import { useAuth } from '@contexts/AuthContext'
 import Button from '@components/ui/Button'
 import ErrorBoundary from '@components/ui/ErrorBoundary'
 import { CheckCircle, CreditCard, Calendar, MapPin, Camera, AlertCircle, ArrowRight, Download } from 'lucide-react'
@@ -18,7 +19,8 @@ const PaymentSuccess = () => {
   const [searchParams] = useSearchParams()
   const sessionId = searchParams.get('session_id')
 
-  const { bookingFlow } = useBookingFlow()
+  const { bookingFlow, markPaymentComplete } = useBookingFlow()
+  const { user } = useAuth()
 
   const [isVerifying, setIsVerifying] = useState(true)
   const [paymentDetails, setPaymentDetails] = useState(null)
@@ -55,6 +57,9 @@ const PaymentSuccess = () => {
           metadata: data.metadata
         })
 
+        // Mark payment as complete in booking flow
+        markPaymentComplete(data.id)
+
       } catch (error) {
         console.error('Payment verification failed:', error)
         setVerificationError(error.message)
@@ -64,7 +69,24 @@ const PaymentSuccess = () => {
     }
 
     verifyPayment()
-  }, [sessionId])
+  }, [sessionId, markPaymentComplete])
+
+  // Redirect to account creation if not authenticated
+  useEffect(() => {
+    if (!isVerifying && paymentDetails && !verificationError) {
+      // If user is not authenticated, redirect to account creation
+      if (!user) {
+        const photographerId = bookingFlow?.photographerId
+        if (photographerId) {
+          // Give user 2 seconds to see success message, then redirect
+          const timer = setTimeout(() => {
+            navigate(`/booking/${photographerId}/account`)
+          }, 2000)
+          return () => clearTimeout(timer)
+        }
+      }
+    }
+  }, [isVerifying, paymentDetails, verificationError, user, bookingFlow, navigate])
 
   // Loading state
   if (isVerifying) {
@@ -235,6 +257,19 @@ const PaymentSuccess = () => {
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
             <h2 className="text-xl font-semibold text-blue-900 mb-4">What's Next?</h2>
             <div className="space-y-3 text-blue-800">
+              {!user && (
+                <div className="flex items-start space-x-3 bg-yellow-50 border border-yellow-200 rounded-lg p-3 -mx-2 mb-4">
+                  <div className="w-6 h-6 bg-yellow-200 rounded-full flex items-center justify-center text-sm font-semibold mt-0.5">
+                    →
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-yellow-900">Create Your Account</h3>
+                    <p className="text-sm text-yellow-800">
+                      You'll be redirected to create your account in a few seconds...
+                    </p>
+                  </div>
+                </div>
+              )}
               <div className="flex items-start space-x-3">
                 <div className="w-6 h-6 bg-blue-200 rounded-full flex items-center justify-center text-sm font-semibold mt-0.5">
                   1

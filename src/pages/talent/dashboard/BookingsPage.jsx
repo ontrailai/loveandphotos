@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '@contexts/AuthContext'
 import { supabase } from '@lib/supabase'
 import {
@@ -10,7 +10,10 @@ import {
   AlertCircle,
   ChevronLeft,
   ChevronRight,
-  FileText
+  FileText,
+  ChevronDown,
+  ChevronUp,
+  Info
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
@@ -23,6 +26,7 @@ const BookingsPage = () => {
   const [error, setError] = useState(null)
   const [currentPage, setCurrentPage] = useState(1)
   const [totalCount, setTotalCount] = useState(0)
+  const [expandedBookingId, setExpandedBookingId] = useState(null)
 
   const fetchBookings = useCallback(async () => {
     if (!photographerProfile?.id) {
@@ -40,7 +44,7 @@ const BookingsPage = () => {
       const from = (currentPage - 1) * BOOKINGS_PER_PAGE
       const to = from + BOOKINGS_PER_PAGE - 1
 
-      // Fetch bookings with customer and package data
+      // Fetch bookings with customer, package, and questionnaire data
       const { data, error: fetchError, count } = await supabase
         .from('bookings')
         .select(`
@@ -53,12 +57,18 @@ const BookingsPage = () => {
           booking_status,
           total_amount,
           created_at,
+          personalization_data,
           users!bookings_customer_id_fkey (
             full_name,
             email
           ),
           packages (
             title
+          ),
+          logistics_questionnaire (
+            id,
+            answers,
+            status
           )
         `, { count: 'exact' })
         .eq('photographer_id', photographerProfile.id)
@@ -145,6 +155,126 @@ const BookingsPage = () => {
       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.bg} ${config.text}`}>
         {config.label}
       </span>
+    )
+  }
+
+  const renderClientPreferences = (booking) => {
+    const personalization = booking.personalization_data || {}
+    // Safely access first questionnaire (should only be one per booking)
+    const questionnaire = Array.isArray(booking.logistics_questionnaire) && booking.logistics_questionnaire.length > 0
+      ? booking.logistics_questionnaire[0]
+      : null
+    const answers = questionnaire?.answers || {}
+
+    // Extract addons if available
+    const addons = personalization.addons || []
+
+    return (
+      <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
+        <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center">
+          <Info className="w-4 h-4 mr-2 text-primary-600" />
+          Client Preferences & Event Details
+        </h4>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Left Column - Package & Add-ons */}
+          <div className="space-y-3">
+            {/* Package Info */}
+            {personalization.package && (
+              <div className="bg-white p-3 rounded-lg border border-gray-200">
+                <p className="text-xs font-semibold text-gray-500 uppercase mb-1">Package Details</p>
+                <p className="text-sm text-gray-900">{personalization.package.packageTitle || 'Photography Package'}</p>
+                {personalization.package.hoursBooked && (
+                  <p className="text-xs text-gray-600 mt-1">{personalization.package.hoursBooked} hours booked</p>
+                )}
+              </div>
+            )}
+
+            {/* Add-ons */}
+            {addons.length > 0 && (
+              <div className="bg-white p-3 rounded-lg border border-gray-200">
+                <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Selected Add-ons</p>
+                <ul className="space-y-1">
+                  {addons.map((addon, idx) => (
+                    <li key={idx} className="text-sm text-gray-900 flex items-start">
+                      <span className="text-primary-600 mr-2">•</span>
+                      <span>{addon.title || addon.id} {addon.qty > 1 && `(×${addon.qty})`}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+
+          {/* Right Column - Event Logistics */}
+          <div className="space-y-3">
+            {/* Contact Information */}
+            {(answers.contact_name || answers.contact_phone) && (
+              <div className="bg-white p-3 rounded-lg border border-gray-200">
+                <p className="text-xs font-semibold text-gray-500 uppercase mb-1">Event Contact</p>
+                {answers.contact_name && (
+                  <p className="text-sm text-gray-900">{answers.contact_name}</p>
+                )}
+                {answers.contact_phone && (
+                  <p className="text-xs text-gray-600 mt-1">{answers.contact_phone}</p>
+                )}
+              </div>
+            )}
+
+            {/* Event Locations */}
+            {(answers.getting_ready_location || answers.ceremony_time_location || answers.reception_time_location) && (
+              <div className="bg-white p-3 rounded-lg border border-gray-200">
+                <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Event Locations</p>
+                <div className="space-y-1 text-sm text-gray-700">
+                  {answers.getting_ready_location && (
+                    <p><span className="font-medium">Getting Ready:</span> {answers.getting_ready_location}</p>
+                  )}
+                  {answers.ceremony_time_location && (
+                    <p><span className="font-medium">Ceremony:</span> {answers.ceremony_time_location}</p>
+                  )}
+                  {answers.reception_time_location && (
+                    <p><span className="font-medium">Reception:</span> {answers.reception_time_location}</p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* First Look */}
+            {answers.first_look_choice && (
+              <div className="bg-white p-3 rounded-lg border border-gray-200">
+                <p className="text-xs font-semibold text-gray-500 uppercase mb-1">First Look</p>
+                <p className="text-sm text-gray-900 capitalize">{answers.first_look_choice}</p>
+                {answers.first_look_location && (
+                  <p className="text-xs text-gray-600 mt-1">Location: {answers.first_look_location}</p>
+                )}
+              </div>
+            )}
+
+            {/* Must-Have Photos */}
+            {answers.must_have_photos && (
+              <div className="bg-white p-3 rounded-lg border border-gray-200">
+                <p className="text-xs font-semibold text-gray-500 uppercase mb-1">Must-Have Shots</p>
+                <p className="text-sm text-gray-700 whitespace-pre-wrap">{answers.must_have_photos}</p>
+              </div>
+            )}
+
+            {/* Venue Restrictions */}
+            {answers.venue_restrictions && (
+              <div className="bg-white p-3 rounded-lg border border-yellow-300 bg-yellow-50">
+                <p className="text-xs font-semibold text-yellow-800 uppercase mb-1">⚠️ Venue Restrictions</p>
+                <p className="text-sm text-yellow-900 whitespace-pre-wrap">{answers.venue_restrictions}</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Empty State */}
+        {!personalization.package && addons.length === 0 && Object.keys(answers).length === 0 && (
+          <p className="text-sm text-gray-500 italic text-center py-4">
+            No client preferences or questionnaire data available for this booking.
+          </p>
+        )}
+      </div>
     )
   }
 
@@ -274,58 +404,95 @@ const BookingsPage = () => {
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
                   </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <span className="sr-only">Details</span>
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {bookings.map((booking) => (
-                  <tr key={booking.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center">
-                          <span className="text-white font-medium text-sm">
-                            {(booking.users?.full_name || booking.users?.email || 'Client')
-                              .split(' ')
-                              .map(n => n[0])
-                              .join('')
-                              .toUpperCase()
-                              .slice(0, 2)}
-                          </span>
-                        </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">
-                            {booking.users?.full_name || 'Client'}
+                {bookings.map((booking) => {
+                  const isExpanded = expandedBookingId === booking.id
+
+                  return (
+                    <React.Fragment key={booking.id}>
+                      <tr className="hover:bg-gray-50 transition-colors">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className="flex-shrink-0 h-10 w-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center">
+                              <span className="text-white font-medium text-sm">
+                                {(booking.users?.full_name || booking.users?.email || 'Client')
+                                  .split(' ')
+                                  .map(n => n[0])
+                                  .join('')
+                                  .toUpperCase()
+                                  .slice(0, 2)}
+                              </span>
+                            </div>
+                            <div className="ml-4">
+                              <div className="text-sm font-medium text-gray-900">
+                                {booking.users?.full_name || 'Client'}
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                {booking.users?.email}
+                              </div>
+                            </div>
                           </div>
-                          <div className="text-sm text-gray-500">
-                            {booking.users?.email}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900 font-medium">
+                            {formatDate(booking.event_date)}
                           </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900 font-medium">
-                        {formatDate(booking.event_date)}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {formatTime(booking.event_time)}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm text-gray-900 max-w-xs truncate">
-                        {formatLocation(booking.venue_name, booking.venue_address)}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {booking.packages?.title || 'Custom Package'}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {getStatusBadge(booking.booking_status)}
-                    </td>
-                  </tr>
-                ))}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">
+                            {formatTime(booking.event_time)}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="text-sm text-gray-900 max-w-xs truncate">
+                            {formatLocation(booking.venue_name, booking.venue_address)}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">
+                            {booking.packages?.title || 'Custom Package'}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {getStatusBadge(booking.booking_status)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right">
+                          <button
+                            onClick={() => setExpandedBookingId(isExpanded ? null : booking.id)}
+                            className="text-primary-600 hover:text-primary-900 font-medium text-sm inline-flex items-center"
+                            aria-label={isExpanded ? 'Hide details' : 'Show details'}
+                          >
+                            {isExpanded ? (
+                              <>
+                                <ChevronUp className="w-4 h-4 mr-1" />
+                                Hide
+                              </>
+                            ) : (
+                              <>
+                                <ChevronDown className="w-4 h-4 mr-1" />
+                                Details
+                              </>
+                            )}
+                          </button>
+                        </td>
+                      </tr>
+
+                      {/* Expandable Row */}
+                      {isExpanded && (
+                        <tr>
+                          <td colSpan="7" className="p-0">
+                            {renderClientPreferences(booking)}
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
+                  )
+                })}
               </tbody>
             </table>
           </div>

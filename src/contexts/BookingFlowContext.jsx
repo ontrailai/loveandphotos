@@ -6,10 +6,12 @@
 
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import { v4 as uuidv4 } from 'uuid'
+import { getBasePhotoPrice, validateHours } from '@/lib/constants/pricing'
 
 const BookingFlowContext = createContext({})
 
 // Step configuration
+// Actual booking flow: Schedule → Add-Ons → Account Setup → Contract → Payment
 const BOOKING_STEPS = [
   { id: 'schedule', label: 'Schedule Details', order: 0 },
   { id: 'addons', label: 'Add-Ons', order: 1 },
@@ -224,14 +226,16 @@ export const BookingFlowProvider = ({ children }) => {
         ? [...new Set([...prev.completedSteps, 'schedule'])]
         : prev.completedSteps.filter(step => step !== 'schedule')
 
-      // Calculate package price from hours (startTime and endTime)
+      // Calculate package price from hours using authoritative pricing table
       let packagePrice = 0
       let hoursBooked = 0
       if (startTime && endTime) {
         const [startHour] = startTime.split(':').map(Number)
         const [endHour] = endTime.split(':').map(Number)
         hoursBooked = endHour - startHour
-        packagePrice = hoursBooked * 200 // $200 per hour
+
+        // Use authoritative pricing lookup instead of hourly rate
+        packagePrice = getBasePhotoPrice(hoursBooked) || 0
       }
 
       return {
@@ -244,7 +248,7 @@ export const BookingFlowProvider = ({ children }) => {
         },
         packageDetails: {
           ...prev.packageDetails,
-          packagePrice, // Update package price based on hours
+          packagePrice, // Update package price based on authoritative pricing
           hoursBooked, // Store hours booked
           packageTitle: scheduleValid ? `${hoursBooked} Hour Photoshoot` : null
         },
@@ -289,7 +293,7 @@ export const BookingFlowProvider = ({ children }) => {
           selectedAt: new Date().toISOString()
         },
         completedSteps: newCompletedSteps,
-        currentStep: addonsValid ? 'account' : 'addons',
+        currentStep: addonsValid ? 'contract' : 'addons',
         validationState: {
           ...prev.validationState,
           addons: addonsValid
@@ -321,7 +325,7 @@ export const BookingFlowProvider = ({ children }) => {
           selectedAt: new Date().toISOString()
         },
         completedSteps: newCompletedSteps,
-        currentStep: accountValid ? 'contract' : 'account',
+        currentStep: accountValid ? 'contract' : 'account', // Move to contract after account
         validationState: {
           ...prev.validationState,
           account: accountValid
@@ -422,6 +426,19 @@ export const BookingFlowProvider = ({ children }) => {
     // First step (schedule) is always accessible
     if (step.order === 0) return true
 
+    // Special requirement for contract step: must have bookingId
+    if (stepName === 'contract') {
+      // Check all previous steps are completed
+      for (let i = 0; i < step.order; i++) {
+        const prevStep = BOOKING_STEPS[i]
+        if (!bookingFlow.completedSteps.includes(prevStep.id)) {
+          return false
+        }
+      }
+      // Additional requirement: must have bookingId from account setup
+      return !!bookingFlow.bookingId
+    }
+
     // Special requirement for payment step: contract must be signed
     if (stepName === 'payment') {
       // Check all previous steps are completed
@@ -444,7 +461,7 @@ export const BookingFlowProvider = ({ children }) => {
     }
 
     return true
-  }, [bookingFlow.completedSteps, bookingFlow.contractDetails.contractSigned])
+  }, [bookingFlow.completedSteps, bookingFlow.contractDetails.contractSigned, bookingFlow.bookingId])
 
   // Navigate to a specific step (with validation)
   const goToStep = useCallback((stepName) => {

@@ -37,8 +37,6 @@ export function PhotographerRow({
     location_city,
     location_state,
     bio,
-    acceptance_rate,
-    avg_response_time_minutes,
     total_bookings
   } = photographer
 
@@ -211,8 +209,6 @@ export function PhotographerRow({
           <div className="text-xs">
             <TrustBadges
               totalBookings={total_bookings}
-              avgResponseTimeMinutes={avg_response_time_minutes}
-              acceptanceRate={acceptance_rate}
               layout="horizontal"
               className="gap-6"
             />

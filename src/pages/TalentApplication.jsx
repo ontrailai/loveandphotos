@@ -38,7 +38,6 @@ const TalentApplication = () => {
     experience_years: '', // Number input
     referral_name: '', // Text input
     instagram_handle: '', // Text input
-    cross_service_offer: '', // Dropdown
     background_description: '', // Textarea
 
     // Videographer-specific additional question
@@ -93,13 +92,6 @@ const TalentApplication = () => {
       type: 'text',
       placeholder: '@yourhandle or leave blank',
       required: false
-    },
-    {
-      key: 'cross_service_offer',
-      label: `Do you also offer ${oppServiceType} services?`,
-      type: 'select',
-      options: ['No', 'Yes'],
-      required: true
     },
     ...(selectedRole === 'videographer' ? [{
       key: 'has_drone',
@@ -231,7 +223,6 @@ const TalentApplication = () => {
           experience_years: formData.experience_years,
           referral_name: formData.referral_name,
           instagram_handle: formData.instagram_handle,
-          cross_service_offer: formData.cross_service_offer,
           background_description: formData.background_description,
 
           // Videographer-specific additional question
@@ -399,7 +390,7 @@ const TalentApplication = () => {
           <div className="bg-white rounded-2xl shadow-xl p-8">
             {/* Header */}
             <div className="flex items-center gap-3 mb-6">
-              <RoleIcon className={`w-8 h-8 text-${roleColor}-600`} />
+              <RoleIcon className={selectedRole === 'photographer' ? 'w-8 h-8 text-primary-600' : 'w-8 h-8 text-rose-600'} />
               <div>
                 <h1 className="text-2xl font-bold text-gray-900 capitalize">{selectedRole} Application</h1>
                 <p className="text-gray-600 text-sm">Complete all fields to apply</p>
@@ -633,8 +624,244 @@ const TalentApplication = () => {
                 </div>
               )}
 
-              {/* Terms and Conditions */}
-              <div className="border-t pt-6">
+              {/* Talent Terms of Service */}
+              <div className="border-t pt-6 space-y-4">
+                <h3 className="text-lg font-semibold text-gray-900">Talent Terms of Service</h3>
+                <p className="text-sm text-gray-600">
+                  Please read the complete terms below. You must scroll through and accept these terms to continue.
+                </p>
+
+                {/* Scrollable TOS Container */}
+                <div className="border border-gray-300 rounded-lg p-4 h-96 overflow-y-scroll bg-gray-50 text-sm leading-relaxed">
+                  <div className="prose prose-sm max-w-none">
+                    <h2 className="text-xl font-bold text-gray-900 mb-2">Love & Photos LLC</h2>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-1">Talent Terms of Service</h3>
+                    <p className="text-xs text-gray-600 mb-4">Effective October 1, 2025</p>
+
+                    <p className="mb-4">
+                      By creating a profile, accepting an assignment, or otherwise engaging with Love & Photos LLC ("Studio" or "Company"), you acknowledge that you have read, understood, and agreed to these Talent Terms of Service. These Terms may be updated at any time without notice, and it is your responsibility to review them regularly for updates. Continued engagement after updates constitutes acceptance of the revised Terms.
+                    </p>
+
+                    <h4 className="font-bold text-gray-900 mt-6 mb-3">Quick Summary / Key Requirements</h4>
+                    <ul className="list-disc pl-6 space-y-1 mb-4">
+                      <li><strong>Confirmation:</strong> Accept or reject assignments within 24 hours. Failure to confirm will result in removal from the talent system if not booked out of your calendar availability.</li>
+                      <li><strong>Pre-event Contact:</strong> Contact the couple at least 1 month prior via phone or internal chat to introduce yourself and confirm final details.</li>
+                      <li><strong>Event Coverage & Upload:</strong> Perform full coverage of the event and upload all media within 72 hours. Begin uploads early; 100GB may take ~24 hours.</li>
+                      <li><strong>Photography:</strong> Minimum of 100 photos per contracted hour. Deliver in RAW and JPEG, full color, unwatermarked. Do not go below 1/250 second shutter speed.</li>
+                      <li><strong>Videography:</strong> Record full ceremony and all speeches at 1080p or higher, in ready-to-use format. Drone footage required if allowed.</li>
+                      <li><strong>Overtime:</strong> Extra coverage billed at $300/hour; obtain signed acknowledgment from the couple.</li>
+                      <li><strong>Professional Conduct:</strong> Arrive on time, dress appropriately, no smoking/vaping/gum in view of clients, no alcohol or drugs, remain focused, do not use your phone during the event, no personal marketing, no arguing with clients/vendors/guests.</li>
+                      <li><strong>Breaks & Meals:</strong> For events over 4 hours, one vendor meal and one 20-minute break.</li>
+                      <li><strong>Payment:</strong> Processed via ACH/QuickBooks within 14 business days of completed deliverables and submitted job form.</li>
+                      <li><strong>No-show couple:</strong> If the couple does not appear on the day of the event and the contractor is present, contractor will be paid 20% of their regular day rate. Notify the Studio immediately.</li>
+                      <li><strong>Contact Support:</strong> Reach out to the Studio at studio@team.loveandphotos.com or text +1 323-701-1705.</li>
+                    </ul>
+
+                    <h4 className="font-bold text-gray-900 mt-6 mb-2">1. Independent Contractor Status</h4>
+                    <p className="mb-4">
+                      You are an independent contractor, not an employee of the Studio. You are responsible for your own taxes, insurance, and benefits. You provide and maintain your own equipment and backups. Nothing in these Terms creates an employer-employee, joint-venture, or agency relationship.
+                    </p>
+
+                    <h4 className="font-bold text-gray-900 mt-6 mb-2">2. Scope of Services</h4>
+                    <p className="font-semibold mb-1">Assignment Acceptance</p>
+                    <ul className="list-disc pl-6 space-y-1 mb-3">
+                      <li>You must confirm or reject a job within 24 hours of assignment notification.</li>
+                      <li>If you reject a job that was within your calendar availability, you may be removed from the talent system.</li>
+                    </ul>
+                    <p className="font-semibold mb-1">Coverage Responsibilities</p>
+                    <ul className="list-disc pl-6 space-y-1 mb-3">
+                      <li>Confirm all shoot details (date and city/state) immediately upon accepting.</li>
+                      <li>Contact the couple at least 1 month before the wedding via phone or internal chat to introduce yourself and confirm final details.</li>
+                      <li>Perform full coverage of the wedding as scheduled.</li>
+                      <li>After the event, upload all media (photos, videos, audio, etc.) to the Studio's portal within 72 hours. Begin uploads early; large files may take ~24 hours.</li>
+                    </ul>
+                    <p className="font-semibold mb-1">Subcontracting</p>
+                    <p className="mb-4">
+                      Contractors may not subcontract, delegate, or assign any portion of their duties or assignments to another individual or entity without prior written approval from the Studio. Any unauthorized subcontracting is grounds for immediate termination and forfeiture of payment.
+                    </p>
+
+                    <h4 className="font-bold text-gray-900 mt-6 mb-2">3. Technical Standards</h4>
+                    <p className="font-semibold mb-1">Photography</p>
+                    <ul className="list-disc pl-6 space-y-1 mb-3">
+                      <li>Minimum 100 high-quality photos per contracted hour. Capture all key moments evenly across the event.</li>
+                      <li>Deliver both RAW and JPEG formats, in full color, unwatermarked. Black-and-white, filtered, or watermarked images do not meet standards.</li>
+                      <li>DSLR or mirrorless professional cameras only; smartphones or consumer devices are not acceptable.</li>
+                      <li><strong>Shutter Speed:</strong> Do not go below 1/250 second; slower speeds will result in motion blur. Adjust ISO or aperture as needed to maintain proper exposure.</li>
+                      <li>RAW files must be retained for at least 30 days post-event.</li>
+                    </ul>
+                    <p className="font-semibold mb-1">Videography</p>
+                    <ul className="list-disc pl-6 space-y-1 mb-3">
+                      <li>Deliver ready-to-use video at 1080p or higher in MP4/MOV format. RAW/log/flat formats are not accepted unless requested.</li>
+                      <li>Record the full ceremony and all speeches with clean audio, keeping the camera on a tripod and continuously recording without stopping.</li>
+                      <li>Drone footage is required if permitted by venue and law; follow all safety regulations.</li>
+                      <li>Professional-grade video equipment is required; consumer devices are not acceptable.</li>
+                    </ul>
+                    <p className="font-semibold mb-1">Equipment Failure & Backup Responsibility</p>
+                    <p className="mb-4">
+                      Contractors are required to bring and maintain backup cameras, lenses, batteries, memory cards, and audio equipment as applicable. The Contractor is fully responsible for coverage lost due to equipment malfunction, user error, or failure to prepare adequate backups.
+                    </p>
+                    <p className="font-semibold mb-1">Upload Timeline</p>
+                    <ul className="list-disc pl-6 space-y-1 mb-4">
+                      <li>Begin uploads as soon as possible; 100GB may take ~24 hours.</li>
+                      <li>All media must be uploaded within 72 hours of the event. Delays may result in deductions per the Penalty Schedule.</li>
+                    </ul>
+
+                    <h4 className="font-bold text-gray-900 mt-6 mb-2">4. Overtime</h4>
+                    <ul className="list-disc pl-6 space-y-1 mb-4">
+                      <li>If the couple requests extra coverage, inform them that it is billed at $300/hour.</li>
+                      <li>Obtain written or electronic consent only from the couple before recording extra hours.</li>
+                      <li>Document all extra hours in the job form. Couples must acknowledge overtime here: <a href="https://loveandphotos.com/overtime" className="text-primary-600 underline">Overtime Acknowledgment</a>.</li>
+                    </ul>
+
+                    <h4 className="font-bold text-gray-900 mt-6 mb-2">5. Fees, Invoicing & Payment</h4>
+                    <ul className="list-disc pl-6 space-y-1 mb-4">
+                      <li>Contractors are paid based on actual hours worked; half-hour increments allowed.</li>
+                      <li><strong>Tiered Pay:</strong>
+                        <ul className="list-disc pl-6 mt-1">
+                          <li>Tier 1: $40/hr — 0–20 weddings</li>
+                          <li>Tier 2: $45/hr — 21–50 weddings</li>
+                          <li>Tier 3: $50/hr — 51+ weddings</li>
+                        </ul>
+                      </li>
+                      <li>Payment is processed via ACH/QuickBooks within 14 business days after delivery of all media and job form submission.</li>
+                      <li>Late or incomplete submissions may incur deductions.</li>
+                    </ul>
+
+                    <h4 className="font-bold text-gray-900 mt-6 mb-2">6. Travel & Mileage</h4>
+                    <ul className="list-disc pl-6 space-y-1 mb-4">
+                      <li>Travel fees/stipends are only provided if explicitly agreed in writing.</li>
+                      <li>No automatic reimbursement for travel unless authorized.</li>
+                    </ul>
+
+                    <h4 className="font-bold text-gray-900 mt-6 mb-2">7. Media Ownership & Usage</h4>
+                    <ul className="list-disc pl-6 space-y-1 mb-4">
+                      <li>Love & Photos LLC owns all copyrights and exclusive rights to delivered media.</li>
+                      <li>The Studio may use any photos, videos, or other media for marketing, promotion, social media, website content, advertising, or any other purpose without additional compensation to the Contractor.</li>
+                      <li>Contractors may use media for personal portfolios, websites, and social media after 30 days post-event, with credit to Love & Photos.</li>
+                      <li>Contractors may not sell, license, transfer, or otherwise provide captured media to any third party without written consent from the Studio.</li>
+                    </ul>
+
+                    <h4 className="font-bold text-gray-900 mt-6 mb-2">8. Professional Appearance and Conduct</h4>
+                    <p className="font-semibold mb-1">Appearance</p>
+                    <ul className="list-disc pl-6 space-y-1 mb-3">
+                      <li>Business casual or formal attire appropriate for weddings. Neutral colors recommended.</li>
+                      <li>No tennis shoes, sandals, shorts, bright/neon colors, or casual T-shirts.</li>
+                      <li>Maintain neat grooming and polished presentation.</li>
+                    </ul>
+                    <p className="font-semibold mb-1">Behavior</p>
+                    <ul className="list-disc pl-6 space-y-1 mb-3">
+                      <li>Arrive on time; do not leave early without authorization.</li>
+                      <li>No smoking, vaping, or chewing gum in view of clients or guests.</li>
+                      <li>No alcohol or drugs before or during the event.</li>
+                      <li>Do not use your phone for personal reasons during the event.</li>
+                      <li>Remain attentive and professional at all times.</li>
+                      <li>Do not promote personal business or distribute marketing materials.</li>
+                      <li>Avoid arguments with clients, guests, vendors, or other staff.</li>
+                      <li>Sitting for extended periods is only allowed during designated breaks.</li>
+                    </ul>
+                    <p className="font-semibold mb-1">Breaks & Meals</p>
+                    <ul className="list-disc pl-6 space-y-1 mb-4">
+                      <li>For events over four hours, contractors are entitled to one vendor meal and one 20-minute break.</li>
+                      <li>No break or meal is granted for events under four hours.</li>
+                    </ul>
+
+                    <h4 className="font-bold text-gray-900 mt-6 mb-2">9. Confidentiality & Non-Disclosure</h4>
+                    <p className="mb-4">
+                      Contractor agrees to keep all information related to the Studio, its clients, pricing, contracts, communications, and business operations strictly confidential. Such information may not be disclosed, shared, or used for any purpose outside of assignments with the Studio without prior written consent.
+                    </p>
+
+                    <h4 className="font-bold text-gray-900 mt-6 mb-2">10. Non-Solicitation & Non-Interference</h4>
+                    <p className="mb-4">
+                      Contractor agrees not to solicit, contract directly, or attempt to provide photography, videography, or related services to any Studio client for a period of twenty-four (24) months following completion of the last assignment for that client. Contractor also agrees not to solicit, recruit, or attempt to hire away Studio employees, contractors, or talent during the same period.
+                    </p>
+
+                    <h4 className="font-bold text-gray-900 mt-6 mb-2">11. Communication</h4>
+                    <ul className="list-disc pl-6 space-y-1 mb-4">
+                      <li>Use only email or text for Studio communication: studio@team.loveandphotos.com, +1 323-701-1705.</li>
+                      <li>Phone calls only for emergencies during the event day.</li>
+                    </ul>
+
+                    <h4 className="font-bold text-gray-900 mt-6 mb-2">12. Cancellation</h4>
+                    <p className="font-semibold mb-1">Contractor Cancellation</p>
+                    <p className="mb-2">Notify the Studio immediately if unable to fulfill an assignment. May result in blacklisting.</p>
+                    <p className="font-semibold mb-1">Studio Cancellation</p>
+                    <p className="mb-2">Studio will notify promptly; no payment or stipend owed if cancelled.</p>
+                    <p className="font-semibold mb-1">No-show couple</p>
+                    <p className="mb-4">
+                      If the couple does not appear on the day of the event and the contractor is present, contractor will be paid 20% of what they would have been paid that day. Notify the Studio immediately.
+                    </p>
+
+                    <h4 className="font-bold text-gray-900 mt-6 mb-2">13. Amendments & Updates</h4>
+                    <p className="mb-4">
+                      The Studio may update these Terms at any time without notice. It is the Contractor's responsibility to review Terms regularly for updates. Continued engagement constitutes acceptance of any changes.
+                    </p>
+
+                    <h4 className="font-bold text-gray-900 mt-6 mb-2">14. Penalty Schedule</h4>
+                    <table className="w-full border-collapse border border-gray-300 my-4">
+                      <thead>
+                        <tr className="bg-gray-200">
+                          <th className="border border-gray-300 px-3 py-2 text-left">Violation</th>
+                          <th className="border border-gray-300 px-3 py-2 text-left">Deduction / Consequence</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr><td className="border border-gray-300 px-3 py-2">Late Upload (&gt;3 days)</td><td className="border border-gray-300 px-3 py-2">1 day = $25, 2 days = $50, 3 days = $75, 4 days = $100, 5+ days = $200</td></tr>
+                        <tr><td className="border border-gray-300 px-3 py-2">Under-delivery (photos &lt;100/hr)</td><td className="border border-gray-300 px-3 py-2">$25–$100 depending on severity</td></tr>
+                        <tr><td className="border border-gray-300 px-3 py-2">Missing RAW or JPEG files</td><td className="border border-gray-300 px-3 py-2">$75–full payment withheld</td></tr>
+                        <tr><td className="border border-gray-300 px-3 py-2">Incorrect video format</td><td className="border border-gray-300 px-3 py-2">$50–$150 depending on issue</td></tr>
+                        <tr><td className="border border-gray-300 px-3 py-2">Video &lt;1080p</td><td className="border border-gray-300 px-3 py-2">$50–$150 depending on issue</td></tr>
+                        <tr><td className="border border-gray-300 px-3 py-2">Corrupted/incomplete files</td><td className="border border-gray-300 px-3 py-2">$75–$150 case-by-case</td></tr>
+                        <tr><td className="border border-gray-300 px-3 py-2">Extreme unprofessional conduct</td><td className="border border-gray-300 px-3 py-2">$200 + blacklisted</td></tr>
+                        <tr><td className="border border-gray-300 px-3 py-2">Event tardiness</td><td className="border border-gray-300 px-3 py-2">Up to 15 min = $25, 15–30 min = $50, &gt;30 min = $150</td></tr>
+                        <tr><td className="border border-gray-300 px-3 py-2">No-show / lack of notice</td><td className="border border-gray-300 px-3 py-2">100% payment withheld + blacklisted</td></tr>
+                      </tbody>
+                    </table>
+
+                    <h4 className="font-bold text-gray-900 mt-6 mb-2">15. Insurance, Liability & Indemnification</h4>
+                    <ul className="list-disc pl-6 space-y-1 mb-4">
+                      <li>Contractors are responsible for their own insurance coverage, including liability and equipment insurance.</li>
+                      <li>Love & Photos LLC is not liable for any injuries, damages, loss, theft, or accidents that occur to the Contractor, their equipment, or personal property, on or off-site.</li>
+                      <li>Contractors indemnify and hold harmless Love & Photos LLC for claims arising from negligence, misconduct, or breach of these Terms.</li>
+                      <li>Studio liability is strictly limited to fees actually paid for the Assignment.</li>
+                    </ul>
+
+                    <h4 className="font-bold text-gray-900 mt-6 mb-2">16. Misrepresentation of Skills & Equipment</h4>
+                    <p className="mb-4">
+                      Contractors represent that they possess the skills, experience, and professional-grade equipment necessary to perform the assignment. Any misrepresentation that results in client dissatisfaction, incomplete coverage, or damages to the Studio may result in withheld payment and liability for damages.
+                    </p>
+
+                    <h4 className="font-bold text-gray-900 mt-6 mb-2">17. Termination of Relationship</h4>
+                    <p className="mb-4">
+                      The Studio reserves the right, at its sole discretion, to suspend or permanently remove a Contractor from the talent system at any time, with or without cause. This includes, but is not limited to, breaches of these Terms, failure to meet professional standards, conduct that harms the Studio's reputation, clients, or business interests, or for any other reason the Studio deems appropriate.
+                    </p>
+
+                    <h4 className="font-bold text-gray-900 mt-6 mb-2">18. Force Majeure</h4>
+                    <p className="mb-4">
+                      Neither party shall be liable for failure to perform obligations due to acts of God, natural disasters, pandemics, government restrictions, transportation failures, or other causes beyond reasonable control. Contractors must immediately notify the Studio of such events. Unless otherwise authorized, no payment is owed to Contractor under these circumstances.
+                    </p>
+
+                    <h4 className="font-bold text-gray-900 mt-6 mb-2">19. Compliance with Law</h4>
+                    <p className="mb-4">
+                      Contractor agrees to comply with all local, state, and federal laws and regulations, including but not limited to FAA drone regulations, copyright laws, venue requirements, and safety rules. Failure to comply is grounds for withheld payment and termination.
+                    </p>
+
+                    <h4 className="font-bold text-gray-900 mt-6 mb-2">20. Collection of Damages</h4>
+                    <p className="mb-4">
+                      If Contractor's actions result in financial loss to the Studio, including client refunds, reshoots, or reputational harm, the Studio reserves the right to deduct such amounts from unpaid invoices or to pursue reimbursement through legal means.
+                    </p>
+
+                    <h4 className="font-bold text-gray-900 mt-6 mb-2">21. Governing Law & Dispute Resolution</h4>
+                    <p className="mb-4">
+                      Governed by California law. Mediation and arbitration in San Diego County, CA, per JAMS rules.
+                    </p>
+
+                    <p className="mt-6 font-semibold">
+                      By creating a profile, accepting an assignment, or otherwise engaging with Love & Photos LLC, you acknowledge that you have read, understood, and agreed to these Talent Terms of Service. Continued engagement constitutes acceptance of all provisions above.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Agreement Checkbox */}
                 <label className="flex items-start cursor-pointer">
                   <input
                     type="checkbox"
@@ -642,14 +869,10 @@ const TalentApplication = () => {
                     checked={formData.terms_agreement}
                     onChange={handleInputChange}
                     required
-                    className="w-4 h-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded mt-1"
+                    className="w-4 h-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded mt-1 flex-shrink-0"
                   />
                   <span className="ml-3 text-sm text-gray-700">
-                    I agree to{' '}
-                    <a href="/terms" target="_blank" className="text-primary-600 hover:text-primary-700 underline">
-                      terms & conditions
-                    </a>{' '}
-                    provided by the company. By providing my phone number and email, I agree to receive text messages and emails from the company regarding services, vetting, and potential job opportunities.{' '}
+                    I have read and agree to the Talent Terms of Service above. By providing my phone number and email, I agree to receive text messages and emails from Love & Photos LLC regarding services, vetting, and job opportunities.{' '}
                     <span className="text-red-500">*</span>
                   </span>
                 </label>
@@ -678,7 +901,6 @@ const TalentApplication = () => {
                       experience_years: '',
                       referral_name: '',
                       instagram_handle: '',
-                      cross_service_offer: '',
                       background_description: '',
                       has_drone: '',
                       terms_agreement: false
@@ -692,7 +914,10 @@ const TalentApplication = () => {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className={`flex-1 px-6 py-3 bg-${roleColor}-600 text-white rounded-lg hover:bg-${roleColor}-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2`}
+                  className={selectedRole === 'photographer'
+                    ? 'flex-1 px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2'
+                    : 'flex-1 px-6 py-3 bg-rose-600 text-white rounded-lg hover:bg-rose-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2'
+                  }
                 >
                   {submitting ? (
                     <>

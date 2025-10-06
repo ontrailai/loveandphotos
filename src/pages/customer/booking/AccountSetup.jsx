@@ -54,8 +54,13 @@ const AccountSetup = () => {
 
     const { scheduleDetails, packageDetails, locationDetails, addonsDetails } = bookingFlow
 
+    // Validate schedule details are complete
     if (!scheduleDetails?.date) {
       throw new Error('Event date is required. Please complete the schedule step.')
+    }
+
+    if (!scheduleDetails?.startTime || !scheduleDetails?.endTime) {
+      throw new Error('Event time is required. Please complete the schedule step.')
     }
 
     // Package is optional - fallback to "Custom Package" if not provided
@@ -149,6 +154,15 @@ const AccountSetup = () => {
       setLoading(true)
     }
     try {
+      // IMPORTANT: Create booking FIRST before marking account complete
+      // This prevents race condition where guard redirects to contract before bookingId is set
+      const bookingId = await ensureBookingForCustomer(customerId, {
+        email,
+        fullName,
+        phone
+      })
+
+      // Only mark account complete AFTER booking is created and bookingId is set
       updateAccountDetails({
         isAuthenticated: true,
         userId: customerId,
@@ -157,12 +171,7 @@ const AccountSetup = () => {
         phone
       })
 
-      await ensureBookingForCustomer(customerId, {
-        email,
-        fullName,
-        phone
-      })
-
+      console.log('✅ Account finalized with bookingId:', bookingId)
       navigate(`/booking/${photographerId}/contract`)
     } catch (error) {
       // Suppress USER_NOT_READY errors - expected on first attempt
@@ -400,7 +409,7 @@ const AccountSetup = () => {
     <div className="min-h-screen bg-dusty-50">
       <BookingStepper
         steps={steps}
-        currentStepIndex={4}
+        currentStepIndex={2} // Account is step 3 (0-indexed: 2)
       />
 
       <div className="max-w-2xl mx-auto px-4 py-12">

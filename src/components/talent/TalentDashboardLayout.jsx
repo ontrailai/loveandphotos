@@ -1,7 +1,7 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '@contexts/AuthContext'
-import { Camera, Calendar, FileText, MessageCircle, User, LayoutDashboard, ArrowLeft, LogOut, Sparkles, Settings, CalendarClock, BookOpen } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { Camera, Calendar, FileText, MessageCircle, User, LayoutDashboard, ArrowLeft, LogOut, Sparkles, Settings, BookOpen, RefreshCcw, AlertCircle } from 'lucide-react'
+import { useEffect, useState, useRef } from 'react'
 import { supabase } from '@lib/supabase'
 import toast from 'react-hot-toast'
 
@@ -11,6 +11,8 @@ const TalentDashboardLayout = () => {
   const navigate = useNavigate()
   const [applicationChecked, setApplicationChecked] = useState(false)
   const [hasAcceptedApplication, setHasAcceptedApplication] = useState(false)
+  const [loadingTimeout, setLoadingTimeout] = useState(false)
+  const timeoutRef = useRef(null)
 
   console.log('[TalentDashboard] Render state:', {
     loading,
@@ -19,16 +21,56 @@ const TalentDashboardLayout = () => {
     role: profile?.role,
     hasPhotographerProfile: !!photographerProfile,
     applicationChecked,
-    hasAcceptedApplication
+    hasAcceptedApplication,
+    loadingTimeout
   })
+
+  // Set timeout for loading state (5 seconds max)
+  useEffect(() => {
+    if (loading && !timeoutRef.current) {
+      console.log('[TalentDashboard] ⏱️ Starting 5s timeout for auth loading')
+      timeoutRef.current = setTimeout(() => {
+        console.warn('[TalentDashboard] ⚠️ Loading timeout (5s), showing fallback UI')
+        setLoadingTimeout(true)
+      }, 5000)
+    }
+
+    // Clear timeout when loading completes
+    if (!loading && timeoutRef.current) {
+      console.log('[TalentDashboard] ✅ Loading complete, clearing timeout')
+      clearTimeout(timeoutRef.current)
+      timeoutRef.current = null
+      setLoadingTimeout(false)
+    }
+
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+        timeoutRef.current = null
+      }
+    }
+  }, [loading])
 
   // Check if user has an accepted application (ROUTE GUARD)
   useEffect(() => {
+    let checkTimeoutId = null
+    let hasRedirected = false
+
     const checkApplicationStatus = async () => {
-      if (!user || !profile || profile.role !== 'photographer') return
+      if (!user || !profile || profile.role !== 'photographer') {
+        setApplicationChecked(true)
+        return
+      }
 
       try {
         console.log('[TalentDashboard] Checking application status for user:', user.id, 'email:', profile.email)
+
+        // Set timeout to prevent infinite hanging (5 seconds max)
+        checkTimeoutId = setTimeout(() => {
+          console.warn('[TalentDashboard] ⚠️ Application check timeout (5s)')
+          setApplicationChecked(true)
+          setHasAcceptedApplication(false)
+        }, 5000)
 
         // Query by user_id OR email (for applications submitted before account was linked)
         const { data, error } = await supabase
@@ -37,6 +79,12 @@ const TalentDashboardLayout = () => {
           .eq('is_accepted', true)
           .or(`user_id.eq.${user.id},email.eq.${profile.email}`)
           .maybeSingle()
+
+        // Clear timeout if query completes
+        if (checkTimeoutId) {
+          clearTimeout(checkTimeoutId)
+          checkTimeoutId = null
+        }
 
         if (error) {
           console.error('[TalentDashboard] Error checking application:', error)
@@ -66,19 +114,32 @@ const TalentDashboardLayout = () => {
           setHasAcceptedApplication(true)
         } else {
           console.log('[TalentDashboard] No accepted application found, redirecting to application page')
-          toast.error('Please complete the talent application to access the dashboard')
-          navigate('/talent/apply')
+          if (!hasRedirected) {
+            hasRedirected = true
+            toast.error('Please complete the talent application to access the dashboard')
+            navigate('/talent/apply')
+          }
         }
       } catch (err) {
         console.error('[TalentDashboard] Failed to check application status:', err)
         toast.error('An error occurred while checking application status')
       } finally {
+        if (checkTimeoutId) {
+          clearTimeout(checkTimeoutId)
+        }
         setApplicationChecked(true)
       }
     }
 
     checkApplicationStatus()
-  }, [user, profile, navigate])
+
+    return () => {
+      if (checkTimeoutId) {
+        clearTimeout(checkTimeoutId)
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id, profile?.role]) // Only depend on IDs, not entire objects or navigate function
 
   // Ensure photographer profile exists, create if missing
   useEffect(() => {
@@ -114,12 +175,66 @@ const TalentDashboardLayout = () => {
     ensurePhotographerProfile()
   }, [user?.id, profile?.role, photographerProfile]) // Include photographerProfile to prevent re-running after creation
 
-  // Show loading spinner while auth or application is loading
+  // Handle reload when user clicks retry button
+  const handleRetry = () => {
+    console.log('[TalentDashboard] 🔄 User requested reload')
+    window.location.reload()
+  }
+
+  // Handle return to login
+  const handleBackToLogin = () => {
+    console.log('[TalentDashboard] 🚪 Returning to login')
+    signOut()
+    navigate('/login')
+  }
+
+  // Show loading timeout fallback UI (after 5 seconds)
+  if (loadingTimeout && (loading || !profile || !applicationChecked)) {
+    console.log('[TalentDashboard] ⏱️ Showing timeout fallback UI')
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-pink-50/30 to-rose-50/30 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8 max-w-md w-full">
+          <div className="flex flex-col items-center text-center">
+            <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mb-4">
+              <AlertCircle className="w-8 h-8 text-yellow-600" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Taking Longer Than Expected</h2>
+            <p className="text-gray-600 mb-6">
+              We're having trouble loading your session. This sometimes happens in certain browsers.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 w-full">
+              <button
+                onClick={handleRetry}
+                className="flex-1 flex items-center justify-center px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
+              >
+                <RefreshCcw className="w-5 h-5 mr-2" />
+                Reload Page
+              </button>
+              <button
+                onClick={handleBackToLogin}
+                className="flex-1 px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+              >
+                Back to Login
+              </button>
+            </div>
+            <p className="text-xs text-gray-500 mt-4">
+              💡 Tip: Try clearing your browser cache or using a private/incognito window
+            </p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Show loading spinner while auth or application is loading (first 5 seconds)
   if (loading || !profile || !applicationChecked) {
     console.log('[TalentDashboard] Loading state, showing spinner')
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
+        <div className="flex flex-col items-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600 mb-4"></div>
+          <p className="text-gray-600 text-sm">Loading your dashboard...</p>
+        </div>
       </div>
     )
   }
@@ -139,7 +254,6 @@ const TalentDashboardLayout = () => {
   const navItems = [
     { path: '/talent/dashboard', label: 'Overview', icon: LayoutDashboard },
     { path: '/talent/dashboard/profile', label: 'Profile', icon: User },
-    { path: '/talent/dashboard/availability', label: 'Availability', icon: CalendarClock },
     { path: '/talent/dashboard/calendar', label: 'Calendar', icon: Calendar },
     { path: '/talent/dashboard/bookings', label: 'Bookings', icon: FileText },
     { path: '/talent/dashboard/resources', label: 'Resources', icon: BookOpen },

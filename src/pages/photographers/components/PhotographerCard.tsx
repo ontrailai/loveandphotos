@@ -38,8 +38,6 @@ export function PhotographerCard({
     languages = [],
     location_city,
     location_state,
-    acceptance_rate,
-    avg_response_time_minutes,
     total_bookings,
     availability_level = 'unknown'
   } = photographer
@@ -177,7 +175,7 @@ export function PhotographerCard({
               hidden: { opacity: 0, y: 20 },
               visible: { opacity: 1, y: 0 }
             }}
-            className="grid grid-cols-3 gap-3 mb-4 p-3 bg-gray-50 rounded-xl"
+            className="grid grid-cols-2 gap-3 mb-4 p-3 bg-gray-50 rounded-xl"
           >
             {/* Rating */}
             <div className="text-center">
@@ -186,14 +184,6 @@ export function PhotographerCard({
                 <span className="font-bold text-gray-900">{computedData.rating.toFixed(1)}</span>
               </div>
               <p className="text-xs text-gray-500">{reviewCount} reviews</p>
-            </div>
-
-            {/* Trust Score */}
-            <div className="text-center">
-              <div className="font-bold text-gray-900 mb-1">
-                {acceptance_rate ? Math.round(acceptance_rate * 100) : 'N/A'}%
-              </div>
-              <p className="text-xs text-gray-500">Accept Rate</p>
             </div>
 
             {/* Projects */}

@@ -181,10 +181,10 @@ const SignatureBox = ({
         </p>
       </div>
 
-      {/* Typed name input for accessibility */}
+      {/* Full name input - REQUIRED */}
       <div className="mb-4">
         <label htmlFor="signer-name" className="block text-sm font-medium text-gray-700 mb-2">
-          Full Name (Optional - for typed signature)
+          Full Name <span className="text-red-600">*</span>
         </label>
         <div className="flex gap-2">
           <input
@@ -192,10 +192,12 @@ const SignatureBox = ({
             type="text"
             value={signerName}
             onChange={(e) => onSignerNameChange(e.target.value)}
-            placeholder="Enter your full name"
+            placeholder="Enter your full name (required)"
             className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             disabled={disabled}
             autoComplete="name"
+            required
+            aria-required="true"
           />
           <Button
             type="button"
@@ -203,14 +205,14 @@ const SignatureBox = ({
             size="sm"
             onClick={generateTypedSignature}
             disabled={!signerName.trim() || disabled}
-            aria-label="Generate typed signature"
+            aria-label="Generate typed signature from your name"
           >
             <Type className="w-4 h-4 mr-1" />
             Type
           </Button>
         </div>
         <p className="text-xs text-gray-500 mt-1">
-          Keyboard users: Enter your name above and click "Type" to create an accessible signature.
+          Required for contract signing. Keyboard users can click "Type" to generate signature from name.
         </p>
       </div>
 

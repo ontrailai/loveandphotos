@@ -9,7 +9,7 @@ import { getRawContractTemplate } from './contractText.js'
  * Current contract version identifier
  * MUST be incremented whenever contract text changes
  */
-export const CONTRACT_VERSION = 'LNP-Contract-v1.0'
+export const CONTRACT_VERSION = 'LNP-Contract-v2.0'
 
 /**
  * Generates SHA-256 hash of contract template for integrity verification
@@ -55,14 +55,22 @@ export const CONTRACT_VERSION_HISTORY = [
     releaseDate: '2025-09-28',
     description: 'Initial Love & Photos contract version',
     changes: ['Initial contract text', 'Love & Photos branding', 'Standard terms and conditions']
+  },
+  {
+    version: 'LNP-Contract-v2.0',
+    releaseDate: '2025-10-05',
+    description: 'Updated contract with simplified structure and clearer terms',
+    changes: [
+      'Simplified contract structure with 6 main sections',
+      'Added booking date field to contract header',
+      'Updated payment terms and cancellation policy',
+      'Clarified creative and staffing rights',
+      'Added studio breaks and vendor meal requirements',
+      'Streamlined client acknowledgment section',
+      'Removed arbitration clause and lengthy legal provisions',
+      'Updated branding to Love & Photos LLC'
+    ]
   }
-  // Future versions will be added here
-  // {
-  //   version: 'LNP-Contract-v1.1',
-  //   releaseDate: '2025-XX-XX',
-  //   description: 'Updated payment terms',
-  //   changes: ['Modified section 2', 'Updated late fee structure']
-  // }
 ]
 
 /**

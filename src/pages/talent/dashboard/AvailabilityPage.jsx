@@ -41,9 +41,14 @@ const AvailabilityPage = () => {
 
       if (error) throw error
 
-      // Convert date strings to Date objects
+      // Convert date strings to Date objects and deduplicate at load time
       const dates = (data.unavailable_dates || []).map(dateStr => new Date(dateStr))
-      setBlockedDates(dates)
+
+      // Deduplicate by converting to ISO strings, using Set, then back to Date objects
+      const uniqueDateStrings = [...new Set(dates.map(d => d.toISOString().split('T')[0]))]
+      const uniqueDates = uniqueDateStrings.map(str => new Date(str))
+
+      setBlockedDates(uniqueDates)
       setIsPublic(data.is_public ?? true)
       setIsVisibleInSearch(data.visible_in_search ?? false)
     } catch (error) {
@@ -58,16 +63,19 @@ const AvailabilityPage = () => {
     setSaving(true)
 
     try {
-      // Convert Date objects to ISO date strings (YYYY-MM-DD)
+      // Convert Date objects to ISO date strings (YYYY-MM-DD) and deduplicate
       const dateStrings = blockedDates.map(date => {
         const d = new Date(date)
         return d.toISOString().split('T')[0]
       })
 
+      // Deduplicate using Set to prevent duplicate dates
+      const uniqueDateStrings = [...new Set(dateStrings)]
+
       const { error } = await supabase
         .from('photographers')
         .update({
-          unavailable_dates: dateStrings,
+          unavailable_dates: uniqueDateStrings,
           is_public: isPublic,
           updated_at: new Date().toISOString()
         })
@@ -302,17 +310,21 @@ const AvailabilityPage = () => {
                 {futureBlockedDates
                   .sort((a, b) => a - b)
                   .slice(0, 10)
-                  .map((date, i) => (
-                    <div key={i} className="text-sm text-gray-600 flex items-center gap-2">
-                      <XCircle className="w-3 h-3 text-red-500" />
-                      {date.toLocaleDateString('en-US', {
-                        weekday: 'short',
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric'
-                      })}
-                    </div>
-                  ))}
+                  .map((date) => {
+                    // Use ISO date string as unique key to prevent duplicate rendering
+                    const dateKey = date.toISOString().split('T')[0]
+                    return (
+                      <div key={dateKey} className="text-sm text-gray-600 flex items-center gap-2">
+                        <XCircle className="w-3 h-3 text-red-500" />
+                        {date.toLocaleDateString('en-US', {
+                          weekday: 'short',
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric'
+                        })}
+                      </div>
+                    )
+                  })}
                 {futureBlockedDates.length > 10 && (
                   <p className="text-xs text-gray-500 mt-2">
                     +{futureBlockedDates.length - 10} more blocked dates

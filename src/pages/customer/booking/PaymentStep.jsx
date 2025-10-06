@@ -9,6 +9,7 @@ import Card from '@components/ui/Card'
 import PaymentElementWrapper from '@components/payment/PaymentElementWrapper'
 import PaymentSuccessModal from '@components/payment/PaymentSuccessModal'
 import PaymentOptions from '@components/payment/PaymentOptions'
+import { getBasePhotoPrice, formatPrice } from '@/lib/constants/pricing'
 import toast from 'react-hot-toast'
 
 const PaymentStep = () => {
@@ -341,20 +342,17 @@ const PaymentStep = () => {
                           })()}
                         </span>
                       </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-dusty-700">Rate:</span>
-                        <span className="font-semibold text-dusty-900">$200/hour</span>
-                      </div>
                       <div className="flex justify-between items-center pt-1 border-t border-primary-300">
-                        <span className="text-dusty-700 font-medium">Subtotal:</span>
+                        <span className="text-dusty-700 font-medium">Package Price:</span>
                         <span className="font-bold text-primary-600">
-                          ${(() => {
+                          {(() => {
                             const start = bookingFlow.scheduleDetails.startTime
                             const end = bookingFlow.scheduleDetails.endTime
                             const [startHour] = start.split(':').map(Number)
                             const [endHour] = end.split(':').map(Number)
                             const hours = endHour - startHour
-                            return (hours * 200).toFixed(2)
+                            const price = getBasePhotoPrice(hours) || 0
+                            return formatPrice(price)
                           })()}
                         </span>
                       </div>

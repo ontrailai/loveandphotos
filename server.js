@@ -24,6 +24,7 @@ import paymentsRouter from './src/server/routes/payments.js'
 import stripeWebhookRouter from './src/server/routes/stripe-webhook.js'
 import dateChangeRouter from './src/server/routes/date-change.js'
 import talentRouter from './src/server/routes/talent.js'
+import bookingsRouter from './src/server/routes/bookings.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -49,6 +50,7 @@ app.use(express.urlencoded({ extended: true, limit: '2mb' }))
 // Mount payment and date change routes
 app.use('/api/payments', paymentsRouter)
 app.use('/api/bookings', dateChangeRouter)
+app.use('/api/booking', bookingsRouter)
 app.use('/api/talent', talentRouter)
 
 // Authentication endpoints
@@ -145,188 +147,8 @@ app.get('/api/health', async (req, res) => {
   })
 })
 
-// Booking creation endpoint
-app.post('/api/booking/create', async (req, res) => {
-  const startTime = Date.now()
-
-  try {
-    console.log('📅 Creating new booking...')
-
-    const {
-      customerId,
-      photographerId,
-      packageDetails,
-      scheduleDetails,
-      locationDetails,
-      addonsDetails,
-      totalAmount,
-      accountDetails = {},
-      eventType = 'photoshoot'
-    } = req.body
-
-    // Validate required fields with detailed logging
-    const missingFields = []
-    if (!customerId) missingFields.push('customerId')
-    if (!photographerId) missingFields.push('photographerId')
-    if (!scheduleDetails?.date) missingFields.push('scheduleDetails.date')
-    if (!totalAmount && totalAmount !== 0) missingFields.push('totalAmount')
-
-    if (missingFields.length > 0) {
-      console.error('❌ Missing required fields:', missingFields)
-      return res.status(400).json({
-        success: false,
-        message: 'Missing required booking fields',
-        code: 'MISSING_REQUIRED_FIELDS',
-        missingFields
-      })
-    }
-
-    // Import Supabase client
-    const { createClient } = await import('@supabase/supabase-js')
-    const supabase = createClient(
-      process.env.SUPABASE_URL,
-      process.env.SUPABASE_SERVICE_KEY,
-      {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false
-        }
-      }
-    )
-
-    // Look up the actual photographer ID from the user_id
-    const { data: photographer, error: photographerError } = await supabase
-      .from('photographers')
-      .select('id')
-      .eq('user_id', photographerId)
-      .single()
-
-    if (photographerError || !photographer) {
-      return res.status(404).json({
-        success: false,
-        message: 'Photographer not found',
-        code: 'PHOTOGRAPHER_NOT_FOUND'
-      })
-    }
-
-    // Use the actual photographer ID for the booking
-    const actualPhotographerId = photographer.id
-
-    // Convert amounts to cents for consistent storage
-    const packagePriceCents = Math.round((packageDetails?.packagePrice || 0) * 100)
-    const addonsTotalCents = Math.round((addonsDetails?.totalAddonsPrice || 0) * 100)
-    const totalAmountNumber = Number(totalAmount) || 0
-    const totalAmountCents = Math.round(totalAmountNumber * 100)
-    const pricingSummary = {
-      package_price_cents: packagePriceCents,
-      addons_price_cents: addonsTotalCents,
-      total_amount_cents: totalAmountCents
-    }
-
-    const accountSnapshot = {
-      user_id: customerId,
-      email: accountDetails?.email || null,
-      full_name: accountDetails?.fullName || null,
-      phone: accountDetails?.phone || null,
-      captured_at: new Date().toISOString()
-    }
-
-    // Check if date change flexibility add-on was purchased
-    const selectedAddons = addonsDetails?.selectedAddons || []
-    const hasDateChangeFlexibility = selectedAddons.some(addon => addon.id === 'date-change-flexibility')
-
-    if (hasDateChangeFlexibility) {
-      console.log('✅ Date change flexibility add-on detected - enabling date change permission')
-    }
-
-    // Create booking record
-    const bookingData = {
-      customer_id: customerId,
-      photographer_id: actualPhotographerId,
-      event_date: scheduleDetails.date,
-      event_time: (() => {
-        const timeOfDay = scheduleDetails.timeOfDay
-        if (!timeOfDay) return '10:00'
-        switch (timeOfDay) {
-          case 'morning': return '09:00'
-          case 'afternoon': return '14:00'
-          case 'evening': return '18:00'
-          default: return '10:00'
-        }
-      })(),
-      event_type: eventType,
-      venue_name: locationDetails?.locationTitle || 'TBD',
-      venue_address: locationDetails ? {
-        title: locationDetails.locationTitle,
-        vibe: locationDetails.locationVibe
-      } : null,
-      total_amount: totalAmountNumber,
-      package_total_cents: packagePriceCents, // For payment calculations
-      payment_status: 'pending',
-      booking_status: 'pending',
-      contract_signed: false,
-      personalization_data: {
-        package: packageDetails,
-        addons: addonsDetails?.selectedAddons || [],
-        session_info: {
-          hours_booked: packageDetails?.hoursBooked || 2,
-          is_photo_video: packageDetails?.isPhotoVideo || false
-        },
-        pricing_summary: pricingSummary,
-        account: accountSnapshot
-      },
-      // Date change flexibility fields (if $50 add-on was purchased)
-      can_change_date: hasDateChangeFlexibility,
-      date_change_used: false,
-      date_change_method: hasDateChangeFlexibility ? 'included' : null
-    }
-
-    const { data: booking, error } = await supabase
-      .from('bookings')
-      .insert(bookingData)
-      .select('id, created_at')
-      .single()
-
-    if (error) {
-      console.error('❌ Booking creation failed:', {
-        message: error.message,
-        code: error.code,
-        details: error.details,
-        hint: error.hint,
-        payload: bookingData
-      })
-      return res.status(500).json({
-        success: false,
-        message: 'Failed to create booking in database',
-        code: 'BOOKING_CREATION_FAILED',
-        details: error.message,
-        hint: error.hint
-      })
-    }
-
-    console.log('✅ Booking created successfully:', booking.id)
-
-    res.json({
-      success: true,
-      bookingId: booking.id,
-      createdAt: booking.created_at,
-      processingTime: Date.now() - startTime
-    })
-
-  } catch (error) {
-    console.error('❌ Booking creation error:', {
-      error: error.message,
-      stack: error.stack,
-      body: req.body
-    })
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error during booking creation',
-      code: 'INTERNAL_ERROR',
-      details: process.env.NODE_ENV === 'development' ? error.message : undefined
-    })
-  }
-})
+// Booking routes moved to ./src/server/routes/bookings.js
+// See bookingsRouter mounted at /api/booking
 
 // Contract signing endpoint
 app.post('/api/contract/sign', async (req, res) => {

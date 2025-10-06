@@ -140,6 +140,10 @@ export function validateSignatureData(signatureData) {
     errors.push('Signature is required')
   }
 
+  if (!signatureData.signerFullName || !signatureData.signerFullName.trim()) {
+    errors.push('Please type your full name before continuing.')
+  }
+
   if (!signatureData.consentAccepted) {
     errors.push('You must agree to the terms and conditions')
   }

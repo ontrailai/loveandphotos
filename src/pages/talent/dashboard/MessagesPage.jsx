@@ -1,22 +1,40 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useAuth } from '@contexts/AuthContext'
 import { supabase } from '@lib/supabase'
 import { MessageSquare, AlertCircle, Calendar } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const MessagesPage = () => {
-  const { user, profile } = useAuth()
+  const { user, profile, loading: authLoading } = useAuth()
   const [messages, setMessages] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [forceRender, setForceRender] = useState(false)
+  const timeoutRef = useRef(null)
+  const hasFetchedRef = useRef(false)
 
   const fetchMessages = useCallback(async () => {
+    // Don't fetch if auth is still loading
+    if (authLoading) {
+      console.log('[MessagesPage] Auth still loading, waiting...')
+      return
+    }
+
+    // Check if we have required auth data
     if (!user?.id || !profile?.role) {
-      console.log('[MessagesPage] No user ID or profile role available')
+      console.log('[MessagesPage] Missing auth data - user:', !!user?.id, 'profile:', !!profile?.role)
+      setLoading(false) // ← FIX: Always set loading to false
+      setMessages([]) // Show empty state
+      return
+    }
+
+    // Prevent duplicate fetches
+    if (hasFetchedRef.current) {
       return
     }
 
     try {
+      hasFetchedRef.current = true
       setLoading(true)
       setError(null)
 
@@ -45,13 +63,42 @@ const MessagesPage = () => {
     } finally {
       setLoading(false)
     }
-  }, [user?.id, profile?.role]) // Only depend on ID and role
+  }, [user?.id, profile?.role, authLoading])
 
+  // Set up 10-second timeout safety mechanism
   useEffect(() => {
-    if (user?.id && profile?.role) {
-      fetchMessages()
+    // Start timeout when loading begins
+    if (loading && !timeoutRef.current) {
+      timeoutRef.current = setTimeout(() => {
+        console.warn('[MessagesPage] ⚠️ Loading timeout exceeded (10s), forcing render')
+        setForceRender(true)
+        setLoading(false)
+      }, 10000)
     }
-  }, [user?.id, profile?.role, fetchMessages]) // Include fetchMessages since it's memoized
+
+    // Clear timeout when loading completes
+    if (!loading && timeoutRef.current) {
+      clearTimeout(timeoutRef.current)
+      timeoutRef.current = null
+    }
+
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+        timeoutRef.current = null
+      }
+    }
+  }, [loading])
+
+  // Fetch messages when auth is ready
+  useEffect(() => {
+    if (!authLoading && user?.id && profile?.role) {
+      fetchMessages()
+    } else if (!authLoading) {
+      // Auth loaded but no user/profile - stop loading
+      setLoading(false)
+    }
+  }, [authLoading, user?.id, profile?.role, fetchMessages])
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A'
@@ -72,7 +119,19 @@ const MessagesPage = () => {
     return { formattedDate, isNew }
   }
 
-  if (loading) {
+  // Show loading spinner ONLY while auth is loading
+  // Once auth loads, show content (even if messages are still loading)
+  if (authLoading) {
+    console.log('[MessagesPage] Auth loading, showing spinner')
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600" />
+      </div>
+    )
+  }
+
+  // If data is loading (but auth is done), show skeleton or spinner
+  if (loading && !forceRender) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600" />

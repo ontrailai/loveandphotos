@@ -926,3 +926,318 @@ Professional Photography Platform
 
   return { subject, html, text }
 }
+
+/**
+ * Send new booking notification email to photographer
+ * @param {Object} params - Email parameters
+ * @param {string} params.bookingId - Booking ID
+ * @param {string} params.photographerEmail - Photographer email address
+ * @param {string} params.photographerFirstName - Photographer first name
+ * @param {string} params.customerFullName - Customer full name
+ * @param {string} params.eventDate - Event date (ISO format)
+ * @param {string} params.eventTime - Event time
+ * @param {string} params.eventLocation - Event venue/location
+ * @param {string} params.packageType - Package tier (Bronze/Silver/Gold/Platinum)
+ * @param {number} params.packagePrice - Package price in dollars
+ * @returns {Promise<Object>} - Email sending result
+ */
+export const sendPhotographerBookingNotification = async ({
+  bookingId,
+  photographerEmail,
+  photographerFirstName,
+  customerFullName,
+  eventDate,
+  eventTime,
+  eventLocation,
+  packageType,
+  packagePrice
+}) => {
+  try {
+    console.log(`📸 Sending photographer booking notification for booking ${bookingId}`)
+
+    // Format event date
+    const formattedEventDate = new Date(eventDate).toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })
+
+    // Format time
+    const formatTime = (timeString) => {
+      if (!timeString) return 'TBD'
+      // Validate HH:MM format
+      if (!timeString.includes(':')) return timeString // Return as-is if not in expected format
+      const parts = timeString.split(':')
+      if (parts.length < 2) return timeString
+      const hours = parseInt(parts[0])
+      const minutes = parts[1]
+      if (isNaN(hours)) return timeString
+      const ampm = hours >= 12 ? 'PM' : 'AM'
+      const displayHour = hours % 12 || 12
+      return `${displayHour}:${minutes} ${ampm}`
+    }
+    const formattedTime = formatTime(eventTime)
+
+    // Get dashboard URL
+    const dashboardUrl = `${process.env.VITE_APP_URL || 'https://loveandphotos.onrender.com'}/talent/dashboard/bookings`
+
+    // Generate email content
+    const emailContent = generatePhotographerBookingEmail({
+      photographerFirstName,
+      customerFullName,
+      eventDate: formattedEventDate,
+      eventTime: formattedTime,
+      eventLocation: eventLocation || 'Location TBD',
+      packageType: packageType || 'Photography Package',
+      packagePrice,
+      dashboardUrl
+    })
+
+    // Send email via Supabase Edge Function
+    const { data: emailData, error: emailError } = await supabase.functions.invoke('send-email', {
+      body: {
+        to: photographerEmail,
+        from: 'Love & Photos <hello@loveandphotos.com>',
+        subject: emailContent.subject,
+        html: emailContent.html,
+        text: emailContent.text
+      }
+    })
+
+    if (emailError) {
+      console.error('❌ Photographer email send error:', emailError)
+      // Queue for retry
+      await queueEmailForRetry({
+        bookingId,
+        recipientEmail: photographerEmail,
+        emailContent: {
+          ...emailContent,
+          recipient_type: 'photographer'
+        }
+      })
+      return { success: false, error: emailError, queued: true }
+    }
+
+    console.log(`✅ Photographer notification sent successfully to ${photographerEmail}`)
+    return { success: true, data: emailData }
+  } catch (error) {
+    console.error('❌ Error sending photographer notification:', error)
+    return { success: false, error: error.message }
+  }
+}
+
+/**
+ * Generate photographer email for new booking
+ */
+const generatePhotographerBookingEmail = ({
+  photographerFirstName,
+  customerFullName,
+  eventDate,
+  eventTime,
+  eventLocation,
+  packageType,
+  packagePrice,
+  dashboardUrl
+}) => {
+  const subject = `📸 You've been booked!`
+
+  const html = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>New Booking - Love & Photos</title>
+      <style>
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          line-height: 1.6;
+          color: #333;
+          margin: 0;
+          padding: 0;
+          background-color: #f5f5f5;
+        }
+        .container {
+          max-width: 600px;
+          margin: 20px auto;
+          background: white;
+          border-radius: 12px;
+          overflow: hidden;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          padding: 40px 30px;
+          text-align: center;
+        }
+        .header h1 {
+          margin: 0;
+          font-size: 32px;
+          font-weight: 700;
+        }
+        .header p {
+          margin: 10px 0 0 0;
+          font-size: 16px;
+          opacity: 0.95;
+        }
+        .content {
+          padding: 40px 30px;
+        }
+        .greeting {
+          font-size: 18px;
+          margin-bottom: 20px;
+        }
+        .info-box {
+          background: #f9f9f9;
+          border-left: 4px solid #667eea;
+          padding: 20px;
+          margin: 25px 0;
+          border-radius: 8px;
+        }
+        .info-box h2 {
+          margin: 0 0 15px 0;
+          font-size: 20px;
+          color: #333;
+        }
+        .info-row {
+          display: flex;
+          justify-content: space-between;
+          padding: 8px 0;
+          border-bottom: 1px solid #e0e0e0;
+        }
+        .info-row:last-child {
+          border-bottom: none;
+        }
+        .info-row strong {
+          color: #666;
+        }
+        .highlight {
+          color: #667eea;
+          font-weight: 700;
+        }
+        .button {
+          display: inline-block;
+          padding: 14px 32px;
+          background: #667eea;
+          color: white;
+          text-decoration: none;
+          border-radius: 8px;
+          font-weight: 600;
+          margin: 20px 0;
+        }
+        .footer {
+          background: #f9f9f9;
+          padding: 30px;
+          text-align: center;
+          color: #666;
+          font-size: 14px;
+        }
+        .footer a {
+          color: #667eea;
+          text-decoration: none;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>📸 You've been booked!</h1>
+          <p>New photo shoot confirmed</p>
+        </div>
+
+        <div class="content">
+          <p class="greeting">Hi ${photographerFirstName},</p>
+
+          <p>You've just been booked for a photo shoot with <strong>${customerFullName}</strong>.</p>
+
+          <div class="info-box">
+            <h2>📅 Shoot Details</h2>
+            <div class="info-row">
+              <strong>Event Date:</strong>
+              <span>${eventDate}</span>
+            </div>
+            <div class="info-row">
+              <strong>Event Time:</strong>
+              <span>${eventTime}</span>
+            </div>
+            <div class="info-row">
+              <strong>Location:</strong>
+              <span>${eventLocation}</span>
+            </div>
+            <div class="info-row">
+              <strong>Package:</strong>
+              <span>${packageType} - $${packagePrice.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
+            </div>
+          </div>
+
+          <p>
+            <strong>📝 What's Next?</strong>
+          </p>
+          <ul style="line-height: 2;">
+            <li>Check your Talent Dashboard to view the full booking details and client preferences</li>
+            <li>Review the client's style preferences and must-have shots</li>
+            <li>Mark your calendar for the event date</li>
+            <li>You'll be contacted 1-2 weeks before the event with final details</li>
+          </ul>
+
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${dashboardUrl}" class="button">View Booking Details →</a>
+          </div>
+
+          <p style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #f0f0f0; font-size: 14px; color: #666;">
+            <strong>Questions or concerns?</strong><br>
+            Contact support at <a href="mailto:support@loveandphotos.com" style="color: #667eea;">support@loveandphotos.com</a>
+          </p>
+        </div>
+
+        <div class="footer">
+          <p><strong>Love & Photos</strong></p>
+          <p>Professional Photography Platform</p>
+          <p style="margin-top: 15px;">
+            <a href="${dashboardUrl}">Dashboard</a> •
+            <a href="mailto:support@loveandphotos.com">Support</a>
+          </p>
+          <p style="margin-top: 20px; font-size: 12px; color: #999;">
+            © ${new Date().getFullYear()} Love & Photos. All rights reserved.
+          </p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `
+
+  const text = `
+YOU'VE BEEN BOOKED! 📸
+
+Hi ${photographerFirstName},
+
+You've just been booked for a photo shoot with ${customerFullName}.
+
+SHOOT DETAILS:
+- Event Date: ${eventDate}
+- Event Time: ${eventTime}
+- Location: ${eventLocation}
+- Package: ${packageType} - $${packagePrice.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+
+WHAT'S NEXT?
+1. Check your Talent Dashboard to view the full booking details and client preferences
+2. Review the client's style preferences and must-have shots
+3. Mark your calendar for the event date
+4. You'll be contacted 1-2 weeks before the event with final details
+
+VIEW BOOKING DETAILS:
+${dashboardUrl}
+
+QUESTIONS OR CONCERNS?
+Contact support at support@loveandphotos.com
+
+---
+Love & Photos
+Professional Photography Platform
+© ${new Date().getFullYear()} Love & Photos. All rights reserved.
+  `
+
+  return { subject, html, text }
+}

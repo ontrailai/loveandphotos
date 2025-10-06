@@ -144,11 +144,25 @@ const CustomerDashboard = () => {
 
   useEffect(() => {
     console.log('📊 Dashboard useEffect triggered:', { userId: user?.id, hasUser: !!user })
+
+    // Set a 5-second timeout to prevent infinite loading
+    const loadingTimeoutId = setTimeout(() => {
+      console.warn('⚠️ Dashboard loading timeout (5s), forcing loading=false')
+      setLoading(false)
+    }, 5000)
+
     if (user?.id) {
-      loadDashboardData()
+      loadDashboardData().finally(() => {
+        clearTimeout(loadingTimeoutId)
+      })
     } else {
       console.log('⚠️ No user ID available, setting loading to false')
       setLoading(false)
+      clearTimeout(loadingTimeoutId)
+    }
+
+    return () => {
+      clearTimeout(loadingTimeoutId)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]) // Only watch user?.id to prevent infinite loops on user object changes
