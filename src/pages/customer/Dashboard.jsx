@@ -7,7 +7,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@contexts/AuthContext'
 import { motion, useReducedMotion } from 'framer-motion'
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight, Calendar } from 'lucide-react'
 import StyleQuestionnaire from '@components/dashboard/StyleQuestionnaire'
 import LogisticsCard from '@components/dashboard/LogisticsCard'
 import ModifyBookingFlow from '@components/booking/ModifyBookingFlow'
@@ -18,6 +18,7 @@ import PaymentCard from '@components/dashboard/PaymentCard'
 import DateChangeCard from '@components/dashboard/DateChangeCard'
 import StatsCards from '@components/dashboard/redesign/StatsCards'
 import UpcomingBookingCard from '@components/dashboard/redesign/UpcomingBookingCard'
+import PastBookingCard from '@components/dashboard/redesign/PastBookingCard'
 import EmptyState from '@components/dashboard/redesign/EmptyState'
 import SkeletonLoaders from '@components/dashboard/redesign/SkeletonLoaders'
 import { supabase } from '@lib/supabase'
@@ -172,8 +173,14 @@ const CustomerDashboard = () => {
   }
 
   const handleViewPhotos = (booking) => {
-    if (booking.job_queue?.[0]?.delivery_url) {
-      window.open(booking.job_queue[0].delivery_url, '_blank')
+    const jobQueue = booking.job_queue?.[0]
+
+    if (jobQueue?.delivery_url) {
+      window.open(jobQueue.delivery_url, '_blank')
+    } else if (jobQueue?.upload_status === 'processing') {
+      toast('Your photos are being processed. Check back soon!', { icon: '⏳' })
+    } else {
+      toast('Photos not yet available. We\'ll notify you when they\'re ready!', { icon: '📸' })
     }
   }
 
@@ -255,7 +262,6 @@ const CustomerDashboard = () => {
                   <UpcomingBookingCard
                     booking={booking}
                     onModify={() => setModifyingBooking(booking)}
-                    onMessage={() => {/* TODO: Implement messaging */}}
                     onViewDetails={() => navigate(`/booking/${booking.id}`)}
                     onViewInvoice={async () => {
                       try {
@@ -322,6 +328,41 @@ const CustomerDashboard = () => {
             </div>
           )}
         </motion.div>
+
+        {/* Past Bookings Section */}
+        {(pastBookings.length > 0 || bookings.length > 0) && (
+          <motion.div variants={shouldAnimate ? itemVariants : {}} className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold">Past Bookings</h2>
+              <span className="text-sm text-muted-foreground">
+                {pastBookings.length} {pastBookings.length === 1 ? 'booking' : 'bookings'}
+              </span>
+            </div>
+
+            {pastBookings.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {pastBookings.map((booking) => (
+                  <PastBookingCard
+                    key={booking.id}
+                    booking={booking}
+                    onWriteReview={() => handleWriteReview(booking)}
+                    onViewPhotos={() => handleViewPhotos(booking)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12 px-4 bg-card rounded-xl border">
+                <div className="mx-auto w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
+                  <Calendar className="w-8 h-8 text-muted-foreground" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">No Past Bookings Yet</h3>
+                <p className="text-muted-foreground text-sm">
+                  Your completed bookings will appear here after your events
+                </p>
+              </div>
+            )}
+          </motion.div>
+        )}
       </motion.div>
 
       {/* Style Questionnaire Modal */}

@@ -181,6 +181,7 @@ const AddOnsDetails = () => {
               packageTitle={packageTitle}
               onRemoveAddon={handleRemoveAddon}
               onContinue={handleContinue}
+              bookingFlow={bookingFlow}
               onSkip={selectedAddons.length === 0 ? handleSkip : null}
               position="right"
               isSticky={true}
@@ -247,6 +248,7 @@ const AddOnsDetails = () => {
           packageTitle={packageTitle}
           onRemoveAddon={handleRemoveAddon}
           onContinue={handleContinue}
+          bookingFlow={bookingFlow}
           onSkip={selectedAddons.length === 0 ? handleSkip : null}
           position="bottom"
           isSticky={false}

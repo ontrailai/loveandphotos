@@ -14,6 +14,7 @@ import { supabase } from '@lib/supabase'
 import { ArrowLeft, ShoppingCart } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { differenceInDays, parseISO } from 'date-fns'
+import { getFirstNameOnly } from '@lib/privacy/sanitizeTalentData'
 
 const ManageAddOns = () => {
   const { bookingId } = useParams()
@@ -187,7 +188,7 @@ const ManageAddOns = () => {
             Manage Add-Ons
           </h1>
           <p className="text-dusty-600">
-            Add extra services to your booking with {booking.photographers?.users?.full_name}
+            Add extra services to your booking with {getFirstNameOnly(booking.photographers?.users?.full_name)}
           </p>
           <p className="text-sm text-dusty-500 mt-1">
             Event Date: {new Date(booking.event_date).toLocaleDateString('en-US', {

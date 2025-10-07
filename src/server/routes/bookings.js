@@ -106,6 +106,9 @@ router.post('/create', async (req, res) => {
         photographer_id: photographerId,
         event_date: scheduleDetails.date,
         event_time: scheduleDetails.startTime || '10:00',
+        location_city: locationDetails?.city || null,
+        location_state: locationDetails?.state || null,
+        venue_name: locationDetails?.locationTitle || null,
         package_type: packageDetails?.packageType || 'photoOnly',
         package_total_cents: packageTotalCents,
         total_amount: totalAmountCents / 100, // Store in dollars for compatibility
@@ -122,7 +125,7 @@ router.post('/create', async (req, res) => {
       // Check for foreign key errors (user doesn't exist yet)
       if (bookingError.code === '23503') {
         return res.status(400).json({
-          error: 'BOOKING_CREATION_FAILED',
+          code: 'BOOKING_CREATION_FAILED',
           message: 'User account not ready',
           errorCode: bookingError.code,
           details: bookingError.message

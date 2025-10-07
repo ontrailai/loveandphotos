@@ -1,12 +1,13 @@
-import { useState, useEffect, useRef, useMemo } from 'react'
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@contexts/AuthContext'
 import { supabase, db } from '@lib/supabase'
 import PhotoUploader from '@components/talent/PhotoUploader'
 import ProfilePictureUpload from '@components/talent/ProfilePictureUpload'
-import { Award, TrendingUp, Star, CheckCircle, AlertCircle, Trash2, AlertTriangle, ShieldAlert, Eye, EyeOff } from 'lucide-react'
+import MultiSelect from '@components/ui/MultiSelect'
+import { Award, TrendingUp, Star, CheckCircle, AlertCircle, Trash2, AlertTriangle, ShieldAlert, Eye } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { isProfileComplete, validateVisibilityToggle, getProfileCompletenessMessage } from '@utils/profileCompleteness'
+import { isProfileComplete, getProfileCompletenessMessage } from '@utils/profileCompleteness'
 
 const styleOptions = [
   'Candid',
@@ -29,6 +30,23 @@ const US_STATES = [
   'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY'
 ]
 
+const DEFAULT_LANGUAGES = [
+  'English',
+  'Spanish',
+  'French',
+  'Mandarin',
+  'Cantonese',
+  'Vietnamese',
+  'Hindi',
+  'Korean',
+  'Tagalog',
+  'Japanese',
+  'Arabic',
+  'Portuguese',
+  'Russian',
+  'German'
+]
+
 const ProfilePage = () => {
   const { user, profile, photographerProfile, fetchUserData } = useAuth()
   const navigate = useNavigate()
@@ -49,7 +67,8 @@ const ProfilePage = () => {
     zip_code: '',
     country: 'USA',
     available_dates: [],
-    visible_in_search: false
+    visible_in_search: false,
+    languages: []
   })
   const [stats, setStats] = useState({
     acceptance_rate: 87,
@@ -61,6 +80,8 @@ const ProfilePage = () => {
   const [deleting, setDeleting] = useState(false)
   const autoSaveTimeoutRef = useRef(null)
   const photoSectionRef = useRef(null)
+  const hasLoadedRef = useRef(false)
+  const photographerIdRef = useRef(null)
 
   // Helper function to validate bio meets minimum requirements (500 chars OR 100 words)
   const isBioValid = (bio) => {
@@ -70,22 +91,12 @@ const ProfilePage = () => {
     return charCount >= 500 || wordCount >= 100
   }
 
-  useEffect(() => {
-    loadProfileData()
-  }, [photographerProfile?.id]) // Only depend on ID to prevent infinite loop from object recreation
+  // Wrap loadProfileData in useCallback with stable dependencies
+  const loadProfileData = useCallback(async () => {
+    const currentPhotographerProfile = photographerProfile
+    console.log('[ProfilePage] loadProfileData called, photographerProfile:', currentPhotographerProfile)
 
-  // Redirect if not a photographer
-  useEffect(() => {
-    if (!photographerProfile && !loading && user) {
-      toast.error('You must be a photographer to access this page')
-      navigate('/dashboard')
-    }
-  }, [photographerProfile, loading, user, navigate])
-
-  const loadProfileData = async () => {
-    console.log('[ProfilePage] loadProfileData called, photographerProfile:', photographerProfile)
-
-    if (!photographerProfile) {
+    if (!currentPhotographerProfile) {
       console.log('[ProfilePage] No photographerProfile available yet')
       setLoading(false)
       return
@@ -93,40 +104,41 @@ const ProfilePage = () => {
 
     try {
       console.log('[ProfilePage] Setting form data from photographerProfile:', {
-        bio: photographerProfile.bio?.length || 0,
-        experience_years: photographerProfile.experience_years,
-        gender: photographerProfile.gender,
-        style_tags: photographerProfile.style_tags?.length || 0,
-        portfolio_images: photographerProfile.portfolio_images?.length || 0
+        bio: currentPhotographerProfile.bio?.length || 0,
+        experience_years: currentPhotographerProfile.experience_years,
+        gender: currentPhotographerProfile.gender,
+        style_tags: currentPhotographerProfile.style_tags?.length || 0,
+        portfolio_images: currentPhotographerProfile.portfolio_images?.length || 0
       })
 
       setFormData({
-        bio: photographerProfile.bio || '',
-        experience_years: photographerProfile.experience_years || 0,
-        gender: photographerProfile.gender || '',
-        style_tags: photographerProfile.style_tags || [],
-        is_public: photographerProfile.is_public !== undefined ? photographerProfile.is_public : true,
-        portfolio_images: photographerProfile.portfolio_images || [],
-        available_dates: photographerProfile.available_dates || [],
-        visible_in_search: photographerProfile.visible_in_search || false,
-        address_line1: photographerProfile.address_line1 || '',
-        city: photographerProfile.city || '',
-        state: photographerProfile.state || '',
-        zip_code: photographerProfile.zip_code || '',
-        country: photographerProfile.country || 'USA'
+        bio: currentPhotographerProfile.bio || '',
+        experience_years: currentPhotographerProfile.experience_years || 0,
+        gender: currentPhotographerProfile.gender || '',
+        style_tags: currentPhotographerProfile.style_tags || [],
+        is_public: currentPhotographerProfile.is_public !== undefined ? currentPhotographerProfile.is_public : true,
+        portfolio_images: currentPhotographerProfile.portfolio_images || [],
+        available_dates: currentPhotographerProfile.available_dates || [],
+        visible_in_search: currentPhotographerProfile.visible_in_search || false,
+        address_line1: currentPhotographerProfile.address_line1 || '',
+        city: currentPhotographerProfile.city || '',
+        state: currentPhotographerProfile.state || '',
+        zip_code: currentPhotographerProfile.zip_code || '',
+        country: currentPhotographerProfile.country || 'USA',
+        languages: currentPhotographerProfile.languages || []
       })
 
       // Load real stats
       setStats({
         acceptance_rate: 87, // Mock for now
-        avg_rating: photographerProfile.average_rating || 4.9,
-        total_bookings: photographerProfile.completed_jobs_count || 0,
-        response_time_hours: photographerProfile.response_time_hours || 2
+        avg_rating: currentPhotographerProfile.average_rating || 4.9,
+        total_bookings: currentPhotographerProfile.completed_jobs_count || 0,
+        response_time_hours: currentPhotographerProfile.response_time_hours || 2
       })
 
       // Auto-scroll to photo section if profile incomplete and from overview
       const from = searchParams.get('from')
-      if (from === 'overview' && !photographerProfile.portfolio_images?.length) {
+      if (from === 'overview' && !currentPhotographerProfile.portfolio_images?.length) {
         setTimeout(() => {
           photoSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
         }, 300)
@@ -139,12 +151,40 @@ const ProfilePage = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [photographerProfile, searchParams]) // Stable dependencies
+
+  // Load profile data only when photographer ID changes
+  useEffect(() => {
+    const currentPhotographerId = photographerProfile?.id
+
+    if (!currentPhotographerId) {
+      console.log('[ProfilePage] No photographer ID yet')
+      hasLoadedRef.current = false
+      photographerIdRef.current = null
+      return
+    }
+
+    // Only load if photographer ID changed or first time
+    if (photographerIdRef.current !== currentPhotographerId) {
+      console.log('[ProfilePage] Loading profile data for new photographer:', currentPhotographerId)
+      photographerIdRef.current = currentPhotographerId
+      hasLoadedRef.current = true
+      loadProfileData()
+    }
+  }, [photographerProfile?.id, loadProfileData])
+
+  // Redirect if not a photographer
+  useEffect(() => {
+    if (!photographerProfile && !loading && user) {
+      toast.error('You must be a photographer to access this page')
+      navigate('/dashboard')
+    }
+  }, [photographerProfile, loading, user, navigate])
 
   // Calculate profile completeness using useMemo to prevent infinite loops
   const profileCompletenessValue = useMemo(() => {
-    if (!user || !formData) return null
-    const completeness = isProfileComplete(formData, user)
+    if (!profile || !formData) return null
+    const completeness = isProfileComplete(formData, profile)
     console.log('[ProfilePage] Profile completeness:', completeness)
     return completeness
   }, [
@@ -153,10 +193,12 @@ const ProfilePage = () => {
     formData.experience_years,
     JSON.stringify(formData.style_tags),
     JSON.stringify(formData.portfolio_images),
+    JSON.stringify(formData.languages), // Added - required for profile completion
     formData.zip_code,
     formData.city,
     formData.state,
-    user?.id
+    profile?.id,
+    profile?.avatar_url // Watch profile.avatar_url to trigger recalculation when photo is uploaded
   ])
 
   const autoSaveProfile = async (updates) => {
@@ -179,7 +221,7 @@ const ProfilePage = () => {
       const sanitizedUpdates = {}
       for (const [key, value] of Object.entries(updates)) {
         // Handle arrays
-        if (key === 'style_tags' || key === 'portfolio_images') {
+        if (key === 'style_tags' || key === 'portfolio_images' || key === 'languages') {
           sanitizedUpdates[key] = Array.isArray(value) ? value : []
         }
         // Handle booleans
@@ -330,6 +372,16 @@ const ProfilePage = () => {
     autoSaveProfile({ style_tags: newStyleTags })
   }
 
+  const handleLanguagesChange = (newLanguages) => {
+    setFormData(prev => ({
+      ...prev,
+      languages: newLanguages
+    }))
+
+    // Auto-save immediately for language changes
+    autoSaveProfile({ languages: newLanguages })
+  }
+
   const handlePhotosChange = (newPhotos) => {
     setFormData(prev => ({
       ...prev,
@@ -340,46 +392,7 @@ const ProfilePage = () => {
     autoSaveProfile({ portfolio_images: newPhotos })
   }
 
-  const handleVisibilityToggle = () => {
-    const newValue = !formData.is_public
-
-    // If trying to make public, validate completeness
-    if (newValue === true) {
-      const validation = validateVisibilityToggle(formData, user)
-      if (!validation.canToggle) {
-        toast.error(validation.error, {
-          duration: 5000,
-          icon: '⚠️'
-        })
-        // Show what's missing in detail
-        if (validation.missingFields.length > 0) {
-          setTimeout(() => {
-            toast.error(`Missing: ${validation.missingFields.join(', ')}`, {
-              duration: 7000
-            })
-          }, 200)
-        }
-        return // Prevent toggle
-      }
-    }
-
-    console.log('[ProfilePage] 👁️ Visibility toggle:', newValue ? 'Public' : 'Private')
-
-    setFormData(prev => ({
-      ...prev,
-      is_public: newValue
-    }))
-
-    // Auto-save visibility immediately with toast confirmation
-    autoSaveProfile({ is_public: newValue }).then(() => {
-      toast.success(
-        newValue
-          ? '✅ Profile is now Public - visible in search results'
-          : '🔒 Profile is now Private - hidden from search results',
-        { duration: 3000 }
-      )
-    })
-  }
+  // Removed handleVisibilityToggle - profiles auto-publish based on completeness
 
   const validateZipCode = (zip) => {
     return /^\d{5}$/.test(zip)
@@ -422,6 +435,7 @@ const ProfilePage = () => {
         state: formData.state || null,
         zip_code: formData.zip_code || null,
         country: formData.country || 'USA',
+        languages: Array.isArray(formData.languages) ? formData.languages : [],
         profile_complete: isComplete,
         // Note: visible_in_search is a generated column (= is_public), cannot be set manually
         updated_at: new Date().toISOString()
@@ -739,96 +753,50 @@ const ProfilePage = () => {
 
       {/* Profile Form */}
       <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">Profile Information</h2>
+        <h2 className="text-lg font-semibold text-gray-900">Profile Information</h2>
 
-          {/* Profile Visibility Toggle */}
-          <div className="flex items-center gap-3">
-            <span className={`text-sm font-medium ${formData.is_public ? 'text-green-700' : 'text-gray-500'}`}>
-              {formData.is_public ? 'Public' : 'Private'}
-            </span>
-            <button
-              type="button"
-              onClick={handleVisibilityToggle}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${
-                formData.is_public ? 'bg-green-600' : 'bg-gray-300'
-              }`}
-              aria-label={formData.is_public ? 'Profile is public' : 'Profile is private'}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  formData.is_public ? 'translate-x-6' : 'translate-x-1'
-                }`}
-              >
-                {formData.is_public ? (
-                  <Eye className="w-4 h-4 text-green-600" />
-                ) : (
-                  <EyeOff className="w-4 h-4 text-gray-400" />
-                )}
-              </span>
-            </button>
-          </div>
-        </div>
-
-        {/* Profile Completeness Indicator */}
-        {profileCompletenessValue && !profileCompletenessValue.isComplete && (
-          <div className="p-4 rounded-md bg-amber-50 border border-amber-200">
-            <div className="flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
-              <div className="flex-1">
-                <p className="font-medium text-amber-900 mb-2">
-                  Complete your profile to appear in search ({profileCompletenessValue.completionPercentage}% complete)
-                </p>
-                <div className="space-y-1 text-sm text-amber-800">
-                  <p className="font-medium">Missing requirements:</p>
-                  <ul className="list-disc list-inside space-y-0.5 ml-2">
-                    {profileCompletenessValue.missingFields.map((field, idx) => (
-                      <li key={idx}>{field}</li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Profile Visibility Explanation */}
-        <div className={`p-3 rounded-md text-sm ${
-          formData.visible_in_search
-            ? 'bg-green-50 border border-green-200'
-            : formData.is_public
-            ? 'bg-amber-50 border border-amber-200'
-            : 'bg-gray-50 border border-gray-200'
+        {/* Auto-Publish Status Banner */}
+        <div className={`p-4 rounded-lg text-sm ${
+          profileCompletenessValue?.isComplete
+            ? 'bg-green-50 border-2 border-green-300'
+            : 'bg-amber-50 border-2 border-amber-300'
         }`}>
-          {formData.visible_in_search ? (
-            <div className="flex items-start gap-2">
-              <Eye className="w-4 h-4 text-green-600 mt-0.5" />
+          {profileCompletenessValue?.isComplete ? (
+            <div className="flex items-start gap-3">
+              <Eye className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
               <div>
-                <p className="font-medium text-green-900">✅ Visible in Client Search</p>
-                <p className="text-green-700 mt-1">
-                  Your profile is public and you have availability set. Clients can find you when searching for photographers.
+                <p className="font-semibold text-green-900 text-base">✅ Profile Published - Visible to Clients</p>
+                <p className="text-green-800 mt-1">
+                  Your profile is complete and automatically published! Clients can find you when searching for photographers.
                 </p>
-              </div>
-            </div>
-          ) : formData.is_public ? (
-            <div className="flex items-start gap-2">
-              <AlertCircle className="w-4 h-4 text-amber-600 mt-0.5" />
-              <div>
-                <p className="font-medium text-amber-900">⚠️ Not Visible in Search</p>
-                <p className="text-amber-700 mt-1">
-                  Your profile is public, but you need to set your availability to appear in client searches.{' '}
-                  <a href="/talent/dashboard/availability" className="underline font-medium">
-                    Set availability now →
-                  </a>
+                <p className="text-green-700 text-xs mt-2">
+                  💡 Your profile will remain public as long as all requirements are met. If you remove required content, it will be automatically unpublished.
                 </p>
               </div>
             </div>
           ) : (
-            <div className="flex items-start gap-2">
-              <EyeOff className="w-4 h-4 text-gray-600 mt-0.5" />
+            <div className="flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
               <div>
-                <p className="font-medium text-gray-900">Your profile is hidden from clients</p>
-                <p className="text-gray-700 mt-1">Your profile will not appear in search results. You cannot receive new bookings while private.</p>
+                <p className="font-semibold text-amber-900 text-base">
+                  ⚠️ Profile Incomplete - {profileCompletenessValue?.completionPercentage || 0}% Complete
+                </p>
+                <p className="text-amber-800 mt-1">
+                  Complete the following requirements to automatically publish your profile and appear in client searches:
+                </p>
+                {profileCompletenessValue?.missingFields && profileCompletenessValue.missingFields.length > 0 && (
+                  <ul className="mt-2 space-y-1 text-amber-900">
+                    {profileCompletenessValue.missingFields.map((field, index) => (
+                      <li key={index} className="flex items-start gap-2">
+                        <span className="text-amber-600 font-bold">•</span>
+                        <span>{field}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                <p className="text-amber-700 text-xs mt-3 font-medium">
+                  ✨ Once you complete all requirements, your profile will be <strong>automatically published</strong> - no manual action needed!
+                </p>
               </div>
             </div>
           )}
@@ -962,7 +930,7 @@ const ProfilePage = () => {
             {/* Address Line 1 */}
             <div className="md:col-span-2">
               <label htmlFor="address_line1" className="block text-sm font-medium text-gray-700 mb-2">
-                📍 Address Line 1 <span className="text-red-500">*</span>
+                📍 Address Line 1
               </label>
               <input
                 type="text"
@@ -971,7 +939,7 @@ const ProfilePage = () => {
                 value={formData.address_line1}
                 onChange={handleInputChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-                placeholder="123 Main Street"
+                placeholder="123 Main Street (Optional)"
                 aria-label="Address line 1"
               />
             </div>
@@ -1048,6 +1016,22 @@ const ProfilePage = () => {
                 placeholder="USA"
                 aria-label="Country"
               />
+            </div>
+
+            {/* Spoken Languages */}
+            <div className="md:col-span-2">
+              <MultiSelect
+                label="🗣️ Spoken Languages"
+                value={formData.languages}
+                onChange={handleLanguagesChange}
+                options={DEFAULT_LANGUAGES}
+                placeholder="Select languages you speak..."
+                allowCustom={true}
+                className="w-full"
+              />
+              <p className="mt-1 text-xs text-gray-500">
+                Optional: Select the languages you can communicate in with clients
+              </p>
             </div>
           </div>
         </div>

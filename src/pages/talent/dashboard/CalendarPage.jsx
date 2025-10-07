@@ -152,11 +152,15 @@ const CalendarPage = () => {
       // Process availability data
       if (availabilityResult.status === 'fulfilled' && availabilityResult.value.data) {
         const { data } = availabilityResult.value
-        const dates = (data.unavailable_dates || []).map(dateStr => new Date(dateStr))
 
-        // Deduplicate by converting to ISO strings, using Set, then back to Date objects
-        const uniqueDateStrings = [...new Set(dates.map(d => d.toISOString().split('T')[0]))]
-        const uniqueDates = uniqueDateStrings.map(str => new Date(str))
+        // Deduplicate date strings first (data is already in YYYY-MM-DD format)
+        const uniqueDateStrings = [...new Set(data.unavailable_dates || [])]
+
+        // Convert to Date objects using local timezone constructor (prevents timezone shift)
+        const uniqueDates = uniqueDateStrings.map(str => {
+          const [year, month, day] = str.split('-').map(Number)
+          return new Date(year, month - 1, day) // Local date, no UTC conversion
+        })
 
         setBlockedDates(uniqueDates)
         setIsPublic(data.is_public ?? true)
@@ -222,9 +226,17 @@ const CalendarPage = () => {
     setSaving(true)
 
     try {
+      // Prepare dates for Supabase - convert to consistent YYYY-MM-DD format without timezone conversion
       const dateStrings = blockedDates.map(date => {
-        const d = new Date(date)
-        return d.toISOString().split('T')[0]
+        // If date is already a string in YYYY-MM-DD format, use it directly
+        if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
+          return date
+        }
+        // If it's a Date object, extract YYYY-MM-DD using local timezone (no UTC conversion)
+        const year = date.getFullYear()
+        const month = String(date.getMonth() + 1).padStart(2, '0')
+        const day = String(date.getDate()).padStart(2, '0')
+        return `${year}-${month}-${day}`
       })
 
       // Deduplicate using Set to prevent duplicate dates
@@ -348,7 +360,10 @@ const CalendarPage = () => {
   // Custom day renderer for DayPicker
   const modifiers = {
     blocked: blockedDates,
-    booked: bookedDates.map(dateStr => new Date(dateStr))
+    booked: bookedDates.map(dateStr => {
+      const [year, month, day] = dateStr.split('-').map(Number)
+      return new Date(year, month - 1, day) // Local date, no UTC conversion
+    })
   }
 
   const modifiersClassNames = {

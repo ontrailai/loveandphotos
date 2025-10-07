@@ -154,8 +154,10 @@ const ContractStep = () => {
             selectedAt: bookingFlow.scheduleDetails?.selectedAt
           },
           locationDetails: {
+            city: bookingFromDb.location_city || bookingFlow.locationDetails?.city,
+            state: bookingFromDb.location_state || bookingFlow.locationDetails?.state,
             address: bookingFromDb.venue_address || bookingFlow.locationDetails?.address,
-            locationTitle: bookingFromDb.venue_name || bookingFlow.locationDetails?.locationTitle || 'Venue Location'
+            locationTitle: bookingFromDb.venue_name || bookingFlow.locationDetails?.locationTitle
           },
           packageDetails: {
             packageTitle: bookingFromDb.packages?.title || bookingFlow.packageDetails?.packageTitle || 'Custom Package',

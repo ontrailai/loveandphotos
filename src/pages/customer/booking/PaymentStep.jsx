@@ -377,7 +377,9 @@ const PaymentStep = () => {
                 <div>
                   <p className="text-dusty-600">Location</p>
                   <p className="font-medium text-dusty-900">
-                    {bookingFlow.locationDetails?.locationTitle}
+                    {bookingFlow.locationDetails?.city && bookingFlow.locationDetails?.state
+                      ? `${bookingFlow.locationDetails.city}, ${bookingFlow.locationDetails.state}`
+                      : 'TBD'}
                   </p>
                 </div>
 

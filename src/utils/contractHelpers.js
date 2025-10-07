@@ -16,7 +16,13 @@ export function formatBookingDataForContract(bookingFlow) {
     ? new Date(bookingFlow.scheduleDetails.date).toLocaleDateString('en-US')
     : 'Not specified'
 
-  const location = bookingFlow.locationDetails?.locationTitle || 'Not specified'
+  // Use city+state if available, otherwise fall back to locationTitle, then 'Not specified'
+  let location = 'Not specified'
+  if (bookingFlow.locationDetails?.city && bookingFlow.locationDetails?.state) {
+    location = `${bookingFlow.locationDetails.city}, ${bookingFlow.locationDetails.state}`
+  } else if (bookingFlow.locationDetails?.locationTitle) {
+    location = bookingFlow.locationDetails.locationTitle
+  }
 
   const packageName = bookingFlow.packageDetails?.packageTitle || 'Package'
 
@@ -61,12 +67,20 @@ export function validateBookingDataForContract(bookingFlow) {
     }
   }
 
-  // Enhanced location validation
-  if (!bookingFlow.locationDetails?.locationTitle) {
+  // Enhanced location validation - Accept city+state OR locationTitle
+  const hasCity = bookingFlow.locationDetails?.city &&
+                  typeof bookingFlow.locationDetails.city === 'string' &&
+                  bookingFlow.locationDetails.city.trim().length > 0
+  const hasState = bookingFlow.locationDetails?.state &&
+                   typeof bookingFlow.locationDetails.state === 'string' &&
+                   bookingFlow.locationDetails.state.trim().length > 0
+  const hasLocationTitle = bookingFlow.locationDetails?.locationTitle &&
+                           typeof bookingFlow.locationDetails.locationTitle === 'string' &&
+                           bookingFlow.locationDetails.locationTitle.trim().length > 0
+
+  // Location is valid if we have (city AND state) OR locationTitle
+  if (!(hasCity && hasState) && !hasLocationTitle) {
     missing.push('Location')
-  } else if (typeof bookingFlow.locationDetails.locationTitle !== 'string' ||
-             bookingFlow.locationDetails.locationTitle.trim().length === 0) {
-    errors.push('Location must be a non-empty string')
   }
 
   // Enhanced package validation

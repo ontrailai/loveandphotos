@@ -5,7 +5,7 @@
  */
 
 import { useState, useEffect } from 'react'
-import { XIcon, ShoppingCartIcon } from 'lucide-react'
+import { XIcon, ShoppingCartIcon, MapPinIcon } from 'lucide-react'
 import { clsx } from 'clsx'
 import Button from '@components/ui/Button'
 
@@ -20,6 +20,7 @@ const TotalsPanel = ({
   isSticky = true,
   position = 'right', // 'right', 'bottom'
   packageContext, // Destructure to prevent DOM warning
+  bookingFlow, // Add bookingFlow for location data
   ...props
 }) => {
   const [isVisible, setIsVisible] = useState(false)
@@ -92,6 +93,20 @@ const TotalsPanel = ({
             <span className="font-semibold text-gray-900">
               {formatPrice(packagePrice)}
             </span>
+          </div>
+        </div>
+      )}
+
+      {/* Event Location - Only show if city AND state are provided */}
+      {bookingFlow?.locationDetails?.city && bookingFlow?.locationDetails?.state && (
+        <div className="border-b border-gray-200 pb-4 mb-4">
+          <div className="flex items-start space-x-2">
+            <MapPinIcon className="w-4 h-4 text-gray-400 mt-1 flex-shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-gray-900 break-words">
+                {bookingFlow.locationDetails.city}, {bookingFlow.locationDetails.state}
+              </p>
+            </div>
           </div>
         </div>
       )}
@@ -211,6 +226,13 @@ const TotalsPanel = ({
       </div>
     </>
   )
+
+  // Debug logging for venue location
+  useEffect(() => {
+    if (bookingFlow?.locationDetails) {
+      console.log('🔍 TotalsPanel locationDetails:', bookingFlow.locationDetails)
+    }
+  }, [bookingFlow?.locationDetails])
 
   // Render nothing if not visible and no package
   if (!isVisible && packagePrice <= 0) {

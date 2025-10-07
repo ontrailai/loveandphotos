@@ -5,7 +5,7 @@
 
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CalendarIcon, ClockIcon } from 'lucide-react'
+import { CalendarIcon, ClockIcon, MapPinIcon } from 'lucide-react'
 import { format } from 'date-fns'
 import { useBookingFlow } from '@contexts/BookingFlowContext'
 import Card from '@components/ui/Card'
@@ -31,18 +31,24 @@ const BookingSidebar = ({
   className = ''
 }) => {
   const navigate = useNavigate()
-  const { initializeBookingFlow, updateScheduleDetails } = useBookingFlow()
+  const { initializeBookingFlow, updateScheduleDetails, updateLocationDetails } = useBookingFlow()
 
   const [selectedDate, setSelectedDate] = useState(() => normalizeDate(initialDate))
   const [startTime, setStartTime] = useState('')
   const [endTime, setEndTime] = useState('')
+  const [locationCity, setLocationCity] = useState('')
+  const [locationState, setLocationState] = useState('')
+  const [locationTitle, setLocationTitle] = useState('')
 
   useEffect(() => {
     setSelectedDate(normalizeDate(initialDate))
   }, [initialDate])
 
-  // Convert unavailable_dates array to Date objects for Calendar component
-  const unavailableDates = (photographer?.unavailable_dates || []).map(dateStr => new Date(dateStr))
+  // Convert unavailable_dates array to Date objects for Calendar component (using local timezone)
+  const unavailableDates = (photographer?.unavailable_dates || []).map(dateStr => {
+    const [year, month, day] = dateStr.split('-').map(Number)
+    return new Date(year, month - 1, day) // Local date, no UTC conversion
+  })
 
   const handleDateSelect = (day) => {
     setSelectedDate(day ? normalizeDate(day) : null)
@@ -50,6 +56,12 @@ const BookingSidebar = ({
 
   const handleRequestToBook = () => {
     if (!selectedDate || !startTime || !endTime) return
+
+    // Validate location is provided
+    if (!locationCity || !locationState) {
+      toast.error('Please enter the event city and state.')
+      return
+    }
 
     // Validate selected date is not in photographer's unavailable dates
     const selectedDateStr = format(selectedDate, 'yyyy-MM-dd')
@@ -78,13 +90,22 @@ const BookingSidebar = ({
     // Update schedule details in context
     updateScheduleDetails(selectedDate, startTime, endTime)
 
+    // Update location details in context
+    updateLocationDetails({
+      city: locationCity,
+      state: locationState,
+      locationTitle: locationTitle || null,
+      address: null
+    })
+
     // Navigate to add-ons step (first step in booking flow after schedule)
     navigate(`/booking/${photographer.id}/addons`)
   }
 
   const hasValidDate = selectedDate instanceof Date && !Number.isNaN(selectedDate?.getTime?.())
   const hasValidTimes = startTime && endTime
-  const isBookingReady = hasValidDate && hasValidTimes
+  const hasValidLocation = locationCity && locationState
+  const isBookingReady = hasValidDate && hasValidTimes && hasValidLocation
 
   // Calculate hours between start and end time
   const calculateHours = () => {
@@ -127,8 +148,66 @@ const BookingSidebar = ({
           />
         </div>
 
-        {/* Time Selection */}
+        {/* Event Location */}
         {hasValidDate && (
+          <div className="space-y-4 pt-4 border-t border-gray-200">
+            <div className="text-center">
+              <h4 className="text-sm font-medium text-dusty-900 mb-3 flex items-center justify-center">
+                <MapPinIcon className="w-4 h-4 mr-2" />
+                Event Location
+              </h4>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label htmlFor="location-city" className="block text-xs font-medium text-dusty-700 mb-1">
+                  City <span className="text-red-500">*</span>
+                </label>
+                <input
+                  id="location-city"
+                  type="text"
+                  value={locationCity}
+                  onChange={(e) => setLocationCity(e.target.value)}
+                  placeholder="Enter city"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-base bg-white text-dusty-900 transition-all duration-200 hover:border-primary-400"
+                  required
+                />
+              </div>
+
+              <div>
+                <label htmlFor="location-state" className="block text-xs font-medium text-dusty-700 mb-1">
+                  State <span className="text-red-500">*</span>
+                </label>
+                <input
+                  id="location-state"
+                  type="text"
+                  value={locationState}
+                  onChange={(e) => setLocationState(e.target.value)}
+                  placeholder="Enter state"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-base bg-white text-dusty-900 transition-all duration-200 hover:border-primary-400"
+                  required
+                />
+              </div>
+
+              <div>
+                <label htmlFor="location-title" className="block text-xs font-medium text-dusty-700 mb-1">
+                  Venue Name (Optional)
+                </label>
+                <input
+                  id="location-title"
+                  type="text"
+                  value={locationTitle}
+                  onChange={(e) => setLocationTitle(e.target.value)}
+                  placeholder="Enter venue name"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-base bg-white text-dusty-900 transition-all duration-200 hover:border-primary-400"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Time Selection */}
+        {hasValidDate && hasValidLocation && (
           <div className="space-y-4 pt-4 border-t border-gray-200">
             <div className="text-center">
               <h4 className="text-sm font-medium text-dusty-900 mb-3 flex items-center justify-center">
@@ -226,7 +305,9 @@ const BookingSidebar = ({
             <p className="text-sm text-dusty-500 mt-2 text-center">
               {!hasValidDate
                 ? 'Please select a date to continue'
-                : 'Please select start and end times to continue'
+                : !hasValidLocation
+                  ? 'Please enter event city and state to continue'
+                  : 'Please select start and end times to continue'
               }
             </p>
           )}
@@ -240,6 +321,10 @@ const BookingSidebar = ({
               <div className="flex items-center">
                 <CalendarIcon className="w-4 h-4 mr-2" />
                 <span>{format(selectedDate, 'EEEE, MMMM d, yyyy')}</span>
+              </div>
+              <div className="flex items-center">
+                <MapPinIcon className="w-4 h-4 mr-2" />
+                <span>{locationCity}, {locationState}</span>
               </div>
               <div className="flex items-center">
                 <ClockIcon className="w-4 h-4 mr-2" />

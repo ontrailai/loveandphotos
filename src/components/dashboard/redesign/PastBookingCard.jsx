@@ -11,13 +11,14 @@ import Avatar from '@components/shared/Avatar'
 import RatingStars from '@components/shared/RatingStars'
 import Button from '@components/ui/Button'
 import { format, parseISO } from 'date-fns'
+import { getFirstNameOnly } from '@lib/privacy/sanitizeTalentData'
 
 const PastBookingCard = ({
   booking,
   onWriteReview,
   onViewPhotos
 }) => {
-  const photographerName = booking.photographers?.users?.full_name || 'Unknown Photographer'
+  const photographerName = getFirstNameOnly(booking.photographers?.users?.full_name)
   const photographerAvatar = booking.photographers?.users?.avatar_url
   const eventType = booking.event_type || 'Photography Session'
   const eventDate = parseISO(booking.event_date)

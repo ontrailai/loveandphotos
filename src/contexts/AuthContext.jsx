@@ -45,48 +45,26 @@ export const AuthProvider = ({ children }) => {
       let userProfile = null
 
       try {
-        // Try db.users.getProfile with 15s timeout (increased from 5s to handle slow queries)
-        console.log('[AuthContext] 🔍 Starting Promise.race with 15s timeout...')
+        // Try db.users.getProfile with 3s timeout (reduced for faster fallback)
+        console.log('[AuthContext] 🔍 Starting Promise.race with 3s timeout...')
         const profilePromise = db.users.getProfile(user.id)
         const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Profile fetch timeout')), 15000)
+          setTimeout(() => reject(new Error('Profile fetch timeout')), 3000)
         )
         userProfile = await Promise.race([profilePromise, timeoutPromise])
         console.log('[AuthContext] ✅ Profile fetched successfully via db.users.getProfile')
       } catch (timeoutError) {
-        console.warn('[AuthContext] ⏱️ Profile fetch timed out or failed, trying direct query:', timeoutError.message)
+        console.warn('[AuthContext] ⏱️ Profile fetch timed out, creating minimal profile from session')
 
-        // Fallback: Direct Supabase query with timeout
-        try {
-          const fallbackPromise = supabase
-            .from('users')
-            .select('*')
-            .eq('id', user.id)
-            .maybeSingle()
-
-          const fallbackTimeout = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Fallback query timeout')), 10000)
-          )
-
-          const { data, error } = await Promise.race([fallbackPromise, fallbackTimeout])
-
-          if (!error && data) {
-            userProfile = data
-            console.log('[AuthContext] ✅ Fetched profile via fallback query')
-          } else if (!data) {
-            // Profile doesn't exist in database - this is OK for new users
-            console.log('[AuthContext] No existing profile found, will create new one')
-            userProfile = null
-          } else {
-            console.warn('[AuthContext] Fallback query failed:', error)
-            userProfile = null
-          }
-        } catch (fallbackError) {
-          console.error('[AuthContext] ❌ Fallback query also timed out:', fallbackError.message)
-          // Don't create a new profile on timeout - just use cached data and retry later
-          console.warn('[AuthContext] Using cached profile data, will retry on next auth state change')
-          return null
+        // Create minimal profile from session user metadata instead of waiting for DB
+        userProfile = {
+          id: user.id,
+          email: user.email,
+          full_name: user.user_metadata?.full_name || '',
+          role: user.user_metadata?.role || 'photographer',
+          created_at: user.created_at
         }
+        console.log('[AuthContext] ✅ Created minimal profile from session metadata')
       }
 
       console.log('[AuthContext] User profile:', userProfile)
@@ -178,12 +156,22 @@ export const AuthProvider = ({ children }) => {
 
       setProfile(userProfile)
 
-      // If photographer, get photographer profile
+      // If photographer, get photographer profile with timeout
       if (userProfile?.role === 'photographer') {
         console.log('[AuthContext] Fetching photographer profile')
-        const photographerData = await db.photographers.getProfile(user.id)
-        console.log('[AuthContext] Photographer profile:', photographerData)
-        setPhotographerProfile(photographerData)
+        try {
+          const photographerPromise = db.photographers.getProfile(user.id)
+          const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Photographer profile fetch timeout')), 3000)
+          )
+          const photographerData = await Promise.race([photographerPromise, timeoutPromise])
+          console.log('[AuthContext] Photographer profile:', photographerData)
+          setPhotographerProfile(photographerData)
+        } catch (photographerError) {
+          console.warn('[AuthContext] ⚠️ Photographer profile fetch timeout, will be created if needed')
+          // Set to null on timeout/error, TalentDashboardLayout will create it if needed
+          setPhotographerProfile(null)
+        }
       }
 
       console.log('[AuthContext] User data fetch complete')

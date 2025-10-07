@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, useCallback } from 'react'
+import { useMemo, useState, useEffect, useCallback, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '@contexts/AuthContext'
 import { supabase } from '@lib/supabase'
@@ -30,6 +30,8 @@ const OverviewPage = () => {
     loading: true,
     error: null
   })
+  const hasFetchedRef = useRef(false)
+  const photographerIdRef = useRef(null)
 
   console.log('[OverviewPage] Render state:', {
     loading,
@@ -40,17 +42,18 @@ const OverviewPage = () => {
 
   // Fetch stats data from Supabase with optimized batching
   const fetchStats = useCallback(async () => {
-    if (!photographerProfile?.id) {
+    const currentPhotographerId = photographerProfile?.id
+    if (!currentPhotographerId) {
       console.warn('[OverviewPage] No photographer profile ID available')
       return
     }
 
     try {
       setStats(prev => ({ ...prev, loading: true, error: null }))
-      console.log('[OverviewPage] Fetching stats for photographer:', photographerProfile.id)
+      console.log('[OverviewPage] Fetching stats for photographer:', currentPhotographerId)
 
       // Store photographer data in local variables to avoid dependency on entire object
-      const photographerId = photographerProfile.id
+      const photographerId = currentPhotographerId
       const profileRating = photographerProfile.rating || 0
       const profileLnpChoice = photographerProfile.lnp_choice || false
       const profileStyleTags = photographerProfile.style_tags || []
@@ -58,8 +61,7 @@ const OverviewPage = () => {
       // Batch all queries using Promise.all for optimal performance
       const [
         { count: totalShoots, error: shootsError },
-        { count: pendingRequests, error: pendingError },
-        { data: completedBookings, error: completedError }
+        { count: pendingRequests, error: pendingError }
       ] = await Promise.all([
         // Total confirmed shoots
         supabase
@@ -73,15 +75,7 @@ const OverviewPage = () => {
           .from('bookings')
           .select('*', { count: 'exact', head: true })
           .eq('photographer_id', photographerId)
-          .eq('booking_status', 'pending'),
-
-        // Completed bookings with ratings for average calculation
-        supabase
-          .from('bookings')
-          .select('rating')
-          .eq('photographer_id', photographerId)
-          .eq('booking_status', 'completed')
-          .not('rating', 'is', null)
+          .eq('booking_status', 'pending')
       ])
 
       // Handle query errors
@@ -91,21 +85,10 @@ const OverviewPage = () => {
       if (pendingError) {
         console.error('[OverviewPage] Error fetching pending requests:', pendingError)
       }
-      if (completedError) {
-        console.error('[OverviewPage] Error fetching completed bookings:', completedError)
-      }
 
-      // Calculate average rating from completed bookings
-      let averageRating = 0
-      if (completedBookings && completedBookings.length > 0) {
-        const totalRating = completedBookings.reduce((sum, booking) => sum + (booking.rating || 0), 0)
-        averageRating = totalRating / completedBookings.length
-        console.log('[OverviewPage] Calculated average rating:', averageRating, 'from', completedBookings.length, 'bookings')
-      } else {
-        // Fallback to photographer profile rating if no booking ratings exist
-        averageRating = profileRating
-        console.log('[OverviewPage] Using profile rating as fallback:', averageRating)
-      }
+      // Use photographer profile rating (bookings table doesn't have rating column)
+      const averageRating = profileRating
+      console.log('[OverviewPage] Using profile rating:', averageRating)
 
       // Extract photographer profile data
       const isLnpChoice = profileLnpChoice
@@ -143,36 +126,46 @@ const OverviewPage = () => {
         error: err.message || 'Failed to load stats'
       }))
     }
-  }, [photographerProfile?.id]) // Only depend on ID to prevent infinite loops
+  }, [photographerProfile]) // Stable reference, won't cause re-render loop
 
-  // Initial data fetch - only run once when photographer profile loads
+  // Initial data fetch - only run once when photographer profile ID changes
   useEffect(() => {
+    const currentPhotographerId = photographerProfile?.id
+
     // Guard: Only fetch if we have profile, auth is loaded, and profile ID exists
-    if (!photographerProfile?.id || loading) {
+    if (!currentPhotographerId || loading) {
       console.log('[OverviewPage] Skipping fetchStats - missing profile or still loading')
+      hasFetchedRef.current = false
+      photographerIdRef.current = null
       return
     }
 
-    console.log('[OverviewPage] Running initial fetchStats')
-    fetchStats()
-  }, [photographerProfile?.id, loading, fetchStats]) // Include fetchStats since it's memoized
+    // Only fetch if photographer ID changed or first time
+    if (photographerIdRef.current !== currentPhotographerId) {
+      console.log('[OverviewPage] Running initial fetchStats for new photographer:', currentPhotographerId)
+      photographerIdRef.current = currentPhotographerId
+      hasFetchedRef.current = true
+      fetchStats()
+    }
+  }, [photographerProfile?.id, loading, fetchStats]) // Only depend on ID and loading state
 
   // Set up real-time subscription for bookings changes
   useEffect(() => {
-    if (!photographerProfile?.id) return
+    const currentPhotographerId = photographerProfile?.id
+    if (!currentPhotographerId) return
 
-    console.log('[OverviewPage] Setting up real-time subscription for photographer:', photographerProfile.id)
+    console.log('[OverviewPage] Setting up real-time subscription for photographer:', currentPhotographerId)
 
     // Create subscription to bookings table
     const channel = supabase
-      .channel(`bookings-${photographerProfile.id}`)
+      .channel(`bookings-${currentPhotographerId}`)
       .on(
         'postgres_changes',
         {
           event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
           schema: 'public',
           table: 'bookings',
-          filter: `photographer_id=eq.${photographerProfile.id}`
+          filter: `photographer_id=eq.${currentPhotographerId}`
         },
         (payload) => {
           console.log('[OverviewPage] Real-time booking change detected:', payload)
@@ -189,7 +182,7 @@ const OverviewPage = () => {
       console.log('[OverviewPage] Cleaning up real-time subscription')
       supabase.removeChannel(channel)
     }
-  }, [photographerProfile?.id, fetchStats]) // Include fetchStats in dependencies since it's memoized and stable
+  }, [photographerProfile?.id, fetchStats]) // fetchStats is stable now since it only depends on photographerProfile
 
   // Show loading spinner while auth is loading
   if (loading) {

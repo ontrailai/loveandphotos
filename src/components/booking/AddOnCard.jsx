@@ -53,12 +53,17 @@ const AddOnCard = ({
     }
   }
 
-  // Calculate display price
-  let displayPrice = addon.displayPrice || addon.basePrice
+  // Calculate display price - ensure it's always a valid number
+  let displayPrice = addon.displayPrice || addon.basePrice || 0
   let priceCalculation = addon.priceCalculation
 
-  // Dynamic pricing for His & Hers
-  if (addon.pricing?.isDynamic) {
+  // Validate displayPrice is a number
+  if (isNaN(displayPrice) || displayPrice === null || displayPrice === undefined) {
+    displayPrice = addon.basePrice || 0
+  }
+
+  // Dynamic pricing for Second Shooter only (video-coverage is handled in getFormattedAddOn)
+  if (addon.pricing?.isDynamic && addon.id === 'second-shooter') {
     const { packageType, packagePrice, hoursBooked } = context
 
     if (packageType && hoursBooked) {
@@ -146,7 +151,14 @@ const AddOnCard = ({
             </h3>
 
             {/* Price display */}
-            <div className="flex items-baseline gap-2">
+            <div className="flex items-baseline gap-2 flex-wrap">
+              {/* "Starts at" prefix for Second Photographer */}
+              {addon.badges?.priceNote && (
+                <span className="text-sm text-gray-600 font-medium">
+                  {addon.badges.priceNote}
+                </span>
+              )}
+
               <span className="text-2xl font-bold text-gray-900">
                 ${displayPrice}
               </span>
@@ -175,16 +187,40 @@ const AddOnCard = ({
           </div>
 
           {/* Badges section - under price */}
-          {addon.badges?.popularity && (
+          {(addon.badges?.popularity || addon.badges?.recommended || addon.badges?.priceWarning) && (
             <div className="flex flex-wrap gap-2 mt-2">
               {/* Popularity badge */}
-              <Badge
-                variant="primary"
-                size="sm"
-                className="text-xs whitespace-nowrap"
-              >
-                {addon.badges.popularity}
-              </Badge>
+              {addon.badges?.popularity && (
+                <Badge
+                  variant="primary"
+                  size="sm"
+                  className="text-xs whitespace-nowrap"
+                >
+                  {addon.badges.popularity}
+                </Badge>
+              )}
+
+              {/* Highly Recommended badge */}
+              {addon.badges?.recommended && (
+                <Badge
+                  variant="success"
+                  size="sm"
+                  className="text-xs whitespace-nowrap font-bold bg-green-600 text-white"
+                >
+                  Highly Recommended
+                </Badge>
+              )}
+
+              {/* Price Warning badge (for One-Time Date Change) */}
+              {addon.badges?.priceWarning && (
+                <Badge
+                  variant="warning"
+                  size="sm"
+                  className="text-xs whitespace-nowrap"
+                >
+                  {addon.badges.priceWarning}
+                </Badge>
+              )}
             </div>
           )}
         </div>

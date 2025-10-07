@@ -6,8 +6,32 @@
 import { format, parseISO } from 'date-fns'
 import Button from '@components/ui/Button'
 import { CalendarIcon, ClockIcon, MapPinIcon, DollarSignIcon } from 'lucide-react'
+import { formatPrice, formatEventTime, getEventLocation } from '@lib/utils/priceFormatting'
 
 const BookingSummaryStep = ({ booking, onNext, onCancel }) => {
+  // Debug log for booking data
+  console.log('📋 BookingSummaryStep - Booking Data:', {
+    id: booking?.id,
+    event_date: booking?.event_date,
+    event_time: booking?.event_time,
+    location_city: booking?.location_city,
+    location_state: booking?.location_state,
+    venue_name: booking?.venue_name,
+    total_amount: booking?.total_amount,
+    final_price: booking?.final_price,
+    package: booking?.packages?.title
+  })
+
+  // Format location as City, State
+  const locationDisplay = getEventLocation(booking)
+
+  // Format time with AM/PM
+  const timeDisplay = formatEventTime(booking?.event_time)
+
+  // Format price
+  const totalPrice = booking?.final_price || booking?.total_amount || 0
+  const formattedPrice = formatPrice(totalPrice)
+
   return (
     <div className="space-y-6">
       {/* Current Booking Details */}
@@ -19,7 +43,7 @@ const BookingSummaryStep = ({ booking, onNext, onCancel }) => {
           <div className="flex items-start space-x-3">
             <CalendarIcon className="w-5 h-5 text-primary-600 mt-0.5" />
             <div>
-              <p className="text-sm text-muted-foreground">Event Date</p>
+              <p className="text-sm text-muted-foreground">📅 Event Date</p>
               <p className="font-medium text-foreground">
                 {format(parseISO(booking.event_date), 'MMMM dd, yyyy')}
               </p>
@@ -30,9 +54,9 @@ const BookingSummaryStep = ({ booking, onNext, onCancel }) => {
           <div className="flex items-start space-x-3">
             <ClockIcon className="w-5 h-5 text-primary-600 mt-0.5" />
             <div>
-              <p className="text-sm text-muted-foreground">Time</p>
+              <p className="text-sm text-muted-foreground">🕒 Time</p>
               <p className="font-medium text-foreground">
-                {booking.event_time || 'TBD'}
+                {timeDisplay}
               </p>
             </div>
           </div>
@@ -41,9 +65,9 @@ const BookingSummaryStep = ({ booking, onNext, onCancel }) => {
           <div className="flex items-start space-x-3">
             <MapPinIcon className="w-5 h-5 text-primary-600 mt-0.5" />
             <div>
-              <p className="text-sm text-muted-foreground">Location</p>
+              <p className="text-sm text-muted-foreground">📍 Location</p>
               <p className="font-medium text-foreground">
-                {booking.venue_name || 'TBD'}
+                {locationDisplay}
               </p>
             </div>
           </div>
@@ -53,7 +77,7 @@ const BookingSummaryStep = ({ booking, onNext, onCancel }) => {
             <div className="flex items-start space-x-3">
               <DollarSignIcon className="w-5 h-5 text-primary-600 mt-0.5" />
               <div>
-                <p className="text-sm text-muted-foreground">Package</p>
+                <p className="text-sm text-muted-foreground">📦 Package</p>
                 <p className="font-medium text-foreground">
                   {booking.packages.title}
                 </p>
@@ -67,9 +91,9 @@ const BookingSummaryStep = ({ booking, onNext, onCancel }) => {
           {/* Current Total */}
           <div className="pt-4 border-t border-border">
             <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Current Total</span>
-              <span className="text-xl font-bold text-foreground">
-                ${booking.total_amount ? booking.total_amount.toFixed(2) : '0.00'}
+              <span className="text-sm text-muted-foreground">💲 Total Price</span>
+              <span className="text-xl font-bold text-red-600">
+                {formattedPrice}
               </span>
             </div>
           </div>

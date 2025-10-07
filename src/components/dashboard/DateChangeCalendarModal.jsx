@@ -12,6 +12,7 @@ import Button from '@components/ui/Button'
 import Card from '@components/ui/Card'
 import toast from 'react-hot-toast'
 import { format, parseISO, isBefore, startOfDay } from 'date-fns'
+import { getFirstNameOnly } from '@lib/privacy/sanitizeTalentData'
 
 const DateChangeCalendarModal = ({ bookingId, sessionId, onSuccess }) => {
   const navigate = useNavigate()
@@ -193,7 +194,7 @@ const DateChangeCalendarModal = ({ bookingId, sessionId, onSuccess }) => {
                   Select New Shoot Date
                 </h2>
                 <p className="text-sm text-gray-600">
-                  With {booking?.photographers?.users?.full_name}
+                  With {getFirstNameOnly(booking?.photographers?.users?.full_name)}
                 </p>
               </div>
             </div>

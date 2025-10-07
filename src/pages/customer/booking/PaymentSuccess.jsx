@@ -227,7 +227,9 @@ const PaymentSuccess = () => {
                   <div>
                     <h3 className="font-medium">Location</h3>
                     <p className="text-gray-600">
-                      {bookingFlow?.locationDetails?.selectedLocation || 'To be determined'}
+                      {bookingFlow?.locationDetails?.city && bookingFlow?.locationDetails?.state
+                        ? `${bookingFlow.locationDetails.city}, ${bookingFlow.locationDetails.state}`
+                        : 'TBD'}
                     </p>
                   </div>
                 </div>

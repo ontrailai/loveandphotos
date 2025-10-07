@@ -4,10 +4,8 @@ import {
   ArrowLeftIcon,
   CalendarIcon,
   CheckCircleIcon,
-  DollarSignIcon,
   MapPinIcon,
   StarIcon,
-  LockIcon,
   ImageOffIcon
 } from 'lucide-react'
 import Button from '@components/ui/Button'
@@ -35,9 +33,6 @@ const PhotographerProfile = () => {
 
   // Parse initial date from URL parameter
   const initialDate = searchParams.get('date') ? new Date(searchParams.get('date')) : null
-
-  // Determine if pricing should be shown
-  const shouldShowPricing = profile?.role === 'admin' || profile?.role === 'photographer'
 
   useEffect(() => {
     loadPhotographer()
@@ -392,37 +387,6 @@ const PhotographerProfile = () => {
                     }
                   </span>
                 </div>
-
-                {/* Pricing - Only for admins/photographers */}
-                {shouldShowPricing ? (
-                  <div className="flex items-center justify-between pt-3 border-t border-gray-200">
-                    <span className="flex items-center text-dusty-600">
-                      <DollarSignIcon className="w-4 h-4 mr-2" />
-                      Rate Information
-                    </span>
-                    <span className="text-dusty-900 font-medium">
-                      Contact for rates
-                    </span>
-                  </div>
-                ) : (
-                  <div className="bg-gray-50 p-4 rounded-lg mt-3">
-                    <div className="flex items-center text-dusty-600 mb-2">
-                      <LockIcon className="w-4 h-4 mr-2" />
-                      <span className="text-sm font-medium">Pricing Information</span>
-                    </div>
-                    <p className="text-xs text-dusty-500">
-                      Contact photographer for pricing details or{' '}
-                      <button
-                        onClick={() => navigate('/login')}
-                        className="text-primary-600 hover:text-primary-700 underline font-medium"
-                        aria-label="Sign in to view pricing"
-                      >
-                        sign in as a professional
-                      </button>{' '}
-                      to view rates.
-                    </p>
-                  </div>
-                )}
               </div>
             </Card>
 

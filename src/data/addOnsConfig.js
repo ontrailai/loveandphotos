@@ -10,15 +10,11 @@ export const ADD_ONS_CONFIG = [
     id: 'raw-footage',
     title: 'Raw Footage',
     basePrice: 395,
-    originalPrice: 795,
-    discountPercent: 50,
+    originalPrice: null,
+    discountPercent: 0,
     popularity: 81,
     category: 'photos',
-    description: `During your wedding day, we take thousands of photos—capturing all the hugs, smiles, and fun moments as they happen. But usually, we pick and edit just a few hundred of the very best pictures to give you.
-
-If you want every single photo we took—no matter if it made the final cut or not—you can buy the raw photos add-on. These are straight from the camera, with no edits or changes, exactly how they were snapped.
-
-This way, you get to keep all those extra special moments that don't always show up in the edited set—like a quick laugh with a friend, a little tear during the vows, your grandma's smile in the crowd, or a silly dance move on the dance floor. It's a great way to relive your day from every angle and never miss a memory.`,
+    description: "We'll deliver all the raw media. Unfiltered. Unedited. Everything.",
     features: [
       'Thousands of unedited photos',
       'Complete coverage of your day',
@@ -35,19 +31,19 @@ This way, you get to keep all those extra special moments that don't always show
       isAlwaysAvailable: true
     },
     badges: {
-      discount: 'Usually $795 — 50% off',
+      discount: null,
       popularity: '81% of couples choose this'
     }
   },
   {
     id: 'liability-insurance',
-    title: 'Liability Insurance',
+    title: 'Insured Photographer',
     basePrice: 395,
-    originalPrice: 595,
-    discountPercent: 34,
+    originalPrice: null,
+    discountPercent: 0,
     popularity: 94,
     category: 'protection',
-    description: 'Protects you from liability in case of accidents or damage caused by our team or gear. Highly Recommended.',
+    description: 'Protects you from liability in case of accidents or damage. Highly Recommended.',
     features: [
       'Complete liability protection',
       'Equipment damage coverage',
@@ -59,8 +55,9 @@ This way, you get to keep all those extra special moments that don't always show
       isAlwaysAvailable: true
     },
     badges: {
-      discount: 'Usually $595 — 34% off',
-      popularity: '94% of couples choose this'
+      discount: null,
+      popularity: '94% of couples choose this',
+      recommended: true
     }
   },
   {
@@ -121,17 +118,13 @@ You'll be bumped to the front of the editing queue, with final delivery complete
   },
   {
     id: 'second-shooter',
-    title: 'His & Hers Photographer',
-    basePrice: 800, // Base price for display, actual price is calculated dynamically
+    title: 'Second Photographer',
+    basePrice: 750, // Base price for display, actual price is calculated dynamically
     originalPrice: null,
     discountPercent: 0,
     popularity: 36,
     category: 'team',
-    description: `A second photographer or videographer — 4 hour minimum. Second shooters always match your booked hours for seamless coverage. For photo only packages, second shooters are billed at $100 per hour. For photo + video packages, the second shooter fee is 50% of the total package price.
-
-Example for 8 hours (second photographer only):
-• Photo-only package: 8 × $100 = $800
-• Photo + video package: 50% of $2,500 = $1,250`,
+    description: 'Perfect for larger weddings—and smart for smaller ones too. Capture every angle, every moment.',
     features: [
       'Second photographer included',
       '4 hour minimum coverage',
@@ -152,18 +145,19 @@ Example for 8 hours (second photographer only):
     },
     badges: {
       discount: null,
-      popularity: '36% of couples choose this'
+      popularity: '36% of couples choose this',
+      priceNote: 'Starts at'
     }
   },
   {
     id: 'date-change-flexibility',
-    title: 'Change Date Flexibility',
+    title: 'One-Time Date Change',
     basePrice: 50,
     originalPrice: null,
     discountPercent: 0,
-    popularity: null,
+    popularity: 72,
     category: 'flexibility',
-    description: 'Life happens! This add-on allows you to reschedule your shoot date once at no additional cost. Perfect for peace of mind if your plans might change.',
+    description: 'Covers one emergency reschedule. Peace of mind just in case. Becomes $495 if purchased after the initial booking.',
     features: [
       'Reschedule your shoot date once',
       'No additional fees when used',
@@ -177,7 +171,8 @@ Example for 8 hours (second photographer only):
     },
     badges: {
       discount: null,
-      popularity: null
+      popularity: '72% of couples choose this',
+      priceWarning: 'Becomes $495 if purchased after booking'
     }
   },
   {
@@ -188,11 +183,7 @@ Example for 8 hours (second photographer only):
     discountPercent: 0,
     popularity: null,
     category: 'media',
-    description: `Professional video coverage for your wedding. Duration automatically matches your photo package for seamless coverage.
-
-We'll capture your ceremony, speeches, first dance, and all the special moments in beautiful cinematic video. The final product includes professionally edited highlight reels and full ceremony footage.
-
-Video coverage pricing is calculated as the difference between our Photo+Video package and Photo-Only package for your selected duration. This ensures you get the best value while upgrading your coverage.`,
+    description: 'Professional video coverage for your wedding. Duration automatically matches your photo package for seamless coverage.',
     features: [
       'Professional video cinematography',
       'Duration matches photo package',
@@ -302,13 +293,18 @@ export const getFormattedAddOn = (id, context = {}) => {
   if (addon.pricing?.isDynamic && id === 'video-coverage') {
     const { hoursBooked } = context
 
-    if (hoursBooked) {
+    if (hoursBooked && hoursBooked > 0) {
       // Round to nearest whole hour for pricing lookup
       const roundedHours = Math.round(hoursBooked)
 
       // Get price from lookup table or use base price as fallback
-      displayPrice = addon.pricing.priceByHours[roundedHours] || addon.basePrice
+      const calculatedPrice = addon.pricing.priceByHours[roundedHours]
+      displayPrice = calculatedPrice !== undefined ? calculatedPrice : addon.basePrice
       priceCalculation = `${roundedHours} hour${roundedHours !== 1 ? 's' : ''} video coverage`
+    } else {
+      // If no hours booked, use base price as default
+      displayPrice = addon.basePrice
+      priceCalculation = null
     }
   }
 

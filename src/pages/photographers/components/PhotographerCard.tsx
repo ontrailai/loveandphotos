@@ -5,7 +5,7 @@
 
 import React, { useState, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
-import { StarIcon, MapPinIcon, CalendarIcon, MessageSquareIcon } from 'lucide-react'
+import { StarIcon, MapPinIcon, CalendarIcon, MessageSquareIcon, MessageCircleIcon } from 'lucide-react'
 import Button from '@components/ui/Button'
 import Badge from '@components/ui/Badge'
 import SafeAvatar from '@components/shared/SafeAvatar'
@@ -201,13 +201,33 @@ export function PhotographerCard({
               hidden: { opacity: 0, y: 20 },
               visible: { opacity: 1, y: 0 }
             }}
-            className="mb-4"
+            className="mb-3"
           >
             <div className="flex items-center text-sm text-gray-600">
               <MapPinIcon className="w-4 h-4 mr-2 flex-shrink-0 text-[#FF4D6D]" />
               <span className="truncate font-medium">{computedData.location}</span>
             </div>
           </motion.div>
+
+          {/* Spoken Languages */}
+          {languages && languages.length > 0 && (
+            <motion.div
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                visible: { opacity: 1, y: 0 }
+              }}
+              className="mb-4"
+            >
+              <div className="flex items-center text-xs text-gray-500">
+                <MessageCircleIcon className="w-3.5 h-3.5 mr-1.5 flex-shrink-0" />
+                <span className="truncate">
+                  {languages.length === 1 ? 'Language: ' : 'Languages: '}
+                  {languages.slice(0, 3).join(', ')}
+                  {languages.length > 3 && ` +${languages.length - 3}`}
+                </span>
+              </div>
+            </motion.div>
+          )}
 
           {/* Request to Book Button */}
           <motion.div

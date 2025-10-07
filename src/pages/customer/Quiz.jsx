@@ -28,6 +28,7 @@ import Badge from '@components/ui/Badge'
 import { supabase } from '@lib/supabase'
 import toast from 'react-hot-toast'
 import { clsx } from 'clsx'
+import { getFirstNameOnly } from '@lib/privacy/sanitizeTalentData'
 
 const Quiz = () => {
   const { user } = useAuth()
@@ -329,7 +330,7 @@ const Quiz = () => {
               Personalize Your Photography Experience
             </h1>
             <p className="text-dusty-600 mt-2">
-              Help {booking?.photographers?.users?.full_name} capture your vision perfectly
+              Help {getFirstNameOnly(booking?.photographers?.users?.full_name)} capture your vision perfectly
             </p>
           </div>
 

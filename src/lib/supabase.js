@@ -25,7 +25,7 @@ export const db = {
         .from('users')
         .select('*')
         .eq('id', userId)
-        .single()
+        .maybeSingle()
       if (error) throw error
       return data
     }
@@ -36,12 +36,8 @@ export const db = {
         .from('photographers')
         .select('*')
         .eq('user_id', userId)
-        .single()
+        .maybeSingle()
 
-      // Return null if not found instead of throwing
-      if (error && error.code === 'PGRST116') {
-        return null
-      }
       if (error) throw error
       return data
     },

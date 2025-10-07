@@ -57,6 +57,15 @@ const TalentDashboardLayout = () => {
     let hasRedirected = false
 
     const checkApplicationStatus = async () => {
+      // If loading is complete but we don't have a profile, mark application as checked
+      // This prevents infinite loading when profile fetch fails
+      if (!loading && !profile) {
+        console.log('[TalentDashboard] Loading complete but no profile, marking application checked')
+        setApplicationChecked(true)
+        setHasAcceptedApplication(false)
+        return
+      }
+
       if (!user || !profile || profile.role !== 'photographer') {
         setApplicationChecked(true)
         return
@@ -139,7 +148,7 @@ const TalentDashboardLayout = () => {
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id, profile?.role]) // Only depend on IDs, not entire objects or navigate function
+  }, [user?.id, profile?.role, loading]) // Include loading to re-check when auth completes
 
   // Ensure photographer profile exists, create if missing
   useEffect(() => {
@@ -244,9 +253,9 @@ const TalentDashboardLayout = () => {
     return null
   }
 
-  // Verify user is a photographer
-  if (profile.role !== 'photographer') {
-    console.log('[TalentDashboard] Not a photographer, redirecting')
+  // Verify user is a photographer - check profile exists first
+  if (!profile || profile.role !== 'photographer') {
+    console.log('[TalentDashboard] Not a photographer or no profile, redirecting')
     navigate('/forbidden')
     return null
   }

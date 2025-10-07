@@ -68,6 +68,14 @@ export const BookingFlowProvider = ({ children }) => {
       selectedAt: null
     },
 
+    locationDetails: {
+      city: null,
+      state: null,
+      locationTitle: null,
+      address: null,
+      selectedAt: null
+    },
+
     accountDetails: {
       isAuthenticated: false,
       userId: null,
@@ -190,6 +198,13 @@ export const BookingFlowProvider = ({ children }) => {
         totalAddonsPrice: 0,
         selectedAt: null
       },
+      locationDetails: {
+        city: null,
+        state: null,
+        locationTitle: null,
+        address: null,
+        selectedAt: null
+      },
       accountDetails: {
         isAuthenticated: false,
         userId: null,
@@ -297,6 +312,29 @@ export const BookingFlowProvider = ({ children }) => {
         validationState: {
           ...prev.validationState,
           addons: addonsValid
+        }
+      }
+    })
+  }, [])
+
+  // Update location details
+  const updateLocationDetails = useCallback((locationData) => {
+    setBookingFlow(prev => {
+      const locationValid = !!(locationData && (locationData.city || locationData.state || locationData.locationTitle))
+      const newCompletedSteps = locationValid
+        ? [...new Set([...prev.completedSteps, 'location'])]
+        : prev.completedSteps.filter(step => step !== 'location')
+
+      return {
+        ...prev,
+        locationDetails: {
+          ...locationData,
+          selectedAt: new Date().toISOString()
+        },
+        completedSteps: newCompletedSteps,
+        validationState: {
+          ...prev.validationState,
+          location: locationValid
         }
       }
     })
@@ -521,6 +559,13 @@ export const BookingFlowProvider = ({ children }) => {
         totalAddonsPrice: 0,
         selectedAt: null
       },
+      locationDetails: {
+        city: null,
+        state: null,
+        locationTitle: null,
+        address: null,
+        selectedAt: null
+      },
       accountDetails: {
         isAuthenticated: false,
         userId: null,
@@ -588,6 +633,7 @@ export const BookingFlowProvider = ({ children }) => {
     updateScheduleDetails,
     updatePackageDetails,
     updateAddonsDetails,
+    updateLocationDetails,
     setBookingId,
     updateAccountDetails,
     updateContractDetails,

@@ -221,7 +221,7 @@ router.post('/:id/update-date', async (req, res) => {
       customerEmail: booking.customers?.email || '',
       customerName: booking.customers?.full_name || 'Valued Customer',
       photographerEmail: booking.photographers?.users?.email || '',
-      photographerName: booking.photographers?.users?.full_name || 'Photographer'
+      photographerName: booking.photographers?.users?.full_name?.split(' ')[0] || 'Photographer'
     })
 
     if (!emailResult.success) {

@@ -29,6 +29,7 @@ import { supabase } from '@lib/supabase'
 import { sendConfirmationEmail } from '@lib/emailClient'
 import { format } from 'date-fns'
 import toast from 'react-hot-toast'
+import { getFirstNameOnly } from '@lib/privacy/sanitizeTalentData'
 
 const BookingConfirmation = () => {
   const { user, profile } = useAuth()
@@ -44,6 +45,8 @@ const BookingConfirmation = () => {
   const [contractUrl, setContractUrl] = useState('')
 
   useEffect(() => {
+    if (!user?.id) return
+
     if (sessionId) {
       verifyPaymentAndLoadBooking()
     } else if (bookingId) {
@@ -52,7 +55,7 @@ const BookingConfirmation = () => {
       toast.error('Invalid confirmation link')
       navigate('/dashboard')
     }
-  }, [sessionId, bookingId])
+  }, [sessionId, bookingId, user?.id])
 
   const verifyPaymentAndLoadBooking = async () => {
     try {
@@ -135,17 +138,31 @@ const BookingConfirmation = () => {
         return
       }
 
+      console.log('✅ Booking loaded successfully:', {
+        id: data.id,
+        event_date: data.event_date,
+        event_time: data.event_time,
+        city: data.city,
+        state: data.state,
+        location_city: data.location_city,
+        location_state: data.location_state,
+        venue_name: data.venue_name,
+        location_title: data.location_title
+      })
+
       setBooking(data)
-      
-      // Generate contract if not exists
+
+      // Generate contract if not exists (non-blocking)
       if (!data.contract_url) {
-        await generateContract(data)
+        generateContract(data).catch(err => {
+          console.warn('Contract generation failed (non-critical):', err)
+        })
       } else {
         setContractUrl(data.contract_url)
       }
-      
+
     } catch (error) {
-      console.error('Error loading booking:', error)
+      console.error('❌ Error loading booking:', error)
       toast.error('Failed to load booking details')
     } finally {
       setLoading(false)
@@ -229,7 +246,7 @@ const BookingConfirmation = () => {
             </tr>
             <tr>
               <td><strong>Photographer:</strong></td>
-              <td>${bookingData.photographers?.users?.full_name}</td>
+              <td>${bookingData.photographers?.users?.full_name?.split(' ')[0] || 'Photographer'}</td>
             </tr>
             <tr>
               <td><strong>Package:</strong></td>
@@ -404,13 +421,13 @@ const BookingConfirmation = () => {
               <h3 className="font-medium text-dusty-900 mb-4">Your Photographer</h3>
               <div className="flex items-center space-x-4 mb-4">
                 <img
-                  src={booking.photographers?.users?.avatar_url || `https://ui-avatars.com/api/?name=${booking.photographers?.users?.full_name}`}
-                  alt={booking.photographers?.users?.full_name}
+                  src={booking.photographers?.users?.avatar_url || `https://ui-avatars.com/api/?name=${getFirstNameOnly(booking.photographers?.users?.full_name)}`}
+                  alt={getFirstNameOnly(booking.photographers?.users?.full_name)}
                   className="w-16 h-16 rounded-full object-cover"
                 />
                 <div>
                   <p className="font-semibold text-dusty-900">
-                    {booking.photographers?.users?.full_name}
+                    {getFirstNameOnly(booking.photographers?.users?.full_name)}
                   </p>
                   <Badge variant={booking.photographers?.pay_tiers?.name?.toLowerCase()} size="sm">
                     {booking.photographers?.pay_tiers?.name} Photographer
@@ -418,15 +435,15 @@ const BookingConfirmation = () => {
                 </div>
               </div>
               
-              <div className="space-y-2 text-sm">
-                <div className="flex items-center text-dusty-600">
-                  <MailIcon className="w-4 h-4 mr-2" />
-                  {booking.photographers?.users?.email}
-                </div>
-                <div className="flex items-center text-dusty-600">
-                  <PhoneIcon className="w-4 h-4 mr-2" />
-                  {booking.photographers?.users?.phone}
-                </div>
+              {/* Studio Contact Information */}
+              <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-xs text-blue-900 font-medium mb-1">Questions about your booking?</p>
+                <p className="text-xs text-blue-800">
+                  Contact our Studio team at{' '}
+                  <a href="mailto:studio@team.loveandphotos.com" className="font-medium underline hover:text-blue-600">
+                    studio@team.loveandphotos.com
+                  </a>
+                </p>
               </div>
             </div>
 
@@ -440,14 +457,30 @@ const BookingConfirmation = () => {
                 </div>
                 <div className="flex items-center text-dusty-700">
                   <ClockIcon className="w-5 h-5 mr-3 text-dusty-400" />
-                  {booking.event_time} • {booking.packages?.duration_minutes} minutes
+                  {booking.event_time
+                    ? new Date(`2000-01-01T${booking.event_time}`).toLocaleTimeString('en-US', {
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        hour12: true
+                      })
+                    : 'Time TBD'}
+                  {booking.packages?.duration_minutes && ` • ${booking.packages.duration_minutes} minutes`}
                 </div>
                 <div className="flex items-center text-dusty-700">
                   <MapPinIcon className="w-5 h-5 mr-3 text-dusty-400" />
                   <div>
-                    <p>{booking.venue_name}</p>
+                    {booking.venue_name && <p className="font-medium">{booking.venue_name}</p>}
                     <p className="text-sm text-dusty-600">
-                      {booking.venue_address?.street}, {booking.venue_address?.city}, {booking.venue_address?.state} {booking.venue_address?.zip}
+                      {/* Priority: location_city+state → venue_name → venue_address → TBD */}
+                      {booking.location_city && booking.location_state ? (
+                        `${booking.location_city}, ${booking.location_state}`
+                      ) : booking.venue_name ? (
+                        booking.venue_name
+                      ) : booking.venue_address?.city && booking.venue_address?.state ? (
+                        `${booking.venue_address.city}, ${booking.venue_address.state}`
+                      ) : (
+                        'TBD'
+                      )}
                     </p>
                   </div>
                 </div>
@@ -480,14 +513,67 @@ const BookingConfirmation = () => {
               <div>
                 <h3 className="font-medium text-dusty-900 mb-3">Payment Summary</h3>
                 <div className="space-y-2">
-                  <div className="flex justify-between text-dusty-700">
-                    <span>Package Price</span>
-                    <span className="font-semibold">${booking.total_amount}</span>
-                  </div>
-                  <div className="flex justify-between text-green-600 text-lg pt-2 border-t">
-                    <span className="font-semibold">Total Paid</span>
-                    <span className="font-bold">${booking.total_amount}</span>
-                  </div>
+                  {(() => {
+                    const basePrice = booking.total_amount || 0
+                    const finalPrice = booking.final_amount || booking.final_price || basePrice
+                    const difference = finalPrice - basePrice
+
+                    return (
+                      <>
+                        <div className="flex justify-between text-dusty-700">
+                          <span>Base Package Price</span>
+                          <span className="font-medium">
+                            {new Intl.NumberFormat('en-US', {
+                              style: 'currency',
+                              currency: 'USD',
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2
+                            }).format(basePrice)}
+                          </span>
+                        </div>
+
+                        {difference > 0 && (
+                          <div className="flex justify-between text-dusty-700">
+                            <span className="text-sm">Add-ons & Adjustments</span>
+                            <span className="font-medium text-sm">
+                              +{new Intl.NumberFormat('en-US', {
+                                style: 'currency',
+                                currency: 'USD',
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2
+                              }).format(difference)}
+                            </span>
+                          </div>
+                        )}
+
+                        {difference < 0 && (
+                          <div className="flex justify-between text-dusty-700">
+                            <span className="text-sm">Discount</span>
+                            <span className="font-medium text-sm text-green-600">
+                              {new Intl.NumberFormat('en-US', {
+                                style: 'currency',
+                                currency: 'USD',
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2
+                              }).format(difference)}
+                            </span>
+                          </div>
+                        )}
+
+                        <div className="flex justify-between text-red-600 text-lg pt-2 border-t">
+                          <span className="font-semibold">Total Paid</span>
+                          <span className="font-bold">
+                            {new Intl.NumberFormat('en-US', {
+                              style: 'currency',
+                              currency: 'USD',
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2
+                            }).format(finalPrice)}
+                          </span>
+                        </div>
+                      </>
+                    )
+                  })()}
                   <div className="flex items-center text-sm text-gray-500 mt-2">
                     <CreditCardIcon className="w-4 h-4 mr-2" />
                     Paid via Stripe

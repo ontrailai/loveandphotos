@@ -7,7 +7,7 @@
  * - Bio: 500+ characters OR 100+ words
  * - Portfolio: 10+ images
  * - Languages: At least 1 language
- * - Address: Complete address (street, city, zip)
+ * - Address: City and ZIP code (street address is optional)
  */
 
 /**
@@ -20,27 +20,29 @@ function countWords(text) {
 
 /**
  * Check if a photographer profile is complete
- * @param {Object} profile - Photographer profile object
- * @param {Object} user - User object with avatar_url
+ * @param {Object} photographerProfile - Photographer profile object (from photographers table)
+ * @param {Object} userProfile - User profile object (from users table with avatar_url)
  * @returns {Object} - { isComplete: boolean, missingFields: string[], completionPercentage: number }
  */
-export function isProfileComplete(profile, user) {
+export function isProfileComplete(photographerProfile, userProfile) {
   const missingFields = []
   const requirements = []
 
-  // Requirement 1: Profile photo
+  // Requirement 1: Profile photo (avatar_url is stored in users table)
+  const hasAvatar = userProfile?.avatar_url && userProfile.avatar_url.trim() !== ''
+
   requirements.push({
     name: 'Profile Photo',
-    met: user?.avatar_url && user.avatar_url.trim() !== '',
+    met: hasAvatar,
     field: 'avatar_url'
   })
-  if (!user?.avatar_url || user.avatar_url.trim() === '') {
+  if (!hasAvatar) {
     missingFields.push('Profile photo')
   }
 
   // Requirement 2: Bio (500 characters OR 100 words)
-  const bioLength = profile?.bio ? profile.bio.length : 0
-  const bioWordCount = countWords(profile?.bio || '')
+  const bioLength = photographerProfile?.bio ? photographerProfile.bio.length : 0
+  const bioWordCount = countWords(photographerProfile?.bio || '')
   const bioMet = bioLength >= 500 || bioWordCount >= 100
   requirements.push({
     name: 'Bio',
@@ -54,8 +56,8 @@ export function isProfileComplete(profile, user) {
   }
 
   // Requirement 3: Portfolio images (minimum 10)
-  const portfolioCount = Array.isArray(profile?.portfolio_images)
-    ? profile.portfolio_images.length
+  const portfolioCount = Array.isArray(photographerProfile?.portfolio_images)
+    ? photographerProfile.portfolio_images.length
     : 0
   const portfolioMet = portfolioCount >= 10
   requirements.push({
@@ -70,8 +72,8 @@ export function isProfileComplete(profile, user) {
   }
 
   // Requirement 4: Languages (at least 1)
-  const languagesCount = Array.isArray(profile?.languages)
-    ? profile.languages.length
+  const languagesCount = Array.isArray(photographerProfile?.languages)
+    ? photographerProfile.languages.length
     : 0
   const languagesMet = languagesCount > 0
   requirements.push({
@@ -85,23 +87,21 @@ export function isProfileComplete(profile, user) {
     missingFields.push('At least one language')
   }
 
-  // Requirement 5: Complete address
-  const hasStreet = profile?.address_line1 && profile.address_line1.trim() !== ''
-  const hasCity = profile?.city && profile.city.trim() !== ''
-  const hasZip = profile?.zip_code && profile.zip_code.trim() !== ''
-  const addressMet = hasStreet && hasCity && hasZip
+  // Requirement 5: Complete address (city and ZIP required, street optional)
+  const hasCity = photographerProfile?.city && photographerProfile.city.trim() !== ''
+  const hasZip = photographerProfile?.zip_code && photographerProfile.zip_code.trim() !== ''
+  const addressMet = hasCity && hasZip
 
   requirements.push({
     name: 'Address',
     met: addressMet,
     field: 'address',
-    current: [hasStreet ? '✓' : '✗', hasCity ? '✓' : '✗', hasZip ? '✓' : '✗'].join(' '),
-    required: 'Street, City, ZIP'
+    current: [hasCity ? '✓' : '✗', hasZip ? '✓' : '✗'].join(' '),
+    required: 'City, ZIP'
   })
 
   if (!addressMet) {
     const missingAddressParts = []
-    if (!hasStreet) missingAddressParts.push('street address')
     if (!hasCity) missingAddressParts.push('city')
     if (!hasZip) missingAddressParts.push('ZIP code')
     missingFields.push(`Address (${missingAddressParts.join(', ')})`)

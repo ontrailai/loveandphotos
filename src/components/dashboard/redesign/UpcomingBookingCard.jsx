@@ -10,11 +10,10 @@ import {
   Clock,
   MapPin,
   Star,
-  Mail,
-  Phone,
   X
 } from 'lucide-react'
 import { parseISO } from 'date-fns'
+import { getFirstNameOnly } from '@lib/privacy/sanitizeTalentData'
 
 // Countdown Timer Component
 function CountdownTimer({ targetDate }) {
@@ -61,22 +60,44 @@ function CountdownTimer({ targetDate }) {
 const UpcomingBookingCard = ({
   booking,
   onModify,
-  onMessage,
   onViewDetails,
   onViewInvoice
 }) => {
   const shouldReduceMotion = useReducedMotion()
   const shouldAnimate = !shouldReduceMotion
 
-  const photographerName = booking.photographers?.users?.full_name || 'Unknown Photographer'
+  const photographerName = getFirstNameOnly(booking.photographers?.users?.full_name)
   const photographerAvatar = booking.photographers?.users?.avatar_url
   const photographerRating = booking.photographers?.average_rating || 0
   const photographerSpecialty = booking.photographers?.pay_tiers?.name || 'Photography'
   const packageTitle = booking.packages?.title || 'Photography Package'
   const eventDate = parseISO(booking.event_date)
-  const eventTime = booking.event_time || 'TBD'
-  const eventLocation = booking.venue_name || 'TBD'
-  const price = booking.final_price || booking.base_price || 0
+
+  // Format event time with AM/PM
+  const eventTime = booking.event_time
+    ? new Date(`2000-01-01T${booking.event_time}`).toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      })
+    : 'TBD'
+
+  // Location with cascading fallback: location_city + location_state -> venue_name -> venue_address -> TBD
+  const eventLocation = booking.location_city && booking.location_state
+    ? `${booking.location_city}, ${booking.location_state}`
+    : booking.venue_name ||
+      (booking.venue_address?.city && booking.venue_address?.state
+        ? `${booking.venue_address.city}, ${booking.venue_address.state}`
+        : 'TBD')
+
+  // Price formatting with proper USD display
+  const price = booking.final_price || booking.total_amount || booking.base_price || 0
+  const formattedPrice = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(price)
 
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -144,10 +165,20 @@ const UpcomingBookingCard = ({
               <CountdownTimer targetDate={eventDate} />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground mb-1">Price</p>
-              <p className="text-2xl font-bold text-primary">${price}</p>
+              <p className="text-sm text-muted-foreground mb-1">Total Price</p>
+              <p className="text-2xl font-bold text-red-600">{formattedPrice}</p>
             </div>
           </div>
+        </div>
+
+        {/* Studio Contact Notice */}
+        <div className="mt-6 mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <p className="text-sm text-blue-900">
+            Questions about your booking? Contact our Studio team at{' '}
+            <a href="mailto:studio@team.loveandphotos.com" className="font-medium underline hover:text-blue-700">
+              studio@team.loveandphotos.com
+            </a>
+          </p>
         </div>
 
         {/* Action Buttons */}
@@ -155,25 +186,8 @@ const UpcomingBookingCard = ({
           <motion.button
             whileHover={shouldAnimate ? { scale: 1.02 } : {}}
             whileTap={shouldAnimate ? { scale: 0.98 } : {}}
-            onClick={onMessage}
-            className="flex-1 min-w-[140px] bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
-          >
-            <Mail className="w-4 h-4" />
-            Message
-          </motion.button>
-          <motion.button
-            whileHover={shouldAnimate ? { scale: 1.02 } : {}}
-            whileTap={shouldAnimate ? { scale: 0.98 } : {}}
-            className="flex-1 min-w-[140px] bg-muted text-foreground px-4 py-2 rounded-lg font-medium hover:bg-muted/80 transition-colors flex items-center justify-center gap-2"
-          >
-            <Phone className="w-4 h-4" />
-            Call
-          </motion.button>
-          <motion.button
-            whileHover={shouldAnimate ? { scale: 1.02 } : {}}
-            whileTap={shouldAnimate ? { scale: 0.98 } : {}}
             onClick={onViewDetails}
-            className="flex-1 min-w-[140px] bg-muted text-foreground px-4 py-2 rounded-lg font-medium hover:bg-muted/80 transition-colors"
+            className="flex-1 min-w-[140px] bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors"
           >
             View Details
           </motion.button>

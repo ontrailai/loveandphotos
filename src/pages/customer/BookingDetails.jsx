@@ -8,6 +8,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '@contexts/AuthContext'
 import { supabase } from '@lib/supabase'
 import { format, parseISO } from 'date-fns'
+import { getFirstNameOnly } from '@lib/privacy/sanitizeTalentData'
 import {
   Calendar,
   Clock,
@@ -114,9 +115,7 @@ const BookingDetails = () => {
     )
   }
 
-  const photographerName = booking.photographers?.users?.full_name || 'Unknown'
-  const photographerEmail = booking.photographers?.users?.email
-  const photographerPhone = booking.photographers?.users?.phone
+  const photographerName = getFirstNameOnly(booking.photographers?.users?.full_name)
   const packageTitle = booking.packages?.title || 'Photography Package'
   const totalAmount = parseFloat(booking.final_amount || booking.total_amount || 0)
   const isSigned = !!booking.contract_signatures?.[0]
@@ -192,35 +191,16 @@ const BookingDetails = () => {
                 </div>
               </div>
 
-              {photographerEmail && (
-                <div className="flex items-start gap-3">
-                  <Mail className="w-5 h-5 text-muted-foreground mt-0.5" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">Email</p>
-                    <a
-                      href={`mailto:${photographerEmail}`}
-                      className="font-medium text-primary hover:underline"
-                    >
-                      {photographerEmail}
-                    </a>
-                  </div>
-                </div>
-              )}
-
-              {photographerPhone && (
-                <div className="flex items-start gap-3">
-                  <Phone className="w-5 h-5 text-muted-foreground mt-0.5" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">Phone</p>
-                    <a
-                      href={`tel:${photographerPhone}`}
-                      className="font-medium text-primary hover:underline"
-                    >
-                      {photographerPhone}
-                    </a>
-                  </div>
-                </div>
-              )}
+              {/* Studio Contact Information */}
+              <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-sm text-blue-900 font-medium mb-1">Questions about this booking?</p>
+                <p className="text-sm text-blue-800">
+                  Contact our Studio team at{' '}
+                  <a href="mailto:studio@team.loveandphotos.com" className="font-medium underline hover:text-blue-600">
+                    studio@team.loveandphotos.com
+                  </a>
+                </p>
+              </div>
             </div>
           </div>
         </div>
