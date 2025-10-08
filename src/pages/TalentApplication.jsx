@@ -300,9 +300,13 @@ const TalentApplication = () => {
       })
       setStep('result')
 
-      // Redirect to dashboard after 2 seconds
+      // Redirect to appropriate dashboard based on selected role
       setTimeout(() => {
-        navigate('/talent/dashboard')
+        if (selectedRole === 'videographer') {
+          navigate('/talent/dashboard/videographer')
+        } else {
+          navigate('/talent/dashboard')
+        }
       }, 2000)
 
     } catch (error) {

@@ -102,6 +102,7 @@ const TalentMessages = lazy(() => import('@pages/talent/dashboard/MessagesPage')
 const TalentBookings = lazy(() => import('@pages/talent/dashboard/BookingsPage'))
 const TalentSettings = lazy(() => import('@pages/talent/dashboard/SettingsPage'))
 const TalentAvailability = lazy(() => import('@pages/talent/dashboard/AvailabilityPage'))
+const VideographerProfile = lazy(() => import('@pages/talent/dashboard/videographer/VideographerProfilePage'))
 
 // Lazy load photographer placeholders
 const PhotographerPlaceholders = lazy(() => import('@pages/placeholders'))
@@ -260,7 +261,7 @@ function App() {
                 <BrowsePhotographers />
               </Suspense>
             } />
-            <Route path="/photographers/video" element={
+            <Route path="/videographers" element={
               <Suspense fallback={<PageLoader />}>
                 <VideoBrowse />
               </Suspense>
@@ -566,6 +567,15 @@ function App() {
               </Suspense>
             } />
           </Route>
+
+          {/* Videographer Dashboard Route - Separate from Photographer Dashboard */}
+          <Route path="/talent/dashboard/videographer" element={
+            <ProtectedRoute requireRole="photographer">
+              <Suspense fallback={<PageLoader />}>
+                <VideographerProfile />
+              </Suspense>
+            </ProtectedRoute>
+          } />
 
           {/* Admin Routes - Lazy loaded */}
           <Route path="/admin" element={

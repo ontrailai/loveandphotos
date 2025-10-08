@@ -63,23 +63,23 @@ export default function VideoBrowse() {
         .from('photographers')
         .select(`
           *,
-          users!inner(id, email, phone, first_name, last_name, full_name, profile_photo_url, location_city, location_state, location_zip),
+          users!inner(id, email, phone, full_name, avatar_url),
           portfolio_items(id, image_url, title, description),
           pay_tiers(id, name, hourly_rate)
         `)
-        .eq('status', 'active')
-        .eq('users.status', 'active')
-        .contains('specialties', ['video'])
+        .eq('is_videographer', true)
+        .eq('profile_complete', true)
+        .eq('visible_in_search', true)
 
-      // Apply location filter
+      // Apply location filter (city, state, zip_code are in photographers table)
       if (locationQuery.trim()) {
         const normalized = normalizeLocationQuery(locationQuery)
-        query = query.or(`users.location_city.ilike.%${normalized}%, users.location_state.ilike.%${normalized}%, users.location_zip.ilike.%${normalized}%`)
+        query = query.or(`city.ilike.%${normalized}%,state.ilike.%${normalized}%,zip_code.ilike.%${normalized}%`)
       }
 
-      // Apply search filter
+      // Apply search filter (full_name is in users table, bio is in photographers table)
       if (searchQuery.trim()) {
-        query = query.or(`users.first_name.ilike.%${searchQuery}%, users.last_name.ilike.%${searchQuery}%, bio.ilike.%${searchQuery}%`)
+        query = query.or(`users.full_name.ilike.%${searchQuery}%,bio.ilike.%${searchQuery}%`)
       }
 
       // Order by rating
@@ -272,7 +272,7 @@ export default function VideoBrowse() {
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center space-x-3">
                       <SafeAvatar
-                        src={photographer.users?.profile_photo_url}
+                        src={photographer.users?.avatar_url}
                         name={photographer.users?.full_name || `Photographer ${photographer.id}`}
                         size="sm"
                       />
@@ -301,23 +301,11 @@ export default function VideoBrowse() {
                     </div>
                   </div>
 
-                  {/* Pricing */}
-                  <div className="flex items-center justify-between">
-                    {shouldShowPricing ? (
-                      <span className="text-lg font-semibold">
-                        ${photographer.pay_tiers?.hourly_rate || 150}/hr
-                      </span>
-                    ) : (
-                      <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); navigate('/login'); }}>
-                        <LockIcon className="w-3 h-3 mr-1" />
-                        View Pricing
-                      </Button>
+                  {/* Verified Badge */}
+                  <div className="flex items-center justify-end">
+                    {photographer.is_verified && (
+                      <CheckCircleIcon className="w-5 h-5 text-green-500" title="Verified" />
                     )}
-                    <div className="flex items-center space-x-2">
-                      {photographer.is_verified && (
-                        <CheckCircleIcon className="w-5 h-5 text-green-500" title="Verified" />
-                      )}
-                    </div>
                   </div>
 
                   {/* Trust Metrics */}

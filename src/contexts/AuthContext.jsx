@@ -527,7 +527,20 @@ export const AuthProvider = ({ children }) => {
         console.log('[AuthContext] Navigating to dashboard for role:', userProfile.role)
 
         if (userProfile.role === 'photographer') {
-          navigate('/talent/dashboard', { replace: true })
+          // Check if videographer by fetching photographer profile
+          try {
+            const photographerData = await db.photographers.getProfile(data.user.id)
+            if (photographerData?.is_videographer) {
+              console.log('[AuthContext] Routing videographer to videographer dashboard')
+              navigate('/talent/dashboard/videographer', { replace: true })
+            } else {
+              console.log('[AuthContext] Routing photographer to photographer dashboard')
+              navigate('/talent/dashboard', { replace: true })
+            }
+          } catch (error) {
+            console.warn('[AuthContext] Could not determine videographer status, using default route')
+            navigate('/talent/dashboard', { replace: true })
+          }
         } else if (userProfile.role === 'admin') {
           navigate('/admin', { replace: true })
         } else {

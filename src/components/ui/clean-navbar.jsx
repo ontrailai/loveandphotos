@@ -17,7 +17,7 @@ const navItems = [
     href: '/photographers',
     submenu: [
       { name: 'Find Photographers', href: '/photographers', description: 'Search by ZIP, style, or date' },
-      { name: 'Video Only', href: '/photographers/video', description: 'Professional videographers only', icon: <Video size={16} /> },
+      { name: 'Video Only', href: '/videographers', description: 'Professional videographers only', icon: <Video size={16} /> },
       { name: 'How to Book', href: '/how-to-book', description: '3 simple steps to book', icon: <Book size={16} /> }
     ]
   },
@@ -244,13 +244,27 @@ function MobileSheet({ isOpen, onClose, children }) {
 }
 
 export function CleanNavbar({ className = '' }) {
-  const { user, signOut, profile } = useAuth()
+  const { user, signOut, profile, photographerProfile } = useAuth()
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [activeDropdown, setActiveDropdown] = useState(null)
 
   // Check if current user is already a photographer
   const isPhotographer = profile?.role === 'photographer' || user?.user_metadata?.role === 'photographer'
+
+  // Helper function to get the correct dashboard route based on role and videographer status
+  const getDashboardRoute = () => {
+    if (profile?.role === 'photographer') {
+      // Check if user is a videographer
+      if (photographerProfile?.is_videographer) {
+        return '/talent/dashboard/videographer'
+      }
+      return '/talent/dashboard'
+    } else if (profile?.role === 'admin') {
+      return '/admin'
+    }
+    return '/dashboard'
+  }
 
   const handleSignOut = async () => {
     const result = await signOut()
@@ -382,7 +396,7 @@ export function CleanNavbar({ className = '' }) {
             <div className="hidden sm:flex items-center gap-2">
               {user ? (
                 <>
-                  <Link to={profile?.role === 'photographer' ? '/talent/dashboard' : profile?.role === 'admin' ? '/admin' : '/dashboard'}>
+                  <Link to={getDashboardRoute()}>
                     <Button variant="ghost" size="sm">
                       {profile?.role === 'photographer' ? 'Talent Dashboard' : profile?.role === 'admin' ? 'Admin Panel' : 'Dashboard'}
                     </Button>
@@ -483,7 +497,7 @@ export function CleanNavbar({ className = '' }) {
 
             {user ? (
               <>
-                <Link to={profile?.role === 'photographer' ? '/talent/dashboard' : profile?.role === 'admin' ? '/admin' : '/dashboard'}>
+                <Link to={getDashboardRoute()}>
                   <Button variant="ghost" className="w-full justify-start">
                     {profile?.role === 'photographer' ? 'Talent Dashboard' : profile?.role === 'admin' ? 'Admin Panel' : 'Dashboard'}
                   </Button>

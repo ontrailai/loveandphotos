@@ -53,7 +53,7 @@ const PhotographerProfile = () => {
       console.log('[PhotographerProfile] Loading photographer:', id)
 
       // Query photographers table with unavailable_dates for blocking
-      const { data, error } = await supabasePublic
+      const { data, error} = await supabasePublic
         .from('photographers')
         .select(`
           id,
@@ -69,6 +69,7 @@ const PhotographerProfile = () => {
           visible_in_search,
           is_verified,
           lnp_choice,
+          is_videographer,
           average_rating,
           total_reviews,
           portfolio_images,
@@ -76,20 +77,20 @@ const PhotographerProfile = () => {
           completed_jobs_count,
           unavailable_dates
         `)
-        .eq('id', id)
+        .eq('user_id', id)
         .single()
 
       if (error) {
         console.error('[PhotographerProfile] Query error:', error)
         setLoadError(true)
-        toast.error('Photographer not found')
+        toast.error(error.message || 'Profile not found')
         return
       }
 
       if (!data) {
         console.error('[PhotographerProfile] No data returned')
         setLoadError(true)
-        toast.error('Photographer not found')
+        toast.error('Profile not found')
         return
       }
 
@@ -113,13 +114,15 @@ const PhotographerProfile = () => {
       }
 
       // Transform data to expected format with null handling
+      const isVideographer = data.is_videographer || false
       const transformed = {
         id: data.id,
         user_id: data.user_id,
-        bio: data.bio || 'Professional photographer with years of experience.',
+        is_videographer: isVideographer,
+        bio: data.bio || `Professional ${isVideographer ? 'videographer' : 'photographer'} with years of experience.`,
         specialties: Array.isArray(data.style_tags) && data.style_tags.length > 0
           ? data.style_tags
-          : ['Photography'],
+          : [isVideographer ? 'Videography' : 'Photography'],
         languages: Array.isArray(data.languages) && data.languages.length > 0
           ? data.languages
           : ['English'],
@@ -139,7 +142,7 @@ const PhotographerProfile = () => {
         unavailable_dates: Array.isArray(data.unavailable_dates) ? data.unavailable_dates : [],
         // User info with fallbacks
         users: {
-          full_name: userData?.full_name || 'Photographer',
+          full_name: userData?.full_name || (isVideographer ? 'Videographer' : 'Photographer'),
           email: userData?.email || '',
           phone: userData?.phone || '',
           avatar_url: userData?.avatar_url || null
@@ -189,12 +192,18 @@ const PhotographerProfile = () => {
 
   // Error state
   if (loadError || !photographer) {
+    const isVideographer = photographer?.is_videographer
+    const title = isVideographer ? 'Videographer Not Found' : 'Photographer Not Found'
+    const description = isVideographer
+      ? 'The videographer you\'re looking for doesn\'t exist or is no longer available.'
+      : 'The photographer you\'re looking for doesn\'t exist or is no longer available.'
+
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center max-w-md mx-auto px-4">
-          <h2 className="text-2xl font-semibold text-dusty-900 mb-2">Photographer Not Found</h2>
+          <h2 className="text-2xl font-semibold text-dusty-900 mb-2">{title}</h2>
           <p className="text-dusty-600 mb-6">
-            The photographer you're looking for doesn't exist or is no longer available.
+            {description}
           </p>
           <Button onClick={() => navigate('/photographers')}>
             <ArrowLeftIcon className="w-4 h-4 mr-2" />
