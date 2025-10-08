@@ -10,7 +10,8 @@ import {
   Clock,
   MapPin,
   Star,
-  X
+  X,
+  VideoIcon
 } from 'lucide-react'
 import { parseISO } from 'date-fns'
 import { getFirstNameOnly } from '@lib/privacy/sanitizeTalentData'
@@ -72,6 +73,11 @@ const UpcomingBookingCard = ({
   const photographerSpecialty = booking.photographers?.pay_tiers?.name || 'Photography'
   const packageTitle = booking.packages?.title || 'Photography Package'
   const eventDate = parseISO(booking.event_date)
+
+  // Videographer data (optional)
+  const hasVideographer = !!booking.videographer
+  const videographerName = hasVideographer ? getFirstNameOnly(booking.videographer?.users?.full_name) : null
+  const videographerAvatar = booking.videographer?.users?.avatar_url
 
   // Format event time with AM/PM
   const eventTime = booking.event_time
@@ -153,6 +159,25 @@ const UpcomingBookingCard = ({
               </div>
             </div>
           </div>
+
+          {/* Videographer Info (if present) */}
+          {hasVideographer && (
+            <div className="flex items-start gap-4 flex-1 pt-4 border-t">
+              <motion.img
+                whileHover={shouldAnimate ? { scale: 1.1 } : {}}
+                src={videographerAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(videographerName)}&size=150`}
+                alt={videographerName}
+                className="w-20 h-20 rounded-lg object-cover"
+              />
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <VideoIcon className="w-4 h-4 text-rose-600" />
+                  <h3 className="text-lg font-semibold">{videographerName}</h3>
+                </div>
+                <p className="text-sm text-muted-foreground">Videographer</p>
+              </div>
+            </div>
+          )}
 
           {/* Booking Details */}
           <div className="lg:border-l lg:pl-6 space-y-4">

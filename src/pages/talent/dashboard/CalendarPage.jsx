@@ -139,6 +139,7 @@ const CalendarPage = () => {
             package_id
           `)
           .eq('photographer_id', photographerProfile.id)
+          .eq('payment_status', 'paid') // ✅ Only show paid bookings on calendar
           .neq('booking_status', 'cancelled')
           .order('event_date', { ascending: true }),
 

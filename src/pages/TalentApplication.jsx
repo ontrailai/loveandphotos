@@ -268,7 +268,8 @@ const TalentApplication = () => {
       const signupResult = await signUp(formData.email, formData.password, {
         role: 'photographer', // Both roles use 'photographer' role
         fullName: formData.full_name,
-        phone: formData.phone
+        phone: formData.phone,
+        isVideographer: selectedRole === 'videographer' // Set flag for videographers
       })
 
       if (!signupResult.success) {

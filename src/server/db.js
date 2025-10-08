@@ -179,6 +179,7 @@ export async function markBookingPaid(bookingId, paymentData) {
 
   const updatePayload = {
     payment_status: paymentData.status || 'paid',
+    booking_status: 'confirmed', // ✅ Set booking as confirmed when payment succeeds
     stripe_payment_intent_id: paymentData.payment_intent_id || paymentData.stripe_payment_intent_id || null,
     final_amount: amountPaid,
     paid_at: new Date().toISOString(),

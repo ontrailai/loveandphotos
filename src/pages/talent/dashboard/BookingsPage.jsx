@@ -55,6 +55,7 @@ const BookingsPage = () => {
           venue_name,
           venue_address,
           booking_status,
+          payment_status,
           total_amount,
           created_at,
           personalization_data,
@@ -131,26 +132,45 @@ const BookingsPage = () => {
     return 'Location TBD'
   }
 
-  const getStatusBadge = (status) => {
+  const getStatusBadge = (booking) => {
+    // ✅ Display badge based on payment_status (primary) and booking_status (secondary)
     const statusConfig = {
       pending: {
         bg: 'bg-yellow-100',
         text: 'text-yellow-800',
-        label: 'Pending'
+        label: 'Pending Payment'
       },
-      confirmed: {
+      paid: {
         bg: 'bg-green-100',
         text: 'text-green-800',
-        label: 'Confirmed'
+        label: 'Paid'
       },
       completed: {
         bg: 'bg-blue-100',
         text: 'text-blue-800',
         label: 'Completed'
+      },
+      failed: {
+        bg: 'bg-red-100',
+        text: 'text-red-800',
+        label: 'Payment Failed'
+      },
+      refunded: {
+        bg: 'bg-gray-100',
+        text: 'text-gray-800',
+        label: 'Refunded'
       }
     }
 
-    const config = statusConfig[status] || statusConfig.pending
+    // Determine status based on payment_status and booking_status
+    let displayStatus = booking.payment_status || 'pending'
+
+    // If booking is completed, override to show completed
+    if (booking.booking_status === 'completed') {
+      displayStatus = 'completed'
+    }
+
+    const config = statusConfig[displayStatus] || statusConfig.pending
     return (
       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.bg} ${config.text}`}>
         {config.label}
@@ -459,7 +479,7 @@ const BookingsPage = () => {
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          {getStatusBadge(booking.booking_status)}
+                          {getStatusBadge(booking)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right">
                           <button

@@ -10,6 +10,7 @@ import { useBookingFlow } from '@contexts/BookingFlowContext'
 import BookingStepper from '@components/booking/BookingStepper'
 import Button from '@components/ui/Button'
 import Card from '@components/ui/Card'
+import VideoAddOnModal from '@components/booking/VideoAddOnModal'
 import { clsx } from 'clsx'
 
 const PackageDetails = () => {
@@ -26,6 +27,7 @@ const PackageDetails = () => {
   const [selectedPackage, setSelectedPackage] = useState(
     bookingFlow.packageDetails?.packageType || null
   )
+  const [showVideoModal, setShowVideoModal] = useState(false)
 
   // Check if user can access this step
   useEffect(() => {
@@ -51,11 +53,24 @@ const PackageDetails = () => {
     })
   }
 
-  // Handle continue to next step
+  // Handle continue to next step - show video modal first
   const handleContinue = () => {
     if (selectedPackage) {
-      navigate(`/booking/${photographerId}/addons`)
+      // Show video add-on modal before proceeding
+      setShowVideoModal(true)
     }
+  }
+
+  // Handle video modal "Yes" - navigate to videographer selection
+  const handleAddVideo = () => {
+    setShowVideoModal(false)
+    navigate(`/booking/select-videographer`)
+  }
+
+  // Handle video modal "No" - proceed to add-ons
+  const handleSkipVideo = () => {
+    setShowVideoModal(false)
+    navigate(`/booking/${photographerId}/addons`)
   }
 
   // Photography tier packages with pricing
@@ -320,6 +335,14 @@ const PackageDetails = () => {
           </p>
         )}
       </div>
+
+      {/* Video Add-On Modal */}
+      <VideoAddOnModal
+        isOpen={showVideoModal}
+        onClose={() => setShowVideoModal(false)}
+        onAddVideo={handleAddVideo}
+        onSkip={handleSkipVideo}
+      />
     </div>
   )
 }

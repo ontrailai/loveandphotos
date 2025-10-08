@@ -10,7 +10,7 @@ import { useBookingFlow } from '@contexts/BookingFlowContext'
 import { useAuth } from '@contexts/AuthContext'
 import Button from '@components/ui/Button'
 import ErrorBoundary from '@components/ui/ErrorBoundary'
-import { CheckCircle, CreditCard, Calendar, MapPin, Camera, AlertCircle, ArrowRight, Download } from 'lucide-react'
+import { CheckCircle, CreditCard, Calendar, MapPin, Camera, AlertCircle, ArrowRight, Download, VideoIcon } from 'lucide-react'
 import { clsx } from 'clsx'
 
 const PaymentSuccess = () => {
@@ -241,6 +241,17 @@ const PaymentSuccess = () => {
                     {bookingFlow?.packageDetails?.packageTitle || 'Custom Package'}
                   </p>
                 </div>
+                {bookingFlow?.videographerId && (
+                  <div>
+                    <h3 className="font-medium mb-2 flex items-center">
+                      <VideoIcon className="w-4 h-4 mr-1.5 text-rose-600" />
+                      Videographer
+                    </h3>
+                    <p className="text-gray-600 text-sm">
+                      Professional videographer added to your booking
+                    </p>
+                  </div>
+                )}
                 {bookingFlow?.addonsDetails?.selectedAddons?.length > 0 && (
                   <div>
                     <h3 className="font-medium mb-2">Add-ons</h3>

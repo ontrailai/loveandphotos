@@ -80,9 +80,10 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
 async function handleCheckoutSessionCompleted(session) {
   console.log(`Processing checkout.session.completed: ${session.id}`)
 
-  const bookingId = session.metadata?.bookingId
+  // Support both camelCase and snake_case for backward compatibility
+  const bookingId = session.metadata?.bookingId || session.metadata?.booking_id
   if (!bookingId) {
-    console.error('No bookingId found in session metadata')
+    console.error('No bookingId or booking_id found in session metadata:', session.metadata)
     return
   }
 
@@ -179,8 +180,38 @@ async function handlePaymentIntentSucceeded(paymentIntent) {
   // This is called after checkout.session.completed for most payments
 
   const bookingId = paymentIntent.metadata?.booking_id
-  if (bookingId) {
-    console.log(`Payment confirmed for booking: ${bookingId}`)
+  if (!bookingId) {
+    console.error('No booking_id found in payment intent metadata')
+    return
+  }
+
+  console.log(`Payment confirmed for booking: ${bookingId}`)
+
+  // Update booking status to confirmed
+  const paymentData = {
+    amount_paid_cents: paymentIntent.amount || 0,
+    currency: paymentIntent.currency || 'usd',
+    plan: paymentIntent.metadata?.payment_plan || 'full',
+    status: 'paid',
+    payment_intent_id: paymentIntent.id
+  }
+
+  const success = await markBookingPaid(bookingId, paymentData)
+
+  if (success) {
+    console.log(`✅ Booking ${bookingId} marked as paid successfully via payment_intent.succeeded`)
+
+    // Send confirmation email (non-blocking)
+    sendPaymentConfirmationEmail({
+      bookingId,
+      paymentIntentId: paymentIntent.id,
+      amountPaid: paymentIntent.amount,
+      paymentPlan: paymentIntent.metadata?.payment_plan || 'full'
+    }).catch(err => {
+      console.error('📧 Email send error (non-blocking):', err)
+    })
+  } else {
+    console.error(`❌ Failed to mark booking ${bookingId} as paid`)
   }
 }
 

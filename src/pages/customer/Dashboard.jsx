@@ -73,12 +73,27 @@ const CustomerDashboard = () => {
     try {
       setLoading(true)
 
-      // Load bookings
+      // Load bookings with photographer AND videographer data
       const { data: bookingsData, error: bookingsError } = await supabase
         .from('bookings')
         .select(`
           *,
           photographers (
+            id,
+            users!inner (
+              full_name,
+              avatar_url,
+              phone,
+              email
+            ),
+            pay_tiers (
+              name,
+              badge_color
+            ),
+            average_rating,
+            total_reviews
+          ),
+          videographer:videographer_id (
             id,
             users!inner (
               full_name,

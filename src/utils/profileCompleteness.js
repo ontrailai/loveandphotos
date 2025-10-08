@@ -4,19 +4,11 @@
  *
  * Requirements:
  * - Profile photo (users.avatar_url)
- * - Bio: 500+ characters OR 100+ words
+ * - Bio: 500+ characters (strictly enforced)
  * - Portfolio: 10+ images
  * - Languages: At least 1 language
  * - Address: City and ZIP code (street address is optional)
  */
-
-/**
- * Count words in a string
- */
-function countWords(text) {
-  if (!text || typeof text !== 'string') return 0
-  return text.trim().split(/\s+/).filter(word => word.length > 0).length
-}
 
 /**
  * Check if a photographer profile is complete
@@ -40,19 +32,18 @@ export function isProfileComplete(photographerProfile, userProfile) {
     missingFields.push('Profile photo')
   }
 
-  // Requirement 2: Bio (500 characters OR 100 words)
+  // Requirement 2: Bio (strictly 500+ characters)
   const bioLength = photographerProfile?.bio ? photographerProfile.bio.length : 0
-  const bioWordCount = countWords(photographerProfile?.bio || '')
-  const bioMet = bioLength >= 500 || bioWordCount >= 100
+  const bioMet = bioLength >= 500
   requirements.push({
     name: 'Bio',
     met: bioMet,
     field: 'bio',
-    current: `${bioLength} chars, ${bioWordCount} words`,
-    required: '500 characters or 100 words'
+    current: `${bioLength} characters`,
+    required: '500 characters minimum'
   })
   if (!bioMet) {
-    missingFields.push(`Bio (${bioLength}/500 characters or ${bioWordCount}/100 words)`)
+    missingFields.push(`Bio (${bioLength}/500 characters)`)
   }
 
   // Requirement 3: Portfolio images (minimum 10)

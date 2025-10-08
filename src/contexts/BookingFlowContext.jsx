@@ -42,6 +42,7 @@ export const BookingFlowProvider = ({ children }) => {
   const [sessionId] = useState(getBookingSessionId)
   const [bookingFlow, setBookingFlow] = useState({
     photographerId: null,
+    videographerId: null, // Optional videographer ID for video add-on
     bookingId: null, // Database booking ID once created
     currentStep: 'schedule',
     completedSteps: [],
@@ -348,6 +349,14 @@ export const BookingFlowProvider = ({ children }) => {
     }))
   }, [])
 
+  // Set videographer ID (called when user adds videographer to booking)
+  const setVideographerId = useCallback((videographerId) => {
+    setBookingFlow(prev => ({
+      ...prev,
+      videographerId
+    }))
+  }, [])
+
   // Update account details
   const updateAccountDetails = useCallback((accountData) => {
     setBookingFlow(prev => {
@@ -635,6 +644,7 @@ export const BookingFlowProvider = ({ children }) => {
     updateAddonsDetails,
     updateLocationDetails,
     setBookingId,
+    setVideographerId,
     updateAccountDetails,
     updateContractDetails,
     updatePaymentDetails,

@@ -603,121 +603,13 @@ const ProfilePage = () => {
         )}
       </div>
 
-      {/* Dynamic Profile Completion Tracker */}
-      {!profileIsComplete && (
-        <div className="bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-yellow-300 rounded-xl p-6 shadow-sm" role="alert" aria-live="polite">
-          <div className="flex items-start">
-            <div className="flex-shrink-0">
-              <AlertCircle className="w-6 h-6 text-yellow-600" aria-hidden="true" />
-            </div>
-            <div className="ml-4 flex-1">
-              <h3 className="text-lg font-semibold text-yellow-900 mb-1">
-                Complete Your Profile ({completedFields}/{totalFields} complete)
-              </h3>
-              <p className="text-sm text-yellow-800 mb-3">
-                A complete profile helps clients find and book you. Fill in all sections below to start receiving bookings.
-              </p>
-
-              {/* Progress Bar */}
-              <div className="w-full bg-yellow-200 rounded-full h-3 mb-4 overflow-hidden">
-                <div
-                  className="bg-gradient-to-r from-yellow-500 to-amber-500 h-3 rounded-full transition-all duration-500 ease-in-out shadow-sm"
-                  style={{ width: `${completionPercentage}%` }}
-                  role="progressbar"
-                  aria-valuenow={completionPercentage}
-                  aria-valuemin={0}
-                  aria-valuemax={100}
-                  aria-label={`Profile completion: ${completionPercentage}%`}
-                />
-              </div>
-
-              {/* Detailed Checklist */}
-              <ul className="space-y-2 text-sm">
-                <li className={`flex items-start ${profileCompletion.bio ? 'text-green-700' : 'text-yellow-800'}`}>
-                  <span className="mr-2 mt-0.5 flex-shrink-0">
-                    {profileCompletion.bio ? '✅' : '⬜'}
-                  </span>
-                  <span>
-                    {profileCompletion.bio
-                      ? `Bio complete (${formData.bio?.length} characters, ${formData.bio?.trim().split(/\s+/).filter(w => w.length > 0).length} words)`
-                      : `Write a bio (at least 500 characters OR 100 words${formData.bio?.length ? `, currently ${formData.bio.length} characters, ${formData.bio.trim().split(/\s+/).filter(w => w.length > 0).length} words` : ''})`
-                    }
-                  </span>
-                </li>
-
-                <li className={`flex items-start ${profileCompletion.gender ? 'text-green-700' : 'text-yellow-800'}`}>
-                  <span className="mr-2 mt-0.5 flex-shrink-0">
-                    {profileCompletion.gender ? '✅' : '⬜'}
-                  </span>
-                  <span>
-                    {profileCompletion.gender ? 'Gender selected' : 'Select your gender'}
-                  </span>
-                </li>
-
-                <li className={`flex items-start ${profileCompletion.experience_years ? 'text-green-700' : 'text-yellow-800'}`}>
-                  <span className="mr-2 mt-0.5 flex-shrink-0">
-                    {profileCompletion.experience_years ? '✅' : '⬜'}
-                  </span>
-                  <span>
-                    {profileCompletion.experience_years
-                      ? `Experience: ${formData.experience_years} years`
-                      : 'Enter years of experience (must be > 0)'
-                    }
-                  </span>
-                </li>
-
-                <li className={`flex items-start ${profileCompletion.style_tags ? 'text-green-700' : 'text-yellow-800'}`}>
-                  <span className="mr-2 mt-0.5 flex-shrink-0">
-                    {profileCompletion.style_tags ? '✅' : '⬜'}
-                  </span>
-                  <span>
-                    {profileCompletion.style_tags
-                      ? `${formData.style_tags?.length} photography style${formData.style_tags?.length !== 1 ? 's' : ''} selected`
-                      : 'Choose at least one photography style'
-                    }
-                  </span>
-                </li>
-
-                <li className={`flex items-start ${profileCompletion.portfolio_images ? 'text-green-700' : 'text-yellow-800'}`}>
-                  <span className="mr-2 mt-0.5 flex-shrink-0">
-                    {profileCompletion.portfolio_images ? '✅' : '⬜'}
-                  </span>
-                  <span>
-                    {profileCompletion.portfolio_images
-                      ? `${formData.portfolio_images?.length} portfolio photos uploaded`
-                      : `Upload at least 10 portfolio photos${formData.portfolio_images?.length ? ` (currently ${formData.portfolio_images.length})` : ''}`
-                    }
-                  </span>
-                </li>
-
-                <li className={`flex items-start ${profileCompletion.location ? 'text-green-700' : 'text-yellow-800'}`}>
-                  <span className="mr-2 mt-0.5 flex-shrink-0">
-                    {profileCompletion.location ? '✅' : '⬜'}
-                  </span>
-                  <span>
-                    {profileCompletion.location
-                      ? `Location: ${formData.city}, ${formData.state} ${formData.zip_code}`
-                      : 'Complete location (city, state, ZIP code required for search)'
-                    }
-                  </span>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Performance Stats */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
           <TrendingUp className="w-5 h-5 mr-2 text-primary-600" aria-hidden="true" />
           Performance Stats
         </h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-primary-600">{stats.acceptance_rate}%</div>
-            <div className="text-xs text-gray-600 mt-1">Acceptance Rate</div>
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="text-center">
             <div className="text-2xl font-bold text-primary-600 flex items-center justify-center">
               <Star className="w-5 h-5 mr-1 fill-current" aria-hidden="true" />
@@ -728,10 +620,6 @@ const ProfilePage = () => {
           <div className="text-center">
             <div className="text-2xl font-bold text-primary-600">{stats.total_bookings}</div>
             <div className="text-xs text-gray-600 mt-1">Total Bookings</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-primary-600">{stats.response_time_hours}h</div>
-            <div className="text-xs text-gray-600 mt-1">Avg Response Time</div>
           </div>
         </div>
       </div>
@@ -756,45 +644,95 @@ const ProfilePage = () => {
         <h2 className="text-lg font-semibold text-gray-900">Profile Information</h2>
 
         {/* Auto-Publish Status Banner */}
-        <div className={`p-4 rounded-lg text-sm ${
+        <div className={`p-5 rounded-lg ${
           profileCompletenessValue?.isComplete
             ? 'bg-green-50 border-2 border-green-300'
             : 'bg-amber-50 border-2 border-amber-300'
         }`}>
           {profileCompletenessValue?.isComplete ? (
             <div className="flex items-start gap-3">
-              <Eye className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="font-semibold text-green-900 text-base">✅ Profile Published - Visible to Clients</p>
-                <p className="text-green-800 mt-1">
+              <Eye className="w-6 h-6 text-green-600 mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="font-semibold text-green-900 text-base mb-2">✅ Profile Published - Visible to Clients</p>
+                <p className="text-green-800 text-sm mb-3">
                   Your profile is complete and automatically published! Clients can find you when searching for photographers.
                 </p>
-                <p className="text-green-700 text-xs mt-2">
+
+                {/* Requirements Checklist - All Complete */}
+                {profileCompletenessValue?.requirements && profileCompletenessValue.requirements.length > 0 && (
+                  <div className="bg-white/50 rounded-md p-3 mb-3">
+                    <p className="text-xs font-semibold text-green-900 mb-2">✓ All Requirements Met:</p>
+                    <ul className="space-y-1.5 text-sm">
+                      {profileCompletenessValue.requirements.map((req, index) => (
+                        <li key={index} className="flex items-start gap-2 text-green-700">
+                          <span className="mt-0.5 flex-shrink-0">✅</span>
+                          <span>
+                            <strong>{req.name}:</strong> {req.current || 'Complete'}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                <p className="text-green-700 text-xs font-medium">
                   💡 Your profile will remain public as long as all requirements are met. If you remove required content, it will be automatically unpublished.
                 </p>
               </div>
             </div>
           ) : (
             <div className="flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="font-semibold text-amber-900 text-base">
+              <AlertCircle className="w-6 h-6 text-amber-600 mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="font-semibold text-amber-900 text-base mb-2">
                   ⚠️ Profile Incomplete - {profileCompletenessValue?.completionPercentage || 0}% Complete
                 </p>
-                <p className="text-amber-800 mt-1">
+
+                {/* Progress Bar */}
+                <div className="w-full bg-amber-200 rounded-full h-2.5 mb-3 overflow-hidden">
+                  <div
+                    className="bg-gradient-to-r from-amber-500 to-yellow-500 h-2.5 rounded-full transition-all duration-500 ease-in-out"
+                    style={{ width: `${profileCompletenessValue?.completionPercentage || 0}%` }}
+                    role="progressbar"
+                    aria-valuenow={profileCompletenessValue?.completionPercentage || 0}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                  />
+                </div>
+
+                <p className="text-amber-800 text-sm mb-3">
                   Complete the following requirements to automatically publish your profile and appear in client searches:
                 </p>
-                {profileCompletenessValue?.missingFields && profileCompletenessValue.missingFields.length > 0 && (
-                  <ul className="mt-2 space-y-1 text-amber-900">
-                    {profileCompletenessValue.missingFields.map((field, index) => (
-                      <li key={index} className="flex items-start gap-2">
-                        <span className="text-amber-600 font-bold">•</span>
-                        <span>{field}</span>
-                      </li>
-                    ))}
-                  </ul>
+
+                {/* Detailed Requirements Checklist */}
+                {profileCompletenessValue?.requirements && profileCompletenessValue.requirements.length > 0 && (
+                  <div className="bg-white/50 rounded-md p-3 mb-3">
+                    <ul className="space-y-2 text-sm">
+                      {profileCompletenessValue.requirements.map((req, index) => (
+                        <li key={index} className={`flex items-start gap-2 ${req.met ? 'text-green-700' : 'text-amber-900'}`}>
+                          <span className="mt-0.5 flex-shrink-0 font-bold">
+                            {req.met ? '✅' : '⬜'}
+                          </span>
+                          <span className="flex-1">
+                            <strong>{req.name}:</strong>{' '}
+                            {req.met ? (
+                              <span className="text-green-700">{req.current || 'Complete'}</span>
+                            ) : (
+                              <span>
+                                {req.required}
+                                {req.current && req.current !== '0 characters' && req.current !== '0' && (
+                                  <span className="text-amber-700"> (currently: {req.current})</span>
+                                )}
+                              </span>
+                            )}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 )}
-                <p className="text-amber-700 text-xs mt-3 font-medium">
+
+                <p className="text-amber-700 text-xs font-medium">
                   ✨ Once you complete all requirements, your profile will be <strong>automatically published</strong> - no manual action needed!
                 </p>
               </div>
@@ -836,7 +774,7 @@ const ProfilePage = () => {
             value={formData.bio}
             onChange={handleInputChange}
             className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 ${
-              formData.bio && (formData.bio.length >= 500 || formData.bio.trim().split(/\s+/).filter(w => w.length > 0).length >= 100)
+              formData.bio && formData.bio.length >= 500
                 ? 'border-green-300 focus:ring-green-500 focus:border-green-500'
                 : formData.bio && formData.bio.length > 0
                 ? 'border-amber-300 focus:ring-amber-500 focus:border-amber-500'
@@ -846,21 +784,14 @@ const ProfilePage = () => {
             aria-describedby="bio-description bio-validation"
           />
 
-          {/* Character and Word Count */}
+          {/* Character Count */}
           <div className="mt-2 flex items-center justify-between text-sm">
-            <div className="flex gap-4">
-              <span className={`${
-                formData.bio?.length >= 500 ? 'text-green-600 font-medium' : 'text-gray-600'
-              }`}>
-                {formData.bio?.length || 0} / 500 characters
-              </span>
-              <span className={`${
-                formData.bio?.trim().split(/\s+/).filter(w => w.length > 0).length >= 100 ? 'text-green-600 font-medium' : 'text-gray-600'
-              }`}>
-                {formData.bio?.trim().split(/\s+/).filter(w => w.length > 0).length || 0} / 100 words
-              </span>
-            </div>
-            {formData.bio && (formData.bio.length >= 500 || formData.bio.trim().split(/\s+/).filter(w => w.length > 0).length >= 100) && (
+            <span className={`${
+              formData.bio?.length >= 500 ? 'text-green-600 font-semibold' : 'text-gray-600'
+            }`}>
+              {formData.bio?.length || 0} / 500 characters {formData.bio?.length >= 500 ? '✓' : ''}
+            </span>
+            {formData.bio && formData.bio.length >= 500 && (
               <span className="text-green-600 text-xs font-medium flex items-center gap-1">
                 <CheckCircle className="w-4 h-4" />
                 Requirement met
@@ -869,10 +800,10 @@ const ProfilePage = () => {
           </div>
 
           {/* Validation Message */}
-          {formData.bio && formData.bio.length > 0 && formData.bio.length < 500 && formData.bio.trim().split(/\s+/).filter(w => w.length > 0).length < 100 && (
-            <p id="bio-validation" className="mt-1 text-sm text-amber-600 flex items-start gap-1">
+          {formData.bio && formData.bio.length > 0 && formData.bio.length < 500 && (
+            <p id="bio-validation" className="mt-1 text-sm text-red-600 flex items-start gap-1">
               <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-              <span>Your bio must be at least 500 characters OR 100 words to complete your profile.</span>
+              <span>Your bio must be at least 500 characters to complete your profile. ({500 - formData.bio.length} more characters needed)</span>
             </p>
           )}
 

@@ -10,7 +10,7 @@ const router = express.Router()
 
 /**
  * POST /api/talent/decline-job
- * Decline a job booking and blacklist talent from future jobs with this client
+ * Decline a job booking, blacklist talent account, and schedule for deletion
  *
  * Body: {
  *   booking_id: UUID,
@@ -21,7 +21,7 @@ const router = express.Router()
  * Returns: {
  *   success: boolean,
  *   message: string,
- *   declined_job_id?: UUID
+ *   purge_date?: ISO8601
  * }
  */
 router.post('/decline-job', async (req, res) => {
@@ -54,7 +54,7 @@ router.post('/decline-job', async (req, res) => {
       })
     }
 
-    // Step 1: Fetch booking details to get customer_id and verify talent assignment
+    // Step 1: Fetch booking details and verify talent assignment
     const { data: booking, error: bookingError } = await supabase
       .from('bookings')
       .select('id, customer_id, photographer_id, booking_status')
@@ -81,7 +81,15 @@ router.post('/decline-job', async (req, res) => {
       })
     }
 
-    // Check if booking is already cancelled or completed
+    // Check if booking is already declined, cancelled or completed
+    if (booking.booking_status === 'declined_by_talent') {
+      console.warn('[Decline Job] Booking already declined:', booking_id)
+      return res.status(400).json({
+        success: false,
+        message: 'This booking has already been declined'
+      })
+    }
+
     if (booking.booking_status === 'cancelled') {
       console.warn('[Decline Job] Booking already cancelled:', booking_id)
       return res.status(400).json({
@@ -98,76 +106,118 @@ router.post('/decline-job', async (req, res) => {
       })
     }
 
-    // Step 2: Check if already declined (idempotency)
-    const { data: existingDecline, error: checkError } = await supabase
-      .from('declined_jobs')
-      .select('id')
-      .eq('talent_id', talent_id)
-      .eq('booking_id', booking_id)
+    // Step 2: Check if user is already blacklisted (idempotency)
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('is_blacklisted, soft_deleted')
+      .eq('id', talent_id)
       .single()
 
-    if (existingDecline) {
-      console.log('[Decline Job] Job already declined:', existingDecline.id)
+    if (userError) {
+      console.error('[Decline Job] Failed to fetch user:', userError)
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to verify user account'
+      })
+    }
+
+    if (user.is_blacklisted || user.soft_deleted) {
+      console.log('[Decline Job] User already blacklisted/deleted')
       return res.status(200).json({
         success: true,
-        message: 'Job already declined',
-        declined_job_id: existingDecline.id,
+        message: 'Account already blacklisted and scheduled for deletion',
         idempotent: true
       })
     }
 
-    // Step 3: Create decline record with audit trail
-    const { data: declinedJob, error: declineError } = await supabase
-      .from('declined_jobs')
-      .insert([{
-        talent_id,
-        booking_id,
-        customer_id: booking.customer_id,
-        reason: reason || null,
-        ip_address: req.ip || null,
-        user_agent: req.get('user-agent') || null,
-        declined_at: new Date().toISOString()
-      }])
-      .select('id')
-      .single()
+    // Step 3: Execute transaction - Update booking, blacklist user, queue purge
+    const now = new Date()
+    const purgeDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000) // 30 days from now
 
-    if (declineError) {
-      console.error('[Decline Job] Failed to create decline record:', declineError)
-      return res.status(500).json({
-        success: false,
-        message: 'Failed to create decline record',
-        error: declineError.message
-      })
-    }
-
-    // Step 4: Update booking status to 'cancelled' and clear photographer assignment
-    const { error: updateError } = await supabase
+    // Update booking status to 'declined_by_talent'
+    const { error: bookingUpdateError } = await supabase
       .from('bookings')
       .update({
-        booking_status: 'cancelled',
-        photographer_id: null,
-        updated_at: new Date().toISOString()
+        booking_status: 'declined_by_talent',
+        updated_at: now.toISOString()
       })
       .eq('id', booking_id)
 
-    if (updateError) {
-      console.error('[Decline Job] Failed to update booking status:', updateError)
-      // Non-fatal error - decline record already created
-      console.warn('[Decline Job] Decline record created but booking update failed')
+    if (bookingUpdateError) {
+      console.error('[Decline Job] Failed to update booking:', bookingUpdateError)
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to update booking status'
+      })
+    }
+
+    // Blacklist and soft-delete user account
+    const { error: userUpdateError } = await supabase
+      .from('users')
+      .update({
+        is_blacklisted: true,
+        soft_deleted: true,
+        deleted_at: now.toISOString(),
+        delete_reason: reason || 'Declined job booking'
+      })
+      .eq('id', talent_id)
+
+    if (userUpdateError) {
+      console.error('[Decline Job] Failed to blacklist user:', userUpdateError)
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to blacklist account'
+      })
+    }
+
+    // Queue account for purge in 30 days
+    const { error: purgeQueueError } = await supabase
+      .from('account_purge_queue')
+      .insert([{
+        user_id: talent_id,
+        booking_id: booking_id,
+        purge_after: purgeDate.toISOString(),
+        created_by: talent_id
+      }])
+
+    if (purgeQueueError) {
+      console.error('[Decline Job] Failed to queue purge:', purgeQueueError)
+      // Non-fatal - account is already blacklisted
+      console.warn('[Decline Job] Account blacklisted but purge queue failed')
+    }
+
+    // Log to admin audit trail
+    const { error: auditError } = await supabase
+      .from('admin_audit_log')
+      .insert([{
+        user_id: talent_id,
+        actor_id: talent_id,
+        action: 'talent_declined_job',
+        payload: {
+          booking_id,
+          reason: reason || null,
+          purge_date: purgeDate.toISOString()
+        },
+        ip_address: req.ip,
+        user_agent: req.get('user-agent')
+      }])
+
+    if (auditError) {
+      console.warn('[Decline Job] Audit log failed:', auditError)
+      // Non-fatal
     }
 
     const endTime = performance.now()
     console.log(`[Decline Job] ✅ Success in ${(endTime - startTime).toFixed(2)}ms`, {
-      declined_job_id: declinedJob.id,
       booking_id,
       talent_id,
-      customer_id: booking.customer_id
+      purge_date: purgeDate.toISOString()
     })
 
     return res.status(200).json({
       success: true,
-      message: 'Job successfully declined. You will no longer be matched with this client.',
-      declined_job_id: declinedJob.id
+      message: 'Account blacklisted and scheduled for deletion in 30 days. You will be logged out immediately.',
+      purge_date: purgeDate.toISOString()
     })
 
   } catch (error) {

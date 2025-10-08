@@ -80,6 +80,7 @@ const ChangeDateSuccess = lazy(() => import('@pages/customer/booking/ChangeDateS
 const CheckoutComplete = lazy(() => import('./pages/customer/booking/CheckoutComplete'))
 const BookingFlowGuard = lazy(() => import('@components/booking/BookingFlowGuard'))
 const ScheduleRedirect = lazy(() => import('@components/booking/ScheduleRedirect'))
+const SelectVideographer = lazy(() => import('@pages/customer/booking/SelectVideographer'))
 const CustomerBookings = lazy(() =>
   import('@pages/customer/placeholders').then(module => ({ default: module.CustomerBookings }))
 )
@@ -229,7 +230,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signin" element={<Navigate to="/login" replace />} />
-            <Route path="/signup" element={<SignUp />} />
+            <Route path="/signup" element={<Navigate to="/login" replace />} />
             <Route path="/get-started" element={<Navigate to="/signup" replace />} />
             <Route path="/signup-demo" element={<SignupDemo />} />
             <Route path="/signup-enhanced" element={<SignupEnhanced />} />
@@ -305,6 +306,12 @@ function App() {
             <Route path="/booking/:photographerId/schedule" element={
               <Suspense fallback={<PageLoader />}>
                 <ScheduleRedirect />
+              </Suspense>
+            } />
+            {/* Videographer Selection Route - Standalone route without photographerId */}
+            <Route path="/booking/select-videographer" element={
+              <Suspense fallback={<PageLoader />}>
+                <SelectVideographer />
               </Suspense>
             } />
             <Route path="/booking/:photographerId/addons" element={

@@ -46,9 +46,10 @@ function buildPhotographersQuery(
 
   let query = supabasePublic
     .from('photographers')
-    .select('id, bio, portfolio_images, style_tags, experience_years, average_rating, total_reviews, is_verified, visible_in_search, profile_complete, user_id, city, state, zip_code, users!inner(full_name, avatar_url)', { count: 'exact' })
+    .select('id, bio, portfolio_images, style_tags, experience_years, average_rating, total_reviews, is_verified, visible_in_search, profile_complete, user_id, city, state, zip_code, is_videographer, users!inner(full_name, avatar_url)', { count: 'exact' })
     .eq('visible_in_search', true)
     .eq('profile_complete', true)
+    .eq('is_videographer', false) // Exclude videographers from photographer search
     .range(offset, offset + limit - 1)
 
   // Apply filters

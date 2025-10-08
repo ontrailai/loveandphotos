@@ -246,6 +246,16 @@ const OverviewPage = () => {
     return rating.toFixed(1)
   }
 
+  // Extract first name from full name
+  const getFirstName = () => {
+    const fullName = profile?.full_name?.trim()
+    if (!fullName) return 'Photographer'
+
+    // Split by space and return first word
+    const firstName = fullName.split(' ')[0]
+    return firstName || 'Photographer'
+  }
+
   return (
     <div className="space-y-6">
       {/* Welcome Header */}
@@ -254,7 +264,7 @@ const OverviewPage = () => {
           <Camera className="w-12 h-12 text-primary-600 mr-4" aria-hidden="true" />
           <div>
             <h1 className="text-2xl font-bold text-gray-900">
-              Welcome back, {profile?.full_name?.trim() || 'Photographer'}!
+              Welcome back, {getFirstName()}!
             </h1>
             <p className="mt-1 text-gray-600">
               Manage your profile and availability from your dashboard

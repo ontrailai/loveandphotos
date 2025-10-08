@@ -173,39 +173,15 @@ const Login = () => {
               </Link>
             </div>
 
-            <div className="space-y-4">
-              <Button
-                type="submit"
-                loading={loading}
-                className="w-full"
-                size="lg"
-              >
-                Sign In
-                <ArrowRightIcon className="w-5 h-5 ml-2" />
-              </Button>
-
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-border"></div>
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-background text-muted-foreground">
-                    New to Love & Photos?
-                  </span>
-                </div>
-              </div>
-
-              <Link to="/signup" className="block">
-                <Button
-                  variant="outline"
-                  className="w-full border-border text-foreground hover:bg-muted"
-                  size="lg"
-                  type="button"
-                >
-                  Create an account
-                </Button>
-              </Link>
-            </div>
+            <Button
+              type="submit"
+              loading={loading}
+              className="w-full"
+              size="lg"
+            >
+              Sign In
+              <ArrowRightIcon className="w-5 h-5 ml-2" />
+            </Button>
           </form>
         </div>
       </div>

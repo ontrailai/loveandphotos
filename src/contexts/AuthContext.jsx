@@ -314,7 +314,7 @@ export const AuthProvider = ({ children }) => {
   // Sign up function
   const signUp = async (email, password, userData = {}) => {
     try {
-      const { role = 'customer', fullName, phone } = userData
+      const { role = 'customer', fullName, phone, isVideographer = false } = userData
 
       // First create the auth user without any metadata that might cause issues
       const { data, error } = await supabase.auth.signUp({
@@ -359,12 +359,13 @@ export const AuthProvider = ({ children }) => {
           console.log('[AuthContext] 📸 Creating photographer profile for:', data.user.id)
 
           // Create record in photographers table
-          const { data: photographerData, error: photographerError } = await supabase
+          const { data: photographerData, error: photographerError} = await supabase
             .from('photographers')
             .upsert({
               user_id: data.user.id,
               is_public: true,  // CRITICAL: Must be true to appear in search
               profile_complete: false,  // Will be set to true after profile completion
+              is_videographer: isVideographer,  // Set videographer flag
               created_at: new Date().toISOString(),
               updated_at: new Date().toISOString()
             }, {
@@ -482,6 +483,17 @@ export const AuthProvider = ({ children }) => {
         if (!userProfile) {
           console.error('[AuthContext] No profile returned')
           throw new Error('Failed to load user profile')
+        }
+
+        // Check if account is blacklisted or soft-deleted
+        if (userProfile.is_blacklisted || userProfile.soft_deleted) {
+          console.warn('[AuthContext] Account is blacklisted/deleted, logging out')
+          await supabase.auth.signOut()
+          setUser(null)
+          setProfile(null)
+          setPhotographerProfile(null)
+          toast.error('This account has been suspended. Please contact support.')
+          return { success: false, error: 'Account suspended' }
         }
 
         // Set profile state
