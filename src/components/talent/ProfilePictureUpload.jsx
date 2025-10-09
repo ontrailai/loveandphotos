@@ -51,7 +51,7 @@ const ProfilePictureUpload = ({ userId, currentAvatarUrl, onUploadSuccess }) => 
 
   const uploadFile = async (file) => {
     setUploading(true)
-    const uploadingToast = toast.loading('Uploading profile picture...')
+    const uploadingToast = toast.loading('Uploading profile photo...')
 
     try {
       // Generate unique file name
@@ -113,9 +113,9 @@ const ProfilePictureUpload = ({ userId, currentAvatarUrl, onUploadSuccess }) => 
         throw updateError
       }
 
-      console.log('[ProfilePictureUpload] ✅ Profile picture updated successfully')
+      console.log('[ProfilePictureUpload] ✅ Profile photo updated successfully')
 
-      toast.success('Profile picture updated successfully!', { id: uploadingToast })
+      toast.success('Profile photo updated successfully!', { id: uploadingToast })
       setPreviewUrl(publicUrl)
 
       // Notify parent component
@@ -124,7 +124,7 @@ const ProfilePictureUpload = ({ userId, currentAvatarUrl, onUploadSuccess }) => 
       }
     } catch (error) {
       console.error('[ProfilePictureUpload] ❌ Upload failed:', error)
-      toast.error(`Failed to upload profile picture: ${error.message}`, { id: uploadingToast })
+      toast.error(`Failed to upload profile photo: ${error.message}`, { id: uploadingToast })
 
       // Reset preview on error
       setPreviewUrl(currentAvatarUrl)
@@ -140,7 +140,7 @@ const ProfilePictureUpload = ({ userId, currentAvatarUrl, onUploadSuccess }) => 
   const handleRemovePhoto = async () => {
     if (!currentAvatarUrl) return
 
-    const removingToast = toast.loading('Removing profile picture...')
+    const removingToast = toast.loading('Removing profile photo...')
 
     try {
       // Remove from storage
@@ -168,7 +168,7 @@ const ProfilePictureUpload = ({ userId, currentAvatarUrl, onUploadSuccess }) => 
         throw updateError
       }
 
-      toast.success('Profile picture removed', { id: removingToast })
+      toast.success('Profile photo removed', { id: removingToast })
       setPreviewUrl(null)
 
       if (onUploadSuccess) {
@@ -176,14 +176,14 @@ const ProfilePictureUpload = ({ userId, currentAvatarUrl, onUploadSuccess }) => 
       }
     } catch (error) {
       console.error('[ProfilePictureUpload] Remove error:', error)
-      toast.error('Failed to remove profile picture', { id: removingToast })
+      toast.error('Failed to remove profile photo', { id: removingToast })
     }
   }
 
   return (
     <div className="space-y-4">
       <label className="block text-sm font-medium text-gray-700 mb-2">
-        Profile Picture
+        Profile Photo
       </label>
 
       <div className="flex items-center gap-6">
@@ -193,7 +193,7 @@ const ProfilePictureUpload = ({ userId, currentAvatarUrl, onUploadSuccess }) => 
             {previewUrl ? (
               <img
                 src={previewUrl}
-                alt="Profile picture"
+                alt="Profile photo"
                 className="w-full h-full object-cover"
               />
             ) : (

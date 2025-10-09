@@ -28,7 +28,6 @@ function VideographerCard({ videographer, onSelect, isSelected }) {
     gear_has_lenses,
     gear_has_tripod,
     gear_has_gimbal,
-    gear_has_drone,
     gear_has_audio_recorder,
     gear_has_lighting
   } = videographer
@@ -44,7 +43,6 @@ function VideographerCard({ videographer, onSelect, isSelected }) {
     gear_has_lenses,
     gear_has_tripod,
     gear_has_gimbal,
-    gear_has_drone,
     gear_has_audio_recorder,
     gear_has_lighting
   ].filter(Boolean).length
@@ -123,11 +121,6 @@ function VideographerCard({ videographer, onSelect, isSelected }) {
             {gear_has_gimbal && (
               <span className="text-xs bg-white border border-gray-200 px-2 py-1 rounded">
                 🤸 Gimbal
-              </span>
-            )}
-            {gear_has_drone && (
-              <span className="text-xs bg-white border border-gray-200 px-2 py-1 rounded">
-                🚁 Drone
               </span>
             )}
             {gear_has_audio_recorder && (

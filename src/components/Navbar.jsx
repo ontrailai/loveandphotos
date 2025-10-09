@@ -5,7 +5,7 @@ import BrandLogo from '@components/BrandLogo'
 import { useState } from 'react'
 
 const Navbar = () => {
-  const { user, signOut } = useAuth()
+  const { user, signOut, profile, photographerProfile } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -15,6 +15,20 @@ const Navbar = () => {
     if (!result.success) {
       console.error('Sign out failed:', result.error)
     }
+  }
+
+  // Helper function to get the correct dashboard route based on role and videographer status
+  const getDashboardRoute = () => {
+    if (profile?.role === 'photographer') {
+      // Check if user is a videographer
+      if (photographerProfile?.is_videographer) {
+        return '/talent/dashboard/videographer'
+      }
+      return '/talent/dashboard'
+    } else if (profile?.role === 'admin') {
+      return '/admin'
+    }
+    return '/dashboard'
   }
 
   return (
@@ -34,20 +48,20 @@ const Navbar = () => {
           <div className="hidden md:flex items-center space-x-8">
             {user ? (
               <>
-                <Link 
-                  to="/dashboard" 
+                <Link
+                  to={getDashboardRoute()}
                   className="text-foreground hover:text-foreground/80 transition"
                 >
                   Dashboard
                 </Link>
-                <Link 
-                  to="/photographers" 
+                <Link
+                  to="/photographers"
                   className="text-foreground hover:text-foreground/80 transition"
                 >
                   Browse
                 </Link>
-                <Link 
-                  to="/profile" 
+                <Link
+                  to={getDashboardRoute()}
                   className="text-foreground hover:text-foreground/80 transition"
                 >
                   Profile
@@ -96,22 +110,22 @@ const Navbar = () => {
           <div className="md:hidden py-4 border-t border-border">
             {user ? (
               <div className="space-y-2">
-                <Link 
-                  to="/dashboard" 
+                <Link
+                  to={getDashboardRoute()}
                   className="block px-4 py-2 text-foreground hover:bg-accent"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Dashboard
                 </Link>
-                <Link 
-                  to="/photographers" 
+                <Link
+                  to="/photographers"
                   className="block px-4 py-2 text-foreground hover:bg-accent"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Browse
                 </Link>
-                <Link 
-                  to="/profile" 
+                <Link
+                  to={getDashboardRoute()}
                   className="block px-4 py-2 text-foreground hover:bg-accent"
                   onClick={() => setMobileMenuOpen(false)}
                 >

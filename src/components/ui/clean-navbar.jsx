@@ -401,7 +401,7 @@ export function CleanNavbar({ className = '' }) {
                       {profile?.role === 'photographer' ? 'Talent Dashboard' : profile?.role === 'admin' ? 'Admin Panel' : 'Dashboard'}
                     </Button>
                   </Link>
-                  <Link to="/profile">
+                  <Link to={getDashboardRoute()}>
                     <Button variant="ghost" size="sm">
                       <User size={16} className="mr-1" aria-label="Profile" />
                       Profile
@@ -502,7 +502,7 @@ export function CleanNavbar({ className = '' }) {
                     {profile?.role === 'photographer' ? 'Talent Dashboard' : profile?.role === 'admin' ? 'Admin Panel' : 'Dashboard'}
                   </Button>
                 </Link>
-                <Link to="/profile">
+                <Link to={getDashboardRoute()}>
                   <Button variant="ghost" className="w-full justify-start">
                     <User size={16} className="mr-2" aria-label="Profile" />
                     Profile

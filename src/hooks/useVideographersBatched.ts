@@ -30,7 +30,7 @@ const TRUST_METRICS_CACHE_TTL = 10 * 60 * 1000 // 10 minutes
 function buildVideographersQuery(offset: number = 0, limit: number = DEFAULT_PAGE_SIZE) {
   return supabasePublic
     .from('photographers')
-    .select('id, bio, portfolio_images, style_tags, experience_years, average_rating, total_reviews, is_verified, visible_in_search, profile_complete, user_id, city, state, zip_code, is_videographer, gear_has_camera, gear_has_lenses, gear_has_tripod, gear_has_gimbal, gear_has_drone, gear_has_audio_recorder, gear_has_lighting, users!inner(full_name, avatar_url)', { count: 'exact' })
+    .select('id, bio, portfolio_images, style_tags, experience_years, average_rating, total_reviews, is_verified, visible_in_search, profile_complete, user_id, city, state, zip_code, is_videographer, gear_has_camera, gear_has_lenses, gear_has_tripod, gear_has_gimbal, gear_has_audio_recorder, gear_has_lighting, users!inner(full_name, avatar_url)', { count: 'exact' })
     .eq('visible_in_search', true)
     .eq('profile_complete', true)
     .eq('is_videographer', true) // Only fetch videographers
@@ -94,7 +94,6 @@ function transformVideographerData(
     gear_has_lenses: rawData.gear_has_lenses || false,
     gear_has_tripod: rawData.gear_has_tripod || false,
     gear_has_gimbal: rawData.gear_has_gimbal || false,
-    gear_has_drone: rawData.gear_has_drone || false,
     gear_has_audio_recorder: rawData.gear_has_audio_recorder || false,
     gear_has_lighting: rawData.gear_has_lighting || false,
     // Trust metrics

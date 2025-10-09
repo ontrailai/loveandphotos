@@ -40,9 +40,6 @@ const TalentApplication = () => {
     instagram_handle: '', // Text input
     background_description: '', // Textarea
 
-    // Videographer-specific additional question
-    has_drone: '', // videographer only
-
     // Terms Agreement
     terms_agreement: false
   })
@@ -93,12 +90,6 @@ const TalentApplication = () => {
       placeholder: '@yourhandle or leave blank',
       required: false
     },
-    ...(selectedRole === 'videographer' ? [{
-      key: 'has_drone',
-      label: 'Do you have a drone?',
-      type: 'radio',
-      required: false
-    }] : []),
     {
       key: 'background_description',
       label: 'We\'d love to get to know you better! Feel free to share anything that helps us learn more about your background and experience.',
@@ -225,10 +216,6 @@ const TalentApplication = () => {
           instagram_handle: formData.instagram_handle,
           background_description: formData.background_description,
 
-          // Videographer-specific additional question
-          ...(selectedRole === 'videographer' && {
-            has_drone: formData.has_drone
-          })
         },
         is_accepted: eligibilityResult.passed,
         rejection_reason: eligibilityResult.passed ? null : `Failed requirement: ${eligibilityResult.failedQuestion}`,
@@ -907,7 +894,6 @@ const TalentApplication = () => {
                       referral_name: '',
                       instagram_handle: '',
                       background_description: '',
-                      has_drone: '',
                       terms_agreement: false
                     })
                   }}

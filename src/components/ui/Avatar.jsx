@@ -1,6 +1,6 @@
 /**
  * Avatar Component
- * Displays user profile pictures with fallback
+ * Displays user profile photos with fallback
  */
 
 import React from 'react'

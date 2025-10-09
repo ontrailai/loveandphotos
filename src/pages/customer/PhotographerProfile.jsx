@@ -62,7 +62,7 @@ const PhotographerProfile = () => {
       // Query photographers table with unavailable_dates for blocking
       const { data, error} = await supabasePublic
         .from('photographers')
-        .select('id, user_id, bio, style_tags, languages, experience_years, city, state, zip_code, is_public, visible_in_search, is_verified, lnp_choice, is_videographer, average_rating, total_reviews, portfolio_images, gender, completed_jobs_count, unavailable_dates, gear_has_camera, gear_has_lenses, gear_has_tripod, gear_has_gimbal, gear_has_drone, gear_has_audio_recorder, gear_has_lighting')
+        .select('id, user_id, bio, style_tags, languages, experience_years, city, state, zip_code, is_public, visible_in_search, is_verified, lnp_choice, is_videographer, average_rating, total_reviews, portfolio_images, gender, completed_jobs_count, unavailable_dates, gear_has_camera, gear_has_lenses, gear_has_tripod, gear_has_gimbal, gear_has_audio_recorder, gear_has_lighting')
         .eq('user_id', id)
         .single()
 
@@ -138,7 +138,6 @@ const PhotographerProfile = () => {
         gear_has_lenses: data.gear_has_lenses || false,
         gear_has_tripod: data.gear_has_tripod || false,
         gear_has_gimbal: data.gear_has_gimbal || false,
-        gear_has_drone: data.gear_has_drone || false,
         gear_has_audio_recorder: data.gear_has_audio_recorder || false,
         gear_has_lighting: data.gear_has_lighting || false,
         // Portfolio images with validation
@@ -347,7 +346,6 @@ const PhotographerProfile = () => {
                   if (photographer.gear_has_lenses) gearItems.push({ label: 'Quality Lenses', icon: Camera })
                   if (photographer.gear_has_tripod) gearItems.push({ label: 'Tripod', icon: Settings })
                   if (photographer.gear_has_gimbal) gearItems.push({ label: 'Gimbal/Stabilizer', icon: Film })
-                  if (photographer.gear_has_drone) gearItems.push({ label: 'Drone', icon: Film })
                   if (photographer.gear_has_audio_recorder) gearItems.push({ label: 'Audio Equipment', icon: Mic })
                   if (photographer.gear_has_lighting) gearItems.push({ label: 'Lighting Kit', icon: Sun })
 

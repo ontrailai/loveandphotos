@@ -740,7 +740,7 @@ const ProfilePage = () => {
           )}
         </div>
 
-        {/* Profile Picture Upload */}
+        {/* Profile Photo Upload */}
         {user && (
           <div className="border-t pt-6 mt-6">
             <ProfilePictureUpload
