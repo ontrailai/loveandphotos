@@ -844,9 +844,9 @@ const ProfilePage = () => {
             aria-label="Select gender"
           >
             <option value="">Select...</option>
-            <option value="female">Female</option>
             <option value="male">Male</option>
-            <option value="prefer_not_to_say">Prefer not to say</option>
+            <option value="female">Female</option>
+            <option value="prefer-not-to-say">Prefer not to say</option>
           </select>
         </div>
 

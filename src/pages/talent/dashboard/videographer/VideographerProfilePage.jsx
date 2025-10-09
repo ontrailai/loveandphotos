@@ -19,9 +19,10 @@ import {
 import toast from 'react-hot-toast'
 
 const styleOptions = [
-  'Cinematic', 'Documentary', 'Wedding', 'Event',
-  'Commercial', 'Music Video', 'Short Film', 'Drone',
-  'Timelapse', 'Interviews', 'Corporate', 'Real Estate'
+  'Cinematic',
+  'Documentary Style',
+  'Vintage',
+  'Modern'
 ]
 
 const US_STATES = [
@@ -436,7 +437,6 @@ const VideographerProfilePage = () => {
                       <option value="">Select...</option>
                       <option value="male">Male</option>
                       <option value="female">Female</option>
-                      <option value="non-binary">Non-binary</option>
                       <option value="prefer-not-to-say">Prefer not to say</option>
                     </select>
                   </div>

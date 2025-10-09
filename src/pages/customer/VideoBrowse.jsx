@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@contexts/AuthContext'
 import { supabase } from '@lib/supabase'
 import { normalizeLocationQuery } from '@lib/utils/normalizeLocationQuery'
+import { resolveZipToCity } from '@lib/server/resolveZipToCity'
 import { 
   SearchIcon, 
   MapPinIcon, 
@@ -58,7 +59,29 @@ export default function VideoBrowse() {
       setLoading(true)
       setError(null)
 
-      // Query for video photographers only
+      // Resolve location to city if it's a ZIP code
+      let locationCity = null
+      if (locationQuery.trim()) {
+        const normalized = normalizeLocationQuery(locationQuery)
+
+        if (normalized.kind === 'zip' && normalized.zip) {
+          // Try to resolve ZIP to city using the database
+          const resolved = await resolveZipToCity(supabase, normalized.zip)
+          if (resolved) {
+            locationCity = resolved.city.toLowerCase()
+          } else {
+            // Unknown ZIP code
+            setError(`We don't recognize ZIP code "${locationQuery}" yet. Please try entering the city name instead.`)
+            setPhotographers([])
+            setLoading(false)
+            return
+          }
+        } else if (normalized.kind === 'city' && normalized.city) {
+          locationCity = normalized.city.toLowerCase()
+        }
+      }
+
+      // Query for video photographers only - CRITICAL: must be videographers, not photographers
       let query = supabase
         .from('photographers')
         .select(`
@@ -67,14 +90,13 @@ export default function VideoBrowse() {
           portfolio_items(id, image_url, title, description),
           pay_tiers(id, name, hourly_rate)
         `)
-        .eq('is_videographer', true)
+        .eq('is_videographer', true)  // CRITICAL: Only videographers
         .eq('profile_complete', true)
         .eq('visible_in_search', true)
 
       // Apply location filter (city, state, zip_code are in photographers table)
-      if (locationQuery.trim()) {
-        const normalized = normalizeLocationQuery(locationQuery)
-        query = query.or(`city.ilike.%${normalized}%,state.ilike.%${normalized}%,zip_code.ilike.%${normalized}%`)
+      if (locationCity) {
+        query = query.or(`city.ilike.%${locationCity}%,state.ilike.%${locationCity}%,zip_code.ilike.%${locationCity}%`)
       }
 
       // Apply search filter (full_name is in users table, bio is in photographers table)
@@ -82,16 +104,20 @@ export default function VideoBrowse() {
         query = query.or(`users.full_name.ilike.%${searchQuery}%,bio.ilike.%${searchQuery}%`)
       }
 
-      // Order by rating
-      query = query.order('average_rating', { ascending: false })
+      // Order by rating (best first)
+      query = query.order('average_rating', { ascending: false, nullsLast: true })
 
       const { data, error } = await query
       if (error) throw error
 
       setPhotographers(data || [])
+
+      // Log for debugging
+      console.log(`✅ Found ${data?.length || 0} videographers${locationCity ? ` in ${locationCity}` : ''}`)
+
     } catch (error) {
       console.error('Error fetching video photographers:', error)
-      setError('Failed to load video photographers. Please try again.')
+      setError(error.message || 'Failed to load video photographers. Please try again.')
     } finally {
       setLoading(false)
     }

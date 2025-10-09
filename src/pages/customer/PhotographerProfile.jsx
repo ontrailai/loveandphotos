@@ -6,7 +6,13 @@ import {
   CheckCircleIcon,
   MapPinIcon,
   StarIcon,
-  ImageOffIcon
+  ImageOffIcon,
+  Video,
+  Camera,
+  Mic,
+  Sun,
+  Settings,
+  Film
 } from 'lucide-react'
 import Button from '@components/ui/Button'
 import Card from '@components/ui/Card'
@@ -30,6 +36,7 @@ const PhotographerProfile = () => {
   const [loadError, setLoadError] = useState(false)
   const [selectedImage, setSelectedImage] = useState(0)
   const [imageErrors, setImageErrors] = useState({})
+  const [isBioExpanded, setIsBioExpanded] = useState(false)
 
   // Parse initial date from URL parameter
   const initialDate = searchParams.get('date') ? new Date(searchParams.get('date')) : null
@@ -55,28 +62,7 @@ const PhotographerProfile = () => {
       // Query photographers table with unavailable_dates for blocking
       const { data, error} = await supabasePublic
         .from('photographers')
-        .select(`
-          id,
-          user_id,
-          bio,
-          style_tags,
-          languages,
-          experience_years,
-          city,
-          state,
-          zip_code,
-          is_public,
-          visible_in_search,
-          is_verified,
-          lnp_choice,
-          is_videographer,
-          average_rating,
-          total_reviews,
-          portfolio_images,
-          gender,
-          completed_jobs_count,
-          unavailable_dates
-        `)
+        .select('id, user_id, bio, style_tags, languages, experience_years, city, state, zip_code, is_public, visible_in_search, is_verified, lnp_choice, is_videographer, average_rating, total_reviews, portfolio_images, gender, completed_jobs_count, unavailable_dates, gear_has_camera, gear_has_lenses, gear_has_tripod, gear_has_gimbal, gear_has_drone, gear_has_audio_recorder, gear_has_lighting')
         .eq('user_id', id)
         .single()
 
@@ -147,6 +133,14 @@ const PhotographerProfile = () => {
           phone: userData?.phone || '',
           avatar_url: userData?.avatar_url || null
         },
+        // Gear data for videographers
+        gear_has_camera: data.gear_has_camera || false,
+        gear_has_lenses: data.gear_has_lenses || false,
+        gear_has_tripod: data.gear_has_tripod || false,
+        gear_has_gimbal: data.gear_has_gimbal || false,
+        gear_has_drone: data.gear_has_drone || false,
+        gear_has_audio_recorder: data.gear_has_audio_recorder || false,
+        gear_has_lighting: data.gear_has_lighting || false,
         // Portfolio images with validation
         portfolio_images: Array.isArray(data.portfolio_images) && data.portfolio_images.length > 0
           ? data.portfolio_images
@@ -238,62 +232,76 @@ const PhotographerProfile = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Portfolio */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Portfolio Gallery */}
-            {validPortfolioImages.length > 0 ? (
+            {/* Portfolio Gallery - Only for Photographers (not Videographers) */}
+            {!photographer.is_videographer && (
               <>
-                {/* Main Image */}
-                <div className="aspect-w-16 aspect-h-10 bg-gray-100 rounded-xl overflow-hidden">
-                  <img
-                    src={validPortfolioImages[selectedImage] || validPortfolioImages[0]}
-                    alt={`${photographer.users?.full_name} - Portfolio Image ${selectedImage + 1}`}
-                    className="w-full h-[400px] sm:h-[500px] object-cover"
-                    loading="lazy"
-                    onError={() => handleImageError(selectedImage)}
-                  />
-                </div>
+                {validPortfolioImages.length > 0 ? (
+                  <>
+                    {/* Main Image */}
+                    <div className="aspect-w-16 aspect-h-10 bg-gray-100 rounded-xl overflow-hidden">
+                      <img
+                        src={validPortfolioImages[selectedImage] || validPortfolioImages[0]}
+                        alt={`${photographer.users?.full_name} - Portfolio Image ${selectedImage + 1}`}
+                        className="w-full h-[400px] sm:h-[500px] object-cover"
+                        loading="lazy"
+                        onError={() => handleImageError(selectedImage)}
+                      />
+                    </div>
 
-                {/* Thumbnail Gallery */}
-                {validPortfolioImages.length > 1 && (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3">
-                    {validPortfolioImages.map((image, index) => (
-                      <button
-                        key={index}
-                        onClick={() => setSelectedImage(index)}
-                        className={`
-                          aspect-square rounded-lg overflow-hidden border-2 transition-all
-                          ${selectedImage === index
-                            ? 'border-primary-500 ring-2 ring-primary-200'
-                            : 'border-transparent hover:border-gray-300'
-                          }
-                        `}
-                      >
-                        <img
-                          src={image}
-                          alt={`${photographer.users?.full_name} - Portfolio Thumbnail ${index + 1}`}
-                          className="w-full h-full object-cover"
-                          loading="lazy"
-                          onError={() => handleImageError(index)}
-                        />
-                      </button>
-                    ))}
+                    {/* Thumbnail Gallery */}
+                    {validPortfolioImages.length > 1 && (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3">
+                        {validPortfolioImages.map((image, index) => (
+                          <button
+                            key={index}
+                            onClick={() => setSelectedImage(index)}
+                            className={`
+                              aspect-square rounded-lg overflow-hidden border-2 transition-all
+                              ${selectedImage === index
+                                ? 'border-primary-500 ring-2 ring-primary-200'
+                                : 'border-transparent hover:border-gray-300'
+                              }
+                            `}
+                          >
+                            <img
+                              src={image}
+                              alt={`${photographer.users?.full_name} - Portfolio Thumbnail ${index + 1}`}
+                              className="w-full h-full object-cover"
+                              loading="lazy"
+                              onError={() => handleImageError(index)}
+                            />
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="aspect-w-16 aspect-h-10 bg-gray-100 rounded-xl flex items-center justify-center mb-6">
+                    <div className="text-center text-gray-400">
+                      <ImageOffIcon className="w-16 h-16 mx-auto mb-2" />
+                      <p>No portfolio images available</p>
+                    </div>
                   </div>
                 )}
               </>
-            ) : (
-              <div className="aspect-w-16 aspect-h-10 bg-gray-100 rounded-xl flex items-center justify-center">
-                <div className="text-center text-gray-400">
-                  <ImageOffIcon className="w-16 h-16 mx-auto mb-2" />
-                  <p>No portfolio images available</p>
-                </div>
-              </div>
             )}
 
             {/* About Section */}
             <Card>
               <h2 className="text-xl font-semibold text-dusty-900 mb-4">About</h2>
-              <p className="text-dusty-600 whitespace-pre-wrap">
-                {photographer.bio}
+              <p className="text-dusty-600 whitespace-pre-wrap break-words">
+                {photographer.bio && photographer.bio.length > 500 && !isBioExpanded
+                  ? `${photographer.bio.substring(0, 500)}...`
+                  : photographer.bio}
               </p>
+              {photographer.bio && photographer.bio.length > 500 && (
+                <button
+                  onClick={() => setIsBioExpanded(!isBioExpanded)}
+                  className="text-[#fe395f] hover:text-[#fe395f]/80 font-medium mt-2 transition-colors"
+                >
+                  {isBioExpanded ? 'Show less' : 'Show more'}
+                </button>
+              )}
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6">
                 {/* Specialties */}
@@ -325,6 +333,52 @@ const PhotographerProfile = () => {
                 )}
               </div>
             </Card>
+
+            {/* Gear Section - Only for Videographers */}
+            {photographer.is_videographer && (
+              <Card>
+                <h2 className="text-xl font-semibold text-dusty-900 mb-4 flex items-center gap-2">
+                  <Video className="w-5 h-5 text-[#fe395f]" />
+                  Gear I Use
+                </h2>
+                {(() => {
+                  const gearItems = []
+                  if (photographer.gear_has_camera) gearItems.push({ label: 'Professional Camera', icon: Video })
+                  if (photographer.gear_has_lenses) gearItems.push({ label: 'Quality Lenses', icon: Camera })
+                  if (photographer.gear_has_tripod) gearItems.push({ label: 'Tripod', icon: Settings })
+                  if (photographer.gear_has_gimbal) gearItems.push({ label: 'Gimbal/Stabilizer', icon: Film })
+                  if (photographer.gear_has_drone) gearItems.push({ label: 'Drone', icon: Film })
+                  if (photographer.gear_has_audio_recorder) gearItems.push({ label: 'Audio Equipment', icon: Mic })
+                  if (photographer.gear_has_lighting) gearItems.push({ label: 'Lighting Kit', icon: Sun })
+
+                  if (gearItems.length === 0) {
+                    return (
+                      <p className="text-dusty-500 italic text-sm">
+                        This videographer hasn't listed their gear yet
+                      </p>
+                    )
+                  }
+
+                  return (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {gearItems.map((item, index) => {
+                        const Icon = item.icon
+                        return (
+                          <div key={index} className="flex items-center gap-3 p-3 bg-dusty-50 rounded-lg">
+                            <div className="flex-shrink-0">
+                              <Icon className="w-5 h-5 text-[#fe395f]" />
+                            </div>
+                            <span className="text-dusty-700 text-sm font-medium">
+                              {item.label}
+                            </span>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )
+                })()}
+              </Card>
+            )}
           </div>
 
           {/* Right Column - Photographer Info */}
