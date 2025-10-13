@@ -26,9 +26,12 @@ const AddOnsGrid = ({
 }) => {
   const [validationResults, setValidationResults] = useState({})
 
-  // Format add-ons with context-aware pricing
+  // Format add-ons with context-aware pricing, excluding video-coverage
   const formattedAddons = useMemo(() => {
-    return ADD_ONS_CONFIG.map(addon => getFormattedAddOn(addon.id, context))
+    return ADD_ONS_CONFIG
+      .filter(addon => addon.id !== 'video-coverage')
+      .map(addon => getFormattedAddOn(addon.id, context))
+      .filter(Boolean)
   }, [context])
 
   // Validate selections whenever they change
@@ -144,40 +147,45 @@ const AddOnsGrid = ({
   }
 
   return (
-    <div
-      role="group"
-      aria-label="Available add-ons"
-      className={clsx(
-        // Magic UI responsive grid with equal heights
-        'grid gap-6',
-        'grid-cols-1',           // Mobile: 1 column
-        'md:grid-cols-2',        // Tablet: 2 columns
-        'lg:grid-cols-3',        // Desktop: 3 columns (optimal for add-ons)
-        'auto-rows-fr',          // Equal height rows
-        className
-      )}
-      {...props}
-    >
-      {formattedAddons.map((addon) => {
-        const validation = getAddonValidation(addon.id)
+    <>
+      <div
+        role="group"
+        aria-label="Available add-ons"
+        className={clsx(
+          // Magic UI responsive grid with dynamic heights
+          'grid gap-6',
+          'grid-cols-1',           // Mobile: 1 column
+          'md:grid-cols-2',        // Tablet: 2 columns
+          'lg:grid-cols-3',        // Desktop: 3 columns (optimal for add-ons)
+          className
+        )}
+        {...props}
+      >
+        {formattedAddons.map((addon, index) => {
+          // Skip rendering if addon is invalid
+          if (!addon || !addon.id || !addon.title) {
+            return null
+          }
 
-        return (
-          <AddOnCard
-            key={addon.id}
-            addon={addon}
-            isSelected={isSelected(addon.id)}
-            isDisabled={validation.isDisabled}
-            onToggle={handleAddonToggle}
-            onInfoClick={handleInfoClick}
-            validationError={validation.validationError}
-            validationWarning={validation.validationWarning}
-            context={context}
-            className="h-full" // Magic UI equal height with flex layout
-          />
-        )
-      })}
+          const validation = getAddonValidation(addon.id)
 
-      {/* Overall validation summary (screen reader only) */}
+          return (
+            <AddOnCard
+              key={`addon-${addon.id}-${index}`}
+              addon={addon}
+              isSelected={isSelected(addon.id)}
+              isDisabled={validation.isDisabled}
+              onToggle={handleAddonToggle}
+              onInfoClick={handleInfoClick}
+              validationError={validation.validationError}
+              validationWarning={validation.validationWarning}
+              context={context}
+            />
+          )
+        })}
+      </div>
+
+      {/* Overall validation summary (screen reader only) - Outside grid to prevent blank tile */}
       <div className="sr-only" aria-live="polite" aria-atomic="true">
         {validationResults.errors?.length > 0 && (
           <div role="alert">
@@ -191,7 +199,7 @@ const AddOnsGrid = ({
           </div>
         )}
       </div>
-    </div>
+    </>
   )
 }
 

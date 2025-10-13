@@ -12,7 +12,7 @@ import AddOnsGrid from '@components/booking/AddOnsGrid'
 import TotalsPanel from '@components/booking/TotalsPanel'
 import Button from '@components/ui/Button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@components/ui/Dialog'
-import { getBasePhotoPrice } from '@/lib/constants/pricing'
+import { ADDONS_PRICING, getSecondPhotographerPrice } from '@/lib/constants/packagePricing'
 
 const AddOnsDetails = () => {
   const { photographerId } = useParams()
@@ -39,10 +39,8 @@ const AddOnsDetails = () => {
   // Check if user can access this step
   useEffect(() => {
     if (!canAccessStep('addons')) {
-      // Find the first incomplete step and redirect there
-      if (!canAccessStep('schedule')) {
-        navigate(`/booking/${photographerId}/schedule`, { replace: true })
-      }
+      // Redirect to packages if not completed
+      navigate(`/booking/${photographerId}/packages`, { replace: true })
       return
     }
 
@@ -50,31 +48,19 @@ const AddOnsDetails = () => {
     goToStep('addons')
   }, [photographerId, canAccessStep, goToStep, navigate])
 
-  // Calculate hours from schedule details
-  const calculateHours = () => {
-    const { startTime, endTime } = bookingFlow.scheduleDetails || {}
-    if (!startTime || !endTime) return 0
-
-    const [startHour, startMin] = startTime.split(':').map(Number)
-    const [endHour, endMin] = endTime.split(':').map(Number)
-
-    const startTotalMin = startHour * 60 + startMin
-    const endTotalMin = endHour * 60 + endMin
-
-    const diffMinutes = endTotalMin - startTotalMin
-    return diffMinutes / 60
-  }
-
-  const hoursBooked = calculateHours()
-  const calculatedPackagePrice = getBasePhotoPrice(Math.round(hoursBooked)) || 0 // Use centralized pricing lookup
+  // Get package details from context (set by PackageSelection and VideoSelection)
+  const hoursBooked = bookingFlow.packageDetails?.hoursBooked || 0
+  const packagePrice = bookingFlow.packageDetails?.packagePrice || 0
+  const isPhotoVideo = bookingFlow.packageDetails?.isPhotoVideo || false
+  const packageTitle = bookingFlow.packageDetails?.packageTitle || 'Photography Package'
 
   // Build package context for pricing and validation
   const packageContext = {
     selectedDate: bookingFlow.scheduleDetails?.date,
-    packageType: bookingFlow.packageDetails?.packageType === 'monthly' ? 'photoOnly' : 'photoVideo',
-    packagePrice: calculatedPackagePrice,
+    packageType: isPhotoVideo ? 'photoVideo' : 'photoOnly',
+    packagePrice: packagePrice,
     hoursBooked: hoursBooked,
-    isPhotoVideo: bookingFlow.packageDetails?.isPhotoVideo || false
+    isPhotoVideo: isPhotoVideo
   }
 
   // Handle add-on selection changes
@@ -129,20 +115,18 @@ const AddOnsDetails = () => {
   }
 
   const steps = getStepsForStepper()
-  const packagePrice = calculatedPackagePrice
-  const packageTitle = `${hoursBooked.toFixed(1)} Hour${hoursBooked !== 1 ? 's' : ''} Photography Session`
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Progress Stepper */}
       <BookingStepper
         steps={steps}
-        currentStepIndex={1}
+        currentStepIndex={2}
         onStepClick={(stepIndex, step) => {
           if (step.status === 'completed') {
             const stepId = steps[stepIndex].id
-            if (stepId === 'schedule') {
-              navigate(`/booking/${photographerId}/schedule`)
+            if (stepId === 'package') {
+              navigate(`/booking/${photographerId}/packages`)
             }
           }
         }}
@@ -194,9 +178,9 @@ const AddOnsDetails = () => {
           <div className="flex justify-between items-center mb-4">
             <Button
               variant="outline"
-              onClick={() => navigate(`/booking/${photographerId}/schedule`)}
+              onClick={() => navigate(`/booking/${photographerId}/video`)}
             >
-              Back to Schedule
+              Back
             </Button>
 
             <div className="flex space-x-3">
@@ -229,9 +213,9 @@ const AddOnsDetails = () => {
         <div className="hidden lg:flex justify-between items-center mt-8">
           <Button
             variant="outline"
-            onClick={() => navigate(`/booking/${photographerId}/schedule`)}
+            onClick={() => navigate(`/booking/${photographerId}/video`)}
           >
-            Back to Schedule
+            Back to Video Selection
           </Button>
 
           <p className="text-sm text-dusty-500">

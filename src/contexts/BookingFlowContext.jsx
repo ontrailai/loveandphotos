@@ -13,7 +13,7 @@ const BookingFlowContext = createContext({})
 // Step configuration
 // Actual booking flow: Schedule → Add-Ons → Account Setup → Contract → Payment
 const BOOKING_STEPS = [
-  { id: 'schedule', label: 'Schedule Details', order: 0 },
+  { id: 'package', label: 'Choose Package', order: 0 },
   { id: 'addons', label: 'Add-Ons', order: 1 },
   { id: 'account', label: 'Account Setup', order: 2 },
   { id: 'contract', label: 'Contract & Signature', order: 3 },
@@ -278,14 +278,26 @@ export const BookingFlowProvider = ({ children }) => {
     })
   }, [])
 
-  // Update package details (legacy - no longer used but kept for backwards compatibility)
+  // Update package details
   const updatePackageDetails = useCallback((packageData) => {
     setBookingFlow(prev => {
+      const packageValid = !!(packageData?.hoursBooked && packageData?.packagePrice)
+      const newCompletedSteps = packageValid
+        ? [...new Set([...prev.completedSteps, 'package'])]
+        : prev.completedSteps.filter(step => step !== 'package')
+
       return {
         ...prev,
         packageDetails: {
+          ...prev.packageDetails,
           ...packageData,
           selectedAt: new Date().toISOString()
+        },
+        completedSteps: newCompletedSteps,
+        currentStep: packageValid ? 'addons' : 'package',
+        validationState: {
+          ...prev.validationState,
+          package: packageValid
         }
       }
     })

@@ -14,18 +14,18 @@ export const ADD_ONS_CONFIG = [
     discountPercent: 0,
     popularity: 81,
     category: 'photos',
-    description: "We'll deliver all the raw media. Unfiltered. Unedited. Everything.",
+    description: 'Receive all unedited photos from your event. Every single shot captured, delivered digitally for you to keep.',
     features: [
-      'Thousands of unedited photos',
-      'Complete coverage of your day',
-      'Every single shot we captured',
+      'All unedited photos captured',
+      'Complete day coverage',
       'Raw, unprocessed files',
-      'Digital download included'
+      'Digital download included',
+      'Professional quality images'
     ],
     extraInfo: {
       hasLink: true,
-      linkText: 'Please read this article before booking, and for download instructions.',
-      linkAction: 'modal' // Could be 'modal', 'external', etc.
+      linkText: 'View article and download instructions',
+      linkAction: 'modal'
     },
     validation: {
       isAlwaysAvailable: true
@@ -43,13 +43,13 @@ export const ADD_ONS_CONFIG = [
     discountPercent: 0,
     popularity: 94,
     category: 'protection',
-    description: 'Protects you from liability in case of accidents or damage. Highly Recommended.',
+    description: 'Professional liability coverage protecting you from accidents or damage during your event.',
     features: [
       'Complete liability protection',
       'Equipment damage coverage',
       'Professional team insurance',
-      'Peace of mind guarantee',
-      'Highly recommended by venues'
+      'Venue requirement compliance',
+      'Peace of mind guarantee'
     ],
     validation: {
       isAlwaysAvailable: true
@@ -68,21 +68,19 @@ export const ADD_ONS_CONFIG = [
     discountPercent: 0,
     popularity: null,
     category: 'delivery',
-    description: `Our premium Rush Delivery option fast-tracks your wedding film or photo gallery, giving you priority editing, first-in-line status, and expedited turnaround well ahead of our standard schedule. Perfect for couples who can't wait to relive their day — or who want to share the final product at an upcoming event.
-
-You'll be bumped to the front of the editing queue, with final delivery completed in a fraction of the standard turnaround time. Rush Delivery must be purchased before or within 48 hours after your wedding and is subject to limited availability.`,
+    description: 'Fast-track your photos and videos with priority editing. Receive your final gallery in a fraction of the standard turnaround time.',
     features: [
       'Priority editing queue',
+      'Expedited delivery',
       'First-in-line status',
-      'Expedited turnaround',
       'Perfect for upcoming events',
-      'Limited availability'
+      'Must purchase within 48 hours'
     ],
     validation: {
       isTimeDependent: true,
       timeLimitHours: 48,
       requiresEventDate: true,
-      validationMessage: 'Must be purchased within 48 hours after your wedding'
+      validationMessage: 'Must be purchased within 48 hours after your event'
     },
     badges: {
       discount: null,
@@ -97,19 +95,19 @@ You'll be bumped to the front of the editing queue, with final delivery complete
     discountPercent: 17,
     popularity: null,
     category: 'sessions',
-    description: 'Engagement, Bridal, and Anniversary Session. Lasts 2–3 Hours. 1 Pro Photographer, 100+ Edited Photos, Digital Download, Social Media Ready Images, $199/mo Payment Plan. If your session is within 31 days, please contact us before booking.',
+    description: 'Professional photo session perfect for engagement, bridal, or anniversary celebrations. Capture beautiful moments with expert photography.',
     features: [
-      '2-3 hour session duration',
-      '1 professional photographer',
+      '2-3 hour session',
+      'Professional photographer',
       '100+ edited photos',
       'Digital download included',
       'Social media ready images',
-      '$199/mo payment plan available'
+      '$199/mo payment plan'
     ],
     validation: {
       hasWarning: true,
       warningThresholdDays: 31,
-      warningMessage: 'If your session is within 31 days, please contact us before booking.'
+      warningMessage: 'Sessions within 31 days require advance contact'
     },
     badges: {
       discount: 'Usually $900 — 17% off',
@@ -119,29 +117,29 @@ You'll be bumped to the front of the editing queue, with final delivery complete
   {
     id: 'second-shooter',
     title: 'Second Photographer',
-    basePrice: 750, // Base price for display, actual price is calculated dynamically
+    basePrice: 750,
     originalPrice: null,
     discountPercent: 0,
     popularity: 36,
     category: 'team',
-    description: 'Perfect for larger weddings—and smart for smaller ones too. Capture every angle, every moment.',
+    description: 'Add a second photographer to capture every moment from multiple angles. Perfect for comprehensive event coverage.',
     features: [
-      'Second photographer included',
-      '4 hour minimum coverage',
-      'Matches your booked hours',
-      'Seamless dual coverage',
+      'Additional photographer',
+      '4 hour minimum',
+      'Matches your package hours',
+      'Dual angle coverage',
       'Professional coordination'
     ],
     pricing: {
       isDynamic: true,
       minimumHours: 4,
-      photoOnlyRate: 100, // per hour
-      photoVideoRate: 0.5 // 50% of package price
+      photoOnlyRate: 100,
+      photoVideoRate: 0.5
     },
     validation: {
       requiresMinimumHours: true,
       minimumHours: 4,
-      errorMessage: 'Second shooter requires minimum 4 hours'
+      errorMessage: 'Requires minimum 4 hour package'
     },
     badges: {
       discount: null,
@@ -157,22 +155,22 @@ You'll be bumped to the front of the editing queue, with final delivery complete
     discountPercent: 0,
     popularity: 72,
     category: 'flexibility',
-    description: 'Covers one emergency reschedule. Peace of mind just in case. Becomes $495 if purchased after the initial booking.',
+    description: 'Protect yourself with one emergency date change option. Peace of mind for unexpected schedule changes.',
     features: [
-      'Reschedule your shoot date once',
+      'One date reschedule included',
       'No additional fees when used',
-      'Valid for one date change',
+      'Valid for emergencies',
       'Peace of mind protection',
-      'Must be purchased at booking'
+      'Must purchase at booking'
     ],
     validation: {
       isAlwaysAvailable: true,
-      isBookingOnly: true // Can only be purchased during initial booking
+      isBookingOnly: true
     },
     badges: {
       discount: null,
       popularity: '72% of couples choose this',
-      priceWarning: 'Becomes $495 if purchased after booking'
+      priceWarning: 'Becomes $495 after booking'
     }
   },
   {

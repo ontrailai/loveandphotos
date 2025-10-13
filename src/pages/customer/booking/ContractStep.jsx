@@ -96,8 +96,8 @@ const ContractStep = () => {
         // Check if user can access this step
         if (!canAccessStep('contract')) {
           // Redirect to first incomplete step
-          if (!canAccessStep('schedule')) {
-            navigate(`/booking/${photographerId}/schedule`, { replace: true })
+          if (!canAccessStep('package')) {
+            navigate(`/booking/${photographerId}/packages`, { replace: true })
           } else if (!canAccessStep('addons')) {
             navigate(`/booking/${photographerId}/addons`, { replace: true })
           } else if (!canAccessStep('account')) {
@@ -524,8 +524,8 @@ const ContractStep = () => {
                 navigate(`/booking/${photographerId}/addons`)
               } else if (stepId === 'account') {
                 navigate(`/booking/${photographerId}/account`)
-              } else if (stepId === 'schedule') {
-                navigate(`/booking/${photographerId}/schedule`)
+              } else if (stepId === 'package') {
+                navigate(`/booking/${photographerId}/packages`)
               }
             }
           }}

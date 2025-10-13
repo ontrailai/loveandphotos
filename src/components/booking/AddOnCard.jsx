@@ -1,15 +1,14 @@
 /**
- * AddOnCard Component
- * Enhanced add-on selection card with equal-height layout, dynamic pricing, and validation
- * Combines Magic UI design patterns with booking system business logic
- * Fully accessible with keyboard navigation and screen reader support
+ * AddOnCard Component - Collapsible Version
+ * Collapsible add-on selection card with Framer Motion animations
+ * Enhanced with validation, state management, and accessibility features
  */
 
 import { useState, useRef } from 'react'
-import { CheckIcon, InfoIcon, AlertCircleIcon, Plus } from 'lucide-react'
+import { CheckIcon, InfoIcon, AlertCircleIcon, Plus, ChevronDown } from 'lucide-react'
 import { clsx } from 'clsx'
+import { motion, AnimatePresence } from 'framer-motion'
 import Badge from '@components/ui/Badge'
-import CollapsibleText from '@components/ui/CollapsibleText'
 
 const AddOnCard = ({
   addon,
@@ -23,15 +22,26 @@ const AddOnCard = ({
   className = '',
   ...props
 }) => {
+  // Guard against invalid addon data first
+  if (!addon || !addon.id || !addon.title) {
+    return null
+  }
+
+  // Use addon.id as part of state key to ensure proper React reconciliation
+  const [isExpanded, setIsExpanded] = useState(false)
   const [showTooltip, setShowTooltip] = useState(false)
   const cardRef = useRef(null)
 
-  // Handle card click/keyboard interaction
-  const handleInteraction = (event) => {
-    if (isDisabled) {
-      event.preventDefault()
-      return
-    }
+  // Handle expand/collapse toggle
+  const handleExpand = (event) => {
+    event.stopPropagation()
+    setIsExpanded(prev => !prev)
+  }
+
+  // Handle selection toggle
+  const handleToggle = (event) => {
+    event.stopPropagation()
+    if (isDisabled) return
 
     if (onToggle) {
       onToggle(addon, !isSelected)
@@ -41,7 +51,7 @@ const AddOnCard = ({
   const handleKeyDown = (event) => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault()
-      handleInteraction(event)
+      handleExpand(event)
     }
   }
 
@@ -83,12 +93,11 @@ const AddOnCard = ({
   const hasWarning = validationWarning && !hasError
 
   return (
-    <div
+    <motion.div
       ref={cardRef}
       className={clsx(
-        // Equal height layout with modern styling
-        'group relative flex h-full flex-col justify-between overflow-hidden',
-        'bg-white rounded-xl border-2 transition-all duration-300 cursor-pointer',
+        // Base styling
+        'group relative overflow-hidden bg-white rounded-xl border-2 transition-all duration-300 cursor-pointer',
         'hover:shadow-lg hover:shadow-primary/10',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
         {
@@ -105,65 +114,41 @@ const AddOnCard = ({
         },
         className
       )}
-      onClick={handleInteraction}
+      onClick={handleExpand}
       onKeyDown={handleKeyDown}
-      role="checkbox"
-      aria-checked={isSelected}
+      role="button"
+      aria-expanded={isExpanded}
       aria-disabled={isDisabled}
-      aria-describedby={hasError ? `${addon.id}-error` : hasWarning ? `${addon.id}-warning` : `${addon.id}-description`}
       tabIndex={isDisabled ? -1 : 0}
+      initial={false}
+      animate={{
+        scale: isSelected ? 1.02 : 1,
+      }}
+      transition={{ duration: 0.2 }}
       {...props}
     >
-
-      {/* Selection indicator - top right */}
-      <div className={clsx(
-        "absolute top-4 right-4 flex h-6 w-6 items-center justify-center rounded-full border-2 transition-all duration-200 z-10",
-        {
-          // Selected state
-          'border-primary-500 bg-primary-500 text-white': isSelected && !hasError,
-          // Error state
-          'border-red-500 bg-red-500 text-white': hasError,
-          // Default state
-          'border-gray-300 bg-white text-gray-400 group-hover:border-primary-400 group-hover:text-primary-500': !isSelected && !hasError && !isDisabled,
-          // Disabled state
-          'border-gray-200 bg-gray-100 text-gray-300': isDisabled
-        }
-      )}>
-        {isSelected && !hasError ? (
-          <CheckIcon className="h-3 w-3" />
-        ) : hasError ? (
-          <AlertCircleIcon className="h-3 w-3" />
-        ) : (
-          <Plus className={clsx(
-            "h-3 w-3 transition-transform duration-200",
-            !isDisabled && "group-hover:scale-110"
-          )} />
-        )}
-      </div>
-
-      {/* Card content - flex grow to fill height */}
-      <div className="flex flex-col flex-1 p-6">
-        {/* Header */}
-        <div className="space-y-3 mb-4">
-          <div className="space-y-2">
-            <h3 className="text-xl font-semibold text-gray-900 leading-tight pr-8">
+      {/* Collapsed Header View */}
+      <div className="p-6">
+        <div className="flex items-center justify-between gap-4">
+          {/* Left: Title and Price */}
+          <div className="flex-1 min-w-0">
+            <h3 className="text-lg font-semibold text-gray-900 leading-tight truncate mb-1">
               {addon.title}
             </h3>
 
-            {/* Price display */}
             <div className="flex items-baseline gap-2 flex-wrap">
               {/* "Starts at" prefix for Second Photographer */}
               {addon.badges?.priceNote && (
-                <span className="text-sm text-gray-600 font-medium">
+                <span className="text-xs text-gray-600 font-medium">
                   {addon.badges.priceNote}
                 </span>
               )}
 
-              <span className="text-2xl font-bold text-gray-900">
+              <span className="text-xl font-bold text-gray-900">
                 ${displayPrice}
               </span>
 
-              {/* Original price with strikethrough and discount percentage */}
+              {/* Original price with strikethrough */}
               {addon.originalPrice && addon.originalPrice > displayPrice && (
                 <div className="flex items-baseline gap-1">
                   <span className="text-sm text-gray-500 line-through">
@@ -177,130 +162,160 @@ const AddOnCard = ({
                 </div>
               )}
             </div>
-
-            {/* Price calculation helper (for His & Hers) */}
-            {priceCalculation && (
-              <p className="text-xs text-gray-600">
-                {priceCalculation}
-              </p>
-            )}
           </div>
 
-          {/* Badges section - under price */}
-          {(addon.badges?.popularity || addon.badges?.recommended || addon.badges?.priceWarning) && (
-            <div className="flex flex-wrap gap-2 mt-2">
-              {/* Popularity badge */}
-              {addon.badges?.popularity && (
-                <Badge
-                  variant="primary"
-                  size="sm"
-                  className="text-xs whitespace-nowrap"
-                >
-                  {addon.badges.popularity}
-                </Badge>
-              )}
-
-              {/* Highly Recommended badge */}
-              {addon.badges?.recommended && (
-                <Badge
-                  variant="success"
-                  size="sm"
-                  className="text-xs whitespace-nowrap font-bold bg-green-600 text-white"
-                >
-                  Highly Recommended
-                </Badge>
-              )}
-
-              {/* Price Warning badge (for One-Time Date Change) */}
-              {addon.badges?.priceWarning && (
-                <Badge
-                  variant="warning"
-                  size="sm"
-                  className="text-xs whitespace-nowrap"
-                >
-                  {addon.badges.priceWarning}
-                </Badge>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Description */}
-        <div className="flex-1 space-y-4">
-          <div>
-            <CollapsibleText
-              id={`${addon.id}-description`}
-              maxLength={120}
-              className="text-sm text-gray-700 leading-relaxed"
-              expandOnDesktop={false}
-            >
-              {addon.description}
-            </CollapsibleText>
-          </div>
-
-          {/* Features list (if available) */}
-          {addon.features && addon.features.length > 0 && (
-            <div>
-              <h4 className="text-sm font-medium text-gray-900 mb-2">
-                What's included:
-              </h4>
-              <ul className="space-y-2" role="list">
-                  {addon.features.map((feature, index) => (
-                    <li key={index} className="flex items-start gap-2" role="listitem">
-                      <div className="mt-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-green-100 text-green-600 flex-shrink-0">
-                        <CheckIcon className="h-2.5 w-2.5" />
-                      </div>
-                      <span className="text-sm text-gray-700 leading-relaxed">
-                        {feature}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-            </div>
-          )}
-        </div>
-
-        {/* Bottom section - always at bottom */}
-        <div className="mt-6 space-y-3">
-          {/* Extra info link */}
-          {addon.extraInfo?.hasLink && (
+          {/* Right: Selection Checkbox and Expand Icon */}
+          <div className="flex items-center gap-3 flex-shrink-0">
+            {/* Selection Checkbox */}
             <button
               type="button"
-              onClick={handleInfoClick}
+              onClick={handleToggle}
+              disabled={isDisabled}
               className={clsx(
-                'inline-flex items-center text-xs text-primary-600 hover:text-primary-700',
-                'focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 rounded-md',
-                'transition-colors duration-200'
+                "flex h-6 w-6 items-center justify-center rounded-full border-2 transition-all duration-200 flex-shrink-0",
+                {
+                  'border-primary-500 bg-primary-500 text-white': isSelected && !hasError,
+                  'border-red-500 bg-red-500 text-white': hasError,
+                  'border-gray-300 bg-white text-gray-400 hover:border-primary-400 hover:text-primary-500': !isSelected && !hasError && !isDisabled,
+                  'border-gray-200 bg-gray-100 text-gray-300 cursor-not-allowed': isDisabled
+                }
               )}
+              aria-label={isSelected ? `Remove ${addon.title}` : `Add ${addon.title}`}
             >
-              <InfoIcon className="w-3 h-3 mr-1" />
-              {addon.extraInfo.linkText}
+              {isSelected && !hasError ? (
+                <CheckIcon className="h-3 w-3" />
+              ) : hasError ? (
+                <AlertCircleIcon className="h-3 w-3" />
+              ) : (
+                <Plus className={clsx(
+                  "h-3 w-3 transition-transform duration-200",
+                  !isDisabled && "group-hover:scale-110"
+                )} />
+              )}
             </button>
-          )}
 
-          {/* Validation messages */}
-          {hasError && (
-            <div
-              id={`${addon.id}-error`}
-              className="flex items-start space-x-2 text-red-600"
-              role="alert"
+            {/* Expand/Collapse Icon */}
+            <motion.div
+              animate={{ rotate: isExpanded ? 180 : 0 }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+              className="flex-shrink-0"
             >
-              <AlertCircleIcon className="w-4 h-4 mt-0.5 flex-shrink-0" />
-              <span className="text-sm">{validationError}</span>
-            </div>
-          )}
-
-          {hasWarning && (
-            <div
-              id={`${addon.id}-warning`}
-              className="flex items-start space-x-2 text-yellow-700"
-            >
-              <InfoIcon className="w-4 h-4 mt-0.5 flex-shrink-0" />
-              <span className="text-sm">{validationWarning}</span>
-            </div>
-          )}
+              <ChevronDown className={clsx(
+                "h-5 w-5 text-gray-500 transition-colors",
+                !isDisabled && "group-hover:text-primary-500"
+              )} />
+            </motion.div>
+          </div>
         </div>
+
+        {/* Badges row - always visible in collapsed view */}
+        {(addon.badges?.popularity || addon.badges?.recommended || addon.badges?.priceWarning) && (
+          <div className="flex flex-wrap gap-2 mt-3">
+            {addon.badges?.popularity && (
+              <Badge variant="primary" size="sm" className="text-xs whitespace-nowrap">
+                {addon.badges.popularity}
+              </Badge>
+            )}
+            {addon.badges?.recommended && (
+              <Badge variant="success" size="sm" className="text-xs whitespace-nowrap font-bold bg-green-600 text-white">
+                Highly Recommended
+              </Badge>
+            )}
+            {addon.badges?.priceWarning && (
+              <Badge variant="warning" size="sm" className="text-xs whitespace-nowrap">
+                {addon.badges.priceWarning}
+              </Badge>
+            )}
+          </div>
+        )}
       </div>
+
+      {/* Expanded Content - Animated */}
+      <AnimatePresence initial={false} mode="wait">
+        {isExpanded && (
+          <motion.div
+            key={`expanded-${addon.id}`}
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3, ease: 'easeInOut' }}
+            className="overflow-hidden"
+          >
+            <div className="px-6 pb-6 pt-0 space-y-4 border-t border-gray-200">
+              {/* Description */}
+              <div className="pt-4">
+                <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">
+                  {addon.description}
+                </p>
+              </div>
+
+              {/* Price calculation helper */}
+              {priceCalculation && (
+                <div className="bg-gray-100 rounded-lg p-3">
+                  <p className="text-xs text-gray-600">
+                    <strong>Pricing:</strong> {priceCalculation}
+                  </p>
+                </div>
+              )}
+
+              {/* Features list */}
+              {addon.features && addon.features.length > 0 && (
+                <div>
+                  <h4 className="text-sm font-medium text-gray-900 mb-3">
+                    What's included:
+                  </h4>
+                  <ul className="space-y-2" role="list">
+                    {addon.features.map((feature, index) => (
+                      <li key={index} className="flex items-start gap-2" role="listitem">
+                        <div className="mt-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-green-100 text-green-600 flex-shrink-0">
+                          <CheckIcon className="h-2.5 w-2.5" />
+                        </div>
+                        <span className="text-sm text-gray-700 leading-relaxed">
+                          {feature}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Extra info link */}
+              {addon.extraInfo?.hasLink && (
+                <button
+                  type="button"
+                  onClick={handleInfoClick}
+                  className={clsx(
+                    'inline-flex items-center text-xs text-primary-600 hover:text-primary-700',
+                    'focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 rounded-md',
+                    'transition-colors duration-200'
+                  )}
+                >
+                  <InfoIcon className="w-3 h-3 mr-1" />
+                  {addon.extraInfo.linkText}
+                </button>
+              )}
+
+              {/* Validation messages */}
+              {hasError && (
+                <div
+                  className="flex items-start space-x-2 text-red-600 bg-red-50 p-3 rounded-lg"
+                  role="alert"
+                >
+                  <AlertCircleIcon className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                  <span className="text-sm">{validationError}</span>
+                </div>
+              )}
+
+              {hasWarning && (
+                <div className="flex items-start space-x-2 text-yellow-700 bg-yellow-50 p-3 rounded-lg">
+                  <InfoIcon className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                  <span className="text-sm">{validationWarning}</span>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Hover effect overlay */}
       <div className={clsx(
@@ -337,7 +352,7 @@ const AddOnCard = ({
         aria-hidden="true"
         tabIndex={-1}
       />
-    </div>
+    </motion.div>
   )
 }
 

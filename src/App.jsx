@@ -70,6 +70,8 @@ const BookingPage = lazy(() =>
 )
 
 // Booking wizard pages
+const PackageSelection = lazy(() => import('@pages/customer/booking/PackageSelection'))
+const VideoSelection = lazy(() => import('@pages/customer/booking/VideoSelection'))
 const AddOnsDetails = lazy(() => import('@pages/customer/booking/AddOnsDetails'))
 const ManageAddOns = lazy(() => import('@pages/customer/booking/ManageAddOns'))
 const AccountSetup = lazy(() => import('@pages/customer/booking/AccountSetup'))
@@ -103,6 +105,7 @@ const TalentBookings = lazy(() => import('@pages/talent/dashboard/BookingsPage')
 const TalentSettings = lazy(() => import('@pages/talent/dashboard/SettingsPage'))
 const TalentAvailability = lazy(() => import('@pages/talent/dashboard/AvailabilityPage'))
 const VideographerProfile = lazy(() => import('@pages/talent/dashboard/videographer/VideographerProfilePage'))
+const TalentTraining = lazy(() => import('@pages/talent/TalentTraining'))
 
 // Lazy load photographer placeholders
 const PhotographerPlaceholders = lazy(() => import('@pages/placeholders'))
@@ -304,6 +307,19 @@ function App() {
             } />
 
             {/* Booking Wizard Routes */}
+            {/* New Package Selection Flow */}
+            <Route path="/booking/:photographerId/packages" element={
+              <Suspense fallback={<PageLoader />}>
+                <PackageSelection />
+              </Suspense>
+            } />
+            <Route path="/booking/:photographerId/video" element={
+              <Suspense fallback={<PageLoader />}>
+                <VideoSelection />
+              </Suspense>
+            } />
+
+            {/* Legacy Schedule Route - Keep for backwards compatibility */}
             <Route path="/booking/:photographerId/schedule" element={
               <Suspense fallback={<PageLoader />}>
                 <ScheduleRedirect />
@@ -515,6 +531,15 @@ function App() {
                   <PhotographerEarnings />
                 </Suspense>
               </TalentLayout>
+            </ProtectedRoute>
+          } />
+
+          {/* Talent Training Route - Required before dashboard access */}
+          <Route path="/talent/training" element={
+            <ProtectedRoute requireRole="photographer">
+              <Suspense fallback={<PageLoader />}>
+                <TalentTraining />
+              </Suspense>
             </ProtectedRoute>
           } />
 

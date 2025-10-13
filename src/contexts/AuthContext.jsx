@@ -527,9 +527,18 @@ export const AuthProvider = ({ children }) => {
         console.log('[AuthContext] Navigating to dashboard for role:', userProfile.role)
 
         if (userProfile.role === 'photographer') {
-          // Check if videographer by fetching photographer profile
+          // Check if videographer and training status by fetching photographer profile
           try {
             const photographerData = await db.photographers.getProfile(data.user.id)
+
+            // Check if training is completed
+            if (photographerData && !photographerData.training_completed) {
+              console.log('[AuthContext] Training not completed, routing to training page')
+              navigate('/talent/training', { replace: true })
+              return { success: true, user: data.user, profile: userProfile }
+            }
+
+            // Training completed, route to appropriate dashboard
             if (photographerData?.is_videographer) {
               console.log('[AuthContext] Routing videographer to videographer dashboard')
               navigate('/talent/dashboard/videographer', { replace: true })
@@ -716,6 +725,13 @@ export const AuthProvider = ({ children }) => {
     return !!user && !!profile
   }
 
+  // Refresh profile data (useful after profile updates)
+  const refreshProfile = useCallback(async () => {
+    if (!user) return
+    console.log('[AuthContext] Refreshing profile data')
+    await fetchUserData(user)
+  }, [user, fetchUserData])
+
   const value = {
     user,
     profile,
@@ -728,6 +744,7 @@ export const AuthProvider = ({ children }) => {
     updatePassword,
     updateProfile,
     fetchUserData,
+    refreshProfile,
     checkOnboardingStatus,
     hasRole,
     isAuthenticated
@@ -805,6 +822,26 @@ export const ProtectedRoute = ({ children, requireRole = null, requireOnboarding
         }
       }
 
+      // Check training requirement for talent dashboard access
+      if (profile?.role === 'photographer' && photographerProfile) {
+        const currentPath = window.location.pathname
+        const isDashboardRoute = currentPath.startsWith('/talent/dashboard')
+        const isTrainingRoute = currentPath === '/talent/training'
+
+        if (isDashboardRoute && !photographerProfile.training_completed) {
+          console.log('[ProtectedRoute] Training not completed, redirecting to training page')
+          hasNavigatedRef.current = true
+          navigate('/talent/training', { replace: true })
+          return
+        }
+
+        // Allow access to training page even if training is completed
+        if (isTrainingRoute && photographerProfile.training_completed) {
+          console.log('[ProtectedRoute] Training already completed, allowing access to training page')
+          // Don't redirect, allow them to view training page again if they want
+        }
+      }
+
       console.log('[ProtectedRoute] Access granted, rendering children')
     }
 
@@ -815,7 +852,7 @@ export const ProtectedRoute = ({ children, requireRole = null, requireOnboarding
         timeoutRef.current = null
       }
     }
-  }, [user, profile, loading, requireRole, requireOnboarding, navigate, hasRole, checkOnboardingStatus, forceRender])
+  }, [user, profile, photographerProfile, loading, requireRole, requireOnboarding, navigate, hasRole, checkOnboardingStatus, forceRender])
 
   if (loading && !forceRender) {
     console.log('[ProtectedRoute] Loading state active, showing spinner')

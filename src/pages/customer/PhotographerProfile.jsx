@@ -63,8 +63,8 @@ const PhotographerProfile = () => {
       const { data, error} = await supabasePublic
         .from('photographers')
         .select('id, user_id, bio, style_tags, languages, experience_years, city, state, zip_code, is_public, visible_in_search, is_verified, lnp_choice, is_videographer, average_rating, total_reviews, portfolio_images, gender, completed_jobs_count, unavailable_dates, gear_has_camera, gear_has_lenses, gear_has_tripod, gear_has_gimbal, gear_has_audio_recorder, gear_has_lighting')
-        .eq('user_id', id)
-        .single()
+        .eq('id', id)
+        .maybeSingle()
 
       if (error) {
         console.error('[PhotographerProfile] Query error:', error)
@@ -89,7 +89,7 @@ const PhotographerProfile = () => {
           .from('users')
           .select('full_name, email, phone, avatar_url')
           .eq('id', data.user_id)
-          .single()
+          .maybeSingle()
 
         if (!userError && user) {
           userData = user
