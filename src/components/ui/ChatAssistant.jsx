@@ -19,7 +19,7 @@ import { useLocation } from 'react-router-dom'
 const SITE_KNOWLEDGE = {
   routes: {
     photographers: '/photographers',
-    video: '/photographers/video',
+    video: '/videographers',
     pricing: '/pricing/client',
     guide: '/guide',
     about: '/about',
@@ -270,7 +270,7 @@ export default function ChatAssistant() {
       return { 
         response: `Looking for videography? We have amazing videographers who can capture your day in motion. You can browse video specialists or add video to any photo package. What type of video coverage interests you?`,
         chips: [
-          { label: "View Videographers", action: "/photographers/video" },
+          { label: "View Videographers", action: "/videographers" },
           { label: "Video Packages", action: "/pricing/client" }
         ]
       }
