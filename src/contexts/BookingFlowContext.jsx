@@ -159,6 +159,34 @@ export const BookingFlowProvider = ({ children }) => {
     }
   }, [bookingFlow, saveBookingFlow])
 
+  // Auto-load existing booking flow from localStorage on mount
+  useEffect(() => {
+    // Only run once on mount
+    if (bookingFlow.photographerId) return // Already initialized
+
+    // Try to find any existing booking flow in localStorage for this session
+    try {
+      const allKeys = Object.keys(localStorage)
+      const bookingKeys = allKeys.filter(key =>
+        key.startsWith('booking_flow_') && key.endsWith(`_${sessionId}`)
+      )
+
+      if (bookingKeys.length > 0) {
+        // Load the most recent booking flow (in case there are multiple)
+        const mostRecentKey = bookingKeys[bookingKeys.length - 1]
+        const stored = localStorage.getItem(mostRecentKey)
+
+        if (stored) {
+          const parsed = JSON.parse(stored)
+          console.log('🔄 Auto-loading booking flow from localStorage:', parsed.photographerId)
+          setBookingFlow(parsed)
+        }
+      }
+    } catch (error) {
+      console.error('Failed to auto-load booking flow:', error)
+    }
+  }, [sessionId]) // Only run when sessionId is available, and only once
+
   // Initialize booking flow for a photographer
   const initializeBookingFlow = useCallback((photographerId, initialData = {}) => {
     // Try to load existing flow first

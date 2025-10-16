@@ -165,7 +165,12 @@ function VideographerCard({ videographer, onSelect, isSelected }) {
 export default function SelectVideographer() {
   const navigate = useNavigate()
   const { bookingFlow, setVideographerId } = useBookingFlow()
-  const { data: videographers, isLoading, error, isEmpty } = useVideographersBatched()
+
+  // Get event state from booking flow to filter videographers by location
+  const eventState = bookingFlow.locationDetails?.state
+
+  // Fetch videographers filtered by event state
+  const { data: videographers, isLoading, error, isEmpty } = useVideographersBatched(eventState)
 
   // Get photographer ID from booking flow context
   const photographerId = bookingFlow.photographerId
@@ -273,8 +278,10 @@ export default function SelectVideographer() {
                 No Videographers Available
               </h3>
               <p className="text-gray-600 mb-6 max-w-md mx-auto">
-                We don't have any videographers available in your area at the moment.
-                You can continue with photography only.
+                {eventState
+                  ? `We don't have any videographers available in ${eventState} at the moment. You can continue with photography only.`
+                  : "We don't have any videographers available in your area at the moment. You can continue with photography only."
+                }
               </p>
               <Button onClick={handleSkip}>
                 Continue without Video
@@ -288,6 +295,7 @@ export default function SelectVideographer() {
               <div className="mb-6">
                 <p className="text-gray-700">
                   <span className="font-medium">{videographers.length}</span> videographer{videographers.length !== 1 ? 's' : ''} available
+                  {eventState && <span className="text-gray-500"> in {eventState}</span>}
                 </p>
               </div>
 
