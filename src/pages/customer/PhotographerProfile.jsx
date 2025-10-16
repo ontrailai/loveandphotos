@@ -23,6 +23,7 @@ import PhotographerMetricBadges from '@components/photographer/PhotographerMetri
 import Avatar from '@components/shared/Avatar'
 import RatingStars from '@components/shared/RatingStars'
 import BookingSidebar from '@components/booking/BookingSidebar'
+import ImageLightbox from '@components/ui/ImageLightbox'
 import { supabasePublic } from '@lib/supabase'
 import { useAuth } from '@contexts/AuthContext'
 import toast from 'react-hot-toast'
@@ -38,6 +39,8 @@ const PhotographerProfile = () => {
   const [selectedImage, setSelectedImage] = useState(0)
   const [imageErrors, setImageErrors] = useState({})
   const [isBioExpanded, setIsBioExpanded] = useState(false)
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false)
+  const [lightboxIndex, setLightboxIndex] = useState(0)
 
   // Check if viewing own profile
   const isOwnProfile = photographerProfile?.id === id
@@ -167,6 +170,22 @@ const PhotographerProfile = () => {
     setImageErrors(prev => ({ ...prev, [index]: true }))
   }
 
+  // Open lightbox at specific index
+  const openLightbox = (index) => {
+    setLightboxIndex(index)
+    setIsLightboxOpen(true)
+  }
+
+  // Close lightbox
+  const closeLightbox = () => {
+    setIsLightboxOpen(false)
+  }
+
+  // Navigate to different image in lightbox
+  const navigateLightbox = (index) => {
+    setLightboxIndex(index)
+  }
+
   // Get location display string
   const getLocationDisplay = () => {
     const parts = []
@@ -261,7 +280,19 @@ const PhotographerProfile = () => {
                 {validPortfolioImages.length > 0 ? (
                   <>
                     {/* Main Image */}
-                    <div className="aspect-w-16 aspect-h-10 bg-gray-100 rounded-xl overflow-hidden">
+                    <div
+                      className="aspect-w-16 aspect-h-10 bg-gray-100 rounded-xl overflow-hidden cursor-pointer hover:opacity-95 transition-opacity"
+                      onClick={() => openLightbox(selectedImage)}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault()
+                          openLightbox(selectedImage)
+                        }
+                      }}
+                      aria-label="Open image in full screen"
+                    >
                       <img
                         src={validPortfolioImages[selectedImage] || validPortfolioImages[0]}
                         alt={`${photographer.users?.full_name} - Portfolio Image ${selectedImage + 1}`}
@@ -277,19 +308,23 @@ const PhotographerProfile = () => {
                         {validPortfolioImages.map((image, index) => (
                           <button
                             key={index}
-                            onClick={() => setSelectedImage(index)}
+                            onClick={() => {
+                              setSelectedImage(index)
+                              openLightbox(index)
+                            }}
                             className={`
-                              aspect-square rounded-lg overflow-hidden border-2 transition-all
+                              aspect-square rounded-lg overflow-hidden border-2 transition-all cursor-pointer
                               ${selectedImage === index
                                 ? 'border-primary-500 ring-2 ring-primary-200'
                                 : 'border-transparent hover:border-gray-300'
                               }
                             `}
+                            aria-label={`View portfolio image ${index + 1} in full screen`}
                           >
                             <img
                               src={image}
                               alt={`${photographer.users?.full_name} - Portfolio Thumbnail ${index + 1}`}
-                              className="w-full h-full object-cover"
+                              className="w-full h-full object-cover hover:scale-105 transition-transform"
                               loading="lazy"
                               onError={() => handleImageError(index)}
                             />
@@ -502,6 +537,15 @@ const PhotographerProfile = () => {
           </div>
         </div>
       </div>
+
+      {/* Image Lightbox */}
+      <ImageLightbox
+        images={validPortfolioImages}
+        currentIndex={lightboxIndex}
+        isOpen={isLightboxOpen}
+        onClose={closeLightbox}
+        onNavigate={navigateLightbox}
+      />
     </div>
   )
 }
