@@ -234,7 +234,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signin" element={<Navigate to="/login" replace />} />
-            <Route path="/signup" element={<Navigate to="/login" replace />} />
+            <Route path="/signup" element={<SignUp />} />
             <Route path="/get-started" element={<Navigate to="/signup" replace />} />
             <Route path="/signup-demo" element={<SignupDemo />} />
             <Route path="/signup-enhanced" element={<SignupEnhanced />} />
@@ -593,14 +593,55 @@ function App() {
             } />
           </Route>
 
-          {/* Videographer Dashboard Route - Separate from Photographer Dashboard */}
+          {/* Videographer Dashboard Route - Nested Routes Structure */}
           <Route path="/talent/dashboard/videographer" element={
             <ProtectedRoute requireRole="photographer">
               <Suspense fallback={<PageLoader />}>
-                <VideographerProfile />
+                <TalentDashboardLayout />
               </Suspense>
             </ProtectedRoute>
-          } />
+          }>
+            <Route index element={
+              <Suspense fallback={<PageLoader />}>
+                <TalentOverview />
+              </Suspense>
+            } />
+            <Route path="profile" element={
+              <Suspense fallback={<PageLoader />}>
+                <VideographerProfile />
+              </Suspense>
+            } />
+            <Route path="calendar" element={
+              <Suspense fallback={<PageLoader />}>
+                <TalentCalendar />
+              </Suspense>
+            } />
+            <Route path="resources" element={
+              <Suspense fallback={<PageLoader />}>
+                <TalentResources />
+              </Suspense>
+            } />
+            <Route path="messages" element={
+              <Suspense fallback={<PageLoader />}>
+                <TalentMessages />
+              </Suspense>
+            } />
+            <Route path="bookings" element={
+              <Suspense fallback={<PageLoader />}>
+                <TalentBookings />
+              </Suspense>
+            } />
+            <Route path="settings" element={
+              <Suspense fallback={<PageLoader />}>
+                <TalentSettings />
+              </Suspense>
+            } />
+            <Route path="availability" element={
+              <Suspense fallback={<PageLoader />}>
+                <TalentAvailability />
+              </Suspense>
+            } />
+          </Route>
 
           {/* Admin Routes - Lazy loaded */}
           <Route path="/admin" element={
