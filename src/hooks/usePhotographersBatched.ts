@@ -9,6 +9,7 @@ import { supabasePublic } from '@lib/supabase'
 import { fetchPhotographerTrustMetrics } from '@utils/batchSupabaseQueries'
 import { normalizeLocationQuery } from '@lib/utils/normalizeLocationQuery'
 import { resolveZipToCity } from '@lib/server/resolveZipToCity'
+import { geocodeZipCode, calculateDistance, type Coordinates } from '@utils/photographers/distanceCalculator'
 import type {
   PhotographerProfile,
   PhotographersQueryParams,
@@ -32,6 +33,13 @@ const MAX_RETRIES = 3
 // Cache for trust metrics to avoid repeated fetches
 const trustMetricsCache = new Map<string, { data: TrustMetrics; timestamp: number }>()
 const TRUST_METRICS_CACHE_TTL = 10 * 60 * 1000 // 10 minutes
+
+// Cache for ZIP code geocoding
+const zipCoordinatesCache = new Map<string, { coords: Coordinates | null; timestamp: number }>()
+const ZIP_COORDS_CACHE_TTL = 60 * 60 * 1000 // 1 hour (coordinates don't change)
+
+// Search radius in miles
+const SEARCH_RADIUS_MILES = 100
 
 /**
  * Build Supabase query with filters and sorting
@@ -148,7 +156,9 @@ function transformPhotographerData(
     has_minimum_data: metrics.has_minimum_data || false,
     manual_override_acceptance_rate: metrics.manual_override_acceptance_rate,
     manual_override_response_time: metrics.manual_override_response_time,
-    availability_level: 'high' // TODO: Calculate based on real metrics
+    availability_level: 'high', // TODO: Calculate based on real metrics
+    // Distance from search origin (if available)
+    distance_miles: rawData.distance_miles
   }
 }
 
@@ -196,6 +206,93 @@ async function applyLocationFilter(
   }
 
   return photographers
+}
+
+/**
+ * Geocode ZIP code with caching
+ */
+async function geocodeZipWithCache(zipCode: string): Promise<Coordinates | null> {
+  const now = Date.now()
+  const cached = zipCoordinatesCache.get(zipCode)
+
+  if (cached && (now - cached.timestamp) < ZIP_COORDS_CACHE_TTL) {
+    return cached.coords
+  }
+
+  try {
+    const coords = await geocodeZipCode(zipCode)
+    zipCoordinatesCache.set(zipCode, {
+      coords,
+      timestamp: now
+    })
+    return coords
+  } catch (error) {
+    console.error(`Failed to geocode ZIP ${zipCode}:`, error)
+    return null
+  }
+}
+
+/**
+ * Filter photographers by distance from origin ZIP code
+ * Returns photographers within SEARCH_RADIUS_MILES
+ */
+async function filterByRadius(
+  photographers: any[],
+  originZip: string
+): Promise<any[]> {
+  // Geocode the origin ZIP
+  const originCoords = await geocodeZipWithCache(originZip)
+
+  if (!originCoords) {
+    console.warn(`Could not geocode origin ZIP: ${originZip}`)
+    return photographers // Return unfiltered if geocoding fails
+  }
+
+  console.log(`📍 Origin coordinates for ZIP ${originZip}:`, originCoords)
+
+  // Filter photographers by distance
+  const photographersWithDistance = await Promise.all(
+    photographers.map(async (photographer) => {
+      const photographerZip = photographer.zip_code
+
+      if (!photographerZip) {
+        // No ZIP code - exclude from radius search
+        return null
+      }
+
+      // Geocode photographer's ZIP
+      const photographerCoords = await geocodeZipWithCache(photographerZip)
+
+      if (!photographerCoords) {
+        // Could not geocode - exclude from results
+        return null
+      }
+
+      // Calculate distance
+      const distance = calculateDistance(originCoords, photographerCoords)
+
+      console.log(`📏 Distance to ${photographer.users?.full_name || 'photographer'} (${photographerZip}): ${distance.toFixed(2)} miles`)
+
+      // Include only if within radius
+      if (distance <= SEARCH_RADIUS_MILES) {
+        return {
+          ...photographer,
+          distance_miles: distance
+        }
+      }
+
+      return null
+    })
+  )
+
+  // Filter out nulls and sort by distance
+  const filtered = photographersWithDistance
+    .filter(p => p !== null)
+    .sort((a, b) => a.distance_miles - b.distance_miles)
+
+  console.log(`✅ Filtered ${photographers.length} photographers to ${filtered.length} within ${SEARCH_RADIUS_MILES} miles`)
+
+  return filtered
 }
 
 /**
@@ -260,17 +357,29 @@ async function fetcherFunction(
       return { photographers: [], hasMore: false, total: 0 }
     }
 
-    // Resolve location before building query
+    // Check if the location query is a ZIP code for radius search
+    const normalized = params.filters.zip ? normalizeLocationQuery(params.filters.zip) : null
+    const isZipSearch = normalized?.kind === 'zip' && normalized.zip && /^\d{5}$/.test(normalized.zip)
+
+    console.log('🔍 Location search:', {
+      query: params.filters.zip,
+      isZipSearch,
+      zipCode: isZipSearch ? normalized.zip : null
+    })
+
+    // If ZIP search, don't apply database location filter - we'll filter by radius client-side
+    // For city/state searches, continue using database filtering
     let locationCity: string | undefined
-    if (params.filters.zip) {
+    if (params.filters.zip && !isZipSearch) {
       locationCity = await resolveLocationToCity(params.filters.zip) || undefined
     }
 
     console.log('🏗️ Building query with location:', locationCity)
 
-    // Build and execute query with location filter
+    // Build and execute query
+    // For ZIP searches, fetch broader results (remove location filter) then filter by radius
     const query = buildPhotographersQuery(params, offset, DEFAULT_PAGE_SIZE, locationCity)
-    const { data: rawPhotographers, error, count } = await query
+    let { data: rawPhotographers, error, count } = await query
 
     console.log('📊 Query result:', {
       data: rawPhotographers?.length || 0,
@@ -288,7 +397,17 @@ async function fetcherFunction(
       return { photographers: [], hasMore: false, total: count || 0 }
     }
 
-    // No need for post-query location filtering - already handled by database
+    // Apply radius filtering for ZIP searches
+    if (isZipSearch && normalized?.zip) {
+      console.log(`🌐 Applying ${SEARCH_RADIUS_MILES}-mile radius filter from ZIP ${normalized.zip}`)
+      rawPhotographers = await filterByRadius(rawPhotographers, normalized.zip)
+
+      if (rawPhotographers.length === 0) {
+        console.log('📭 No photographers found within radius')
+        return { photographers: [], hasMore: false, total: 0 }
+      }
+    }
+
     // Fetch trust metrics for photographers that have user_id
     const userIds = rawPhotographers
       .filter(p => p.user_id)
