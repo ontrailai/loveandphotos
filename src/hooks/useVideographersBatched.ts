@@ -27,7 +27,12 @@ const TRUST_METRICS_CACHE_TTL = 10 * 60 * 1000 // 10 minutes
 /**
  * Build Supabase query for videographers
  */
-function buildVideographersQuery(offset: number = 0, limit: number = DEFAULT_PAGE_SIZE, stateFilter?: string) {
+function buildVideographersQuery(
+  offset: number = 0,
+  limit: number = DEFAULT_PAGE_SIZE,
+  cityFilter?: string,
+  stateFilter?: string
+) {
   let query = supabasePublic
     .from('photographers')
     .select('id, bio, portfolio_images, style_tags, experience_years, average_rating, total_reviews, is_verified, visible_in_search, profile_complete, user_id, city, state, zip_code, is_videographer, gear_has_camera, gear_has_lenses, gear_has_tripod, gear_has_gimbal, gear_has_audio_recorder, gear_has_lighting, users!inner(full_name, avatar_url)', { count: 'exact' })
@@ -35,7 +40,12 @@ function buildVideographersQuery(offset: number = 0, limit: number = DEFAULT_PAG
     .eq('profile_complete', true)
     .eq('is_videographer', true) // Only fetch videographers
 
-  // Apply state filter if provided
+  // Apply city filter first if provided (more specific)
+  if (cityFilter) {
+    query = query.ilike('city', cityFilter)
+  }
+
+  // Apply state filter if provided (less specific, fallback)
   if (stateFilter) {
     query = query.eq('state', stateFilter)
   }
@@ -163,10 +173,11 @@ async function fetchTrustMetricsWithCache(userIds: string[]): Promise<Record<str
 async function fetcherFunction(
   key: string,
   offset: number = 0,
+  cityFilter?: string,
   stateFilter?: string
 ): Promise<{ videographers: PhotographerProfile[]; hasMore: boolean; total: number }> {
   try {
-    console.log('🎥 Fetching videographers, offset:', offset, 'state filter:', stateFilter)
+    console.log('🎥 Fetching videographers, offset:', offset, 'city filter:', cityFilter, 'state filter:', stateFilter)
 
     // Check if Supabase is properly configured
     if (!import.meta.env.VITE_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL.includes('your-project')) {
@@ -174,7 +185,7 @@ async function fetcherFunction(
       return { videographers: [], hasMore: false, total: 0 }
     }
 
-    const query = buildVideographersQuery(offset, DEFAULT_PAGE_SIZE, stateFilter)
+    const query = buildVideographersQuery(offset, DEFAULT_PAGE_SIZE, cityFilter, stateFilter)
     const { data: rawVideographers, error, count } = await query
 
     console.log('📊 Videographers query result:', {
@@ -224,15 +235,18 @@ async function fetcherFunction(
 
 /**
  * Custom hook for fetching videographers with infinite scroll
- * @param stateFilter - Optional state abbreviation to filter videographers by location
+ * @param filters - Optional filters object with city and/or state
  */
-export function useVideographersBatched(stateFilter?: string): UsePhotographersBatchedReturn {
+export function useVideographersBatched(filters?: { city?: string; state?: string }): UsePhotographersBatchedReturn {
   const [allVideographers, setAllVideographers] = useState<PhotographerProfile[]>([])
   const [currentOffset, setCurrentOffset] = useState(0)
   const [hasMore, setHasMore] = useState(true)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
   const abortControllerRef = useRef<AbortController | null>(null)
   const retryCountRef = useRef(0)
+
+  const cityFilter = filters?.city
+  const stateFilter = filters?.state
 
   // SWR for initial data
   const {
@@ -241,8 +255,8 @@ export function useVideographersBatched(stateFilter?: string): UsePhotographersB
     isLoading,
     mutate
   } = useSWR(
-    [CACHE_KEY_PREFIX, 0, stateFilter],
-    ([key, offset, state]) => fetcherFunction(key, offset, state),
+    [CACHE_KEY_PREFIX, 0, cityFilter, stateFilter],
+    ([key, offset, city, state]) => fetcherFunction(key, offset, city, state),
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: true,
@@ -256,7 +270,7 @@ export function useVideographersBatched(stateFilter?: string): UsePhotographersB
     }
   )
 
-  // Reset state when cache key changes (including state filter)
+  // Reset state when cache key changes (including filters)
   useEffect(() => {
     setAllVideographers([])
     setCurrentOffset(0)
@@ -267,7 +281,7 @@ export function useVideographersBatched(stateFilter?: string): UsePhotographersB
     if (abortControllerRef.current) {
       abortControllerRef.current.abort()
     }
-  }, [CACHE_KEY_PREFIX, stateFilter])
+  }, [CACHE_KEY_PREFIX, cityFilter, stateFilter])
 
   // Update videographers when initial data changes
   useEffect(() => {
@@ -298,7 +312,7 @@ export function useVideographersBatched(stateFilter?: string): UsePhotographersB
       abortControllerRef.current = new AbortController()
 
       const nextOffset = currentOffset
-      const nextData = await fetcherFunction(CACHE_KEY_PREFIX, nextOffset, stateFilter)
+      const nextData = await fetcherFunction(CACHE_KEY_PREFIX, nextOffset, cityFilter, stateFilter)
 
       if (nextData.videographers.length > 0) {
         setAllVideographers(prev => [...prev, ...nextData.videographers])
@@ -322,7 +336,7 @@ export function useVideographersBatched(stateFilter?: string): UsePhotographersB
     } finally {
       setIsLoadingMore(false)
     }
-  }, [hasMore, isLoadingMore, isLoading, currentOffset, stateFilter])
+  }, [hasMore, isLoadingMore, isLoading, currentOffset, cityFilter, stateFilter])
 
   // Refetch function
   const refetch = useCallback(async () => {
