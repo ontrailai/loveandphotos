@@ -355,56 +355,47 @@ export function FiltersPanel({
 
         <div className={clsx(isMobile ? 'space-y-0' : 'space-y-0')}>
 
-          {/* Photographer Tier */}
-          <FilterSection title="Photographer Tier" defaultOpen={true}>
+          {/* Love & Photos Choice */}
+          <FilterSection title="Quality" defaultOpen={true}>
             <div className="space-y-3">
-              {['all', 'bronze', 'silver', 'gold', 'platinum'].map((tier) => (
-                <label
-                  key={tier}
+              <label
+                className={clsx(
+                  'flex items-center cursor-pointer p-3 -mx-1 rounded-xl',
+                  'group'
+                )}
+              >
+                <input
+                  type="checkbox"
+                  name="lnpChoiceOnly"
+                  checked={filters.lnpChoiceOnly}
+                  onChange={(e) => updateFilter('lnpChoiceOnly', e.target.checked)}
+                  className="sr-only"
+                />
+
+                <div
                   className={clsx(
-                    'flex items-center cursor-pointer p-3 -mx-1 rounded-xl',
-                    'group'
+                    'w-5 h-5 rounded border-2 mr-3 transition-colors duration-150 flex items-center justify-center',
+                    filters.lnpChoiceOnly
+                      ? 'border-[#FF4D6D] bg-[#FF4D6D]'
+                      : 'border-gray-300 group-hover:border-[#FF4D6D]/50'
                   )}
                 >
-                  <input
-                    type="radio"
-                    name="tier"
-                    value={tier}
-                    checked={filters.tier === tier}
-                    onChange={() => updateFilter('tier', tier)}
-                    className="sr-only"
-                  />
+                  {filters.lnpChoiceOnly && (
+                    <svg className="w-3 h-3 text-white" viewBox="0 0 12 12" fill="none">
+                      <path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  )}
+                </div>
 
-                  <div
-                    className={clsx(
-                      'w-5 h-5 rounded-full border-2 mr-3 transition-colors duration-150 flex items-center justify-center',
-                      filters.tier === tier
-                        ? 'border-[#FF4D6D] bg-[#FF4D6D]'
-                        : 'border-gray-300 group-hover:border-[#FF4D6D]/50'
-                    )}
-                  >
-                    {filters.tier === tier && (
-                      <div className="w-2 h-2 rounded-full bg-white" />
-                    )}
-                  </div>
-
-                  <div className="flex items-center flex-1">
-                    {tier === 'all' ? (
-                      <span className="text-sm font-medium text-gray-800 group-hover:text-gray-900">
-                        All Tiers
-                      </span>
-                    ) : (
-                      <Badge
-                        variant="default"
-                        size="sm"
-                        className="capitalize font-medium bg-gray-200 text-gray-800"
-                      >
-                        {tier}
-                      </Badge>
-                    )}
-                  </div>
-                </label>
-              ))}
+                <div className="flex items-center flex-1">
+                  <span className="text-sm font-medium text-gray-800 group-hover:text-gray-900">
+                    Love & Photos Choice Only
+                  </span>
+                </div>
+              </label>
+              <p className="text-xs text-gray-500 px-3">
+                Hand-selected by our team for quality, consistency, and experience
+              </p>
             </div>
           </FilterSection>
 

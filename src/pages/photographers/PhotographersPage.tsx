@@ -70,7 +70,7 @@ export default function PhotographersPage() {
   const activeFilterCount = useMemo(() => {
     return (
       filters.languages.length +
-      (filters.tier !== 'all' ? 1 : 0) +
+      (filters.lnpChoiceOnly ? 1 : 0) +
       (filters.photographyStyle !== 'all' ? 1 : 0) +
       (filters.femaleOnly ? 1 : 0) +
       (filters.priceRange ? 1 : 0)

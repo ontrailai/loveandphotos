@@ -86,7 +86,7 @@ export const AvailabilityLevelSchema = z.enum(AVAILABILITY_LEVELS)
 export const FilterStateSchema = z.object({
   zip: z.string().default(''),
   date: z.string().default(''),
-  tier: z.union([z.literal('all'), PayTierSchema]).default('all'),
+  lnpChoiceOnly: z.boolean().default(false),
   specialties: z.array(SpecialtySchema).default([]),
   languages: z.array(LanguageSchema).default([]),
   photographyStyle: PhotographyStyleSchema.default('all'),
@@ -104,7 +104,7 @@ export const URLParamsSchema = z.object({
   q: z.string().optional(), // Search query
   zip: z.string().optional(), // ZIP code or city
   date: z.string().optional(), // Selected date (YYYY-MM-DD)
-  tier: z.union([z.literal('all'), PayTierSchema]).optional(),
+  lnp_choice: z.coerce.boolean().optional(),
   specialties: z.string().optional(), // CSV string
   languages: z.string().optional(), // CSV string
   sort: SortOptionSchema.optional(),
@@ -438,7 +438,7 @@ export const isValidViewMode = (value: string): value is ViewMode =>
 export const DEFAULT_FILTERS: FilterState = {
   zip: '',
   date: '',
-  tier: 'all',
+  lnpChoiceOnly: false,
   specialties: [],
   languages: [],
   photographyStyle: 'all',

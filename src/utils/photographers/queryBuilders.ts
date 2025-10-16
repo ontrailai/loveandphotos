@@ -53,22 +53,11 @@ export function applyRatingFilter(query: any, rating: number) {
 }
 
 /**
- * Apply tier filter to query
+ * Apply Love & Photos Choice filter to query
  */
-export function applyTierFilter(query: any, tier: string) {
-  if (tier !== 'all') {
-    // Note: This would need to be joined with pay_tiers table in a real implementation
-    // For now, we'll use a simplified approach based on verification status
-    switch (tier.toLowerCase()) {
-      case 'platinum':
-      case 'gold':
-        return query.eq('is_verified', true)
-      case 'silver':
-      case 'bronze':
-        return query.eq('is_verified', false)
-      default:
-        return query
-    }
+export function applyLnpChoiceFilter(query: any, lnpChoiceOnly: boolean) {
+  if (lnpChoiceOnly) {
+    return query.eq('is_lnp_choice', true)
   }
   return query
 }
@@ -263,7 +252,7 @@ export function buildPhotographersQuery(
   // Apply all filters
   query = applyAvailabilityFilter(query)
   query = applyRatingFilter(query, filters.rating)
-  query = applyTierFilter(query, filters.tier)
+  query = applyLnpChoiceFilter(query, filters.lnpChoiceOnly)
   query = applySpecialtiesFilter(query, filters.specialties)
   query = applyLanguagesFilter(query, filters.languages)
   query = applyLocationFilter(query, filters.zip)
@@ -297,7 +286,7 @@ export function buildPhotographersCountQuery(
   // Apply same filters as main query (except sorting and pagination)
   query = applyAvailabilityFilter(query)
   query = applyRatingFilter(query, filters.rating)
-  query = applyTierFilter(query, filters.tier)
+  query = applyLnpChoiceFilter(query, filters.lnpChoiceOnly)
   query = applySpecialtiesFilter(query, filters.specialties)
   query = applyLanguagesFilter(query, filters.languages)
   query = applyLocationFilter(query, filters.zip)
@@ -367,8 +356,7 @@ export function sanitizeFilters(filters: FilterState): FilterState {
   return {
     zip: filters.zip?.trim()?.slice(0, 50) || '',
     date: filters.date || '',
-    rating: Math.max(0, Math.min(5, filters.rating || 0)),
-    tier: filters.tier || 'all',
+    lnpChoiceOnly: Boolean(filters.lnpChoiceOnly),
     specialties: filters.specialties?.slice(0, 10) || [],
     languages: filters.languages?.slice(0, 10) || [],
     photographyStyle: filters.photographyStyle || 'all',
@@ -388,8 +376,7 @@ export function getFilterSummary(filters: FilterState) {
 
   if (filters.zip) activeFilters.push(`location: ${filters.zip}`)
   if (filters.date) activeFilters.push(`date: ${filters.date}`)
-  if (filters.rating > 0) activeFilters.push(`rating: ${filters.rating}+`)
-  if (filters.tier !== 'all') activeFilters.push(`tier: ${filters.tier}`)
+  if (filters.lnpChoiceOnly) activeFilters.push('Love & Photos Choice')
   if (filters.specialties.length > 0) activeFilters.push(`specialties: ${filters.specialties.join(', ')}`)
   if (filters.languages.length > 0) activeFilters.push(`languages: ${filters.languages.join(', ')}`)
   if (filters.photographyStyle !== 'all') activeFilters.push(`style: ${filters.photographyStyle}`)
@@ -413,7 +400,7 @@ export function getFilterSummary(filters: FilterState) {
  */
 export const queryBuilderUtils = {
   applyRatingFilter,
-  applyTierFilter,
+  applyLnpChoiceFilter,
   applySpecialtiesFilter,
   applyLanguagesFilter,
   applyLocationFilter,

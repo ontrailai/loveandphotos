@@ -64,7 +64,7 @@ function parseURLToFilters(params: URLSearchParams): FilterState {
     return {
       zip: validated.q || validated.zip || '',
       date: validated.date || '',
-      tier: validated.tier === 'all' ? 'all' : (isValidPayTier(validated.tier || '') ? validated.tier : 'all'),
+      lnpChoiceOnly: validated.lnp_choice || false,
       specialties: [],
       languages: parseCSVWithValidation(validated.languages, isValidLanguage),
       photographyStyle: validated.style || 'all',
@@ -100,11 +100,10 @@ function filtersToURLParams(
     params.set('date', filters.date)
   }
 
-  // Tier
-  if (filters.tier !== 'all') {
-    params.set('tier', filters.tier)
+  // Love & Photos Choice
+  if (filters.lnpChoiceOnly) {
+    params.set('lnp_choice', 'true')
   }
-
 
   // Languages
   if (filters.languages.length > 0) {
@@ -156,7 +155,7 @@ function validateURLLength(params: URLSearchParams, baseUrl: string): URLSearchP
 
   // Priority order for keeping parameters (most important first)
   const priorityOrder = [
-    'zip', 'date', 'tier', 'sort', 'view',
+    'zip', 'date', 'lnp_choice', 'sort', 'view',
     'languages', 'style', 'female'
   ]
 
@@ -350,7 +349,7 @@ export function useUrlStateAnalytics() {
     const activeFilters = {
       hasLocation: !!filters.zip,
       hasDate: !!filters.date,
-      hasTier: filters.tier !== 'all',
+      hasLnpChoice: filters.lnpChoiceOnly,
       hasLanguages: filters.languages.length > 0,
       hasStyle: filters.photographyStyle !== 'all',
       hasFemaleOnly: filters.femaleOnly,
