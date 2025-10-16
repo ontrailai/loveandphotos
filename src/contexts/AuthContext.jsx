@@ -57,11 +57,12 @@ export const AuthProvider = ({ children }) => {
         console.warn('[AuthContext] ⏱️ Profile fetch timed out, creating minimal profile from session')
 
         // Create minimal profile from session user metadata instead of waiting for DB
+        // CRITICAL: Default role should be 'customer', NOT 'photographer'
         userProfile = {
           id: user.id,
           email: user.email,
           full_name: user.user_metadata?.full_name || '',
-          role: user.user_metadata?.role || 'photographer',
+          role: user.user_metadata?.role || 'customer',
           created_at: user.created_at
         }
         console.log('[AuthContext] ✅ Created minimal profile from session metadata')

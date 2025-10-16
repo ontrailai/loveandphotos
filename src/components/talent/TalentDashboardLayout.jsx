@@ -153,8 +153,9 @@ const TalentDashboardLayout = () => {
   // Ensure photographer profile exists, create if missing
   useEffect(() => {
     const ensurePhotographerProfile = async () => {
-      // Only run once when conditions are met and photographer profile is missing
-      if (user && profile?.role === 'photographer' && !photographerProfile) {
+      // CRITICAL: Only create photographer profile if user has an ACCEPTED talent application
+      // This prevents accidentally creating photographer profiles for customer users
+      if (user && profile?.role === 'photographer' && !photographerProfile && hasAcceptedApplication) {
         console.log('[TalentDashboard] Creating missing photographer profile for user:', user.id)
         try {
           const { supabase } = await import('@lib/supabase')

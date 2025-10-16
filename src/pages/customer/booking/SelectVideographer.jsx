@@ -166,11 +166,12 @@ export default function SelectVideographer() {
   const navigate = useNavigate()
   const { bookingFlow, setVideographerId } = useBookingFlow()
 
-  // Get event state from booking flow to filter videographers by location
+  // Get event location from booking flow to filter videographers by location
+  const eventCity = bookingFlow.locationDetails?.city
   const eventState = bookingFlow.locationDetails?.state
 
-  // Fetch videographers filtered by event state
-  const { data: videographers, isLoading, error, isEmpty } = useVideographersBatched(eventState)
+  // Fetch videographers filtered by event location (city first, then state fallback)
+  const { data: videographers, isLoading, error, isEmpty } = useVideographersBatched({ city: eventCity, state: eventState })
 
   // Get photographer ID from booking flow context
   const photographerId = bookingFlow.photographerId
