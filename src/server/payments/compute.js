@@ -43,10 +43,11 @@
  *    - No processing fee
  *
  * C. $199 Monthly Plan ('monthly199'):
- *    - $150 one-time processing fee added to total
- *    - Monthly payments calculated as: (base_amount + $150) / months_until_60day_cutoff
- *    - First payment due today
- *    - Subsequent payments charged monthly
+ *    - $149 one-time processing fee added to FINAL payment (not first payment)
+ *    - Monthly payments: Fixed $199/month
+ *    - First payment: $199 (no processing fee)
+ *    - Subsequent payments: $199/month
+ *    - Final payment at 60-day cutoff: Remaining balance + $149 processing fee
  *    - All payments complete 60 days before event
  *
  * BASE AMOUNT CALCULATION:
@@ -178,19 +179,19 @@ export function computePayable(booking, plan) {
       // $500 deposit + remaining balance split into monthly payments
       amount_cents = 50000 // $500 deposit
     } else if (plan === 'monthly199') {
-      // Monthly plan: Fixed $199/month payments + $150 processing fee (first payment only)
-      // First payment: $199 + $150 processing fee = $349
+      // Monthly plan: Fixed $199/month payments + $149 processing fee added to FINAL payment
+      // First payment: $199
       // Subsequent payments: $199/month
-      // Final payment at 60-day cutoff: Remaining balance
-      processing_fee_cents = 15000 // $150 processing fee
+      // Final payment at 60-day cutoff: Remaining balance + $149 processing fee
+      processing_fee_cents = 14900 // $149 processing fee (added to final payment, not first)
       const monthlyPayment = 19900 // Fixed $199/month
 
-      // First payment due today: $199 + $150 processing fee
-      amount_cents = monthlyPayment + processing_fee_cents
+      // First payment due today: $199 only (NO processing fee)
+      amount_cents = monthlyPayment
 
       // Calculate total paid after monthly installments
       const totalMonthlyPayments = monthlyPayment * monthsUntilCutoff
-      const finalBalance = base_cents - totalMonthlyPayments
+      const finalBalance = base_cents + processing_fee_cents - totalMonthlyPayments
 
       console.log('💳 Monthly Plan Breakdown:', {
         base_cents: `$${(base_cents / 100).toFixed(2)}`,
@@ -198,7 +199,7 @@ export function computePayable(booking, plan) {
         monthly_payment: `$${(monthlyPayment / 100).toFixed(2)}`,
         months_available: monthsUntilCutoff,
         total_monthly_payments: `$${(totalMonthlyPayments / 100).toFixed(2)}`,
-        final_balance: `$${(finalBalance / 100).toFixed(2)}`,
+        final_balance_with_fee: `$${(finalBalance / 100).toFixed(2)}`,
         first_payment_today: `$${(amount_cents / 100).toFixed(2)}`
       })
     } else if (plan === 'deposit+3' || plan === 'installments') {
@@ -323,23 +324,23 @@ export function generatePaymentSchedule(booking, plan) {
       })
     }
   } else if (plan === 'monthly199') {
-    // Monthly Plan: Fixed $199/month payments until 60 days before event, then lump sum
-    const processingFee = 15000 // $150 processing fee
+    // Monthly Plan: Fixed $199/month payments until 60 days before event, then lump sum + processing fee
+    const processingFee = 14900 // $149 processing fee (added to FINAL payment only)
     const monthlyPayment = 19900 // $199 fixed monthly payment
 
     // Calculate how many full months we have until the 60-day cutoff
     const monthsAvailable = Math.max(1, Math.floor(daysUntilCutoff / 30))
 
-    // First payment: $199 + $150 processing fee
+    // First payment: $199 only (NO processing fee)
     schedule.push({
       date: today.toISOString(),
-      amount_cents: monthlyPayment + processingFee,
-      description: 'First monthly payment ($199 + $150 processing fee)',
+      amount_cents: monthlyPayment,
+      description: 'First monthly payment ($199)',
       payment_number: 1,
       total_payments: monthsAvailable + 1 // monthly payments + final lump sum
     })
 
-    let totalPaidSoFar = monthlyPayment + processingFee
+    let totalPaidSoFar = monthlyPayment
 
     // Monthly $199 payments (excluding first payment which we already added)
     for (let i = 1; i < monthsAvailable; i++) {
@@ -357,13 +358,13 @@ export function generatePaymentSchedule(booking, plan) {
       totalPaidSoFar += monthlyPayment
     }
 
-    // Final lump sum payment at 60-day cutoff
-    const finalLumpSum = base_cents - totalPaidSoFar
+    // Final lump sum payment at 60-day cutoff (includes $149 processing fee)
+    const finalLumpSum = base_cents + processingFee - totalPaidSoFar
 
     schedule.push({
       date: cutoffDate.toISOString(),
       amount_cents: finalLumpSum,
-      description: `Final balance due 60 days before event`,
+      description: `Final balance + $149 processing fee (due 60 days before event)`,
       payment_number: monthsAvailable + 1,
       total_payments: monthsAvailable + 1
     })
