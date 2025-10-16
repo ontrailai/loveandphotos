@@ -106,7 +106,7 @@ const CheckoutComplete = () => {
 
   const handleViewBooking = () => {
     if (bookingFlow?.bookingId) {
-      navigate(`/booking/${bookingFlow.bookingId}/details`)
+      navigate(`/booking/${bookingFlow.bookingId}`)
     } else {
       navigate('/my-bookings')
     }
