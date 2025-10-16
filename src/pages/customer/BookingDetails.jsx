@@ -44,7 +44,7 @@ const BookingDetails = () => {
         .from('bookings')
         .select(`
           *,
-          photographers (
+          photographer:photographer_id (
             id,
             users!inner (
               full_name,
@@ -59,7 +59,7 @@ const BookingDetails = () => {
             average_rating,
             total_reviews
           ),
-          packages (
+          package:package_id (
             title,
             duration_minutes,
             description
@@ -115,8 +115,8 @@ const BookingDetails = () => {
     )
   }
 
-  const photographerName = getFirstNameOnly(booking.photographers?.users?.full_name)
-  const packageTitle = booking.packages?.title || 'Photography Package'
+  const photographerName = getFirstNameOnly(booking.photographer?.users?.full_name || 'Photographer')
+  const packageTitle = booking.package?.title || booking.package_title || 'Photography Package'
   const totalAmount = parseFloat(booking.final_amount || booking.total_amount || 0)
   const isSigned = !!booking.contract_signatures?.[0]
 
