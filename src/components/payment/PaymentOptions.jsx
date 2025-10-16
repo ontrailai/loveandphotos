@@ -99,7 +99,7 @@ const PaymentOptions = ({
       dueToday: (() => {
         const monthlyPayment = 199
         const processingFee = 150
-        return monthlyPayment + processingFee // $349 first payment
+        return monthlyPayment // $199 first payment (fee added to final payment)
       })(),
       schedule: (() => {
         if (!isMonthlyAvailable) return []
@@ -120,11 +120,11 @@ const PaymentOptions = ({
           })
         }
 
-        // Calculate final lump sum
-        const totalMonthlyPayments = (monthsAvailable * monthlyPayment) + processingFee
-        const finalLumpSum = totalAmount - totalMonthlyPayments
+        // Calculate final lump sum (includes processing fee)
+        const totalMonthlyPayments = monthsAvailable * monthlyPayment
+        const finalLumpSum = (totalAmount + processingFee) - totalMonthlyPayments
 
-        // Final lump sum payment at 60-day cutoff (only if > 0)
+        // Final lump sum payment at 60-day cutoff (includes $150 processing fee)
         if (finalLumpSum > 0) {
           scheduleArray.push({
             amount: finalLumpSum,
@@ -154,22 +154,22 @@ const PaymentOptions = ({
         // Calculate how many full months we have until the 60-day cutoff
         const monthsAvailable = Math.max(1, Math.floor(daysUntilCutoff / 30))
 
-        // Calculate final lump sum
-        const totalMonthlyPayments = (monthsAvailable * monthlyPayment) + processingFee
-        const finalLumpSum = totalAmount - totalMonthlyPayments
+        // Calculate final lump sum (includes processing fee added to final payment)
+        const totalMonthlyPayments = monthsAvailable * monthlyPayment
+        const finalLumpSum = (totalAmount + processingFee) - totalMonthlyPayments
 
         const features = []
 
-        // First payment
-        features.push(`✅ $${monthlyPayment + processingFee} due today ($${monthlyPayment} + $${processingFee} fee)`)
+        // First payment (NO processing fee on first payment)
+        features.push(`✅ $${monthlyPayment} due today`)
 
         // Monthly payments (if any)
         if (monthsAvailable > 1) {
           features.push(`✅ $${monthlyPayment}/month for ${monthsAvailable - 1} months`)
         }
 
-        // Final lump sum
-        features.push(`✅ Remaining $${finalLumpSum.toLocaleString()} due 60 days before event`)
+        // Final lump sum (includes $150 processing fee)
+        features.push(`✅ Remaining $${finalLumpSum.toLocaleString()} (includes $${processingFee} fee) due 60 days before event`)
 
         return features
       })()
