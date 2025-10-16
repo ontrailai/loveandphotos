@@ -12,7 +12,8 @@ import {
   Mic,
   Sun,
   Settings,
-  Film
+  Film,
+  Edit
 } from 'lucide-react'
 import Button from '@components/ui/Button'
 import Card from '@components/ui/Card'
@@ -30,13 +31,16 @@ const PhotographerProfile = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const { profile } = useAuth()
+  const { profile, photographerProfile } = useAuth()
   const [photographer, setPhotographer] = useState(null)
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState(false)
   const [selectedImage, setSelectedImage] = useState(0)
   const [imageErrors, setImageErrors] = useState({})
   const [isBioExpanded, setIsBioExpanded] = useState(false)
+
+  // Check if viewing own profile
+  const isOwnProfile = photographerProfile?.id === id
 
   // Parse initial date from URL parameter
   const initialDate = searchParams.get('date') ? new Date(searchParams.get('date')) : null
@@ -217,13 +221,33 @@ const PhotographerProfile = () => {
       {/* Header */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <button
-            onClick={() => navigate('/photographers')}
-            className="flex items-center text-dusty-600 hover:text-dusty-900 transition-colors"
-          >
-            <ArrowLeftIcon className="w-5 h-5 mr-2" />
-            Back to Browse
-          </button>
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => navigate('/photographers')}
+              className="flex items-center text-dusty-600 hover:text-dusty-900 transition-colors"
+            >
+              <ArrowLeftIcon className="w-5 h-5 mr-2" />
+              Back to Browse
+            </button>
+
+            {/* Edit Profile button - only show if viewing own profile */}
+            {isOwnProfile && (
+              <Button
+                variant="primary"
+                onClick={() => {
+                  // Navigate to appropriate edit page based on videographer status
+                  const editPath = photographer.is_videographer
+                    ? '/talent/dashboard/videographer'
+                    : '/talent/dashboard/profile'
+                  navigate(editPath)
+                }}
+                className="flex items-center gap-2"
+              >
+                <Edit className="w-4 h-4" />
+                Edit Profile
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 

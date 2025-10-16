@@ -197,9 +197,12 @@ const OverviewPage = () => {
   // Memoize profile completion calculation with detailed requirements
   const completionPercentage = useMemo(() => {
     let completed = 0
-    const total = 5
+    // Videographers have 4 required items (no portfolio), photographers have 5
+    const isVideographer = photographerProfile?.is_videographer
+    const total = isVideographer ? 4 : 5
 
-    if (photographerProfile?.portfolio_images?.length >= 3) completed++
+    // Only count portfolio for photographers, not videographers
+    if (!isVideographer && photographerProfile?.portfolio_images?.length >= 3) completed++
     if (photographerProfile?.bio?.length >= 50) completed++
     if (photographerProfile?.experience_years > 0) completed++
     if (photographerProfile?.style_tags?.length > 0) completed++
@@ -492,16 +495,19 @@ const OverviewPage = () => {
           </div>
 
           <div className="space-y-3 text-sm">
-            <div className="flex items-center text-primary-900">
-              <div className={`w-6 h-6 rounded-full mr-3 flex items-center justify-center flex-shrink-0 ${photographerProfile?.portfolio_images?.length >= 3 ? 'bg-green-500' : 'bg-primary-300'}`}>
-                {photographerProfile?.portfolio_images?.length >= 3 && (
-                  <CheckCircle2 className="w-4 h-4 text-white" />
-                )}
+            {/* Only show portfolio requirement for photographers, not videographers */}
+            {!photographerProfile?.is_videographer && (
+              <div className="flex items-center text-primary-900">
+                <div className={`w-6 h-6 rounded-full mr-3 flex items-center justify-center flex-shrink-0 ${photographerProfile?.portfolio_images?.length >= 3 ? 'bg-green-500' : 'bg-primary-300'}`}>
+                  {photographerProfile?.portfolio_images?.length >= 3 && (
+                    <CheckCircle2 className="w-4 h-4 text-white" />
+                  )}
+                </div>
+                <span className={photographerProfile?.portfolio_images?.length >= 10 ? 'font-medium' : ''}>
+                  Upload at least 10 portfolio photos {photographerProfile?.portfolio_images?.length > 0 && `(${photographerProfile.portfolio_images.length}/10)`}
+                </span>
               </div>
-              <span className={photographerProfile?.portfolio_images?.length >= 10 ? 'font-medium' : ''}>
-                Upload at least 10 portfolio photos {photographerProfile?.portfolio_images?.length > 0 && `(${photographerProfile.portfolio_images.length}/10)`}
-              </span>
-            </div>
+            )}
             <div className="flex items-center text-primary-900">
               <div className={`w-6 h-6 rounded-full mr-3 flex items-center justify-center flex-shrink-0 ${photographerProfile?.bio?.length >= 50 ? 'bg-green-500' : 'bg-primary-300'}`}>
                 {photographerProfile?.bio?.length >= 50 && (

@@ -1,4 +1,4 @@
-import { Outlet, Navigate } from 'react-router-dom'
+import { Outlet, Navigate, useLocation } from 'react-router-dom'
 import { CleanNavbar } from './ui/clean-navbar'
 import { Footer } from './ui/footer-section'
 import { useAuth } from '@contexts/AuthContext'
@@ -7,6 +7,7 @@ import ChatAssistant from './ui/ChatAssistant'
 
 const ClientLayout = ({ children }) => {
   const { profile, loading } = useAuth()
+  const location = useLocation()
 
   // If still loading, show loading state
   if (loading) {
@@ -17,10 +18,21 @@ const ClientLayout = ({ children }) => {
     )
   }
 
-  // Block talent users from accessing client-only pages (unless admin)
-  if (profile && profile.role === 'photographer') {
+  // Allow photographers to view public profiles (their own or others)
+  const isViewingPublicProfile = location.pathname.startsWith('/photographer/')
+
+  console.log('[ClientLayout] Current pathname:', location.pathname)
+  console.log('[ClientLayout] isViewingPublicProfile:', isViewingPublicProfile)
+  console.log('[ClientLayout] profile.role:', profile?.role)
+  console.log('[ClientLayout] Will redirect?', profile && profile.role === 'photographer' && !isViewingPublicProfile)
+
+  // Block talent users from accessing client-only pages (unless admin or viewing public profiles)
+  if (profile && profile.role === 'photographer' && !isViewingPublicProfile) {
+    console.log('[ClientLayout] REDIRECTING to /talent/dashboard')
     return <Navigate to="/talent/dashboard" replace />
   }
+
+  console.log('[ClientLayout] Allowing access to:', location.pathname)
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">

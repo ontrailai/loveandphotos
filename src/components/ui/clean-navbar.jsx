@@ -252,13 +252,10 @@ export function CleanNavbar({ className = '' }) {
   // Check if current user is already a photographer
   const isPhotographer = profile?.role === 'photographer' || user?.user_metadata?.role === 'photographer'
 
-  // Helper function to get the correct dashboard route based on role and videographer status
+  // Helper function to get the correct dashboard route based on role
+  // Always return the dashboard overview, not the edit pages
   const getDashboardRoute = () => {
     if (profile?.role === 'photographer') {
-      // Check if user is a videographer
-      if (photographerProfile?.is_videographer) {
-        return '/talent/dashboard/videographer'
-      }
       return '/talent/dashboard'
     } else if (profile?.role === 'admin') {
       return '/admin'
