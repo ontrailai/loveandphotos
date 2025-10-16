@@ -102,24 +102,57 @@ test.describe('Videographer Add-On Selection', () => {
     expect(hasConfirmation || isOnNextPage).toBeTruthy()
   })
 
-  test('should handle skip videographer option', async ({ page }) => {
-    // Navigate to videographer selection page
-    await page.goto('/booking/select-videographer')
+  test('should handle skip button in header', async ({ page }) => {
+    // Test the "Skip" button in the header
+    // This test requires a real photographer ID - using a mock flow
+    const mockPhotographerId = 'test-photographer-123'
+
+    await page.goto(`/booking/${mockPhotographerId}/select-videographer`)
     await page.waitForLoadState('networkidle')
-    await page.waitForTimeout(1000)
+    await page.waitForTimeout(2000)
 
-    // Find the "Skip" button
-    const skipButton = page.locator('button:has-text("Skip"), button:has-text("Continue without")')
+    // Find the "Skip" button in header (ghost variant with X icon)
+    const skipButton = page.locator('button:has-text("Skip")')
+    await expect(skipButton).toBeVisible({ timeout: 10000 })
 
-    if (await skipButton.count() > 0) {
-      await skipButton.first().click()
+    // Get current URL to verify it has photographer ID
+    const currentUrl = page.url()
+    expect(currentUrl).toContain('/select-videographer')
 
-      // Should navigate to next step (add-ons or checkout)
-      await page.waitForTimeout(1000)
-      const currentUrl = page.url()
+    // Click skip button
+    await skipButton.click()
 
-      // Should move to next page in booking flow
-      expect(currentUrl).toMatch(/\/addons|\/checkout|\/booking/)
+    // Wait for navigation
+    await page.waitForTimeout(1500)
+
+    // Should navigate to add-ons page with photographer ID preserved
+    const newUrl = page.url()
+    expect(newUrl).toMatch(/\/booking\/[^/]+\/addons/)
+  })
+
+  test('should handle continue without video button', async ({ page }) => {
+    // Test the "Continue without Video" button in empty state
+    const mockPhotographerId = 'test-photographer-123'
+
+    await page.goto(`/booking/${mockPhotographerId}/select-videographer`)
+    await page.waitForLoadState('networkidle')
+    await page.waitForTimeout(2000)
+
+    // Check if "Continue without Video" button exists (only in empty state)
+    const continueButton = page.locator('button:has-text("Continue without Video")')
+
+    if (await continueButton.isVisible()) {
+      // Click the button
+      await continueButton.click()
+
+      // Wait for navigation
+      await page.waitForTimeout(1500)
+
+      // Should navigate to add-ons page
+      const newUrl = page.url()
+      expect(newUrl).toMatch(/\/booking\/[^/]+\/addons/)
+    } else {
+      console.log('Continue button not visible - videographers are available')
     }
   })
 

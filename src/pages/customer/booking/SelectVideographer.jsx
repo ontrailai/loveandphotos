@@ -5,7 +5,7 @@
  */
 
 import React, { useCallback, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { motion } from 'motion/react'
 import { VideoIcon, StarIcon, MapPinIcon, CheckCircle2Icon, CameraIcon, XIcon } from 'lucide-react'
 import { useBookingFlow } from '@contexts/BookingFlowContext'
@@ -164,6 +164,7 @@ function VideographerCard({ videographer, onSelect, isSelected }) {
  */
 export default function SelectVideographer() {
   const navigate = useNavigate()
+  const { photographerId } = useParams()
   const { bookingFlow, setVideographerId } = useBookingFlow()
 
   // Get event location from booking flow to filter videographers by location
@@ -172,9 +173,6 @@ export default function SelectVideographer() {
 
   // Fetch videographers filtered by event location (city first, then state fallback)
   const { data: videographers, isLoading, error, isEmpty } = useVideographersBatched({ city: eventCity, state: eventState })
-
-  // Get photographer ID from booking flow context
-  const photographerId = bookingFlow.photographerId
 
   // Check if user has selected a package (route protection)
   useEffect(() => {
