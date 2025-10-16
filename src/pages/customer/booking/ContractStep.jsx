@@ -36,6 +36,54 @@ const ContractRequirementsSchema = z.object({
   price: z.union([z.string(), z.number()]).optional() // Optional - can be $0 base + addons
 })
 
+/**
+ * Fetch with retry logic and exponential backoff
+ * Handles transient database timing issues (e.g., booking not yet committed)
+ */
+const fetchWithRetry = async (fetchFn, options = {}) => {
+  const {
+    maxRetries = 4,
+    initialDelay = 500,
+    maxDelay = 5000,
+    shouldRetry = () => true
+  } = options
+
+  let lastError
+  let delay = initialDelay
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      if (attempt > 0) {
+        console.log(`🔄 Retry attempt ${attempt}/${maxRetries} after ${delay}ms delay`)
+        await new Promise(resolve => setTimeout(resolve, delay))
+      }
+
+      const result = await fetchFn()
+
+      if (attempt > 0) {
+        console.log(`✅ Retry succeeded on attempt ${attempt}`)
+      }
+
+      return result
+    } catch (error) {
+      lastError = error
+
+      // Check if we should retry this error
+      if (attempt < maxRetries && shouldRetry(error)) {
+        // Exponential backoff with jitter to prevent thundering herd
+        const jitter = Math.random() * 200
+        delay = Math.min(delay * 2 + jitter, maxDelay)
+        continue
+      }
+
+      // No more retries or shouldn't retry this error
+      throw error
+    }
+  }
+
+  throw lastError
+}
+
 const ContractStep = () => {
   const { photographerId } = useParams()
   const navigate = useNavigate()
@@ -117,31 +165,64 @@ const ContractStep = () => {
 
         console.log('📋 Fetching booking from database:', bookingFlow.bookingId)
 
-        // Fetch complete booking data from Supabase
-        const { data: bookingFromDb, error: fetchError } = await supabase
-          .from('bookings')
-          .select(`
-            *,
-            packages:package_id (
-              id,
-              title,
-              base_price
-            )
-          `)
-          .eq('id', bookingFlow.bookingId)
-          .single()
+        // Fetch complete booking data from Supabase with retry logic
+        // This handles timing issues where booking insert hasn't fully committed yet
+        let bookingFromDb
+        try {
+          bookingFromDb = await fetchWithRetry(
+            async () => {
+              const { data, error } = await supabase
+                .from('bookings')
+                .select(`
+                  *,
+                  packages:package_id (
+                    id,
+                    title,
+                    base_price
+                  )
+                `)
+                .eq('id', bookingFlow.bookingId)
+                .single()
 
-        if (fetchError || !bookingFromDb) {
-          console.error('Failed to fetch booking:', fetchError)
+              // If booking not found (PGRST116), throw error to trigger retry
+              if (error) {
+                if (error.code === 'PGRST116') {
+                  console.log('⏳ Booking not found yet (PGRST116), will retry...')
+                }
+                throw error
+              }
+
+              if (!data) {
+                const notFoundError = new Error('Booking data is null')
+                notFoundError.code = 'PGRST116'
+                throw notFoundError
+              }
+
+              return data
+            },
+            {
+              maxRetries: 4,
+              initialDelay: 500,
+              maxDelay: 5000,
+              shouldRetry: (error) => {
+                // Only retry on PGRST116 (not found) - indicates timing issue
+                // Don't retry on other errors like permission issues
+                return error.code === 'PGRST116'
+              }
+            }
+          )
+
+          console.log('✅ Booking fetched successfully from database')
+        } catch (fetchError) {
+          console.error('Failed to fetch booking after retries:', fetchError)
           setSubmitError(
-            'Unable to load booking details from database. ' +
-            'Please return to account setup and try again, or contact support if this persists.'
+            fetchError.code === 'PGRST116'
+              ? 'Booking not found in database. Please return to account setup and try again.'
+              : 'Unable to load booking details from database. Please try again or contact support.'
           )
           setIsLoading(false)
           return
         }
-
-        console.log('✅ Booking fetched successfully from database')
 
         // Merge database booking with context for complete validation
         // Use database as source of truth, fallback to context
