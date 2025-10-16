@@ -6,8 +6,9 @@ import { test, expect } from '@playwright/test'
  * Verifies that:
  * 1. After completing a booking, clicking "View Booking Details" navigates correctly
  * 2. The booking details page loads without "Booking Not Found" error
- * 3. The dashboard correctly displays the new booking
+ * 3. The dashboard correctly displays the new booking (payment_status = 'paid')
  * 4. "Go to Dashboard" button works from payment success page
+ * 5. Payment verification updates booking payment_status in database
  */
 
 test.describe('Post-Booking Dashboard Navigation', () => {

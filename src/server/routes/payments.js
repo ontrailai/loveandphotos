@@ -494,9 +494,36 @@ router.post('/verify-intent', async (req, res) => {
 
     // Check payment status
     if (paymentIntent.status === 'succeeded') {
-      // Trigger confirmation email (non-blocking)
       const bookingIdForEmail = paymentIntent.metadata?.booking_id || bookingId
+
+      // Update booking payment status in database
       if (bookingIdForEmail) {
+        try {
+          console.log(`✅ Updating booking ${bookingIdForEmail} payment status to 'paid'`)
+
+          const { data: updatedBooking, error: updateError } = await supabase
+            .from('bookings')
+            .update({
+              payment_status: 'paid',
+              stripe_payment_intent_id: paymentIntent.id,
+              payment_updated_at: new Date().toISOString()
+            })
+            .eq('id', bookingIdForEmail)
+            .select()
+            .single()
+
+          if (updateError) {
+            console.error('❌ Error updating booking payment status:', updateError)
+            // Don't fail the request - payment succeeded, log error for monitoring
+          } else {
+            console.log('✅ Booking payment status updated successfully:', updatedBooking)
+          }
+        } catch (dbError) {
+          console.error('❌ Database error updating payment status:', dbError)
+          // Don't fail the request - payment succeeded, log error for monitoring
+        }
+
+        // Trigger confirmation email (non-blocking)
         sendPaymentConfirmationEmail({
           bookingId: bookingIdForEmail,
           paymentIntentId: paymentIntent.id,
@@ -517,7 +544,7 @@ router.post('/verify-intent', async (req, res) => {
         },
         amount: paymentIntent.amount,
         receiptUrl: paymentIntent.charges?.data?.[0]?.receipt_url || null,
-        bookingId: paymentIntent.metadata?.booking_id || bookingId
+        bookingId: bookingIdForEmail
       })
     } else if (paymentIntent.status === 'requires_payment_method') {
       // Payment failed and needs retry
