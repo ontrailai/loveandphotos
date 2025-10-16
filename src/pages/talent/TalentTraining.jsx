@@ -11,7 +11,9 @@ const TalentTraining = () => {
   const [videoCompleted, setVideoCompleted] = useState(false)
   const [hasAccepted, setHasAccepted] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [watchProgress, setWatchProgress] = useState(0)
   const videoRef = useRef(null)
+  const maxWatchedTime = useRef(0)
 
   const TRAINING_VIDEO_URL = 'https://storage.googleapis.com/msgsndr/dXIak5GUkwrvs0TMnFOH/media/68d372de037a13df77ed44a8.mp4'
   const STORAGE_KEY = `training_video_watched_${user?.id}`
@@ -22,9 +24,64 @@ const TalentTraining = () => {
       const hasWatchedBefore = sessionStorage.getItem(STORAGE_KEY) === 'true'
       if (hasWatchedBefore) {
         setVideoCompleted(true)
+        setWatchProgress(100)
       }
     }
   }, [user?.id, STORAGE_KEY])
+
+  // Autoplay video on mount
+  useEffect(() => {
+    const video = videoRef.current
+    if (video) {
+      // Attempt to autoplay (with muted fallback for browser restrictions)
+      video.muted = true
+      video.play().catch((error) => {
+        console.log('[TalentTraining] Autoplay failed, user interaction may be required:', error)
+      })
+    }
+  }, [])
+
+  // Prevent seeking ahead - only allow watching forward
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+
+    const handleSeeking = () => {
+      // If user tries to seek ahead of their max watched time, reset to max watched
+      if (video.currentTime > maxWatchedTime.current + 0.5) {
+        console.log('[TalentTraining] Prevented seeking ahead')
+        video.currentTime = maxWatchedTime.current
+      }
+    }
+
+    const handleTimeUpdate = () => {
+      // Track maximum time the user has watched to
+      if (video.currentTime > maxWatchedTime.current) {
+        maxWatchedTime.current = video.currentTime
+      }
+
+      // Update progress bar
+      if (video.duration) {
+        const progress = (video.currentTime / video.duration) * 100
+        setWatchProgress(progress)
+      }
+    }
+
+    // Disable right-click context menu on video
+    const handleContextMenu = (e) => {
+      e.preventDefault()
+    }
+
+    video.addEventListener('seeking', handleSeeking)
+    video.addEventListener('timeupdate', handleTimeUpdate)
+    video.addEventListener('contextmenu', handleContextMenu)
+
+    return () => {
+      video.removeEventListener('seeking', handleSeeking)
+      video.removeEventListener('timeupdate', handleTimeUpdate)
+      video.removeEventListener('contextmenu', handleContextMenu)
+    }
+  }, [])
 
   // Handle video completion
   const handleVideoEnd = () => {
@@ -97,17 +154,26 @@ const TalentTraining = () => {
 
         {/* Video Player */}
         <div className="bg-white rounded-lg shadow-lg overflow-hidden mb-8">
-          <div className="aspect-video bg-black">
+          <div className="aspect-video bg-black relative">
             <video
               ref={videoRef}
               src={TRAINING_VIDEO_URL}
-              controls
-              controlsList="nodownload"
               className="w-full h-full"
               onEnded={handleVideoEnd}
+              playsInline
             >
               Your browser does not support the video tag.
             </video>
+
+            {/* Custom Progress Bar */}
+            {!videoCompleted && (
+              <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-700 bg-opacity-50">
+                <div
+                  className="h-full bg-primary-600 transition-all duration-200"
+                  style={{ width: `${watchProgress}%` }}
+                />
+              </div>
+            )}
           </div>
 
           {/* Video Completion Status */}
@@ -123,7 +189,7 @@ const TalentTraining = () => {
             <div className="bg-amber-50 border-t-2 border-amber-500 px-6 py-3">
               <p className="text-amber-800 text-sm font-medium flex items-center gap-2">
                 <span className="text-amber-600">⏵</span>
-                Please watch the entire video to continue
+                Video is playing - please watch the entire video to continue ({Math.floor(watchProgress)}% watched)
               </p>
             </div>
           )}
