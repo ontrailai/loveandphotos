@@ -600,6 +600,32 @@ router.post('/confirm-payment', async (req, res) => {
       })
     }
 
+    // Update booking payment status in database
+    try {
+      console.log(`✅ Updating booking ${bookingId} payment status to 'paid'`)
+
+      const { data: updatedBooking, error: updateError } = await supabase
+        .from('bookings')
+        .update({
+          payment_status: 'paid',
+          stripe_payment_intent_id: paymentIntent.id,
+          payment_updated_at: new Date().toISOString()
+        })
+        .eq('id', bookingId)
+        .select()
+        .single()
+
+      if (updateError) {
+        console.error('❌ Error updating booking payment status:', updateError)
+        // Don't fail the request - payment succeeded, log error for monitoring
+      } else {
+        console.log('✅ Booking payment status updated successfully:', updatedBooking)
+      }
+    } catch (dbError) {
+      console.error('❌ Database error updating payment status:', dbError)
+      // Don't fail the request - payment succeeded, log error for monitoring
+    }
+
     // Update payment record (disabled - payments table doesn't exist yet)
     // await createPaymentRecord({
     //   booking_id: bookingId,
