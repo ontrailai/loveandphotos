@@ -54,14 +54,8 @@ const AccountSetup = () => {
 
     const { scheduleDetails, packageDetails, locationDetails, addonsDetails } = bookingFlow
 
-    // Validate schedule details are complete
-    if (!scheduleDetails?.date) {
-      throw new Error('Event date is required. Please complete the schedule step.')
-    }
-
-    if (!scheduleDetails?.startTime || !scheduleDetails?.endTime) {
-      throw new Error('Event time is required. Please complete the schedule step.')
-    }
+    // Schedule details are optional for now - can be added later
+    // Date/time can be coordinated with photographer after booking
 
     // Package is optional - fallback to "Custom Package" if not provided
     const effectivePackageDetails = packageDetails && packageDetails.packagePrice
@@ -89,6 +83,7 @@ const AccountSetup = () => {
     const payload = {
       customerId,
       photographerId,
+      videographerId: bookingFlow.videographerId || null, // Include videographer ID if selected
       packageDetails: effectivePackageDetails, // Use effective package with fallback
       scheduleDetails,
       locationDetails,

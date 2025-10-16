@@ -67,12 +67,30 @@ const UpcomingBookingCard = ({
   const shouldReduceMotion = useReducedMotion()
   const shouldAnimate = !shouldReduceMotion
 
-  const photographerName = getFirstNameOnly(booking.photographers?.users?.full_name)
+  const photographerName = getFirstNameOnly(booking.photographers?.users?.full_name) || 'Photographer'
   const photographerAvatar = booking.photographers?.users?.avatar_url
   const photographerRating = booking.photographers?.average_rating || 0
   const photographerSpecialty = booking.photographers?.pay_tiers?.name || 'Photography'
-  const packageTitle = booking.packages?.title || 'Photography Package'
-  const eventDate = parseISO(booking.event_date)
+  const packageTitle = booking.packages?.title || booking.package_type || 'Photography Package'
+
+  // Handle missing or invalid event_date gracefully
+  let eventDate = null
+  let isDateTBD = false
+  try {
+    if (booking.event_date) {
+      eventDate = parseISO(booking.event_date)
+      // Check if date is valid
+      if (isNaN(eventDate.getTime())) {
+        eventDate = null
+        isDateTBD = true
+      }
+    } else {
+      isDateTBD = true
+    }
+  } catch (error) {
+    console.warn('Invalid event_date:', booking.event_date)
+    isDateTBD = true
+  }
 
   // Videographer data (optional)
   const hasVideographer = !!booking.videographer
@@ -104,6 +122,10 @@ const UpcomingBookingCard = ({
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   }).format(price)
+
+  // Add-ons from personalization_data
+  const addons = booking.personalization_data?.addons || []
+  const hasAddons = addons.length > 0
 
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -146,7 +168,7 @@ const UpcomingBookingCard = ({
               <div className="mt-3 space-y-1">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Calendar className="w-4 h-4" />
-                  <span>{eventDate.toLocaleDateString()}</span>
+                  <span>{isDateTBD ? 'Date TBD' : eventDate.toLocaleDateString()}</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Clock className="w-4 h-4" />
@@ -185,10 +207,29 @@ const UpcomingBookingCard = ({
               <p className="text-sm text-muted-foreground mb-1">Package</p>
               <p className="font-semibold">{packageTitle}</p>
             </div>
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">Starts in</p>
-              <CountdownTimer targetDate={eventDate} />
-            </div>
+            {hasAddons && (
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">Add-ons</p>
+                <ul className="text-sm space-y-0.5">
+                  {addons.map((addon, index) => (
+                    <li key={index} className="text-foreground">
+                      {addon.name} {addon.qty && addon.qty > 1 ? `(×${addon.qty})` : ''}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {!isDateTBD && eventDate && (
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">Starts in</p>
+                <CountdownTimer targetDate={eventDate} />
+              </div>
+            )}
+            {isDateTBD && (
+              <div className="text-sm text-amber-600 bg-amber-50 px-3 py-2 rounded border border-amber-200">
+                📅 Event date to be confirmed with photographer
+              </div>
+            )}
             <div>
               <p className="text-sm text-muted-foreground mb-1">Total Price</p>
               <p className="text-2xl font-bold text-red-600">{formattedPrice}</p>

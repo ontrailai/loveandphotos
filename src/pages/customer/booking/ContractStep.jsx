@@ -28,9 +28,9 @@ import { clsx } from 'clsx'
 import { z } from 'zod'
 
 // Zod schema for contract requirements validation
-// Package details are now optional as we support add-on-only bookings
+// Package details and event date are optional - can be coordinated later
 const ContractRequirementsSchema = z.object({
-  eventDate: z.string().min(1, 'Event date is required'),
+  eventDate: z.string().optional(), // Optional - can be coordinated with photographer later
   location: z.string().optional(), // Optional - can be TBD
   packageName: z.string().optional(), // Optional - fallback to "Custom Package"
   price: z.union([z.string(), z.number()]).optional() // Optional - can be $0 base + addons
@@ -192,30 +192,22 @@ const ContractStep = () => {
           }
         })
 
+        // Validate with Zod (all fields are optional, so this should always pass)
+        // If it fails, just log the error and continue - we can generate contract with TBD values
         try {
           ContractRequirementsSchema.parse(contractRequirements)
+          console.log('✅ Contract requirements validation passed')
         } catch (zodError) {
-          console.error('Contract requirements validation failed:', zodError.issues)
-          const fieldMap = {
-            eventDate: 'Event Date (Schedule step)',
-            location: 'Location (Location step)',
-            packageName: 'Package (Package step)',
-            price: 'Price (Package step)'
-          }
-          const readableFields = zodError.issues
-            .map(err => fieldMap[err.path.join('.')] || err.path.join('.'))
-            .join(', ')
-          setSubmitError(`Missing required information: ${readableFields}. Please go back and complete these steps.`)
-          navigate(`/booking/${photographerId}/addons`, { replace: true })
-          return
+          console.warn('⚠️ Contract requirements validation warning (non-blocking):', zodError.issues)
+          // Don't redirect - continue with TBD values
         }
 
         // Validate booking data (legacy validation for backward compatibility) using merged data
+        // Don't block contract generation - we can work with TBD values
         const validation = validateBookingDataForContract(mergedBookingData)
         if (!validation.isValid) {
-          console.error('Booking data incomplete:', validation.missing)
-          navigate(`/booking/${photographerId}/addons`, { replace: true })
-          return
+          console.warn('⚠️ Booking data has missing fields (non-blocking):', validation.missing)
+          // Don't redirect - continue with available data and use TBD for missing fields
         }
 
         // Generate contract with timeout and retry protection (10s timeout, 2 retries) using merged data

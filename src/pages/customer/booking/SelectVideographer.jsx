@@ -167,13 +167,16 @@ export default function SelectVideographer() {
   const { bookingFlow, setVideographerId } = useBookingFlow()
   const { data: videographers, isLoading, error, isEmpty } = useVideographersBatched()
 
+  // Get photographer ID from booking flow context
+  const photographerId = bookingFlow.photographerId
+
   // Check if user has selected a package (route protection)
   useEffect(() => {
-    if (!bookingFlow.packageDetails?.packagePrice) {
+    if (!bookingFlow.packageDetails?.packagePrice && photographerId) {
       console.warn('⚠️ No package selected, redirecting to package selection')
-      navigate('/booking/package-details', { replace: true })
+      navigate(`/booking/${photographerId}/packages`, { replace: true })
     }
-  }, [bookingFlow.packageDetails, navigate])
+  }, [bookingFlow.packageDetails, navigate, photographerId])
 
   // Handle videographer selection
   const handleSelectVideographer = useCallback((videographer) => {
@@ -181,15 +184,15 @@ export default function SelectVideographer() {
     setVideographerId(videographer.id)
 
     // Navigate to add-ons step
-    navigate('/booking/add-ons')
-  }, [setVideographerId, navigate])
+    navigate(`/booking/${photographerId}/addons`)
+  }, [setVideographerId, navigate, photographerId])
 
   // Handle skip (no videographer)
   const handleSkip = useCallback(() => {
     console.log('⏭️ Skipping videographer selection')
     setVideographerId(null)
-    navigate('/booking/add-ons')
-  }, [setVideographerId, navigate])
+    navigate(`/booking/${photographerId}/addons`)
+  }, [setVideographerId, navigate, photographerId])
 
   return (
     <div className="min-h-screen bg-gray-50">

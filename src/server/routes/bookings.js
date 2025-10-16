@@ -17,6 +17,7 @@ router.post('/create', async (req, res) => {
     const {
       customerId,
       photographerId,
+      videographerId,
       packageDetails,
       scheduleDetails,
       locationDetails,
@@ -25,7 +26,7 @@ router.post('/create', async (req, res) => {
       accountDetails
     } = req.body
 
-    console.log('📅 Creating booking for customer:', customerId, 'photographer:', photographerId)
+    console.log('📅 Creating booking for customer:', customerId, 'photographer:', photographerId, 'videographer:', videographerId || 'none')
 
     // Validate required fields
     if (!customerId || !photographerId) {
@@ -35,12 +36,7 @@ router.post('/create', async (req, res) => {
       })
     }
 
-    if (!scheduleDetails?.date || !scheduleDetails?.startTime || !scheduleDetails?.endTime) {
-      return res.status(400).json({
-        error: 'VALIDATION_ERROR',
-        message: 'Missing schedule details'
-      })
-    }
+    // Schedule details are optional - date/time can be coordinated with photographer later
 
     // Verify photographer exists
     const { data: photographer, error: photographerError } = await supabase
@@ -58,11 +54,36 @@ router.post('/create', async (req, res) => {
       })
     }
 
-    // Calculate package price from hours using centralized pricing
-    const [startHour] = scheduleDetails.startTime.split(':').map(Number)
-    const [endHour] = scheduleDetails.endTime.split(':').map(Number)
-    const hoursBooked = endHour - startHour
-    const packagePrice = getBasePhotoPrice(hoursBooked) || 0
+    // Verify videographer exists if provided
+    if (videographerId) {
+      const { data: videographer, error: videographerError } = await supabase
+        .from('photographers')
+        .select('id, user_id, is_videographer')
+        .eq('id', videographerId)
+        .single()
+
+      if (videographerError || !videographer) {
+        console.error('Videographer not found:', videographerId, videographerError)
+        return res.status(404).json({
+          error: 'VIDEOGRAPHER_NOT_FOUND',
+          message: 'Videographer not found',
+          details: videographerError?.message
+        })
+      }
+
+      // Verify they are actually a videographer
+      if (!videographer.is_videographer) {
+        console.error('Photographer is not a videographer:', videographerId)
+        return res.status(400).json({
+          error: 'INVALID_VIDEOGRAPHER',
+          message: 'Selected photographer is not a videographer'
+        })
+      }
+    }
+
+    // Get hours from package details (set during package selection)
+    const hoursBooked = packageDetails?.hoursBooked || 0
+    const packagePrice = packageDetails?.packagePrice || getBasePhotoPrice(hoursBooked) || 0
 
     // Calculate add-ons total
     const addonsPrice = (addonsDetails?.selectedAddons || []).reduce(
@@ -85,8 +106,8 @@ router.post('/create', async (req, res) => {
       },
       schedule: {
         date: scheduleDetails.date,
-        startTime: scheduleDetails.startTime,
-        endTime: scheduleDetails.endTime,
+        startTime: scheduleDetails.startTime || null,
+        endTime: scheduleDetails.endTime || null,
         hours: hoursBooked
       },
       location: locationDetails || {},
@@ -104,8 +125,9 @@ router.post('/create', async (req, res) => {
       .insert({
         customer_id: customerId,
         photographer_id: photographerId,
+        videographer_id: videographerId || null,
         event_date: scheduleDetails.date,
-        event_time: scheduleDetails.startTime || '10:00',
+        event_time: scheduleDetails.startTime || null,
         location_city: locationDetails?.city || null,
         location_state: locationDetails?.state || null,
         venue_name: locationDetails?.locationTitle || null,

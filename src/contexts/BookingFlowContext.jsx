@@ -237,23 +237,14 @@ export const BookingFlowProvider = ({ children }) => {
   // Update schedule details
   const updateScheduleDetails = useCallback((date, startTime = null, endTime = null) => {
     setBookingFlow(prev => {
-      const scheduleValid = !!date && !!startTime && !!endTime
+      // Only require date - times are optional (user selects package, not specific times)
+      const scheduleValid = !!date
       const newCompletedSteps = scheduleValid
         ? [...new Set([...prev.completedSteps, 'schedule'])]
         : prev.completedSteps.filter(step => step !== 'schedule')
 
-      // Calculate package price from hours using authoritative pricing table
-      let packagePrice = 0
-      let hoursBooked = 0
-      if (startTime && endTime) {
-        const [startHour] = startTime.split(':').map(Number)
-        const [endHour] = endTime.split(':').map(Number)
-        hoursBooked = endHour - startHour
-
-        // Use authoritative pricing lookup instead of hourly rate
-        packagePrice = getBasePhotoPrice(hoursBooked) || 0
-      }
-
+      // Times are now optional - package selection handles hours/pricing
+      // Keep times in state for backwards compatibility but don't require them
       return {
         ...prev,
         scheduleDetails: {
@@ -263,13 +254,11 @@ export const BookingFlowProvider = ({ children }) => {
           selectedAt: new Date().toISOString()
         },
         packageDetails: {
-          ...prev.packageDetails,
-          packagePrice, // Update package price based on authoritative pricing
-          hoursBooked, // Store hours booked
-          packageTitle: scheduleValid ? `${hoursBooked} Hour Photoshoot` : null
+          ...prev.packageDetails
+          // Package price and hours are set by package selection, not schedule
         },
         completedSteps: newCompletedSteps,
-        currentStep: scheduleValid ? 'addons' : 'schedule',
+        currentStep: scheduleValid ? 'packages' : 'schedule', // Changed from 'addons' to 'packages'
         validationState: {
           ...prev.validationState,
           schedule: scheduleValid
@@ -321,7 +310,7 @@ export const BookingFlowProvider = ({ children }) => {
           selectedAt: new Date().toISOString()
         },
         completedSteps: newCompletedSteps,
-        currentStep: addonsValid ? 'contract' : 'addons',
+        currentStep: addonsValid ? 'account' : 'addons',
         validationState: {
           ...prev.validationState,
           addons: addonsValid

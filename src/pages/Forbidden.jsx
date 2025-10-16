@@ -6,14 +6,17 @@ import { useAuth } from '@contexts/AuthContext'
 
 const Forbidden = () => {
   const navigate = useNavigate()
-  const { profile } = useAuth()
+  const { profile, photographerProfile } = useAuth()
 
   const getRedirectPath = () => {
     if (!profile) return '/login'
-    
+
     switch (profile.role) {
       case 'photographer':
-        return '/talent/dashboard'
+        // Check if videographer and route accordingly
+        return photographerProfile?.is_videographer
+          ? '/talent/dashboard/videographer'
+          : '/talent/dashboard'
       case 'admin':
         return '/admin'
       case 'customer':
@@ -149,7 +152,10 @@ const Forbidden = () => {
               </>
             ) : profile?.role === 'photographer' ? (
               <>
-                <a href="/talent/dashboard" className="text-sm text-primary-600 hover:text-primary-700 underline">
+                <a
+                  href={photographerProfile?.is_videographer ? '/talent/dashboard/videographer' : '/talent/dashboard'}
+                  className="text-sm text-primary-600 hover:text-primary-700 underline"
+                >
                   Dashboard
                 </a>
                 <span className="text-gray-400">•</span>

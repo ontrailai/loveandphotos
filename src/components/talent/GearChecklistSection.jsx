@@ -15,6 +15,7 @@ const GearChecklistSection = ({ gearData, onGearChange, readOnly = false }) => {
     gear_has_lenses: false,
     gear_has_tripod: false,
     gear_has_gimbal: false,
+    gear_has_drone: false,
     gear_has_audio_recorder: false,
     gear_has_lighting: false
   })
@@ -43,6 +44,12 @@ const GearChecklistSection = ({ gearData, onGearChange, readOnly = false }) => {
       label: 'Gimbal',
       icon: '🤸',
       description: 'Gimbal/stabilizer for smooth video'
+    },
+    {
+      id: 'gear_has_drone',
+      label: 'Drone',
+      icon: '🚁',
+      description: 'Aerial videography drone'
     },
     {
       id: 'gear_has_audio_recorder',
@@ -131,6 +138,7 @@ GearChecklistSection.propTypes = {
     gear_has_lenses: PropTypes.bool,
     gear_has_tripod: PropTypes.bool,
     gear_has_gimbal: PropTypes.bool,
+    gear_has_drone: PropTypes.bool,
     gear_has_audio_recorder: PropTypes.bool,
     gear_has_lighting: PropTypes.bool
   }),

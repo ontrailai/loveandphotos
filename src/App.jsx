@@ -325,8 +325,8 @@ function App() {
                 <ScheduleRedirect />
               </Suspense>
             } />
-            {/* Videographer Selection Route - Standalone route without photographerId */}
-            <Route path="/booking/select-videographer" element={
+            {/* Videographer Selection Route - With photographerId parameter */}
+            <Route path="/booking/:photographerId/select-videographer" element={
               <Suspense fallback={<PageLoader />}>
                 <SelectVideographer />
               </Suspense>

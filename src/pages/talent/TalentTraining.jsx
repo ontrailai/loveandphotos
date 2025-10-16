@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@contexts/AuthContext'
 import { supabase } from '@lib/supabase'
@@ -8,14 +8,40 @@ import toast from 'react-hot-toast'
 const TalentTraining = () => {
   const { user, photographerProfile, refreshProfile } = useAuth()
   const navigate = useNavigate()
-  const [hasWatched, setHasWatched] = useState(false)
+  const [videoCompleted, setVideoCompleted] = useState(false)
+  const [hasAccepted, setHasAccepted] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const videoRef = useRef(null)
 
   const TRAINING_VIDEO_URL = 'https://storage.googleapis.com/msgsndr/dXIak5GUkwrvs0TMnFOH/media/68d372de037a13df77ed44a8.mp4'
+  const STORAGE_KEY = `training_video_watched_${user?.id}`
+
+  // Check if user has already watched the video in this session
+  useEffect(() => {
+    if (user?.id) {
+      const hasWatchedBefore = sessionStorage.getItem(STORAGE_KEY) === 'true'
+      if (hasWatchedBefore) {
+        setVideoCompleted(true)
+      }
+    }
+  }, [user?.id, STORAGE_KEY])
+
+  // Handle video completion
+  const handleVideoEnd = () => {
+    console.log('[TalentTraining] Video playback completed')
+    setVideoCompleted(true)
+    // Store in sessionStorage for reload protection
+    sessionStorage.setItem(STORAGE_KEY, 'true')
+  }
 
   const handleContinue = async () => {
-    if (!hasWatched) {
-      toast.error('Please confirm you have watched the training video')
+    if (!videoCompleted) {
+      toast.error('Please watch the entire training video before continuing')
+      return
+    }
+
+    if (!hasAccepted) {
+      toast.error('Please confirm you have watched and understood the training')
       return
     }
 
@@ -33,6 +59,9 @@ const TalentTraining = () => {
         console.error('[TalentTraining] Error updating training status:', error)
         throw error
       }
+
+      // Clear session storage after successful completion
+      sessionStorage.removeItem(STORAGE_KEY)
 
       // Refresh profile to get updated training status
       await refreshProfile()
@@ -70,15 +99,34 @@ const TalentTraining = () => {
         <div className="bg-white rounded-lg shadow-lg overflow-hidden mb-8">
           <div className="aspect-video bg-black">
             <video
+              ref={videoRef}
               src={TRAINING_VIDEO_URL}
               controls
               controlsList="nodownload"
               className="w-full h-full"
-              onEnded={() => setHasWatched(true)}
+              onEnded={handleVideoEnd}
             >
               Your browser does not support the video tag.
             </video>
           </div>
+
+          {/* Video Completion Status */}
+          {videoCompleted && (
+            <div className="bg-green-50 border-t-2 border-green-500 px-6 py-3">
+              <p className="text-green-800 text-sm font-medium flex items-center gap-2">
+                <span className="text-green-600">✓</span>
+                Video completed! You can now check the acknowledgment below.
+              </p>
+            </div>
+          )}
+          {!videoCompleted && (
+            <div className="bg-amber-50 border-t-2 border-amber-500 px-6 py-3">
+              <p className="text-amber-800 text-sm font-medium flex items-center gap-2">
+                <span className="text-amber-600">⏵</span>
+                Please watch the entire video to continue
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Confirmation Section */}
@@ -87,21 +135,32 @@ const TalentTraining = () => {
             <input
               type="checkbox"
               id="training-confirmation"
-              checked={hasWatched}
-              onChange={(e) => setHasWatched(e.target.checked)}
-              className="mt-1 h-5 w-5 text-primary-600 focus:ring-primary-500 border-gray-300 rounded cursor-pointer"
+              checked={hasAccepted}
+              onChange={(e) => setHasAccepted(e.target.checked)}
+              disabled={!videoCompleted}
+              className="mt-1 h-5 w-5 text-primary-600 focus:ring-primary-500 border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             />
             <label
               htmlFor="training-confirmation"
-              className="text-gray-700 font-medium cursor-pointer select-none"
+              className={`text-gray-700 font-medium select-none ${
+                videoCompleted ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'
+              }`}
             >
               ✅ I confirm I have watched the training video and understand all talent expectations.
             </label>
           </div>
 
+          {!videoCompleted && (
+            <div className="mb-4 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+              <p className="text-sm text-gray-600">
+                <strong>Note:</strong> The acknowledgment checkbox will be enabled once you have watched the entire video.
+              </p>
+            </div>
+          )}
+
           <Button
             onClick={handleContinue}
-            disabled={!hasWatched || isSubmitting}
+            disabled={!videoCompleted || !hasAccepted || isSubmitting}
             className="w-full bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting ? 'Processing...' : 'Continue to Dashboard'}

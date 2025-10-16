@@ -36,7 +36,7 @@ const EmptyState = () => {
       <p className="text-muted-foreground mb-6">
         Book your next photography session to get started
       </p>
-      <Link to="/photographers">
+      <Link to="/browse">
         <motion.button
           whileHover={shouldAnimate ? { scale: 1.05 } : {}}
           whileTap={shouldAnimate ? { scale: 0.95 } : {}}

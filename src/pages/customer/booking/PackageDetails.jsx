@@ -64,7 +64,7 @@ const PackageDetails = () => {
   // Handle video modal "Yes" - navigate to videographer selection
   const handleAddVideo = () => {
     setShowVideoModal(false)
-    navigate(`/booking/select-videographer`)
+    navigate(`/booking/${photographerId}/select-videographer`)
   }
 
   // Handle video modal "No" - proceed to add-ons

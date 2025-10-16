@@ -14,7 +14,7 @@ import Card from '@components/ui/Card'
 import {
   Video, Camera, Mic, Sun,
   CheckCircle, AlertCircle, Film,
-  Settings, Save, MapPin, Globe, User, Briefcase, ArrowLeft, Home
+  Settings, Save, MapPin, Globe, User, Briefcase, ArrowLeft, Home, Plane
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
@@ -66,6 +66,7 @@ const VideographerProfilePage = () => {
     { id: 'lenses', label: 'Quality Lenses', icon: Camera, description: 'Wide, Standard & Telephoto' },
     { id: 'tripod', label: 'Tripod', icon: Settings, description: 'Sturdy video tripod or fluid head' },
     { id: 'gimbal', label: 'Gimbal/Stabilizer', icon: Film, description: 'For smooth motion shots' },
+    { id: 'drone', label: 'Drone', icon: Plane, description: 'Aerial videography drone' },
     { id: 'audio', label: 'Audio Equipment', icon: Mic, description: 'Microphones & recording gear' },
     { id: 'lighting', label: 'Lighting Kit', icon: Sun, description: 'Professional lighting setup' }
   ]
@@ -115,6 +116,7 @@ const VideographerProfilePage = () => {
         if (photographerProfile.gear_has_lenses) gearList.push('lenses')
         if (photographerProfile.gear_has_tripod) gearList.push('tripod')
         if (photographerProfile.gear_has_gimbal) gearList.push('gimbal')
+        if (photographerProfile.gear_has_drone) gearList.push('drone')
         if (photographerProfile.gear_has_audio_recorder) gearList.push('audio')
         if (photographerProfile.gear_has_lighting) gearList.push('lighting')
 
@@ -159,6 +161,7 @@ const VideographerProfilePage = () => {
           gear_has_lenses: updates.gear_list.includes('lenses'),
           gear_has_tripod: updates.gear_list.includes('tripod'),
           gear_has_gimbal: updates.gear_list.includes('gimbal'),
+          gear_has_drone: updates.gear_list.includes('drone'),
           gear_has_audio_recorder: updates.gear_list.includes('audio'),
           gear_has_lighting: updates.gear_list.includes('lighting')
         } : {}
@@ -212,6 +215,7 @@ const VideographerProfilePage = () => {
         gear_has_lenses: formData.gear_list.includes('lenses'),
         gear_has_tripod: formData.gear_list.includes('tripod'),
         gear_has_gimbal: formData.gear_list.includes('gimbal'),
+        gear_has_drone: formData.gear_list.includes('drone'),
         gear_has_audio_recorder: formData.gear_list.includes('audio'),
         gear_has_lighting: formData.gear_list.includes('lighting')
       }

@@ -28,7 +28,7 @@ import { clsx } from 'clsx'
 import toast from 'react-hot-toast'
 
 const SignUp = () => {
-  const { signUp, user, profile, loading: authLoading } = useAuth()
+  const { signUp, user, profile, photographerProfile, loading: authLoading } = useAuth()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const typeParam = searchParams.get('type') || searchParams.get('role') || 'photographer'
@@ -40,29 +40,41 @@ const SignUp = () => {
   // Check if user is already a photographer
   const isPhotographer = profile?.role === 'photographer' || user?.user_metadata?.role === 'photographer'
 
-  // Redirect if already logged in
+  // Redirect if already logged in (role-aware for videographers)
   useEffect(() => {
     // Only redirect if we have a user AND profile loaded
     if (user && profile) {
       console.log('User is already logged in, redirecting from signup...')
       if (profile.role === 'photographer') {
-        navigate('/talent/dashboard')
+        // Check if videographer and route accordingly
+        if (photographerProfile?.is_videographer) {
+          console.log('[SignUp] Routing videographer to videographer dashboard')
+          navigate('/talent/dashboard/videographer')
+        } else {
+          console.log('[SignUp] Routing photographer to photographer dashboard')
+          navigate('/talent/dashboard')
+        }
       } else if (profile.role === 'admin') {
         navigate('/admin')
       } else {
         navigate('/dashboard')
       }
     }
-  }, [user, profile, navigate])
+  }, [user, profile, photographerProfile, navigate])
 
   // Defensive guard: redirect existing photographers who manually hit /signup?role=photographer
   useEffect(() => {
     const preselectedRole = searchParams.get('role')
     if (user && profile && isPhotographer && preselectedRole === 'photographer') {
       console.log('Photographer attempting to access photographer signup, redirecting to dashboard...')
-      navigate('/talent/dashboard')
+      // Check if videographer and route accordingly
+      if (photographerProfile?.is_videographer) {
+        navigate('/talent/dashboard/videographer')
+      } else {
+        navigate('/talent/dashboard')
+      }
     }
-  }, [user, profile, isPhotographer, searchParams, navigate])
+  }, [user, profile, photographerProfile, isPhotographer, searchParams, navigate])
 
   // Show spinner only while checking auth AND user exists
   // This prevents infinite spinner for non-logged-in users

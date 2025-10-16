@@ -260,18 +260,23 @@ const TalentDashboardLayout = () => {
     return null
   }
 
+  // Determine if user is videographer
+  const isVideographer = photographerProfile?.is_videographer === true
+  const dashboardBase = isVideographer ? '/talent/dashboard/videographer' : '/talent/dashboard'
+
+  // Role-aware navigation items
   const navItems = [
-    { path: '/talent/dashboard', label: 'Overview', icon: LayoutDashboard },
-    { path: '/talent/dashboard/profile', label: 'Profile', icon: User },
-    { path: '/talent/dashboard/calendar', label: 'Calendar', icon: Calendar },
-    { path: '/talent/dashboard/bookings', label: 'Bookings', icon: FileText },
-    { path: '/talent/dashboard/resources', label: 'Resources', icon: BookOpen },
-    { path: '/talent/dashboard/messages', label: 'Messages', icon: MessageCircle },
-    { path: '/talent/dashboard/settings', label: 'Settings', icon: Settings },
+    { path: dashboardBase, label: 'Overview', icon: LayoutDashboard },
+    { path: `${dashboardBase}/profile`, label: 'Profile', icon: User },
+    { path: `${dashboardBase}/calendar`, label: 'Calendar', icon: Calendar },
+    { path: `${dashboardBase}/bookings`, label: 'Bookings', icon: FileText },
+    { path: `${dashboardBase}/resources`, label: 'Resources', icon: BookOpen },
+    { path: `${dashboardBase}/messages`, label: 'Messages', icon: MessageCircle },
+    { path: `${dashboardBase}/settings`, label: 'Settings', icon: Settings },
   ]
 
   const isActive = (path) => {
-    if (path === '/talent/dashboard') {
+    if (path === dashboardBase) {
       return location.pathname === path
     }
     return location.pathname.startsWith(path)
@@ -301,7 +306,7 @@ const TalentDashboardLayout = () => {
                 <Sparkles className="w-3 h-3 text-amber-400 absolute -top-1 -right-1" aria-hidden="true" />
               </div>
               <h1 className="text-xl font-bold bg-gradient-to-r from-[#fe395f] via-pink-600 to-rose-600 bg-clip-text text-transparent">
-                Photographer Dashboard
+                {isVideographer ? 'Videographer Dashboard' : 'Photographer Dashboard'}
               </h1>
             </div>
             <div className="flex items-center space-x-3">

@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { supabase } from '@lib/supabase'
 import { Camera, Upload, X, Loader } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -7,6 +7,12 @@ const ProfilePictureUpload = ({ userId, currentAvatarUrl, onUploadSuccess }) => 
   const [uploading, setUploading] = useState(false)
   const [previewUrl, setPreviewUrl] = useState(currentAvatarUrl)
   const fileInputRef = useRef(null)
+
+  // Sync preview URL with current avatar URL when it changes (e.g., after refresh)
+  useEffect(() => {
+    console.log('[ProfilePictureUpload] Syncing preview with currentAvatarUrl:', currentAvatarUrl)
+    setPreviewUrl(currentAvatarUrl)
+  }, [currentAvatarUrl])
 
   const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
   const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png']

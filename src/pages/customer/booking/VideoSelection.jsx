@@ -49,8 +49,12 @@ const VideoSelection = () => {
 
       toast.success(wantsVideo ? 'Video added to your package!' : 'Photography package confirmed!')
 
-      // Navigate to add-ons
-      navigate(`/booking/${photographerId}/addons`)
+      // If video selected, go to videographer selection; otherwise skip to add-ons
+      if (wantsVideo) {
+        navigate(`/booking/${photographerId}/select-videographer`)
+      } else {
+        navigate(`/booking/${photographerId}/addons`)
+      }
     } catch (error) {
       console.error('[VideoSelection] Error:', error)
       toast.error('Failed to save video selection')

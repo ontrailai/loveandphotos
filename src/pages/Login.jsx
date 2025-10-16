@@ -24,7 +24,7 @@ const Login = () => {
    */
 
   // 1. Call ALL hooks first - no conditionals allowed before this block
-  const { signIn, user, profile, loading: authLoading } = useAuth()
+  const { signIn, user, profile, photographerProfile, loading: authLoading } = useAuth()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [loading, setLoading] = useState(false)
@@ -41,18 +41,25 @@ const Login = () => {
   // 2. Now safe to have computed values and effects
   const redirectTo = searchParams.get('redirect') || '/dashboard'
 
-  // Redirect if already logged in
+  // Redirect if already logged in (role-aware for videographers)
   useEffect(() => {
     // Only redirect if we have a user AND profile loaded
     if (user && profile) {
       console.log('User is already logged in, redirecting...')
       if (profile.role === 'photographer') {
-        navigate('/talent/dashboard')
+        // Check if videographer and route accordingly
+        if (photographerProfile?.is_videographer) {
+          console.log('[Login] Routing videographer to videographer dashboard')
+          navigate('/talent/dashboard/videographer')
+        } else {
+          console.log('[Login] Routing photographer to photographer dashboard')
+          navigate('/talent/dashboard')
+        }
       } else {
         navigate('/dashboard')
       }
     }
-  }, [user, profile, navigate])
+  }, [user, profile, photographerProfile, navigate])
 
   // 3. Conditional returns are now safe - all hooks have been called
   // Show spinner only while checking auth AND user exists

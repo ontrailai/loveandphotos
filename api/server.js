@@ -334,7 +334,7 @@ app.post('/api/booking/create', async (req, res) => {
     const missingFields = []
     if (!customerId) missingFields.push('customerId')
     if (!photographerId) missingFields.push('photographerId')
-    if (!scheduleDetails?.date) missingFields.push('scheduleDetails.date')
+    // Schedule date is optional - can be coordinated with photographer later
     if (!totalAmount && totalAmount !== 0) missingFields.push('totalAmount')
 
     if (missingFields.length > 0) {
@@ -354,7 +354,7 @@ app.post('/api/booking/create', async (req, res) => {
     }
 
     console.log('✅ All required fields present')
-    console.log(`🔍 Looking up photographer with user_id: ${photographerId}`)
+    console.log(`🔍 Looking up photographer with id: ${photographerId}`)
 
     // Import Supabase client
     const { createClient } = await import('@supabase/supabase-js')
@@ -369,11 +369,11 @@ app.post('/api/booking/create', async (req, res) => {
       }
     )
 
-    // Look up the actual photographer ID from the user_id
+    // Verify photographer exists by ID
     const { data: photographer, error: photographerError } = await supabase
       .from('photographers')
-      .select('id')
-      .eq('user_id', photographerId)
+      .select('id, user_id')
+      .eq('id', photographerId)
       .single()
 
     if (photographerError) {

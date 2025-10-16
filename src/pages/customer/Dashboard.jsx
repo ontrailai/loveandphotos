@@ -73,71 +73,76 @@ const CustomerDashboard = () => {
     try {
       setLoading(true)
 
-      // Load bookings with photographer AND videographer data
+      // Load only confirmed bookings (payment_status = 'paid')
+      // First try a simple query without joins to debug
       const { data: bookingsData, error: bookingsError } = await supabase
         .from('bookings')
-        .select(`
-          *,
-          photographers (
-            id,
-            users!inner (
-              full_name,
-              avatar_url,
-              phone,
-              email
-            ),
-            pay_tiers (
-              name,
-              badge_color
-            ),
-            average_rating,
-            total_reviews
-          ),
-          videographer:videographer_id (
-            id,
-            users!inner (
-              full_name,
-              avatar_url,
-              phone,
-              email
-            ),
-            pay_tiers (
-              name,
-              badge_color
-            ),
-            average_rating,
-            total_reviews
-          ),
-          packages (
-            title,
-            duration_minutes
-          ),
-          job_queue (
-            upload_status,
-            delivery_url,
-            delivered_at
-          ),
-          reviews (
-            id,
-            rating,
-            comment
-          ),
-          contract_signatures (
-            id,
-            signed_at,
-            signer_full_name
-          )
-        `)
+        .select('*')
         .eq('customer_id', user.id)
-        .order('event_date', { ascending: false })
+        .eq('payment_status', 'paid')
+        .order('created_at', { ascending: false })
+
+      console.log('🔍 Simple query result:', bookingsData)
+
+      console.log('📊 Dashboard bookings query result:', {
+        error: bookingsError,
+        errorMessage: bookingsError?.message,
+        errorDetails: bookingsError?.details,
+        errorHint: bookingsError?.hint,
+        errorCode: bookingsError?.code,
+        count: bookingsData?.length,
+        userId: user.id
+      })
+
+      if (bookingsError) {
+        console.error('❌ Error loading bookings:', bookingsError)
+        console.error('❌ Error message:', bookingsError.message)
+        console.error('❌ Error details:', bookingsError.details)
+        console.error('❌ Error hint:', bookingsError.hint)
+        console.error('❌ Error code:', bookingsError.code)
+        toast.error(`Failed to load bookings: ${bookingsError.message}`)
+        setBookings([])
+        setUpcomingBookings([])
+        setPastBookings([])
+      }
 
       if (!bookingsError && bookingsData) {
+        console.log('✅ Bookings loaded successfully:', bookingsData)
+        console.log('📊 Bookings count:', bookingsData.length)
+        console.log('📊 First booking details:', bookingsData[0])
         setBookings(bookingsData)
 
         // Separate upcoming and past bookings
-        const upcoming = bookingsData.filter(b => isFuture(parseISO(b.event_date)))
-        const past = bookingsData.filter(b => isPast(parseISO(b.event_date)))
+        // Bookings without dates are treated as "upcoming" (date TBD)
+        const upcoming = bookingsData.filter(b => {
+          if (!b.event_date) {
+            console.log('📅 Booking has no date (TBD), treating as upcoming:', b.id)
+            return true // No date yet = upcoming (TBD)
+          }
+          try {
+            const isFutureDate = isFuture(parseISO(b.event_date))
+            console.log(`📅 Booking ${b.id} date ${b.event_date} is future:`, isFutureDate)
+            return isFutureDate
+          } catch (error) {
+            console.warn('Invalid event_date for booking:', b.id, b.event_date)
+            return true // Treat invalid dates as upcoming
+          }
+        })
 
+        const past = bookingsData.filter(b => {
+          if (!b.event_date) return false // No date = not past
+          try {
+            const isPastDate = isPast(parseISO(b.event_date))
+            console.log(`📅 Booking ${b.id} date ${b.event_date} is past:`, isPastDate)
+            return isPastDate
+          } catch (error) {
+            console.warn('Invalid event_date for booking:', b.id, b.event_date)
+            return false // Treat invalid dates as not past
+          }
+        })
+
+        console.log('📊 Upcoming bookings count:', upcoming.length)
+        console.log('📊 Past bookings count:', past.length)
         setUpcomingBookings(upcoming)
         setPastBookings(past)
 
@@ -204,8 +209,10 @@ const CustomerDashboard = () => {
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
         <div className="w-full max-w-7xl mx-auto p-6 space-y-8">
           <div>
-            <h1 className="text-3xl font-bold">Loading...</h1>
-            <p className="text-muted-foreground mt-1">Fetching your bookings</p>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              My Dashboard
+            </h1>
+            <p className="text-muted-foreground mt-1">Loading your bookings...</p>
           </div>
           <SkeletonLoaders />
         </div>
