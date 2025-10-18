@@ -26,6 +26,7 @@ import SafeImage from '@components/shared/SafeImage'
 import ImageErrorBoundary from '@components/shared/ImageErrorBoundary'
 import RatingStars from '@components/shared/RatingStars'
 import PhotographerMetricBadges from '@components/photographer/PhotographerMetricBadges'
+import LNPChoiceBadge from '@components/ui/LNPChoiceBadge'
 
 export default function VideoBrowse() {
   const { user, profile } = useAuth()
@@ -305,6 +306,9 @@ export default function VideoBrowse() {
                       <div>
                         <h3 className="font-semibold flex items-center gap-2">
                           {photographer.users?.full_name?.split(' ')[0] || 'Photographer'}
+                          {photographer.is_love_and_photos_choice && (
+                            <LNPChoiceBadge size="small" />
+                          )}
                           <VideoIcon className="w-4 h-4 text-[#fe395f]" title="Video specialist" />
                         </h3>
                         <p className="text-sm text-muted-foreground">
