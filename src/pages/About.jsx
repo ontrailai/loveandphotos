@@ -5,8 +5,8 @@ import PageHero from '@/components/marketing/PageHero'
 const About = () => {
   const stats = [
     { number: '10,000+', label: 'Happy Clients' },
-    { number: '500+', label: 'Professional Photographers' },
-    { number: '50+', label: 'Cities Covered' },
+    { number: '2,500+', label: 'Professional Photographers' },
+    { number: '50', label: 'States' },
     { number: '98%', label: 'Satisfaction Rate' }
   ]
 
@@ -14,7 +14,7 @@ const About = () => {
     {
       icon: Camera,
       title: 'Quality First',
-      description: 'We partner only with vetted, professional photographers who consistently deliver exceptional work.'
+      description: 'We partner only with professional photographers who consistently deliver exceptional work.'
     },
     {
       icon: Users,
@@ -24,7 +24,7 @@ const About = () => {
     {
       icon: Award,
       title: 'Trust & Safety',
-      description: 'Every photographer is background-checked and insured, giving you peace of mind for your special day.'
+      description: 'Every photographer is trained and vetted, giving you peace of mind for your special day.'
     },
     {
       icon: Heart,

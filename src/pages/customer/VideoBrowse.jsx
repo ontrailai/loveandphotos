@@ -3,14 +3,11 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@contexts/AuthContext'
 import { supabase } from '@lib/supabase'
 import { normalizeLocationQuery } from '@lib/utils/normalizeLocationQuery'
-import { resolveZipToCity } from '@lib/server/resolveZipToCity'
-import { 
-  SearchIcon, 
-  MapPinIcon, 
+import {
+  SearchIcon,
+  MapPinIcon,
   FilterIcon,
   VideoIcon,
-  GridIcon,
-  ListIcon,
   ChevronDownIcon,
   ArrowLeft,
   CheckCircleIcon,
@@ -40,11 +37,11 @@ export default function VideoBrowse() {
   const [photographers, setPhotographers] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [viewMode, setViewMode] = useState('grid')
 
-  // Search state 
+  // Search state
   const [searchQuery, setSearchQuery] = useState('')
   const [locationQuery, setLocationQuery] = useState('')
+  const [lnpChoiceOnly, setLnpChoiceOnly] = useState(false)
 
   // Get initial values from URL params
   useEffect(() => {
@@ -60,28 +57,6 @@ export default function VideoBrowse() {
       setLoading(true)
       setError(null)
 
-      // Resolve location to city if it's a ZIP code
-      let locationCity = null
-      if (locationQuery.trim()) {
-        const normalized = normalizeLocationQuery(locationQuery)
-
-        if (normalized.kind === 'zip' && normalized.zip) {
-          // Try to resolve ZIP to city using the database
-          const resolved = await resolveZipToCity(supabase, normalized.zip)
-          if (resolved) {
-            locationCity = resolved.city.toLowerCase()
-          } else {
-            // Unknown ZIP code
-            setError(`We don't recognize ZIP code "${locationQuery}" yet. Please try entering the city name instead.`)
-            setPhotographers([])
-            setLoading(false)
-            return
-          }
-        } else if (normalized.kind === 'city' && normalized.city) {
-          locationCity = normalized.city.toLowerCase()
-        }
-      }
-
       // Query for video photographers only - CRITICAL: must be videographers, not photographers
       let query = supabase
         .from('photographers')
@@ -95,14 +70,31 @@ export default function VideoBrowse() {
         .eq('profile_complete', true)
         .eq('visible_in_search', true)
 
-      // Apply location filter (city, state, zip_code are in photographers table)
-      if (locationCity) {
-        query = query.or(`city.ilike.%${locationCity}%,state.ilike.%${locationCity}%,zip_code.ilike.%${locationCity}%`)
+      // Apply location filter - SAME LOGIC AS PHOTOGRAPHER SEARCH
+      // If ZIP filter is selected, filter by zip_code field directly at database level
+      if (locationQuery.trim()) {
+        const normalized = normalizeLocationQuery(locationQuery)
+
+        if (normalized.kind === 'zip' && normalized.zip) {
+          // Exact ZIP code match at database level (same as photographer search)
+          console.log('Filtering by ZIP code in database:', normalized.zip)
+          query = query.eq('zip_code', normalized.zip)
+        } else if (normalized.kind === 'city' && normalized.city) {
+          // City-based filtering uses location fields
+          const cityKey = normalized.city.toLowerCase()
+          console.log('Filtering by city:', cityKey)
+          query = query.or(`city.ilike.%${cityKey}%,state.ilike.%${cityKey}%`)
+        }
       }
 
       // Apply search filter (full_name is in users table, bio is in photographers table)
       if (searchQuery.trim()) {
         query = query.or(`users.full_name.ilike.%${searchQuery}%,bio.ilike.%${searchQuery}%`)
+      }
+
+      // Apply Love & Photos Choice filter
+      if (lnpChoiceOnly) {
+        query = query.eq('lnp_choice', true)
       }
 
       // Order by rating (best first)
@@ -114,7 +106,7 @@ export default function VideoBrowse() {
       setPhotographers(data || [])
 
       // Log for debugging
-      console.log(`✅ Found ${data?.length || 0} videographers${locationCity ? ` in ${locationCity}` : ''}`)
+      console.log(`✅ Found ${data?.length || 0} videographers${locationQuery ? ` in ${locationQuery}` : ''}`)
 
     } catch (error) {
       console.error('Error fetching video photographers:', error)
@@ -139,7 +131,7 @@ export default function VideoBrowse() {
   // Initial load
   useEffect(() => {
     fetchPhotographers()
-  }, [locationQuery, searchQuery])
+  }, [locationQuery, searchQuery, lnpChoiceOnly])
 
   // Handle search
   const handleSearch = (e) => {
@@ -204,28 +196,50 @@ export default function VideoBrowse() {
             </Button>
           </form>
 
+          {/* Love & Photos Choice Filter */}
+          <div className="mb-6 pb-4 border-b border-gray-100">
+            <label
+              className="flex items-center cursor-pointer p-3 -mx-1 rounded-xl hover:bg-gray-50 group transition-colors"
+            >
+              <input
+                type="checkbox"
+                checked={lnpChoiceOnly}
+                onChange={(e) => setLnpChoiceOnly(e.target.checked)}
+                className="sr-only"
+              />
+
+              <div
+                className={`
+                  w-5 h-5 rounded border-2 mr-3 transition-all duration-150 flex items-center justify-center
+                  ${lnpChoiceOnly
+                    ? 'border-[#fe395f] bg-[#fe395f] shadow-sm'
+                    : 'border-gray-300 group-hover:border-[#fe395f]/50'
+                  }
+                `}
+              >
+                {lnpChoiceOnly && (
+                  <svg className="w-3 h-3 text-white" viewBox="0 0 12 12" fill="none">
+                    <path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                )}
+              </div>
+
+              <div className="flex-1">
+                <span className="text-sm font-medium text-gray-800 group-hover:text-gray-900 block">
+                  Love & Photos Choice Only
+                </span>
+                <p className="text-xs text-gray-500 mt-0.5 group-hover:text-gray-600">
+                  Hand-selected by our team for quality, consistency, and experience
+                </p>
+              </div>
+            </label>
+          </div>
+
           {/* Results Count */}
-          <div className="flex items-center justify-between mb-6">
+          <div className="mb-6">
             <h2 className="text-lg font-semibold">
               {loading ? 'Loading...' : `${photographers.length} Video Photographer${photographers.length !== 1 ? 's' : ''} Found`}
             </h2>
-            
-            <div className="flex items-center gap-2">
-              <Button
-                variant={viewMode === 'grid' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setViewMode('grid')}
-              >
-                <GridIcon size={16} />
-              </Button>
-              <Button
-                variant={viewMode === 'list' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setViewMode('list')}
-              >
-                <ListIcon size={16} />
-              </Button>
-            </div>
           </div>
         </div>
 
@@ -306,7 +320,7 @@ export default function VideoBrowse() {
                       <div>
                         <h3 className="font-semibold flex items-center gap-2">
                           {photographer.users?.full_name?.split(' ')[0] || 'Photographer'}
-                          {photographer.is_love_and_photos_choice && (
+                          {photographer.lnp_choice && (
                             <LNPChoiceBadge size="small" />
                           )}
                           <VideoIcon className="w-4 h-4 text-[#fe395f]" title="Video specialist" />

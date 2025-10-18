@@ -43,7 +43,7 @@ const Learn = () => {
   ]
 
   const stats = [
-    { number: '500+', label: 'Active Photographers' },
+    { number: '2,500+', label: 'Active Photographers' },
     { number: '95%', label: 'Success Rate' },
     { number: '50+', label: 'Training Topics' },
     { number: '24/7', label: 'Support Available' }
