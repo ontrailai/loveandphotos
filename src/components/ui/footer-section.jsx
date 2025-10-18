@@ -42,9 +42,8 @@ const footerLinks = [
     links: [
       { title: 'Apply as Photographer', href: '/talent/apply' },
       { title: 'Apply as Videographer', href: '/talent/apply' },
-      { title: 'Resources', href: '/resources' },
-      { title: 'FAQ', href: '/faq' },
-      { title: 'Learn', href: '/learn' }
+      { title: 'Guidelines', href: '/guidelines' },
+      { title: 'FAQ', href: '/faq' }
     ]
   },
   {
@@ -136,12 +135,12 @@ export function Footer() {
               </div>
               <div className='flex items-center gap-2'>
                 <MailIcon className='h-4 w-4 flex-shrink-0' />
-                <a 
-                  href="mailto:hello@loveandphotos.com" 
+                <a
+                  href="mailto:support@lp.loveandphotos.com"
                   className='hover:text-foreground transition-colors'
-                  aria-label="Email Love & Photos at hello@loveandphotos.com"
+                  aria-label="Email Love & Photos at support@lp.loveandphotos.com"
                 >
-                  hello@loveandphotos.com
+                  support@lp.loveandphotos.com
                 </a>
               </div>
             </div>

@@ -16,6 +16,7 @@ const navItems = [
     name: 'Book Now',
     href: '/photographers',
     submenu: [
+      { name: 'FAQ', href: '/faq', description: 'Frequently asked questions' },
       { name: 'Find Photographers', href: '/photographers', description: 'Search by ZIP, style, or date' },
       { name: 'Video Only', href: '/videographers', description: 'Professional videographers only', icon: <Video size={16} /> },
       { name: 'How to Book', href: '/how-to-book', description: '3 simple steps to book', icon: <Book size={16} /> }
@@ -26,9 +27,7 @@ const navItems = [
     // Remove href for dropdown-only items - NO MORE /talent!
     submenu: [
       { name: 'Apply to Join', href: '/talent/apply', description: 'Apply & see pay tiers' },
-      { name: 'Learn', href: '/learn', description: 'Training guides & tutorials' },
-      { name: 'Resources', href: '/resources', description: 'Training & guidelines' },
-      { name: 'FAQ', href: '/faq', description: 'Frequently asked questions' }
+      { name: 'Guidelines', href: '/guidelines', description: 'Training guides & tutorials' }
     ]
   },
   { name: 'About', href: '/about', icon: <Users size={16} aria-label="About" /> }

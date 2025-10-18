@@ -47,8 +47,7 @@ import HowItWorks from '@pages/HowItWorks'
 import ClientPricing from '@pages/ClientPricing'
 import TalentPricing from '@pages/pricing/TalentPricing'
 import FAQ from '@pages/FAQ'
-import Resources from '@pages/Resources'
-import Learn from '@pages/Learn'
+import Guidelines from '@pages/Guidelines'
 import ProfilePage from '@pages/customer/ProfilePage'
 import Demo from '@pages/Demo'
 import TalentApplication from '@pages/TalentApplication'
@@ -251,9 +250,10 @@ function App() {
             <Route path="/how-it-works" element={<HowItWorks />} />
             <Route path="/pricing/client" element={<ClientPricing />} />
             <Route path="/faq" element={<FAQ />} />
-            <Route path="/resources" element={<Resources />} />
-            <Route path="/learn" element={<Learn />} />
-            <Route path="/photographer-resources" element={<Resources />} />
+            <Route path="/resources" element={<Navigate to="/guidelines" replace />} />
+            <Route path="/learn" element={<Navigate to="/guidelines" replace />} />
+            <Route path="/guidelines" element={<Guidelines />} />
+            <Route path="/photographer-resources" element={<Navigate to="/guidelines" replace />} />
             <Route path="/photographer-faq" element={<FAQ />} />
             <Route path="/join" element={<SignUp />} />
             {/* Redirect /talent to application gateway */}
