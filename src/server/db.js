@@ -7,6 +7,7 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 import { createClient } from '@supabase/supabase-js'
+import { checkAndUpdateBookingCompletion } from '../lib/async/contractService.js'
 
 // Server-side Supabase client with service role key
 const supabase = createClient(
@@ -197,6 +198,10 @@ export async function markBookingPaid(bookingId, paymentData) {
   }
 
   console.log(`✅ Updated payment_schedule for booking ${bookingId}, added payment of ${amountPaid}`)
+
+  // Check if contract is also signed - if so, update booking to fully complete status
+  await checkAndUpdateBookingCompletion(bookingId)
+
   return true
 }
 

@@ -212,6 +212,9 @@ export async function storeContractSignature(signatureData, clientIp) {
   // But let's verify it worked
   await verifyContractSigningComplete(signatureData.bookingId)
 
+  // Check if payment is already complete - if so, update booking to fully complete status
+  await checkAndUpdateBookingCompletion(signatureData.bookingId)
+
   // Generate and upload PDF to storage
   try {
     const { generateContractPDF, uploadContractPDF, updateBookingWithContractUrl } = await import('../pdf/contractPdfGenerator.js')
@@ -307,6 +310,61 @@ export async function getContractSignature(signatureId) {
   }
 
   return signature
+}
+
+/**
+ * Check if both contract is signed AND payment is complete
+ * If both conditions are met, update booking to fully complete status
+ * @param {string} bookingId - Booking ID to check and update
+ * @returns {Promise<void>}
+ */
+export async function checkAndUpdateBookingCompletion(bookingId) {
+  const supabase = getSupabaseClient()
+
+  // Fetch current booking status
+  const { data: booking, error } = await withTimeout(
+    supabase
+      .from('bookings')
+      .select('contract_signed, payment_status, booking_status')
+      .eq('id', bookingId)
+      .single(),
+    5000
+  )
+
+  if (error || !booking) {
+    console.warn('⚠️ Could not check booking completion status:', error?.message)
+    return // Non-fatal
+  }
+
+  // Check if both contract is signed AND payment is complete
+  const isFullyComplete = booking.contract_signed === true && booking.payment_status === 'paid'
+
+  if (isFullyComplete && booking.booking_status !== 'completed') {
+    // Update booking to completed status
+    const { error: updateError } = await withTimeout(
+      supabase
+        .from('bookings')
+        .update({
+          booking_status: 'completed',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', bookingId),
+      5000
+    )
+
+    if (updateError) {
+      console.warn('⚠️ Failed to update booking to completed status:', updateError.message)
+    } else {
+      console.log('✅ Booking marked as fully completed (contract signed + payment complete)')
+    }
+  } else if (isFullyComplete) {
+    console.log('✅ Booking already marked as completed')
+  } else {
+    console.log('ℹ️ Booking not yet fully complete:', {
+      contract_signed: booking.contract_signed,
+      payment_status: booking.payment_status
+    })
+  }
 }
 
 /**
