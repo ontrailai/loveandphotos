@@ -84,7 +84,7 @@ function Feature() {
               <div className="flex flex-row gap-6 w-full items-start">
                 <Check className="w-4 h-4 mt-2 text-primary" />
                 <div className="flex flex-col gap-1">
-                  <p className="font-medium">Rush Delivery</p>
+                  <p className="font-medium">Express Turnaround</p>
                   <p className="text-muted-foreground text-sm">
                     {sanitizeSubtext('Need photos fast? Express delivery options available—')}
                   </p>

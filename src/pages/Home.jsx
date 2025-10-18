@@ -448,7 +448,7 @@ const Home = () => {
               </div>
               <div className="flex items-center space-x-2 text-muted-foreground">
                 <HeartIcon className="w-5 h-5 text-primary fill-primary" />
-                <span>10,000+ Happy Moments</span>
+                <span>10,000+ Happy Couples</span>
               </div>
             </div>
 
