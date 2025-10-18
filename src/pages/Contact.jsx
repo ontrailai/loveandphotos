@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Phone, Mail, MessageCircle, Clock, MapPin } from 'lucide-react'
+import { Mail, MessageCircle, Clock, MapPin } from 'lucide-react'
 import { supabase } from '@lib/supabase'
 import PageHero from '@components/marketing/PageHero'
 import toast from 'react-hot-toast'
@@ -149,25 +149,9 @@ const Contact = () => {
             </h2>
             
             <div className="space-y-6">
-              {/* Phone */}
-              <a
-                href="tel:3237011703"
-                className="flex items-start space-x-4 group hover:bg-accent p-3 rounded-lg transition-colors"
-              >
-                <div className="bg-primary p-3 rounded-full text-primary-foreground flex-shrink-0">
-                  <Phone className="w-6 h-6" />
-                </div>
-                <div>
-                  <p className="text-muted-foreground text-sm mb-1">Call Us</p>
-                  <p className="text-foreground font-semibold text-lg group-hover:text-primary transition-colors">
-                    (323) 701-1703
-                  </p>
-                </div>
-              </a>
-
               {/* Email */}
               <a
-                href="mailto:matthew@loveandphotos.com"
+                href="mailto:support@lp.loveandphotos.com"
                 className="flex items-start space-x-4 group hover:bg-accent p-3 rounded-lg transition-colors"
               >
                 <div className="bg-primary p-3 rounded-full text-primary-foreground flex-shrink-0">
@@ -176,7 +160,7 @@ const Contact = () => {
                 <div>
                   <p className="text-muted-foreground text-sm mb-1">Email Us</p>
                   <p className="text-foreground font-semibold text-lg group-hover:text-primary transition-colors break-all">
-                    matthew@loveandphotos.com
+                    support@lp.loveandphotos.com
                   </p>
                 </div>
               </a>
@@ -385,16 +369,9 @@ const Contact = () => {
           <p className="text-muted-foreground mb-6 max-w-md mx-auto">
             Don't wait to capture your special moments. Contact us today and let's create something beautiful together.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex justify-center">
             <a
-              href="tel:3237011703"
-              className="inline-flex items-center justify-center px-6 py-3 bg-card text-primary font-semibold rounded-lg hover:bg-accent transition-colors shadow-md border"
-            >
-              <Phone className="w-5 h-5 mr-2" />
-              Call Now
-            </a>
-            <a
-              href="mailto:matthew@loveandphotos.com"
+              href="mailto:support@lp.loveandphotos.com"
               className="inline-flex items-center justify-center px-6 py-3 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90 transition-all shadow-md"
             >
               <Mail className="w-5 h-5 mr-2" />
