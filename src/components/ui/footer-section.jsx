@@ -2,12 +2,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useReducedMotion } from 'motion/react';
-import { 
-  FacebookIcon, 
-  InstagramIcon, 
+import {
+  FacebookIcon,
+  InstagramIcon,
   MapPinIcon,
-  MailIcon,
-  PhoneIcon 
+  MailIcon
 } from 'lucide-react';
 
 // Custom The Knot Icon Component
@@ -122,16 +121,6 @@ export function Footer() {
               <div className='flex items-center gap-2'>
                 <MapPinIcon className='h-4 w-4 flex-shrink-0' />
                 <span>Serving all major US cities</span>
-              </div>
-              <div className='flex items-center gap-2'>
-                <PhoneIcon className='h-4 w-4 flex-shrink-0' />
-                <a 
-                  href="tel:1-800-PHOTOS" 
-                  className='hover:text-foreground transition-colors'
-                  aria-label="Call Love & Photos at 1-800-PHOTOS"
-                >
-                  1-800-PHOTOS
-                </a>
               </div>
               <div className='flex items-center gap-2'>
                 <MailIcon className='h-4 w-4 flex-shrink-0' />
