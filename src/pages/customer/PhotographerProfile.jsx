@@ -13,9 +13,7 @@ import {
   Sun,
   Settings,
   Film,
-  Edit,
-  ChevronLeft,
-  ChevronRight
+  Edit
 } from 'lucide-react'
 import Button from '@components/ui/Button'
 import Card from '@components/ui/Card'
@@ -38,7 +36,6 @@ const PhotographerProfile = () => {
   const [photographer, setPhotographer] = useState(null)
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState(false)
-  const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [imageErrors, setImageErrors] = useState({})
   const [isBioExpanded, setIsBioExpanded] = useState(false)
   const [isLightboxOpen, setIsLightboxOpen] = useState(false)
@@ -281,83 +278,35 @@ const PhotographerProfile = () => {
               <>
                 {validPortfolioImages.length > 0 ? (
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <h2 className="text-xl font-semibold text-dusty-900">Portfolio</h2>
-                      <span className="text-sm text-gray-600">
-                        {currentImageIndex + 1} / {validPortfolioImages.length}
-                      </span>
-                    </div>
+                    <h2 className="text-xl font-semibold text-dusty-900">Portfolio</h2>
 
-                    {/* Single Full-Size Image with Navigation */}
-                    <div className="relative">
-                      {/* Main Image */}
-                      <div
-                        className="relative bg-gray-100 rounded-xl overflow-hidden cursor-pointer hover:opacity-95 transition-opacity shadow-lg"
-                        onClick={() => openLightbox(currentImageIndex)}
-                        role="button"
-                        tabIndex={0}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' || e.key === ' ') {
-                            e.preventDefault()
-                            openLightbox(currentImageIndex)
-                          }
-                        }}
-                        aria-label={`View portfolio image ${currentImageIndex + 1} in full screen`}
-                      >
-                        <img
-                          src={validPortfolioImages[currentImageIndex]}
-                          alt={`${photographer.users?.full_name} - Portfolio Image ${currentImageIndex + 1}`}
-                          className="w-full h-auto"
-                          loading="lazy"
-                          onError={() => handleImageError(currentImageIndex)}
-                        />
-                      </div>
-
-                      {/* Navigation Buttons */}
-                      {validPortfolioImages.length > 1 && (
-                        <>
-                          {/* Previous Button */}
-                          <button
-                            onClick={() => setCurrentImageIndex(prev =>
-                              prev === 0 ? validPortfolioImages.length - 1 : prev - 1
-                            )}
-                            className="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/90 hover:bg-white shadow-lg transition-all z-10"
-                            aria-label="Previous image"
-                          >
-                            <ChevronLeft className="w-6 h-6 text-gray-800" />
-                          </button>
-
-                          {/* Next Button */}
-                          <button
-                            onClick={() => setCurrentImageIndex(prev =>
-                              prev === validPortfolioImages.length - 1 ? 0 : prev + 1
-                            )}
-                            className="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/90 hover:bg-white shadow-lg transition-all z-10"
-                            aria-label="Next image"
-                          >
-                            <ChevronRight className="w-6 h-6 text-gray-800" />
-                          </button>
-                        </>
-                      )}
-                    </div>
-
-                    {/* Thumbnail Dots for Navigation */}
-                    {validPortfolioImages.length > 1 && (
-                      <div className="flex justify-center gap-2 pt-2">
-                        {validPortfolioImages.map((_, index) => (
-                          <button
-                            key={index}
-                            onClick={() => setCurrentImageIndex(index)}
-                            className={`h-2 rounded-full transition-all ${
-                              currentImageIndex === index
-                                ? 'w-8 bg-primary-500'
-                                : 'w-2 bg-gray-300 hover:bg-gray-400'
-                            }`}
-                            aria-label={`Go to image ${index + 1}`}
+                    {/* Grid of all portfolio images */}
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      {validPortfolioImages.map((image, index) => (
+                        <div
+                          key={index}
+                          className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden cursor-pointer hover:opacity-90 transition-opacity shadow-md hover:shadow-lg"
+                          onClick={() => openLightbox(index)}
+                          role="button"
+                          tabIndex={0}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault()
+                              openLightbox(index)
+                            }
+                          }}
+                          aria-label={`View portfolio image ${index + 1} in full screen`}
+                        >
+                          <img
+                            src={image}
+                            alt={`${photographer.users?.full_name} - Portfolio Image ${index + 1}`}
+                            className="w-full h-full object-contain"
+                            loading="lazy"
+                            onError={() => handleImageError(index)}
                           />
-                        ))}
-                      </div>
-                    )}
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 ) : (
                   <div className="aspect-w-16 aspect-h-10 bg-gray-100 rounded-xl flex items-center justify-center mb-6">
