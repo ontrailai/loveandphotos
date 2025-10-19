@@ -26,6 +26,7 @@ const navItems = [
     name: 'Join',
     // Remove href for dropdown-only items - NO MORE /talent!
     submenu: [
+      { name: 'FAQ', href: '/faq', description: 'Frequently asked questions' },
       { name: 'Apply to Join', href: '/talent/apply', description: 'Apply & see pay tiers' },
       { name: 'Guidelines', href: '/guidelines', description: 'Training guides & tutorials' }
     ]
