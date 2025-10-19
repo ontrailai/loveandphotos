@@ -5,6 +5,7 @@
 import express from 'express'
 import { supabase } from '../db.js'
 import { getBasePhotoPrice } from '../../lib/constants/pricing.js'
+import { computePayable } from '../payments/compute.js'
 
 const router = express.Router()
 
@@ -91,10 +92,36 @@ router.post('/create', async (req, res) => {
       0
     )
 
-    // Calculate total in cents
+    // Calculate total in cents (base amount before late fee)
     const packageTotalCents = Math.round(packagePrice * 100)
     const addonsTotalCents = Math.round(addonsPrice * 100)
-    const totalAmountCents = packageTotalCents + addonsTotalCents
+    const baseTotalCents = packageTotalCents + addonsTotalCents
+
+    // Create a temporary booking object to calculate late fee
+    const tempBooking = {
+      event_date: scheduleDetails.date,
+      package_total_cents: packageTotalCents,
+      upsells_total_cents: addonsTotalCents,
+      personalization_data: {
+        pricing_summary: {
+          package_price_cents: packageTotalCents,
+          addons_price_cents: addonsTotalCents,
+          total_amount_cents: baseTotalCents
+        }
+      }
+    }
+
+    // Use computePayable to calculate total including any late booking fee
+    const paymentCalculation = computePayable(tempBooking, 'full')
+    const totalAmountCents = paymentCalculation.amount_cents
+    const lateFeeAmount = paymentCalculation.late_fee_cents
+
+    console.log('💰 Booking total calculation:', {
+      base_cents: baseTotalCents,
+      late_fee_cents: lateFeeAmount,
+      total_cents: totalAmountCents,
+      event_date: scheduleDetails.date
+    })
 
     // Build personalization_data
     const personalizationData = {
@@ -115,6 +142,7 @@ router.post('/create', async (req, res) => {
       pricing_summary: {
         package_price_cents: packageTotalCents,
         addons_price_cents: addonsTotalCents,
+        late_fee_cents: lateFeeAmount,
         total_amount_cents: totalAmountCents
       }
     }

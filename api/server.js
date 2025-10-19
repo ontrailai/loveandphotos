@@ -416,15 +416,19 @@ app.post('/api/booking/create', async (req, res) => {
 
     if (!existingUser) {
       console.log('⚠️  Customer not found in users table, creating user record...')
+      // Use upsert instead of insert to handle race conditions with AuthContext signup
       const { error: insertUserError } = await supabase
         .from('users')
-        .insert({
+        .upsert({
           id: customerId,
           email: accountDetails?.email || null,
           full_name: accountDetails?.fullName || null,
           phone: accountDetails?.phone || null,
           role: 'customer',
-          created_at: new Date().toISOString()
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'id'  // Use id as conflict resolution key (email might cause issues if user changes email)
         })
 
       if (insertUserError) {
@@ -436,7 +440,7 @@ app.post('/api/booking/create', async (req, res) => {
           details: insertUserError.message
         })
       }
-      console.log('✅ User record created successfully')
+      console.log('✅ User record created/updated successfully')
     } else {
       console.log('✅ Customer already exists in users table')
     }
