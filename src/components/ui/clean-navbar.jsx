@@ -263,6 +263,20 @@ export function CleanNavbar({ className = '' }) {
     return '/dashboard'
   }
 
+  // Helper function to get the correct profile route based on role and videographer status
+  const getProfileRoute = () => {
+    if (profile?.role === 'photographer') {
+      // Check if user is a videographer
+      if (photographerProfile?.is_videographer) {
+        return '/talent/dashboard/videographer/profile'
+      }
+      return '/talent/dashboard/profile'
+    } else if (profile?.role === 'admin') {
+      return '/admin/profile'
+    }
+    return '/profile'
+  }
+
   const handleSignOut = async () => {
     const result = await signOut()
     if (!result.success) {
@@ -398,7 +412,7 @@ export function CleanNavbar({ className = '' }) {
                       {profile?.role === 'photographer' ? 'Talent Dashboard' : profile?.role === 'admin' ? 'Admin Panel' : 'Dashboard'}
                     </Button>
                   </Link>
-                  <Link to={getDashboardRoute()}>
+                  <Link to={getProfileRoute()}>
                     <Button variant="ghost" size="sm">
                       <User size={16} className="mr-1" aria-label="Profile" />
                       Profile
@@ -499,7 +513,7 @@ export function CleanNavbar({ className = '' }) {
                     {profile?.role === 'photographer' ? 'Talent Dashboard' : profile?.role === 'admin' ? 'Admin Panel' : 'Dashboard'}
                   </Button>
                 </Link>
-                <Link to={getDashboardRoute()}>
+                <Link to={getProfileRoute()}>
                   <Button variant="ghost" className="w-full justify-start">
                     <User size={16} className="mr-2" aria-label="Profile" />
                     Profile
