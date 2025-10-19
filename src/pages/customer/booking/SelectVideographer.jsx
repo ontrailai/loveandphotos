@@ -12,6 +12,7 @@ import { useBookingFlow } from '@contexts/BookingFlowContext'
 import { useVideographersBatched } from '@hooks/useVideographersBatched'
 import Button from '@components/ui/Button'
 import SafeAvatar from '@components/shared/SafeAvatar'
+import { getPhotoPackagePrice } from '@/lib/constants/packagePricing'
 
 /**
  * VideographerCard Component
@@ -165,7 +166,7 @@ function VideographerCard({ videographer, onSelect, isSelected }) {
 export default function SelectVideographer() {
   const navigate = useNavigate()
   const { photographerId } = useParams()
-  const { bookingFlow, setVideographerId } = useBookingFlow()
+  const { bookingFlow, setVideographerId, updatePackageDetails } = useBookingFlow()
 
   // Get event location from booking flow to filter videographers by location
   const eventCity = bookingFlow.locationDetails?.city
@@ -195,8 +196,20 @@ export default function SelectVideographer() {
   const handleSkip = useCallback(() => {
     console.log('⏭️ Skipping videographer selection')
     setVideographerId(null)
+
+    // Revert package price to photo-only pricing since user is declining video
+    const hoursBooked = bookingFlow.packageDetails.hoursBooked
+    const photoOnlyPrice = getPhotoPackagePrice(hoursBooked)
+
+    updatePackageDetails({
+      ...bookingFlow.packageDetails,
+      packagePrice: photoOnlyPrice,
+      isPhotoVideo: false,
+      packageTitle: `${hoursBooked} Hour${hoursBooked > 1 ? 's' : ''} - Photography`
+    })
+
     navigate(`/booking/${photographerId}/addons`)
-  }, [setVideographerId, navigate, photographerId])
+  }, [setVideographerId, updatePackageDetails, bookingFlow.packageDetails, navigate, photographerId])
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -277,8 +290,8 @@ export default function SelectVideographer() {
                 No Videographers Available
               </h3>
               <p className="text-gray-600 mb-6 max-w-md mx-auto">
-                {eventState
-                  ? `We don't have any videographers available in ${eventState} at the moment. You can continue with photography only.`
+                {eventCity
+                  ? `We don't have any videographers available in ${eventCity} at the moment. You can continue with photography only.`
                   : "We don't have any videographers available in your area at the moment. You can continue with photography only."
                 }
               </p>
@@ -294,7 +307,7 @@ export default function SelectVideographer() {
               <div className="mb-6">
                 <p className="text-gray-700">
                   <span className="font-medium">{videographers.length}</span> videographer{videographers.length !== 1 ? 's' : ''} available
-                  {eventState && <span className="text-gray-500"> in {eventState}</span>}
+                  {eventCity && <span className="text-gray-500"> in {eventCity}</span>}
                 </p>
               </div>
 
