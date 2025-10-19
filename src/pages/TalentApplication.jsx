@@ -145,6 +145,14 @@ const TalentApplication = () => {
         return
       }
 
+      // Validate first and last name
+      const nameParts = formData.full_name.trim().split(/\s+/)
+      if (nameParts.length < 2) {
+        toast.error('Please enter both first and last name')
+        setSubmitting(false)
+        return
+      }
+
       // Validate terms acceptance
       if (!formData.terms_agreement) {
         toast.error('Please accept the Terms and Conditions')
@@ -396,7 +404,7 @@ const TalentApplication = () => {
 
                 <div>
                   <label htmlFor="full_name" className="block text-sm font-medium text-gray-700 mb-1">
-                    Full Name <span className="text-red-500">*</span>
+                    First and Last Name <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -406,7 +414,7 @@ const TalentApplication = () => {
                     onChange={handleInputChange}
                     required
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                    placeholder="John Doe"
+                    placeholder="John Smith"
                   />
                 </div>
 
@@ -646,7 +654,7 @@ const TalentApplication = () => {
                       <li><strong>Breaks & Meals:</strong> For events over 4 hours, one vendor meal and one 20-minute break.</li>
                       <li><strong>Payment:</strong> Processed via ACH/QuickBooks within 14 business days of completed deliverables and submitted job form.</li>
                       <li><strong>No-show couple:</strong> If the couple does not appear on the day of the event and the contractor is present, contractor will be paid 20% of their regular day rate. Notify the Studio immediately.</li>
-                      <li><strong>Contact Support:</strong> Reach out to the Studio at studio@team.loveandphotos.com or text +1 323-701-1705.</li>
+                      <li><strong>Contact Support:</strong> Reach out to the Studio at support@lp.loveandphotos.com or text +1 323-701-1705.</li>
                     </ul>
 
                     <h4 className="font-bold text-gray-900 mt-6 mb-2">1. Independent Contractor Status</h4>
@@ -769,7 +777,7 @@ const TalentApplication = () => {
 
                     <h4 className="font-bold text-gray-900 mt-6 mb-2">11. Communication</h4>
                     <ul className="list-disc pl-6 space-y-1 mb-4">
-                      <li>Use only email or text for Studio communication: studio@team.loveandphotos.com, +1 323-701-1705.</li>
+                      <li>Use only email or text for Studio communication: support@lp.loveandphotos.com, +1 323-701-1705.</li>
                       <li>Phone calls only for emergencies during the event day.</li>
                     </ul>
 

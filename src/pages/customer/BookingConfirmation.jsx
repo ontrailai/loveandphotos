@@ -440,8 +440,8 @@ const BookingConfirmation = () => {
                 <p className="text-xs text-blue-900 font-medium mb-1">Questions about your booking?</p>
                 <p className="text-xs text-blue-800">
                   Contact our Studio team at{' '}
-                  <a href="mailto:studio@team.loveandphotos.com" className="font-medium underline hover:text-blue-600">
-                    studio@team.loveandphotos.com
+                  <a href="mailto:support@lp.loveandphotos.com" className="font-medium underline hover:text-blue-600">
+                    support@lp.loveandphotos.com
                   </a>
                 </p>
               </div>

@@ -241,8 +241,8 @@ const UpcomingBookingCard = ({
         <div className="mt-6 mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
           <p className="text-sm text-blue-900">
             Questions about your booking? Contact our Studio team at{' '}
-            <a href="mailto:studio@team.loveandphotos.com" className="font-medium underline hover:text-blue-700">
-              studio@team.loveandphotos.com
+            <a href="mailto:support@lp.loveandphotos.com" className="font-medium underline hover:text-blue-700">
+              support@lp.loveandphotos.com
             </a>
           </p>
         </div>

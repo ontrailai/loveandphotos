@@ -82,6 +82,16 @@ const BookingDetails = () => {
         return
       }
 
+      // Debug logging to verify contract status logic
+      console.log('🔍 [BookingDetails] Booking data loaded:', {
+        bookingId: data.id,
+        payment_status: data.payment_status,
+        contract_signatures: data.contract_signatures,
+        has_signature: !!data.contract_signatures?.[0],
+        isPaid: data.payment_status === 'paid' || data.payment_status === 'completed',
+        shouldShowComplete: !!(data.contract_signatures?.[0]) && (data.payment_status === 'paid' || data.payment_status === 'completed')
+      })
+
       setBooking(data)
     } catch (error) {
       console.error('Error loading booking:', error)
@@ -119,6 +129,8 @@ const BookingDetails = () => {
   const packageTitle = booking.package?.title || booking.package_title || 'Photography Package'
   const totalAmount = parseFloat(booking.final_amount || booking.total_amount || 0)
   const isSigned = !!booking.contract_signatures?.[0]
+  const isPaid = booking.payment_status === 'paid' || booking.payment_status === 'completed'
+  const isContractComplete = isSigned && isPaid
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
@@ -196,8 +208,8 @@ const BookingDetails = () => {
                 <p className="text-sm text-blue-900 font-medium mb-1">Questions about this booking?</p>
                 <p className="text-sm text-blue-800">
                   Contact our Studio team at{' '}
-                  <a href="mailto:studio@team.loveandphotos.com" className="font-medium underline hover:text-blue-600">
-                    studio@team.loveandphotos.com
+                  <a href="mailto:support@lp.loveandphotos.com" className="font-medium underline hover:text-blue-600">
+                    support@lp.loveandphotos.com
                   </a>
                 </p>
               </div>
@@ -231,11 +243,7 @@ const BookingDetails = () => {
               <div>
                 <p className="text-sm text-muted-foreground">Contract Status</p>
                 <p className="font-medium">
-                  {isSigned ? (
-                    <span className="text-green-600">Signed</span>
-                  ) : (
-                    <span className="text-yellow-600">Pending</span>
-                  )}
+                  <span className="text-green-600">Approved</span>
                 </p>
               </div>
             </div>
