@@ -163,10 +163,18 @@ const TalentTraining = () => {
       // Clear session storage after successful completion
       sessionStorage.removeItem(STORAGE_KEY)
 
+      // CRITICAL: Refresh profile to get updated training_completed status
+      // This prevents ProtectedRoute from redirecting back to training
+      console.log('[TalentTraining] Refreshing profile to get updated training status...')
+      await refreshProfile()
+      console.log('[TalentTraining] Profile refreshed successfully')
+
       toast.success('Training completed! Redirecting to dashboard...', { id: loadingToast })
 
-      // Redirect based on role (use current profile, don't wait for refresh)
-      // The ProtectedRoute will handle the updated training status check
+      // Small delay to ensure state updates propagate
+      await new Promise(resolve => setTimeout(resolve, 100))
+
+      // Redirect based on role
       console.log('[TalentTraining] Redirecting to dashboard...')
       if (photographerProfile?.is_videographer) {
         navigate('/talent/dashboard/videographer', { replace: true })
