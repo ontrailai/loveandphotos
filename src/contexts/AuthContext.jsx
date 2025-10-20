@@ -54,18 +54,42 @@ export const AuthProvider = ({ children }) => {
         userProfile = await Promise.race([profilePromise, timeoutPromise])
         console.log('[AuthContext] ✅ Profile fetched successfully via db.users.getProfile')
       } catch (timeoutError) {
-        console.warn('[AuthContext] ⏱️ Profile fetch timed out, creating minimal profile from session')
+        console.warn('[AuthContext] ⏱️ Profile fetch timed out, will retry with direct query')
 
-        // Create minimal profile from session user metadata instead of waiting for DB
-        // CRITICAL: Default role should be 'customer', NOT 'photographer'
-        userProfile = {
-          id: user.id,
-          email: user.email,
-          full_name: user.user_metadata?.full_name || '',
-          role: user.user_metadata?.role || 'customer',
-          created_at: user.created_at
+        // CRITICAL FIX: Instead of creating minimal profile, fetch directly from database
+        // This prevents role mismatch errors when photographer profile exists but times out
+        try {
+          const { data: directProfile, error: directError } = await supabase
+            .from('users')
+            .select('*')
+            .eq('id', user.id)
+            .maybeSingle()
+
+          if (directProfile && !directError) {
+            userProfile = directProfile
+            console.log('[AuthContext] ✅ Profile fetched successfully via direct query after timeout')
+          } else {
+            // Only create minimal profile if direct query also fails
+            userProfile = {
+              id: user.id,
+              email: user.email,
+              full_name: user.user_metadata?.full_name || '',
+              role: user.user_metadata?.role || 'customer',
+              created_at: user.created_at
+            }
+            console.log('[AuthContext] ✅ Created minimal profile from session metadata (direct query failed)')
+          }
+        } catch (directQueryError) {
+          // Fallback to minimal profile if direct query fails
+          userProfile = {
+            id: user.id,
+            email: user.email,
+            full_name: user.user_metadata?.full_name || '',
+            role: user.user_metadata?.role || 'customer',
+            created_at: user.created_at
+          }
+          console.log('[AuthContext] ✅ Created minimal profile from session metadata (direct query error)')
         }
-        console.log('[AuthContext] ✅ Created minimal profile from session metadata')
       }
 
       console.log('[AuthContext] User profile:', userProfile)
@@ -157,7 +181,7 @@ export const AuthProvider = ({ children }) => {
 
       setProfile(userProfile)
 
-      // If photographer, get photographer profile with timeout
+      // If photographer, get photographer profile with timeout and retry
       if (userProfile?.role === 'photographer') {
         console.log('[AuthContext] Fetching photographer profile')
         try {
@@ -169,9 +193,27 @@ export const AuthProvider = ({ children }) => {
           console.log('[AuthContext] Photographer profile:', photographerData)
           setPhotographerProfile(photographerData)
         } catch (photographerError) {
-          console.warn('[AuthContext] ⚠️ Photographer profile fetch timeout, will be created if needed')
-          // Set to null on timeout/error, TalentDashboardLayout will create it if needed
-          setPhotographerProfile(null)
+          console.warn('[AuthContext] ⚠️ Photographer profile fetch timeout, retrying with direct query')
+
+          // CRITICAL FIX: Retry with direct database query instead of giving up
+          try {
+            const { data: directPhotographerProfile, error: directPhotoError } = await supabase
+              .from('photographers')
+              .select('*')
+              .eq('user_id', user.id)
+              .maybeSingle()
+
+            if (directPhotographerProfile && !directPhotoError) {
+              console.log('[AuthContext] ✅ Photographer profile fetched via direct query')
+              setPhotographerProfile(directPhotographerProfile)
+            } else {
+              console.warn('[AuthContext] ⚠️ Photographer profile not found, will be created if needed')
+              setPhotographerProfile(null)
+            }
+          } catch (directPhotoQueryError) {
+            console.warn('[AuthContext] ⚠️ Direct photographer profile query failed, will be created if needed')
+            setPhotographerProfile(null)
+          }
         }
       }
 
@@ -800,6 +842,14 @@ export const ProtectedRoute = ({ children, requireRole = null, requireOnboarding
         return
       }
 
+      // If role is required, wait for profile to load before proceeding
+      if (requireRole && !profile) {
+        console.log('[ProtectedRoute] ⏳ Role required but profile not loaded yet, waiting...')
+        // Don't navigate, just wait for profile to load
+        // The loading spinner will show until profile is ready
+        return
+      }
+
       // Check role requirement (only if profile is loaded)
       if (requireRole && profile && !hasRole(requireRole)) {
         // Admin can access everything
@@ -855,8 +905,13 @@ export const ProtectedRoute = ({ children, requireRole = null, requireOnboarding
     }
   }, [user, profile, photographerProfile, loading, requireRole, requireOnboarding, navigate, hasRole, checkOnboardingStatus, forceRender])
 
-  if (loading && !forceRender) {
-    console.log('[ProtectedRoute] Loading state active, showing spinner')
+  // Show loading spinner if:
+  // 1. Still loading auth state, OR
+  // 2. Role is required but profile hasn't loaded yet
+  const shouldShowLoading = (loading && !forceRender) || (requireRole && user && !profile)
+
+  if (shouldShowLoading) {
+    console.log('[ProtectedRoute] Loading state active, showing spinner (loading:', loading, ', requireRole:', requireRole, ', hasProfile:', !!profile, ')')
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-600"></div>
