@@ -106,8 +106,36 @@ const TalentApplication = () => {
     setStep('application-form')
   }
 
+  // Format phone number as user types: (123) 456-7890
+  const formatPhoneNumber = (value) => {
+    // Remove all non-numeric characters
+    const phoneNumber = value.replace(/\D/g, '')
+
+    // Limit to 10 digits (US phone number)
+    const limitedNumber = phoneNumber.slice(0, 10)
+
+    // Format based on length
+    if (limitedNumber.length === 0) return ''
+    if (limitedNumber.length <= 3) return `(${limitedNumber}`
+    if (limitedNumber.length <= 6) {
+      return `(${limitedNumber.slice(0, 3)}) ${limitedNumber.slice(3)}`
+    }
+    return `(${limitedNumber.slice(0, 3)}) ${limitedNumber.slice(3, 6)}-${limitedNumber.slice(6)}`
+  }
+
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target
+
+    // Special handling for phone number to format as user types
+    if (name === 'phone') {
+      const formattedPhone = formatPhoneNumber(value)
+      setFormData(prev => ({
+        ...prev,
+        phone: formattedPhone
+      }))
+      return
+    }
+
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value
@@ -199,10 +227,13 @@ const TalentApplication = () => {
       const eligibilityResult = validateEligibility()
 
       // Prepare application data
+      // Strip formatting from phone number for database storage
+      const cleanPhone = formData.phone ? formData.phone.replace(/\D/g, '') : null
+
       const applicationData = {
         full_name: formData.full_name,
         email: formData.email,
-        phone: formData.phone || null,
+        phone: cleanPhone,
         role: selectedRole,
         answers: {
           // Critical eligibility questions (shared)
@@ -263,7 +294,7 @@ const TalentApplication = () => {
       const signupResult = await signUp(formData.email, formData.password, {
         role: 'photographer', // Both roles use 'photographer' role
         fullName: formData.full_name,
-        phone: formData.phone,
+        phone: cleanPhone, // Use cleaned phone number without formatting
         isVideographer: selectedRole === 'videographer' // Set flag for videographers
       })
 
@@ -443,7 +474,14 @@ const TalentApplication = () => {
                     onChange={handleInputChange}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                     placeholder="(555) 123-4567"
+                    maxLength={14}
+                    pattern="\(\d{3}\) \d{3}-\d{4}"
                   />
+                  {formData.phone && formData.phone.length > 0 && formData.phone.length < 14 && (
+                    <p className="mt-1 text-sm text-amber-600">
+                      Enter a complete 10-digit phone number
+                    </p>
+                  )}
                 </div>
 
                 <div>
