@@ -21,16 +21,34 @@ export const AuthProvider = ({ children }) => {
   const navigate = useNavigate()
   const isMountedRef = useRef(true)
   const fetchInProgressRef = useRef(false)
+  const currentFetchPromiseRef = useRef(null)
 
   // Fetch user profile and photographer data if applicable
   const fetchUserData = useCallback(async (user) => {
-    // Prevent concurrent fetches
-    if (fetchInProgressRef.current) {
-      console.log('[AuthContext] ⏭️  Skipping concurrent fetch - already in progress')
-      return null
+    // Prevent concurrent fetches - return the existing promise instead of null
+    if (fetchInProgressRef.current && currentFetchPromiseRef.current) {
+      console.log('[AuthContext] ⏭️  Fetch already in progress, returning existing promise')
+      return currentFetchPromiseRef.current
     }
 
     fetchInProgressRef.current = true
+
+    // Create a new promise and store it
+    const fetchPromise = (async () => {
+      try {
+        return await executeFetch(user)
+      } finally {
+        fetchInProgressRef.current = false
+        currentFetchPromiseRef.current = null
+      }
+    })()
+
+    currentFetchPromiseRef.current = fetchPromise
+    return fetchPromise
+  }, [])
+
+  // Separate the actual fetch logic
+  const executeFetch = async (user) => {
     // Check if component is still mounted before proceeding
     if (!isMountedRef.current) {
       console.log('[AuthContext] Component unmounted, skipping fetch')
@@ -223,11 +241,8 @@ export const AuthProvider = ({ children }) => {
       console.error('[AuthContext] Error fetching user data:', error)
       // Don't show error toast on initial load
       return null
-    } finally {
-      // Reset fetch flag to allow future fetches
-      fetchInProgressRef.current = false
     }
-  }, []) // Empty dependency array since it only uses parameters
+  } // Empty dependency array since it only uses parameters
 
   useEffect(() => {
     // Set mounted ref
