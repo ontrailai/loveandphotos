@@ -146,12 +146,23 @@ const TalentTraining = () => {
 
     try {
       console.log('[TalentTraining] Starting training completion for user:', user.id)
+      console.log('[TalentTraining] Supabase client initialized:', !!supabase)
+      console.log('[TalentTraining] Current auth state:', { hasUser: !!user, userId: user?.id })
 
-      // Update training_completed in database
-      const { error } = await supabase
+      // Add timeout to prevent hanging indefinitely
+      const updatePromise = supabase
         .from('photographers')
         .update({ training_completed: true, updated_at: new Date().toISOString() })
         .eq('user_id', user.id)
+
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Update timed out after 10 seconds')), 10000)
+      )
+
+      console.log('[TalentTraining] Executing database update...')
+      const { data, error } = await Promise.race([updatePromise, timeoutPromise])
+
+      console.log('[TalentTraining] Update response:', { data, error })
 
       if (error) {
         console.error('[TalentTraining] Error updating training status:', error)
@@ -183,7 +194,7 @@ const TalentTraining = () => {
       }
     } catch (error) {
       console.error('[TalentTraining] Failed to complete training:', error)
-      toast.error('Failed to complete training. Please try again.', { id: loadingToast })
+      toast.error(error.message || 'Failed to complete training. Please try again.', { id: loadingToast })
       setIsSubmitting(false)
     }
   }
