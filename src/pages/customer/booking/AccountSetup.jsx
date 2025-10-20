@@ -207,6 +207,23 @@ const AccountSetup = () => {
   }, [finalizeAccountStep, user])
 
   // Check if email exists when user types email in signup mode
+  // Format phone number as user types: (123) 456-7890
+  const formatPhoneNumber = (value) => {
+    // Remove all non-numeric characters
+    const phoneNumber = value.replace(/\D/g, '')
+
+    // Limit to 10 digits (US phone number)
+    const limitedNumber = phoneNumber.slice(0, 10)
+
+    // Format based on length
+    if (limitedNumber.length === 0) return ''
+    if (limitedNumber.length <= 3) return `(${limitedNumber}`
+    if (limitedNumber.length <= 6) {
+      return `(${limitedNumber.slice(0, 3)}) ${limitedNumber.slice(3)}`
+    }
+    return `(${limitedNumber.slice(0, 3)}) ${limitedNumber.slice(3, 6)}-${limitedNumber.slice(6)}`
+  }
+
   const checkEmailExists = async (email) => {
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return
 
@@ -271,6 +288,8 @@ const AccountSetup = () => {
 
       if (!formData.phone) {
         newErrors.phone = 'Phone number is required'
+      } else if (formData.phone.length < 14) {
+        newErrors.phone = 'Please enter a complete 10-digit phone number'
       }
     }
 
@@ -289,10 +308,13 @@ const AccountSetup = () => {
       let result
 
       if (mode === 'signup') {
+        // Strip formatting from phone number for database storage
+        const cleanPhone = formData.phone ? formData.phone.replace(/\D/g, '') : ''
+
         // Create account
         result = await signUp(formData.email, formData.password, {
           fullName: formData.fullName,
-          phone: formData.phone,
+          phone: cleanPhone,
           role: 'customer'
         })
 
@@ -303,7 +325,7 @@ const AccountSetup = () => {
             customerId: result.user.id,
             email: result.user.email,
             fullName: formData.fullName,
-            phone: formData.phone
+            phone: cleanPhone
           })
           return
         }
@@ -335,6 +357,18 @@ const AccountSetup = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
+
+    // Special handling for phone number to format as user types
+    if (name === 'phone') {
+      const formattedPhone = formatPhoneNumber(value)
+      setFormData(prev => ({ ...prev, phone: formattedPhone }))
+      // Clear error for this field when user starts typing
+      if (errors.phone) {
+        setErrors(prev => ({ ...prev, phone: '' }))
+      }
+      return
+    }
+
     setFormData(prev => ({ ...prev, [name]: value }))
     // Clear error for this field when user starts typing
     if (errors[name]) {
@@ -348,53 +382,13 @@ const AccountSetup = () => {
     }
   }
 
+  // If user is authenticated, show loading state while auto-navigation happens
   if (user && user.id) {
     return (
-      <div className="min-h-screen bg-dusty-50">
-        <BookingStepper
-          steps={steps}
-          currentStepIndex={2}
-        />
-
-        <div className="max-w-2xl mx-auto px-4 py-12">
-          <Card className="p-8 space-y-6">
-            <div className="text-center">
-              <h1 className="text-3xl font-bold text-dusty-900 mb-2">
-                Continue Your Booking
-              </h1>
-              <p className="text-dusty-600">
-                You're signed in as <span className="font-medium">{user.email}</span>. We'll finalize your booking details before moving on to the contract.
-              </p>
-            </div>
-
-            <div className="bg-dusty-100 border border-dusty-200 rounded-lg p-4 text-sm text-dusty-700">
-              <p className="font-medium mb-1">What happens next?</p>
-              <p>
-                We'll create your booking using the schedule, package, and location you selected. Once complete, you'll review and sign the contract.
-              </p>
-            </div>
-
-            <div className="flex flex-col sm:flex-row justify-between gap-3">
-              <Button
-                variant="outline"
-                onClick={() => navigate(`/booking/${photographerId}/addons`)}
-                disabled={loading}
-              >
-                Back to Add-Ons
-              </Button>
-              <Button
-                onClick={() => finalizeAccountStep({
-                  customerId: user.id,
-                  email: user.email,
-                  fullName: user.user_metadata?.full_name || '',
-                  phone: user.user_metadata?.phone || ''
-                })}
-                disabled={loading}
-              >
-                {loading ? 'Preparing Booking…' : 'Continue to Contract'}
-              </Button>
-            </div>
-          </Card>
+      <div className="min-h-screen bg-dusty-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500 mx-auto mb-4"></div>
+          <p className="text-dusty-600">Preparing your booking…</p>
         </div>
       </div>
     )
@@ -492,8 +486,15 @@ const AccountSetup = () => {
                   icon={<Phone className="w-5 h-5" />}
                   error={errors.phone}
                   disabled={loading}
+                  maxLength={14}
+                  pattern="\(\d{3}\) \d{3}-\d{4}"
                   required
                 />
+                {formData.phone && formData.phone.length > 0 && formData.phone.length < 14 && (
+                  <p className="mt-1 text-sm text-amber-600">
+                    Enter a complete 10-digit phone number
+                  </p>
+                )}
               </div>
             )}
 
