@@ -291,18 +291,14 @@ const TalentApplication = () => {
       // Show success screen
       setResult({
         accepted: true,
-        message: "Congratulations! Your application has been approved. You now have access to the Talent Portal."
+        message: "Congratulations! Your application has been approved. Please complete the required training to access the Talent Portal."
       })
       setStep('result')
       setSubmitting(false) // IMPORTANT: Stop loading state
 
-      // Redirect to appropriate dashboard based on selected role
+      // Redirect to training page (required for all new photographers/videographers)
       setTimeout(() => {
-        if (selectedRole === 'videographer') {
-          navigate('/talent/dashboard/videographer')
-        } else {
-          navigate('/talent/dashboard')
-        }
+        navigate('/talent/training', { replace: true })
       }, 2000)
 
     } catch (error) {
