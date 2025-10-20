@@ -294,6 +294,7 @@ const TalentApplication = () => {
         message: "Congratulations! Your application has been approved. You now have access to the Talent Portal."
       })
       setStep('result')
+      setSubmitting(false) // IMPORTANT: Stop loading state
 
       // Redirect to appropriate dashboard based on selected role
       setTimeout(() => {
