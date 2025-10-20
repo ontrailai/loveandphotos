@@ -29,14 +29,20 @@ const TalentTraining = () => {
     }
   }, [user?.id, STORAGE_KEY])
 
-  // Autoplay video on mount
+  // Autoplay video on mount and handle unmuting
   useEffect(() => {
     const video = videoRef.current
     if (video) {
-      // Attempt to autoplay (with muted fallback for browser restrictions)
-      video.muted = true
+      // Attempt to autoplay with sound first
+      video.muted = false
       video.play().catch((error) => {
-        console.log('[TalentTraining] Autoplay failed, user interaction may be required:', error)
+        console.log('[TalentTraining] Autoplay with sound failed, trying muted autoplay:', error)
+        // If autoplay with sound fails due to browser policy, play muted
+        // User can unmute using the video controls
+        video.muted = true
+        video.play().catch((muteError) => {
+          console.log('[TalentTraining] Muted autoplay also failed, user interaction required:', muteError)
+        })
       })
     }
   }, [])
@@ -161,6 +167,8 @@ const TalentTraining = () => {
               className="w-full h-full"
               onEnded={handleVideoEnd}
               playsInline
+              controls
+              controlsList="nodownload"
             >
               Your browser does not support the video tag.
             </video>
