@@ -44,7 +44,7 @@ export default defineConfig({
       },
       // Proxy Supabase requests to avoid CORS issues
       '/api/supabase': {
-        target: 'https://ldxscjxoakqrmkgqwwhr.supabase.co',
+        target: 'https://tboltfobncbjwjelavsl.supabase.co',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/supabase/, ''),
         configure: (proxy, _options) => {

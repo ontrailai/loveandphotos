@@ -254,7 +254,7 @@ export const AuthProvider = ({ children }) => {
     const checkSession = async () => {
       try {
         console.log('[AuthContext] 🔍 Checking session...')
-        console.log('[AuthContext] 🔍 localStorage auth token present:', !!localStorage.getItem('sb-ldxscjxoakqrmkgqwwhr-auth-token'))
+        console.log('[AuthContext] 🔍 localStorage auth token present:', !!localStorage.getItem('sb-tboltfobncbjwjelavsl-auth-token'))
 
         // Set a safety timeout to prevent infinite loading (4 seconds)
         sessionTimeoutId = setTimeout(() => {
@@ -659,7 +659,7 @@ export const AuthProvider = ({ children }) => {
       
       // Clear localStorage session data
       localStorage.removeItem('lovep-auth')
-      localStorage.removeItem('sb-ldxscjxoakqrmkgqwwhr-auth-token')
+      localStorage.removeItem('sb-tboltfobncbjwjelavsl-auth-token')
       
       // Then sign out from Supabase
       const { error } = await supabase.auth.signOut()
@@ -687,7 +687,7 @@ export const AuthProvider = ({ children }) => {
       
       // Clear localStorage session data
       localStorage.removeItem('lovep-auth')
-      localStorage.removeItem('sb-ldxscjxoakqrmkgqwwhr-auth-token')
+      localStorage.removeItem('sb-tboltfobncbjwjelavsl-auth-token')
       
       // Still navigate away
       setTimeout(() => {
