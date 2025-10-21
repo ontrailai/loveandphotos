@@ -43,7 +43,18 @@
       "Bash(git stash:*)",
       "Bash(cat:*)",
       "mcp__supabase__list_tables",
-      "Bash(awk:*)"
+      "Bash(awk:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(taskkill:*)",
+      "Bash(cmd /c \"taskkill /PID 15076 /F\")",
+      "Bash(powershell -Command \"Stop-Process -Id 15076 -Force\")",
+      "mcp__playwright__browser_wait_for",
+      "mcp__playwright__browser_click",
+      "mcp__playwright__browser_snapshot",
+      "mcp__playwright__browser_console_messages",
+      "Bash(npx supabase:*)",
+      "Bash(npm search:*)"
     ],
     "deny": [],
     "ask": []

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useId } from 'react'
 import { supabase } from '@lib/supabase'
 import { Camera, Upload, X, Loader } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -7,6 +7,7 @@ const ProfilePictureUpload = ({ userId, currentAvatarUrl, onUploadSuccess }) => 
   const [uploading, setUploading] = useState(false)
   const [previewUrl, setPreviewUrl] = useState(currentAvatarUrl)
   const fileInputRef = useRef(null)
+  const inputId = useId() // Generate unique ID for this instance
 
   // Sync preview URL with current avatar URL when it changes (e.g., after refresh)
   useEffect(() => {
@@ -235,12 +236,12 @@ const ProfilePictureUpload = ({ userId, currentAvatarUrl, onUploadSuccess }) => 
             accept="image/jpeg,image/jpg,image/png"
             onChange={handleFileSelect}
             className="hidden"
-            id="profile-picture-upload"
+            id={inputId}
             disabled={uploading}
           />
 
           <label
-            htmlFor="profile-picture-upload"
+            htmlFor={inputId}
             className={`inline-flex items-center px-4 py-2 border border-primary-600 text-sm font-medium rounded-md text-primary-600 bg-white hover:bg-primary-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors cursor-pointer ${
               uploading ? 'opacity-50 cursor-not-allowed' : ''
             }`}

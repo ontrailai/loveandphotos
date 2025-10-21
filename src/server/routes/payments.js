@@ -506,7 +506,7 @@ router.post('/verify-intent', async (req, res) => {
             .update({
               payment_status: 'paid',
               stripe_payment_intent_id: paymentIntent.id,
-              payment_updated_at: new Date().toISOString()
+              updated_at: new Date().toISOString()
             })
             .eq('id', bookingIdForEmail)
             .select()
@@ -609,7 +609,7 @@ router.post('/confirm-payment', async (req, res) => {
         .update({
           payment_status: 'paid',
           stripe_payment_intent_id: paymentIntent.id,
-          payment_updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString()
         })
         .eq('id', bookingId)
         .select()

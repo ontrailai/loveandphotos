@@ -37,7 +37,7 @@ export const ADD_ONS_CONFIG = [
   },
   {
     id: 'liability-insurance',
-    title: 'Insured Photographer',
+    title: 'Liability Insurance',
     basePrice: 395,
     originalPrice: null,
     discountPercent: 0,
@@ -46,7 +46,7 @@ export const ADD_ONS_CONFIG = [
     description: 'Professional liability coverage protecting you from accidents or damage during your event.',
     features: [
       'Complete liability protection',
-      'Equipment damage coverage',
+      'Damage coverage',
       'Professional team insurance',
       'Venue requirement compliance',
       'Peace of mind guarantee'
@@ -89,7 +89,7 @@ export const ADD_ONS_CONFIG = [
   },
   {
     id: 'engagement-session',
-    title: 'Engagement, Bridal, or Anniversary Session',
+    title: 'Engagement Shoot',
     basePrice: 750,
     originalPrice: 900,
     discountPercent: 17,
@@ -101,8 +101,7 @@ export const ADD_ONS_CONFIG = [
       'Professional photographer',
       '100+ edited photos',
       'Digital download included',
-      'Social media ready images',
-      '$199/mo payment plan'
+      'Social media ready images'
     ],
     validation: {
       hasWarning: true,
@@ -116,7 +115,7 @@ export const ADD_ONS_CONFIG = [
   },
   {
     id: 'second-shooter',
-    title: 'Second Photographer',
+    title: '2nd Photographer',
     basePrice: 750,
     originalPrice: null,
     discountPercent: 0,
@@ -149,7 +148,7 @@ export const ADD_ONS_CONFIG = [
   },
   {
     id: 'date-change-flexibility',
-    title: 'One-Time Date Change',
+    title: 'Date Change',
     basePrice: 50,
     originalPrice: null,
     discountPercent: 0,

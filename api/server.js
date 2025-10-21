@@ -1,6 +1,6 @@
 // Load environment variables FIRST before any other imports
 import dotenv from 'dotenv'
-dotenv.config()
+dotenv.config({ path: '.env.local', override: true })
 
 /**
  * Local API Server for Development

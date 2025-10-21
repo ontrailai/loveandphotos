@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "npm run check:react && concurrently \"npm run dev:client\" \"npm run dev:api\"",
     "dev:client": "vite",
-    "dev:api": "node api/server.js",
+    "dev:api": "PORT=3001 node api/server.js",
     "dev:frontend-only": "npm run check:react && vite",
     "dev:bypass": "node scripts/check-react-singleton-bypass.js && vite",
     "dev:direct": "vite",

@@ -43,11 +43,11 @@
  *    - No processing fee
  *
  * C. $199 Monthly Plan ('monthly199'):
- *    - $149 one-time processing fee added to FINAL payment (not first payment)
+ *    - $150 one-time processing fee added to FINAL payment (not first payment)
  *    - Monthly payments: Fixed $199/month
  *    - First payment: $199 (no processing fee)
  *    - Subsequent payments: $199/month
- *    - Final payment at 60-day cutoff: Remaining balance + $149 processing fee
+ *    - Final payment at 60-day cutoff: Remaining balance + $150 processing fee
  *    - All payments complete 60 days before event
  *
  * BASE AMOUNT CALCULATION:
@@ -179,11 +179,11 @@ export function computePayable(booking, plan) {
       // $500 deposit + remaining balance split into monthly payments
       amount_cents = 50000 // $500 deposit
     } else if (plan === 'monthly199') {
-      // Monthly plan: Fixed $199/month payments + $149 processing fee added to FINAL payment
+      // Monthly plan: Fixed $199/month payments + $150 processing fee added to FINAL payment
       // First payment: $199
       // Subsequent payments: $199/month
-      // Final payment at 60-day cutoff: Remaining balance + $149 processing fee
-      processing_fee_cents = 14900 // $149 processing fee (added to final payment, not first)
+      // Final payment at 60-day cutoff: Remaining balance + $150 processing fee
+      processing_fee_cents = 15000 // $150 processing fee (added to final payment, not first)
       const monthlyPayment = 19900 // Fixed $199/month
 
       // First payment due today: $199 only (NO processing fee)
@@ -325,7 +325,7 @@ export function generatePaymentSchedule(booking, plan) {
     }
   } else if (plan === 'monthly199') {
     // Monthly Plan: Fixed $199/month payments until 60 days before event, then lump sum + processing fee
-    const processingFee = 14900 // $149 processing fee (added to FINAL payment only)
+    const processingFee = 15000 // $150 processing fee (added to FINAL payment only)
     const monthlyPayment = 19900 // $199 fixed monthly payment
 
     // Calculate how many full months we have until the 60-day cutoff

@@ -71,14 +71,46 @@
 - **Version**: 28.4.0
 - **Installation**: Native Docker Engine in WSL (not Docker Desktop)
 - **Sudo Password**: rypasha4269 (for automated commands)
-- **Usage**: 
+- **Usage**:
   - Start service: `sudo service docker start`
   - Test: `sudo docker run hello-world`
   - Note: User added to docker group but requires sudo for now
-- **Benefits**: 
+- **Benefits**:
   - Enables all Supabase CLI local development features
   - Can run local Supabase instance for testing
   - Database dumps and migrations work
+
+### 6. Airtable MCP Server
+- **Status**: ✅ Connected and working
+- **Package**: `airtable-mcp-server`
+- **API Key**: `[REDACTED - Configured in .claude.json]`
+- **Configuration**: Added via `claude mcp add` command
+- **Available Bases**:
+  - Personal Finances (app1m5WHgxXaadPgR)
+  - Property Management by Softr (appwngtpDWnLLnk3n)
+  - Client Connect (appKex2kYPcrWNI2O)
+  - Leadnest (appKpqYzELSUqWNxO)
+  - Financials (appCcY6bvOsymEYGp)
+  - Cars2You (app1HnBn9IJXfXf2r)
+  - Client Portal (Demo) (app5PD6QgFaSmACZy)
+  - Fleet Maintenance (apptn5FTi9yfhFiqk)
+  - fleetlynk tasks (appA606mcZv5T3pPR)
+  - QuickBooks Transaction Validator (appZPTjyeUT1PCz8l)
+  - Month Close (appNv0kdIHiMP1wg5)
+- **Available Tools**:
+  - `mcp__airtable__list_bases` - List all accessible bases
+  - `mcp__airtable__list_tables` - List tables in a base
+  - `mcp__airtable__describe_table` - Get table schema
+  - `mcp__airtable__list_records` - List records from a table
+  - `mcp__airtable__search_records` - Search for records
+  - `mcp__airtable__get_record` - Get a specific record
+  - `mcp__airtable__create_record` - Create a new record
+  - `mcp__airtable__update_records` - Update records
+  - `mcp__airtable__delete_records` - Delete records
+  - `mcp__airtable__create_table` - Create a new table
+  - `mcp__airtable__update_table` - Update table metadata
+  - `mcp__airtable__create_field` - Create a field
+  - `mcp__airtable__update_field` - Update field metadata
 
 ## Database Information
 
@@ -116,22 +148,31 @@ The Supabase MCP works behind the scenes. You can ask Claude to query the databa
 - "Show me the data in the pay_tiers table"
 - "Count records in contact_submissions"
 
+### Test Airtable Connection:
+You can ask Claude to interact with your Airtable bases:
+- "List all my Airtable bases"
+- "Show me the tables in [base name]"
+- "List records from [table name] in [base name]"
+- "Create a new record in [table name]"
+
 ## Environment Variables
 - Supabase Service Role Key is configured
 - Render API keys are configured
+- Airtable Personal Access Token is configured
 - All sensitive keys are properly stored
 
 ## Notes for Future Sessions
 1. The Supabase MCP server won't show in `/mcp` but it IS working
 2. Use the JavaScript Supabase client for complex operations
 3. The Render MCP tools are accessible via `mcp__render__` prefix
-4. All MCP servers auto-connect when VS Code starts
+4. The Airtable MCP tools are accessible via `mcp__airtable__` prefix
+5. All MCP servers auto-connect when VS Code starts
 
 ## Generated Files
 - `supabase/database.types.ts` - Auto-generated TypeScript types from database schema
 - `supabase/schema-docker-test.sql` - Database schema dump (created with Docker)
 
-Last Updated: 2025-01-14 (Added desktop organization preference)
+Last Updated: 2025-10-20 (Added Airtable MCP Server)
 # important-instruction-reminders
 Do what has been asked; nothing more, nothing less.
 NEVER create files unless they're absolutely necessary for achieving your goal.

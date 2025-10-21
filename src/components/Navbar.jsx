@@ -31,6 +31,20 @@ const Navbar = () => {
     return '/dashboard'
   }
 
+  // Helper function to get the correct profile route based on role and videographer status
+  const getProfileRoute = () => {
+    if (profile?.role === 'photographer') {
+      // Check if user is a videographer
+      if (photographerProfile?.is_videographer) {
+        return '/talent/dashboard/videographer/profile'
+      }
+      return '/talent/dashboard/profile'
+    } else if (profile?.role === 'admin') {
+      return '/admin/profile'
+    }
+    return '/profile'
+  }
+
   return (
     <nav className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border sticky top-0 z-50">
       <div className="w-full px-40 sm:px-56 lg:px-72">
@@ -61,7 +75,7 @@ const Navbar = () => {
                   Browse
                 </Link>
                 <Link
-                  to={getDashboardRoute()}
+                  to={getProfileRoute()}
                   className="text-foreground hover:text-foreground/80 transition"
                 >
                   Profile
@@ -125,7 +139,7 @@ const Navbar = () => {
                   Browse
                 </Link>
                 <Link
-                  to={getDashboardRoute()}
+                  to={getProfileRoute()}
                   className="block px-4 py-2 text-foreground hover:bg-accent"
                   onClick={() => setMobileMenuOpen(false)}
                 >

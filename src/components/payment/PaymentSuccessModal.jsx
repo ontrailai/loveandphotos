@@ -46,15 +46,18 @@ const PaymentSuccessModal = ({ isOpen, onClose, paymentIntent }) => {
 
   const handleViewDashboard = () => {
     onClose()
-    navigate('/dashboard')
+    // Force reload to fetch updated booking data from database
+    window.location.href = '/dashboard'
   }
 
   const handleViewBooking = () => {
     onClose()
     if (bookingFlow?.bookingId) {
+      // Navigate to booking details page
       navigate(`/booking/${bookingFlow.bookingId}`)
     } else {
-      navigate('/dashboard')
+      // Fallback to dashboard if no booking ID
+      window.location.href = '/dashboard'
     }
   }
 

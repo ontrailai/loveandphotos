@@ -56,7 +56,13 @@ const ProfilePage = () => {
     const newErrors = {}
 
     if (!formData.full_name.trim()) {
-      newErrors.full_name = 'Full name is required'
+      newErrors.full_name = 'First and last name are required'
+    } else {
+      // Check if name contains at least first and last name (at least 2 words)
+      const nameParts = formData.full_name.trim().split(/\s+/)
+      if (nameParts.length < 2) {
+        newErrors.full_name = 'Please enter both first and last name'
+      }
     }
 
     if (!formData.email.trim()) {
@@ -233,7 +239,7 @@ const ProfilePage = () => {
             {/* Full Name */}
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">
-                Full Name <span className="text-red-500">*</span>
+                First and Last Name <span className="text-red-500">*</span>
               </label>
               {isEditing ? (
                 <div>
@@ -244,7 +250,7 @@ const ProfilePage = () => {
                     className={`w-full px-4 py-2 border ${
                       errors.full_name ? 'border-red-500' : 'border-border'
                     } rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary-500`}
-                    placeholder="Enter your full name"
+                    placeholder="John Smith"
                   />
                   {errors.full_name && (
                     <p className="text-red-500 text-sm mt-1">{errors.full_name}</p>

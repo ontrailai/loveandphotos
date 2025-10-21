@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Mail, MessageCircle, Clock, MapPin } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { Mail, MessageCircle, Clock, MapPin, Search } from 'lucide-react'
 import { supabase } from '@lib/supabase'
 import PageHero from '@components/marketing/PageHero'
 import toast from 'react-hot-toast'
@@ -367,16 +368,16 @@ const Contact = () => {
             Ready to Get Started?
           </h2>
           <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-            Don't wait to capture your special moments. Contact us today and let's create something beautiful together.
+            Don't wait to capture your special moments. Browse our talented photographers and find your perfect match.
           </p>
           <div className="flex justify-center">
-            <a
-              href="mailto:support@lp.loveandphotos.com"
+            <Link
+              to="/photographers"
               className="inline-flex items-center justify-center px-6 py-3 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90 transition-all shadow-md"
             >
-              <Mail className="w-5 h-5 mr-2" />
-              Email Us
-            </a>
+              <Search className="w-5 h-5 mr-2" />
+              Find Photographers
+            </Link>
           </div>
         </div>
       </div>

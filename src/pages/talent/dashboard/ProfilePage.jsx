@@ -252,7 +252,12 @@ const ProfilePage = () => {
 
       sanitizedUpdates.profile_complete = willBeComplete
 
-      // Note: visible_in_search is a generated column (= is_public), cannot be set manually
+      // Automatically make profile visible when it becomes complete
+      if (willBeComplete) {
+        sanitizedUpdates.is_public = true
+      }
+
+      // Note: visible_in_search is a generated column (= is_public AND profile_complete), automatically computed
 
       console.log('[ProfilePage] Auto-saving:', Object.keys(sanitizedUpdates))
 

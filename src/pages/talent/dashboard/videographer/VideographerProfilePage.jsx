@@ -19,10 +19,17 @@ import {
 import toast from 'react-hot-toast'
 
 const styleOptions = [
+  'Candid',
   'Cinematic',
-  'Documentary Style',
+  'Documentary',
+  'Fine Art',
+  'Lifestyle',
+  'Moody',
   'Vintage',
-  'Modern'
+  'Modern',
+  'Bright & Airy',
+  'Posed',
+  'Editorial'
 ]
 
 const US_STATES = [
@@ -88,7 +95,7 @@ const VideographerProfilePage = () => {
       { label: 'Bio (500+ chars)', met: isBioValid(formData.bio) },
       { label: 'Gender', met: formData.gender?.length > 0 },
       { label: 'Experience Years', met: formData.experience_years > 0 },
-      { label: 'Video Styles', met: formData.style_tags?.length > 0 },
+      { label: 'Videographer Style Tags', met: formData.style_tags?.length > 0 },
       { label: 'Gear Setup (1+ items)', met: gearList.length >= 1 },
       { label: 'Location (City/State/ZIP)', met: formData.city && formData.state && formData.zip_code?.length === 5 },
       { label: 'Languages', met: formData.languages?.length > 0 }
@@ -244,7 +251,14 @@ const VideographerProfilePage = () => {
       if (error) throw error
 
       await fetchUserData(user)
+      console.log('[VideographerProfile] Profile saved, preparing navigation')
+      console.log('[VideographerProfile] photographerIdRef.current:', photographerIdRef.current)
+      console.log('[VideographerProfile] Target URL:', `/photographer/${photographerIdRef.current}`)
       toast.success('Profile saved successfully!')
+      // Navigate to public profile view
+      console.log('[VideographerProfile] Calling navigate()...')
+      navigate(`/photographer/${photographerIdRef.current}`)
+      console.log('[VideographerProfile] navigate() called successfully')
     } catch (error) {
       console.error('[VideographerProfile] Save failed:', error)
       toast.error('Failed to save profile')
@@ -543,11 +557,11 @@ const VideographerProfilePage = () => {
 
           {/* Right Column - 1/3 width */}
           <div className="space-y-8">
-            {/* Video Styles */}
+            {/* Videographer Style Tags */}
             <Card>
               <div className="flex items-center space-x-3 mb-4">
                 <Video className="w-5 h-5 text-gray-700" />
-                <h2 className="text-lg font-semibold text-gray-900">Video Styles</h2>
+                <h2 className="text-lg font-semibold text-gray-900">Videographer Style Tags</h2>
               </div>
               <MultiSelect
                 options={styleOptions}

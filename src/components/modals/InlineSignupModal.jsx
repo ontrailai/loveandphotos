@@ -54,7 +54,12 @@ const InlineSignupModal = ({
       }
       
       if (!formData.fullName) {
-        newErrors.fullName = 'Full name is required'
+        newErrors.fullName = 'First and last name are required'
+      } else {
+        const nameParts = formData.fullName.trim().split(/\s+/);
+        if (nameParts.length < 2) {
+          newErrors.fullName = 'Please enter both first and last name';
+        }
       }
       
       if (!formData.phone) {
@@ -176,7 +181,7 @@ const InlineSignupModal = ({
             {mode === 'signup' && (
               <div>
                 <label htmlFor="fullName" className="block text-sm font-medium text-dusty-700 mb-1">
-                  Full Name
+                  First and Last Name
                 </label>
                 <Input
                   id="fullName"
@@ -184,7 +189,7 @@ const InlineSignupModal = ({
                   type="text"
                   value={formData.fullName}
                   onChange={handleInputChange}
-                  placeholder="Enter your full name"
+                  placeholder="John Smith"
                   icon={<User className="w-5 h-5" />}
                   error={errors.fullName}
                   disabled={loading}

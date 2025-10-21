@@ -244,11 +244,16 @@ const SignUp = () => {
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               <div className="bg-card rounded-xl shadow-sm border border-border p-6 space-y-4">
                 <Input
-                  label="Full Name"
+                  label="First and Last Name"
                   icon={<UserIcon className="w-5 h-5 text-muted-foreground" />}
                   {...register('fullName', {
-                    required: 'Full name is required'
+                    required: 'First and last name are required',
+                    validate: value => {
+                      const nameParts = value.trim().split(/\s+/);
+                      return nameParts.length >= 2 || 'Please enter both first and last name';
+                    }
                   })}
+                  placeholder="John Smith"
                   error={errors.fullName?.message}
                 />
 

@@ -1,0 +1,68 @@
+# RENDER PRODUCTION ENVIRONMENT VARIABLES
+# Copy these exact values to Render Dashboard: https://dashboard.render.com
+# Service: Love & Photos (srv-d3o4113e5dus73adkk7g)
+
+# ========================================
+# 🔴 CRITICAL - MUST FIX THESE FIRST
+# ========================================
+# These are currently WRONG in production and causing deployment failures
+
+VITE_API_URL=https://loveandphotos.onrender.com
+VITE_APP_URL=https://loveandphotos.onrender.com
+
+# ========================================
+# SUPABASE CONFIGURATION (CORRECTED URL - jw not jd)
+# ========================================
+SUPABASE_SERVICE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRib2x0Zm9ibmNiandqZWxhdnNsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2MDY1NjI5NywiZXhwIjoyMDc2MjMyMjk3fQ.loRENOUdOPhYB4Lt98NFO_kZzctsI51fhNKKknEwRF4
+SUPABASE_URL=https://tboltfobncbjwjelavsl.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRib2x0Zm9ibmNiandqZWxhdnNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA2NTYyOTcsImV4cCI6MjA3NjIzMjI5N30.krW-OaKtrQpAv8QThYAfq_51sWKzSwD_yUxHIzAgR4c
+VITE_SUPABASE_URL=https://tboltfobncbjwjelavsl.supabase.co
+
+# ========================================
+# STRIPE CONFIGURATION (TEST KEYS)
+# ========================================
+STRIPE_SECRET_KEY=[REDACTED - Copy from .env.local]
+VITE_STRIPE_PUBLIC_KEY=pk_test_51SK8qJIikLQcr95S5ea5bGEzMrYKv5td6sG845ATzHZnkYoEpIASdoiXHC14vCIzm6LnGxElAoaj9NtQIGu1kvjG00gM7EUz86
+
+# ========================================
+# CLOUDFLARE STREAM VIDEO
+# ========================================
+VITE_CF_STREAM_HLS=https://customer-c24sauyk9nlgoptq.cloudflarestream.com/babc3cd7d0fbd841eb8f92d5d0e09276/manifest/video.m3u8
+VITE_CF_STREAM_SUBDOMAIN=customer-c24sauyk9nlgoptq.cloudflarestream.com
+VITE_CF_STREAM_VIDEO_ID=babc3cd7d0fbd841eb8f92d5d0e09276
+
+# ========================================
+# RENDER CONFIGURATION
+# ========================================
+NODE_ENV=production
+PORT=10000
+
+# ========================================
+# RENDER SERVICE INFO (Optional - for reference)
+# ========================================
+SERVICE_ID=srv-d3o4113e5dus73adkk7g
+PROJECT_ID=d3o410s9c44c73cl732g
+ENVIRONMENT_ID=d3o410s9c44c73cl7330
+DOMAIN=https://loveandphotos.onrender.com
+
+# ========================================
+# IMPORTANT NOTES
+# ========================================
+# 1. Make sure VITE_API_URL and VITE_APP_URL point to your Render domain
+# 2. These VITE_ variables are embedded at BUILD TIME, so you must:
+#    - Set them in Render dashboard
+#    - Trigger a new deployment after changing them
+# 3. After updating, go to Render dashboard and click "Manual Deploy > Clear build cache & deploy"
+# 4. Verify all variables are saved by checking Environment tab in Render
+
+# ========================================
+# VERIFICATION CHECKLIST
+# ========================================
+# [ ] Updated VITE_API_URL to production URL
+# [ ] Updated VITE_APP_URL to production URL
+# [ ] All Supabase keys match new project (tboltfobncbyjdvelavsl)
+# [ ] Stripe keys match new account (51SK8qJI...)
+# [ ] Cloudflare video ID matches new video (babc3cd7...)
+# [ ] Clicked "Manual Deploy" after updating variables
+# [ ] Checked deployment logs for errors
+# [ ] Tested live site: https://loveandphotos.onrender.com

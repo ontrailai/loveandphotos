@@ -469,96 +469,16 @@ const OverviewPage = () => {
         </div>
       </div>
 
-      {/* Getting Started */}
+      {/* Complete Profile CTA */}
       {completionPercentage < 100 && (
-        <div className="bg-gradient-to-br from-primary-50 to-primary-100/50 border-2 border-primary-300 rounded-xl p-6 shadow-sm">
-          <div className="flex items-start justify-between mb-4">
-            <div>
-              <h2 className="text-lg font-semibold text-primary-900 mb-1 flex items-center">
-                Complete Your Profile
-                <span className="ml-3 inline-flex items-center px-3 py-1 rounded-full text-sm font-bold bg-primary-600 text-white">
-                  {completionPercentage}%
-                </span>
-              </h2>
-              <p className="text-sm text-primary-700">
-                To start receiving bookings, complete your profile by uploading photos and setting your availability.
-              </p>
-            </div>
-          </div>
-
-          {/* Progress Bar */}
-          <div className="w-full bg-primary-200 rounded-full h-2.5 mb-4">
-            <div
-              className="bg-gradient-to-r from-primary-600 to-primary-500 h-2.5 rounded-full transition-all duration-500"
-              style={{ width: `${completionPercentage}%` }}
-            />
-          </div>
-
-          <div className="space-y-3 text-sm">
-            {/* Only show portfolio requirement for photographers, not videographers */}
-            {!photographerProfile?.is_videographer && (
-              <div className="flex items-center text-primary-900">
-                <div className={`w-6 h-6 rounded-full mr-3 flex items-center justify-center flex-shrink-0 ${photographerProfile?.portfolio_images?.length >= 3 ? 'bg-green-500' : 'bg-primary-300'}`}>
-                  {photographerProfile?.portfolio_images?.length >= 3 && (
-                    <CheckCircle2 className="w-4 h-4 text-white" />
-                  )}
-                </div>
-                <span className={photographerProfile?.portfolio_images?.length >= 10 ? 'font-medium' : ''}>
-                  Upload at least 10 portfolio photos {photographerProfile?.portfolio_images?.length > 0 && `(${photographerProfile.portfolio_images.length}/10)`}
-                </span>
-              </div>
-            )}
-            <div className="flex items-center text-primary-900">
-              <div className={`w-6 h-6 rounded-full mr-3 flex items-center justify-center flex-shrink-0 ${photographerProfile?.bio?.length >= 50 ? 'bg-green-500' : 'bg-primary-300'}`}>
-                {photographerProfile?.bio?.length >= 50 && (
-                  <CheckCircle2 className="w-4 h-4 text-white" />
-                )}
-              </div>
-              <span className={photographerProfile?.bio?.length >= 50 ? 'font-medium' : ''}>
-                Write a bio (at least 50 characters) {photographerProfile?.bio?.length > 0 && photographerProfile.bio.length < 50 && `(${photographerProfile.bio.length}/50)`}
-              </span>
-            </div>
-            <div className="flex items-center text-primary-900">
-              <div className={`w-6 h-6 rounded-full mr-3 flex items-center justify-center flex-shrink-0 ${photographerProfile?.experience_years > 0 ? 'bg-green-500' : 'bg-primary-300'}`}>
-                {photographerProfile?.experience_years > 0 && (
-                  <CheckCircle2 className="w-4 h-4 text-white" />
-                )}
-              </div>
-              <span className={photographerProfile?.experience_years > 0 ? 'font-medium' : ''}>
-                Set your years of experience
-              </span>
-            </div>
-            <div className="flex items-center text-primary-900">
-              <div className={`w-6 h-6 rounded-full mr-3 flex items-center justify-center flex-shrink-0 ${photographerProfile?.style_tags?.length > 0 ? 'bg-green-500' : 'bg-primary-300'}`}>
-                {photographerProfile?.style_tags?.length > 0 && (
-                  <CheckCircle2 className="w-4 h-4 text-white" />
-                )}
-              </div>
-              <span className={photographerProfile?.style_tags?.length > 0 ? 'font-medium' : ''}>
-                Select at least one photography style
-              </span>
-            </div>
-            <div className="flex items-center text-primary-900">
-              <div className={`w-6 h-6 rounded-full mr-3 flex items-center justify-center flex-shrink-0 ${photographerProfile?.gender?.length > 0 ? 'bg-green-500' : 'bg-primary-300'}`}>
-                {photographerProfile?.gender?.length > 0 && (
-                  <CheckCircle2 className="w-4 h-4 text-white" />
-                )}
-              </div>
-              <span className={photographerProfile?.gender?.length > 0 ? 'font-medium' : ''}>
-                Select your gender
-              </span>
-            </div>
-          </div>
-
-          {completionPercentage < 100 && (
-            <Link
-              to="/talent/dashboard/profile?from=overview"
-              className="mt-6 inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium text-sm shadow-md hover:shadow-lg"
-            >
-              Complete Profile
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Link>
-          )}
+        <div className="bg-gradient-to-br from-primary-50 to-primary-100/50 border-2 border-primary-300 rounded-lg p-4 shadow-sm">
+          <Link
+            to="/talent/dashboard/profile?from=overview"
+            className="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium text-sm shadow-md hover:shadow-lg"
+          >
+            Complete Profile
+            <ArrowRight className="w-4 h-4 ml-2" />
+          </Link>
         </div>
       )}
     </div>

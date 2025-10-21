@@ -1,0 +1,294 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e4]:
+    - banner [ref=e5]:
+      - generic [ref=e7]:
+        - link "Love & Photos home" [ref=e9] [cursor=pointer]:
+          - /url: /
+          - img "Love & Photos logo" [ref=e10] [cursor=pointer]
+          - generic [ref=e11] [cursor=pointer]: Love & Photos
+        - generic [ref=e12]:
+          - button "Change language and currency" [ref=e14] [cursor=pointer]:
+            - img [ref=e15] [cursor=pointer]
+          - button "Open menu" [ref=e18] [cursor=pointer]:
+            - img [ref=e19] [cursor=pointer]
+    - generic [ref=e21]:
+      - generic [ref=e22]:
+        - button "Switch to dark mode" [ref=e24] [cursor=pointer]:
+          - img [ref=e25] [cursor=pointer]
+        - generic [ref=e27]:
+          - generic [ref=e28]:
+            - heading "Your Perfect Moment Deserves the Perfect Eye" [level=1] [ref=e29]:
+              - text: Your Perfect
+              - generic [ref=e30]: Moment
+              - text: Deserves the Perfect Eye
+            - paragraph [ref=e31]: Connect with verified photographers and videographers who capture your story with artistry and care.
+            - generic [ref=e33]:
+              - generic [ref=e34]:
+                - img [ref=e35]
+                - textbox "Enter your ZIP code or city" [ref=e38]
+              - button "Search" [ref=e39] [cursor=pointer]:
+                - img [ref=e40] [cursor=pointer]
+            - generic [ref=e43]:
+              - generic [ref=e44]:
+                - img [ref=e45]
+                - generic [ref=e48]: 2,500+ Verified Photographers
+              - generic [ref=e49]:
+                - img [ref=e50]
+                - generic [ref=e52]: 4.9 Average Rating
+              - generic [ref=e53]:
+                - img [ref=e54]
+                - generic [ref=e56]: 10,000+ Happy Couples
+            - generic [ref=e58]:
+              - paragraph [ref=e59]:
+                - text: Packages start at
+                - generic [ref=e60]: $550 upfront
+                - text: or
+                - generic [ref=e61]: $199/month
+              - paragraph [ref=e62]: Transparent pricing. No hidden fees.
+          - generic [ref=e63]:
+            - generic [ref=e64]:
+              - img "Wedding" [ref=e65]
+              - img "Wedding couple" [ref=e66]
+            - generic [ref=e67]:
+              - img "Portrait" [ref=e68]
+              - img "Family" [ref=e69]
+            - generic [ref=e70]:
+              - img "Event" [ref=e71]
+              - img "Newborn" [ref=e72]
+            - generic [ref=e73]:
+              - img "Corporate" [ref=e74]
+              - img "Birthday" [ref=e75]
+      - generic [ref=e78]:
+        - generic [ref=e80]: Included with Every Booking
+        - generic [ref=e81]:
+          - heading "Why Couples Choose Love & Photos" [level=2] [ref=e82]
+          - paragraph [ref=e83]: Pro photos, zero hassle. We match you with vetted talent, keep pricing clear, and handle the details.
+        - generic [ref=e85]:
+          - generic [ref=e86]:
+            - img [ref=e87]
+            - generic [ref=e89]:
+              - paragraph [ref=e90]: Transparent Pricing
+              - paragraph [ref=e91]: Clear, upfront pricing with no hidden fees or surprises.
+          - generic [ref=e92]:
+            - img [ref=e93]
+            - generic [ref=e95]:
+              - paragraph [ref=e96]: Vetted Talent
+              - paragraph [ref=e97]: All photographers are carefully screened and verified for quality.
+          - generic [ref=e98]:
+            - img [ref=e99]
+            - generic [ref=e101]:
+              - paragraph [ref=e102]: Smart Matching
+              - paragraph [ref=e103]: AI-powered matching finds the perfect photographer for your style.
+          - generic [ref=e104]:
+            - img [ref=e105]
+            - generic [ref=e107]:
+              - paragraph [ref=e108]: Secure Payments
+              - paragraph [ref=e109]: Safe, encrypted payment processing with buyer protection.
+          - generic [ref=e110]:
+            - img [ref=e111]
+            - generic [ref=e113]:
+              - paragraph [ref=e114]: Auto Contracts
+              - paragraph [ref=e115]: Automated legal contracts protect both you and your photographer.
+          - generic [ref=e116]:
+            - img [ref=e117]
+            - generic [ref=e119]:
+              - paragraph [ref=e120]: Flexible Plans
+              - paragraph [ref=e121]: Choose from packages or custom pricing to fit your needs.
+          - generic [ref=e122]:
+            - img [ref=e123]
+            - generic [ref=e125]:
+              - paragraph [ref=e126]: Express Turnaround
+              - paragraph [ref=e127]: Need photos fast? Express delivery options available.
+          - generic [ref=e128]:
+            - img [ref=e129]
+            - generic [ref=e131]:
+              - paragraph [ref=e132]: On-Time Media
+              - paragraph [ref=e133]: Guaranteed delivery timelines with progress tracking.
+          - generic [ref=e134]:
+            - img [ref=e135]
+            - generic [ref=e137]:
+              - paragraph [ref=e138]: 24/7 Support
+              - paragraph [ref=e139]: Our support team is here to help whenever you need us.
+      - generic [ref=e141]:
+        - generic [ref=e142]:
+          - generic [ref=e144]: Testimonials
+          - heading "What our customers say" [level=2] [ref=e145]
+          - paragraph [ref=e146]: See what our customers have to say about Love & Photos.
+        - generic [ref=e149]:
+          - generic [ref=e150]:
+            - generic [ref=e151]: Patient with our large family group and got amazing shots.
+            - generic [ref=e152]:
+              - generic [ref=e154]: QX
+              - generic [ref=e155]:
+                - generic [ref=e156]: Qi Xin
+                - generic [ref=e157]: Los Angeles, CA
+          - generic [ref=e158]:
+            - generic [ref=e159]: Professional from start to finish. Great to work with.
+            - generic [ref=e160]:
+              - generic [ref=e162]: AR
+              - generic [ref=e163]:
+                - generic [ref=e164]: Alondra Rodríguez
+                - generic [ref=e165]: New York, NY
+          - generic [ref=e166]:
+            - generic [ref=e167]: The photos captured the emotion of our day perfectly.
+            - generic [ref=e168]:
+              - generic [ref=e170]: AM
+              - generic [ref=e171]:
+                - generic [ref=e172]: Alexia Morales
+                - generic [ref=e173]: Chicago, IL
+          - generic [ref=e174]:
+            - generic [ref=e175]: Professional from start to finish. Great to work with.
+            - generic [ref=e176]:
+              - generic [ref=e178]: PR
+              - generic [ref=e179]:
+                - generic [ref=e180]: Patrick Richards
+                - generic [ref=e181]: Austin, TX
+          - generic [ref=e182]:
+            - generic [ref=e183]: Patient with our large family group and got amazing shots.
+            - generic [ref=e184]:
+              - generic [ref=e186]: QX
+              - generic [ref=e187]:
+                - generic [ref=e188]: Qi Xin
+                - generic [ref=e189]: Los Angeles, CA
+          - generic [ref=e190]:
+            - generic [ref=e191]: Professional from start to finish. Great to work with.
+            - generic [ref=e192]:
+              - generic [ref=e194]: AR
+              - generic [ref=e195]:
+                - generic [ref=e196]: Alondra Rodríguez
+                - generic [ref=e197]: New York, NY
+          - generic [ref=e198]:
+            - generic [ref=e199]: The photos captured the emotion of our day perfectly.
+            - generic [ref=e200]:
+              - generic [ref=e202]: AM
+              - generic [ref=e203]:
+                - generic [ref=e204]: Alexia Morales
+                - generic [ref=e205]: Chicago, IL
+          - generic [ref=e206]:
+            - generic [ref=e207]: Professional from start to finish. Great to work with.
+            - generic [ref=e208]:
+              - generic [ref=e210]: PR
+              - generic [ref=e211]:
+                - generic [ref=e212]: Patrick Richards
+                - generic [ref=e213]: Austin, TX
+      - generic [ref=e218]:
+        - heading "Forever Starts Here" [level=2] [ref=e219]
+        - link "Browse photographers and reserve your date" [ref=e221] [cursor=pointer]:
+          - /url: /photographers
+          - text: Reserve Date
+          - generic [ref=e222] [cursor=pointer]: →
+    - contentinfo "Site footer" [ref=e223]:
+      - generic [ref=e225]:
+        - generic [ref=e226]:
+          - generic [ref=e227]:
+            - link "Love & Photos - Go to homepage" [ref=e228] [cursor=pointer]:
+              - /url: /
+              - img "Love & Photos logo" [ref=e229] [cursor=pointer]
+            - paragraph [ref=e230]: Connecting moments with the perfect lens since 2024
+            - generic [ref=e231]:
+              - generic [ref=e232]:
+                - img [ref=e233]
+                - generic [ref=e236]: Serving all major US cities
+              - generic [ref=e237]:
+                - img [ref=e238]
+                - link "Email Love & Photos at support@lp.loveandphotos.com" [ref=e241] [cursor=pointer]:
+                  - /url: mailto:support@lp.loveandphotos.com
+                  - text: support@lp.loveandphotos.com
+          - generic [ref=e242]:
+            - heading "For Clients" [level=3] [ref=e243]
+            - list [ref=e244]:
+              - listitem [ref=e245]:
+                - link "Browse Photographers" [ref=e246] [cursor=pointer]:
+                  - /url: /photographers
+                  - generic [ref=e247] [cursor=pointer]: Browse Photographers
+              - listitem [ref=e248]:
+                - link "How It Works" [ref=e249] [cursor=pointer]:
+                  - /url: /how-it-works
+                  - generic [ref=e250] [cursor=pointer]: How It Works
+              - listitem [ref=e251]:
+                - link "Video Specialists" [ref=e252] [cursor=pointer]:
+                  - /url: /videographers
+                  - generic [ref=e253] [cursor=pointer]: Video Specialists
+          - generic [ref=e254]:
+            - heading "For Talent" [level=3] [ref=e255]
+            - list [ref=e256]:
+              - listitem [ref=e257]:
+                - link "Apply as Photographer" [ref=e258] [cursor=pointer]:
+                  - /url: /talent/apply
+                  - generic [ref=e259] [cursor=pointer]: Apply as Photographer
+              - listitem [ref=e260]:
+                - link "Apply as Videographer" [ref=e261] [cursor=pointer]:
+                  - /url: /talent/apply
+                  - generic [ref=e262] [cursor=pointer]: Apply as Videographer
+              - listitem [ref=e263]:
+                - link "Guidelines" [ref=e264] [cursor=pointer]:
+                  - /url: /guidelines
+                  - generic [ref=e265] [cursor=pointer]: Guidelines
+              - listitem [ref=e266]:
+                - link "FAQ" [ref=e267] [cursor=pointer]:
+                  - /url: /faq
+                  - generic [ref=e268] [cursor=pointer]: FAQ
+          - generic [ref=e269]:
+            - heading "Company" [level=3] [ref=e270]
+            - list [ref=e271]:
+              - listitem [ref=e272]:
+                - link "About Us" [ref=e273] [cursor=pointer]:
+                  - /url: /about
+                  - generic [ref=e274] [cursor=pointer]: About Us
+              - listitem [ref=e275]:
+                - link "Contact Love & Photos" [ref=e276] [cursor=pointer]:
+                  - /url: /contact
+                  - generic [ref=e277] [cursor=pointer]: Contact
+              - listitem [ref=e278]:
+                - link "Privacy Policy" [ref=e279] [cursor=pointer]:
+                  - /url: /privacy
+                  - generic [ref=e280] [cursor=pointer]: Privacy Policy
+              - listitem [ref=e281]:
+                - link "Terms & Conditions" [ref=e282] [cursor=pointer]:
+                  - /url: /terms
+                  - generic [ref=e283] [cursor=pointer]: Terms & Conditions
+          - generic [ref=e284]:
+            - heading "Connect" [level=3] [ref=e285]
+            - list [ref=e286]:
+              - listitem [ref=e287]:
+                - link "Facebook - opens in new window" [ref=e288] [cursor=pointer]:
+                  - /url: https://www.facebook.com/profile.php?id=61573197380793
+                  - img [ref=e289] [cursor=pointer]
+                  - generic [ref=e291] [cursor=pointer]: Facebook
+              - listitem [ref=e292]:
+                - link "Instagram - opens in new window" [ref=e293] [cursor=pointer]:
+                  - /url: https://www.instagram.com/lovesandphotos/
+                  - img [ref=e294] [cursor=pointer]
+                  - generic [ref=e297] [cursor=pointer]: Instagram
+              - listitem [ref=e298]:
+                - link "Yelp - opens in new window" [ref=e299] [cursor=pointer]:
+                  - /url: https://www.yelp.com/biz/love-and-photos-arden-arcade-2?utm_campaign=www_business_share_popup&utm_medium=copy_link&utm_source=(direct)
+                  - img "Yelp" [ref=e300] [cursor=pointer]
+                  - generic [ref=e301] [cursor=pointer]: Yelp
+              - listitem [ref=e302]:
+                - link "The Knot - opens in new window" [ref=e303] [cursor=pointer]:
+                  - /url: https://www.theknot.com/marketplace/love-and-photos-springfield-mo-2092546
+                  - img "The Knot" [ref=e304] [cursor=pointer]
+                  - generic [ref=e305] [cursor=pointer]: The Knot
+        - generic [ref=e307]:
+          - paragraph [ref=e308]: © 2025 Love & Photos. All rights reserved.
+          - generic [ref=e309]:
+            - link "Privacy" [ref=e310] [cursor=pointer]:
+              - /url: /privacy
+            - link "Terms" [ref=e311] [cursor=pointer]:
+              - /url: /terms
+            - link "Sitemap" [ref=e312] [cursor=pointer]:
+              - /url: /sitemap
+    - button "Open chat assistant" [ref=e313] [cursor=pointer]:
+      - img [ref=e314] [cursor=pointer]
+      - img [ref=e316] [cursor=pointer]
+  - generic:
+    - button
+    - button [ref=e318] [cursor=pointer]:
+      - img [ref=e320] [cursor=pointer]
+      - generic:
+        - img
+```

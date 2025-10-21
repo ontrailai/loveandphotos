@@ -48,7 +48,9 @@ export const getSupabaseClient = () => {
         persistSession: true,
         detectSessionInUrl: false,
         storage: window.localStorage,
-        storageKey: 'lovep-auth'
+        // CRITICAL: Must match the Supabase default format to prevent duplicate clients
+        // Default format: 'sb-{project-ref}-auth-token'
+        storageKey: `sb-${supabaseUrl.split('//')[1].split('.')[0]}-auth-token`
       }
     })
 

@@ -154,22 +154,22 @@ const PaymentOptions = ({
         // Calculate how many full months we have until the 60-day cutoff
         const monthsAvailable = Math.max(1, Math.floor(daysUntilCutoff / 30))
 
-        // Calculate final lump sum (includes processing fee added to final payment)
+        // Calculate final lump sum (processing fee baked in, not shown to user)
         const totalMonthlyPayments = monthsAvailable * monthlyPayment
         const finalLumpSum = (totalAmount + processingFee) - totalMonthlyPayments
 
         const features = []
 
-        // First payment (NO processing fee on first payment)
-        features.push(`✅ $${monthlyPayment} due today`)
+        // First payment
+        features.push(`$${monthlyPayment} due today`)
 
         // Monthly payments (if any)
         if (monthsAvailable > 1) {
-          features.push(`✅ $${monthlyPayment}/month for ${monthsAvailable - 1} months`)
+          features.push(`Remaining ${monthsAvailable - 1} monthly payment${monthsAvailable - 1 > 1 ? 's' : ''} of $${monthlyPayment}`)
         }
 
-        // Final lump sum (includes $150 processing fee)
-        features.push(`✅ Remaining $${finalLumpSum.toLocaleString()} (includes $${processingFee} fee) due 60 days before event`)
+        // Final lump sum (processing fee baked in, not mentioned to user)
+        features.push(`Remaining $${finalLumpSum.toLocaleString()} due 60 days before event`)
 
         return features
       })()
@@ -270,6 +270,16 @@ const PaymentOptions = ({
                 ))}
               </div>
 
+              {/* Monthly Payment Plan Tip - inside the box */}
+              {plan.id === 'monthly199' && isMonthlyAvailable && monthsUntilCutoff < 3 && (
+                <div className="mt-4 p-3 bg-purple-50 border border-purple-200 rounded-lg">
+                  <p className="text-xs text-purple-800">
+                    <strong>Tip:</strong> With {monthsUntilCutoff} month(s) until the 60-day cutoff, you'll make {monthsUntilCutoff} monthly $199 payments,
+                    then pay the remaining balance in one lump sum 60 days before your event.
+                  </p>
+                </div>
+              )}
+
               {/* Selection indicator */}
               {isSelected && !isDisabled && (
                 <div className="absolute top-4 right-4">
@@ -297,14 +307,6 @@ const PaymentOptions = ({
           <p className="text-sm text-amber-800">
             <strong>Note:</strong> Your event is {daysOut} days away ({daysUntilCutoff} days until the 60-day payment cutoff).
             This is not enough time for installment payment plans, so only full payment is available.
-          </p>
-        </div>
-      )}
-      {isMonthlyAvailable && monthsUntilCutoff < 3 && (
-        <div className="mt-4 p-4 bg-purple-50 border border-purple-200 rounded-lg">
-          <p className="text-sm text-purple-800">
-            <strong>Tip:</strong> With {monthsUntilCutoff} month(s) until the 60-day cutoff, you'll make {monthsUntilCutoff} monthly $199 payments,
-            then pay the remaining balance in one lump sum 60 days before your event.
           </p>
         </div>
       )}
