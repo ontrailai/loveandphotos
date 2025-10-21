@@ -62,8 +62,13 @@ export function validateBookingDataForContract(bookingFlow) {
     const eventDate = new Date(bookingFlow.scheduleDetails.date)
     if (isNaN(eventDate.getTime())) {
       errors.push('Event Date must be a valid date')
-    } else if (eventDate < new Date()) {
-      errors.push('Event Date must be in the future')
+    } else {
+      // Compare dates only (not time) - event is valid if it's today or later
+      const today = new Date()
+      today.setHours(0, 0, 0, 0) // Set to start of today
+      if (eventDate < today) {
+        errors.push('Event Date must be in the future')
+      }
     }
   }
 
